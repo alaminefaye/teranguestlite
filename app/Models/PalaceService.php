@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\EnterpriseScopeTrait;
+
+class PalaceService extends Model
+{
+    use EnterpriseScopeTrait;
+
+    protected $fillable = ['enterprise_id', 'name', 'category', 'description', 'image', 'price', 'price_on_request', 'status', 'is_premium', 'display_order'];
+    
+    protected $casts = ['price' => 'decimal:2', 'price_on_request' => 'boolean', 'is_premium' => 'boolean', 'display_order' => 'integer'];
+
+    public function enterprise() { return $this->belongsTo(Enterprise::class); }
+    public function scopeAvailable($query) { return $query->where('status', 'available'); }
+    public function scopePremium($query) { return $query->where('is_premium', true); }
+    public function getFormattedPriceAttribute() { return $this->price_on_request ? 'Sur demande' : number_format($this->price, 0, ',', ' ') . ' FCFA'; }
+}

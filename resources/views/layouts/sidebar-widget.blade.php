@@ -1,0 +1,1 @@
+{{-- Widget sidebar supprimé --}}
