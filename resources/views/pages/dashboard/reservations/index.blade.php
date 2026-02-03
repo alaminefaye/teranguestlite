@@ -140,9 +140,9 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <a href="{{ route('dashboard.reservations.show', $reservation) }}" class="text-sm text-blue-light-500 hover:text-blue-light-600">
-                                    Voir
-                                </a>
+                                <x-action-buttons 
+                                    :showRoute="route('dashboard.reservations.show', $reservation)"
+                                />
                             </td>
                         </tr>
                     @endforeach

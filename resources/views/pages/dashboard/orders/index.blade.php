@@ -168,15 +168,11 @@
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {{ $order->created_at->format('d/m/Y H:i') }}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <a href="{{ route('dashboard.orders.show', $order) }}" class="text-brand-600 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300">
-                                Voir
-                            </a>
-                            @if(in_array($order->status, ['pending', 'confirmed']))
-                                <a href="{{ route('dashboard.orders.edit', $order) }}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                    Modifier
-                                </a>
-                            @endif
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <x-action-buttons 
+                                :showRoute="route('dashboard.orders.show', $order)"
+                                :editRoute="in_array($order->status, ['pending', 'confirmed']) ? route('dashboard.orders.edit', $order) : null"
+                            />
                         </td>
                     </tr>
                 @empty

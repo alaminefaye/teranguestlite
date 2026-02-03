@@ -10,27 +10,83 @@ class ExcursionSeeder extends Seeder
 {
     public function run(): void
     {
-        $enterprise = Enterprise::where('email', 'contact@kingfahdpalace.sn')->first();
-        if (!$enterprise) return;
+        $enterprises = Enterprise::all();
 
         $excursions = [
-            ['name' => 'Visite Île de Gorée', 'type' => 'cultural', 'price_adult' => 15000, 'price_child' => 8000, 'duration_hours' => 4, 'departure_time' => '09:00', 'is_featured' => true, 'max_participants' => 20],
-            ['name' => 'Tour de la ville de Dakar', 'type' => 'city_tour', 'price_adult' => 12000, 'price_child' => 6000, 'duration_hours' => 3, 'departure_time' => '10:00', 'is_featured' => true, 'max_participants' => 30],
-            ['name' => 'Lac Rose (Lac Retba)', 'type' => 'adventure', 'price_adult' => 20000, 'price_child' => 10000, 'duration_hours' => 6, 'departure_time' => '08:00', 'is_featured' => true, 'max_participants' => 15],
-            ['name' => 'Marché Sandaga & Soumbédioune', 'type' => 'cultural', 'price_adult' => 8000, 'price_child' => 4000, 'duration_hours' => 2, 'departure_time' => '15:00', 'is_featured' => false, 'max_participants' => 25],
-            ['name' => 'Plage de Ngor', 'type' => 'relaxation', 'price_adult' => 10000, 'price_child' => 5000, 'duration_hours' => 4, 'departure_time' => '11:00', 'is_featured' => false, 'max_participants' => 20],
-            ['name' => 'Village Artisanal de Soumbédioune', 'type' => 'cultural', 'price_adult' => 7000, 'price_child' => 3500, 'duration_hours' => 2, 'departure_time' => '14:00', 'is_featured' => false, 'max_participants' => 30],
+            [
+                'name' => 'Visite de l\'Île de Gorée',
+                'type' => 'cultural',
+                'description' => 'Visite guidée de l\'île historique de Gorée',
+                'price_adult' => 25000,
+                'price_child' => 15000,
+                'duration_hours' => 4,
+                'departure_time' => '09:00',
+                'min_participants' => 4,
+                'max_participants' => 20,
+                'included' => json_encode(['Transport en ferry', 'Guide francophone', 'Entrée musée']),
+                'not_included' => json_encode(['Repas', 'Boissons', 'Pourboires']),
+            ],
+            [
+                'name' => 'Safari au Parc de Bandia',
+                'type' => 'adventure',
+                'description' => 'Safari animalier dans la réserve de Bandia',
+                'price_adult' => 35000,
+                'price_child' => 20000,
+                'duration_hours' => 6,
+                'departure_time' => '08:00',
+                'min_participants' => 2,
+                'max_participants' => 15,
+                'included' => json_encode(['Transport 4x4', 'Guide', 'Entrée parc', 'Eau minérale']),
+                'not_included' => json_encode(['Déjeuner', 'Photos avec animaux']),
+            ],
+            [
+                'name' => 'Lac Rose et Dunes',
+                'type' => 'relaxation',
+                'description' => 'Découverte du Lac Retba et des dunes de sable',
+                'price_adult' => 30000,
+                'price_child' => 18000,
+                'duration_hours' => 5,
+                'departure_time' => '10:00',
+                'min_participants' => 3,
+                'max_participants' => 25,
+                'included' => json_encode(['Transport', 'Guide', 'Balade en quad (option)']),
+                'not_included' => json_encode(['Repas', 'Quad (supplément)']),
+            ],
+            [
+                'name' => 'City Tour de Dakar',
+                'type' => 'city_tour',
+                'description' => 'Découverte des sites incontournables de Dakar',
+                'price_adult' => 20000,
+                'price_child' => 12000,
+                'duration_hours' => 4,
+                'departure_time' => '09:00',
+                'min_participants' => 2,
+                'max_participants' => 30,
+                'included' => json_encode(['Transport', 'Guide', 'Entrées monuments']),
+                'not_included' => json_encode(['Repas', 'Souvenirs']),
+            ],
         ];
 
-        foreach ($excursions as $i => $data) {
-            Excursion::create(array_merge($data, [
-                'enterprise_id' => $enterprise->id,
-                'description' => 'Découvrez les merveilles du Sénégal avec nos guides expérimentés.',
-                'display_order' => $i + 1,
-                'status' => 'available',
-            ]));
+        foreach ($enterprises as $enterprise) {
+            foreach ($excursions as $data) {
+                Excursion::create([
+                    'enterprise_id' => $enterprise->id,
+                    'name' => $data['name'],
+                    'type' => $data['type'],
+                    'description' => $data['description'],
+                    'price_adult' => $data['price_adult'],
+                    'price_child' => $data['price_child'],
+                    'duration_hours' => $data['duration_hours'],
+                    'departure_time' => $data['departure_time'],
+                    'min_participants' => $data['min_participants'],
+                    'max_participants' => $data['max_participants'],
+                    'included' => $data['included'],
+                    'not_included' => $data['not_included'],
+                    'status' => 'available',
+                    'is_featured' => rand(0, 1) == 1,
+                ]);
+            }
+            echo "✅ Excursions créées pour : {$enterprise->name}\n";
         }
-        
-        $this->command->info('✅ 6 excursions créées !');
     }
 }

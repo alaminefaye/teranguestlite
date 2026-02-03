@@ -81,21 +81,12 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('dashboard.menu-categories.show', $category) }}" class="text-sm text-blue-light-500 hover:text-blue-light-600">
-                                        Voir
-                                    </a>
-                                    <a href="{{ route('dashboard.menu-categories.edit', $category) }}" class="text-sm text-warning-500 hover:text-warning-600">
-                                        Modifier
-                                    </a>
-                                    <form action="{{ route('dashboard.menu-categories.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-sm text-error-500 hover:text-error-600">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-action-buttons 
+                                    :showRoute="route('dashboard.menu-categories.show', $category)"
+                                    :editRoute="route('dashboard.menu-categories.edit', $category)"
+                                    :deleteRoute="route('dashboard.menu-categories.destroy', $category)"
+                                    deleteMessage="Êtes-vous sûr de vouloir supprimer cette catégorie ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

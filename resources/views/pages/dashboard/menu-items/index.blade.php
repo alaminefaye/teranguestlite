@@ -109,21 +109,12 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('dashboard.menu-items.show', $item) }}" class="text-sm text-blue-light-500 hover:text-blue-light-600">
-                                        Voir
-                                    </a>
-                                    <a href="{{ route('dashboard.menu-items.edit', $item) }}" class="text-sm text-warning-500 hover:text-warning-600">
-                                        Modifier
-                                    </a>
-                                    <form action="{{ route('dashboard.menu-items.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-sm text-error-500 hover:text-error-600">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-action-buttons 
+                                    :showRoute="route('dashboard.menu-items.show', $item)"
+                                    :editRoute="route('dashboard.menu-items.edit', $item)"
+                                    :deleteRoute="route('dashboard.menu-items.destroy', $item)"
+                                    deleteMessage="Êtes-vous sûr de vouloir supprimer cet article ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

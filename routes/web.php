@@ -15,6 +15,12 @@ Route::get('/signup', function () {
     return view('pages.auth.signup', ['title' => 'Inscription']);
 })->name('register');
 
+// Change Password (première connexion)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/auth/change-password', [\App\Http\Controllers\Auth\ChangePasswordController::class, 'showChangePasswordForm'])->name('auth.change-password.form');
+    Route::post('/auth/change-password', [\App\Http\Controllers\Auth\ChangePasswordController::class, 'changePassword'])->name('auth.change-password.update');
+});
+
 // Routes protégées (à ajouter middleware auth plus tard)
 Route::middleware(['auth'])->group(function () {
     // Profile
@@ -26,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(['enterprise'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::resource('enterprises', EnterpriseController::class);
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     });
 
     // Routes Admin Hôtel
@@ -87,6 +94,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('guest')->name('guest.')->middleware(['enterprise'])->group(function () {
         Route::get('/', [\App\Http\Controllers\Guest\GuestDashboardController::class, 'index'])->name('dashboard');
         
+        // Services centraux
+        Route::get('/services', [\App\Http\Controllers\Guest\ServicesController::class, 'index'])
+            ->name('services.index');
+        
         // Room Service
         Route::get('/room-service', [\App\Http\Controllers\Guest\RoomServiceController::class, 'index'])
             ->name('room-service.index');
@@ -104,6 +115,54 @@ Route::middleware(['auth'])->group(function () {
             ->name('orders.show');
         Route::post('/orders/{order}/reorder', [\App\Http\Controllers\Guest\OrderController::class, 'reorder'])
             ->name('orders.reorder');
+        
+        // Restaurants
+        Route::get('/restaurants', [\App\Http\Controllers\Guest\RestaurantController::class, 'index'])
+            ->name('restaurants.index');
+        Route::get('/restaurants/{restaurant}', [\App\Http\Controllers\Guest\RestaurantController::class, 'show'])
+            ->name('restaurants.show');
+        Route::post('/restaurants/{restaurant}/reserve', [\App\Http\Controllers\Guest\RestaurantController::class, 'reserve'])
+            ->name('restaurants.reserve');
+        Route::get('/my-restaurant-reservations', [\App\Http\Controllers\Guest\RestaurantController::class, 'myReservations'])
+            ->name('restaurants.my-reservations');
+        
+        // Spa
+        Route::get('/spa', [\App\Http\Controllers\Guest\SpaServiceController::class, 'index'])
+            ->name('spa.index');
+        Route::get('/spa/{spaService}', [\App\Http\Controllers\Guest\SpaServiceController::class, 'show'])
+            ->name('spa.show');
+        Route::post('/spa/{spaService}/reserve', [\App\Http\Controllers\Guest\SpaServiceController::class, 'reserve'])
+            ->name('spa.reserve');
+        Route::get('/my-spa-reservations', [\App\Http\Controllers\Guest\SpaServiceController::class, 'myReservations'])
+            ->name('spa.my-reservations');
+        
+        // Excursions
+        Route::get('/excursions', [\App\Http\Controllers\Guest\ExcursionController::class, 'index'])
+            ->name('excursions.index');
+        Route::get('/excursions/{excursion}', [\App\Http\Controllers\Guest\ExcursionController::class, 'show'])
+            ->name('excursions.show');
+        Route::post('/excursions/{excursion}/book', [\App\Http\Controllers\Guest\ExcursionController::class, 'book'])
+            ->name('excursions.book');
+        Route::get('/my-excursion-bookings', [\App\Http\Controllers\Guest\ExcursionController::class, 'myBookings'])
+            ->name('excursions.my-bookings');
+        
+        // Blanchisserie
+        Route::get('/laundry', [\App\Http\Controllers\Guest\LaundryServiceController::class, 'index'])
+            ->name('laundry.index');
+        Route::post('/laundry/request', [\App\Http\Controllers\Guest\LaundryServiceController::class, 'request'])
+            ->name('laundry.request');
+        Route::get('/my-laundry-requests', [\App\Http\Controllers\Guest\LaundryServiceController::class, 'myRequests'])
+            ->name('laundry.my-requests');
+        
+        // Services Palace
+        Route::get('/palace', [\App\Http\Controllers\Guest\PalaceServiceController::class, 'index'])
+            ->name('palace.index');
+        Route::get('/palace/{palaceService}', [\App\Http\Controllers\Guest\PalaceServiceController::class, 'show'])
+            ->name('palace.show');
+        Route::post('/palace/{palaceService}/request', [\App\Http\Controllers\Guest\PalaceServiceController::class, 'request'])
+            ->name('palace.request');
+        Route::get('/my-palace-requests', [\App\Http\Controllers\Guest\PalaceServiceController::class, 'myRequests'])
+            ->name('palace.my-requests');
     });
 });
 

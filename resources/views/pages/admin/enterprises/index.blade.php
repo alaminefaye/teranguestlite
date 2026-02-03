@@ -20,6 +20,49 @@
     </div>
 @endif
 
+@if(session('admin_credentials'))
+    <div class="mb-6 rounded-lg bg-brand-50 border-2 border-brand-500 p-6 dark:bg-brand-500/10 dark:border-brand-400">
+        <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-brand-600 dark:text-brand-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-brand-900 dark:text-brand-300 mb-2">
+                    🎉 Compte administrateur créé automatiquement !
+                </h3>
+                <p class="text-brand-700 dark:text-brand-400 mb-4">
+                    Un compte administrateur a été créé pour cette entreprise. Voici les identifiants de connexion :
+                </p>
+                <div class="bg-white dark:bg-gray-900 rounded-lg p-4 border border-brand-200 dark:border-brand-700">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Nom :</span>
+                            <span class="text-gray-900 dark:text-white font-semibold">{{ session('admin_credentials')['name'] }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Email :</span>
+                            <code class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-brand-600 dark:text-brand-400 font-mono text-sm">{{ session('admin_credentials')['email'] }}</code>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Mot de passe :</span>
+                            <code class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-brand-600 dark:text-brand-400 font-mono text-sm">{{ session('admin_credentials')['password'] }}</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-start gap-2 text-sm text-brand-700 dark:text-brand-400">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>
+                        <strong>Important :</strong> Veuillez noter ces identifiants et les transmettre à l'administrateur de l'entreprise. 
+                        Il pourra modifier son mot de passe après la première connexion.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     @if($enterprises->count() > 0)
         <div class="overflow-x-auto">
@@ -86,21 +129,12 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.enterprises.show', $enterprise) }}" class="text-sm text-blue-light-500 hover:text-blue-light-600 dark:text-blue-light-400 dark:hover:text-blue-light-300">
-                                        Voir
-                                    </a>
-                                    <a href="{{ route('admin.enterprises.edit', $enterprise) }}" class="text-sm text-warning-500 hover:text-warning-600 dark:text-warning-400 dark:hover:text-warning-300">
-                                        Modifier
-                                    </a>
-                                    <form action="{{ route('admin.enterprises.destroy', $enterprise) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-sm text-error-500 hover:text-error-600 dark:text-error-400 dark:hover:text-error-300">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-action-buttons 
+                                    :showRoute="route('admin.enterprises.show', $enterprise)"
+                                    :editRoute="route('admin.enterprises.edit', $enterprise)"
+                                    :deleteRoute="route('admin.enterprises.destroy', $enterprise)"
+                                    deleteMessage="Êtes-vous sûr de vouloir supprimer cette entreprise ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

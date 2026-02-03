@@ -1,62 +1,332 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏨 Teranga Guest - Système de Gestion Hôtelière SaaS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Application web et mobile multi-tenant pour la gestion complète d'hôtels et établissements d'hébergement.
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat&logo=php)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat&logo=mysql)](https://mysql.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
+[![Firebase](https://img.shields.io/badge/Firebase-Enabled-FFCA28?style=flat&logo=firebase)](https://firebase.google.com)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 À PROPOS
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Teranga Guest** est une solution SaaS complète de gestion hôtelière permettant à plusieurs établissements (hôtels, résidences, etc.) de gérer leurs opérations quotidiennes via une interface web moderne et une application mobile intuitive.
 
-## Learning Laravel
+### ✨ Fonctionnalités Principales
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- 🏢 **Multi-tenant** - Une application, plusieurs entreprises
+- 👥 **Gestion des rôles** - Super Admin, Admin, Staff, Guest
+- 🛏️ **Gestion des chambres** - Disponibilités, réservations, check-in/out
+- 🍽️ **Room Service** - Commande de repas et articles
+- 🍷 **Restaurants & Bars** - Réservations de tables
+- 💆 **Spa & Bien-être** - Réservations de soins
+- 👔 **Blanchisserie** - Demandes de service
+- 🎯 **Services Palace** - Services premium personnalisés
+- 🌴 **Excursions** - Réservations d'activités touristiques
+- 🔔 **Notifications Push** - Firebase Cloud Messaging
+- 📱 **Interface Tablet** - Optimisée pour tablettes en chambre
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🚀 DÉMARRAGE RAPIDE
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Prérequis
 
-### Premium Partners
+- PHP 8.2+
+- Composer
+- MySQL 8.0+
+- Node.js 18+ & NPM
+- Git
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Installation
 
-## Contributing
+```bash
+# Cloner le repository
+git clone https://github.com/alaminefaye/terangaguest.git
+cd terangaguest
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Installer les dépendances PHP
+composer install
 
-## Code of Conduct
+# Installer les dépendances JS
+npm install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Copier le fichier d'environnement
+cp .env.example .env
 
-## Security Vulnerabilities
+# Générer la clé d'application
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Configurer la base de données dans .env
+# DB_DATABASE=teranga
+# DB_USERNAME=root
+# DB_PASSWORD=
 
-## License
+# Exécuter les migrations et seeders
+php artisan migrate:fresh --seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# terangaguest
-# terangaguest
-# terangaguest
+# Compiler les assets
+npm run build
+
+# Lancer le serveur
+php artisan serve
+```
+
+### Accès par Défaut
+
+**Super Admin**
+- Email: `admin@admin.com`
+- Mot de passe: `passer123`
+
+**Admin Hotel (King Fahd Palace)**
+- Email: `admin@king-fahd-palace.com`
+- Mot de passe: `passer123`
+
+**Guest (Chambre de test)**
+- Email: `guest@teranga.com`
+- Mot de passe: `passer123`
+
+---
+
+## 📚 DOCUMENTATION
+
+La documentation complète est disponible dans le dossier [`docs/`](./docs/)
+
+### Documents Principaux
+
+- **[docs/README.md](./docs/README.md)** - Index de la documentation
+- **[docs/APPLICATION-WEB-100-COMPLETED.md](./docs/APPLICATION-WEB-100-COMPLETED.md)** - État complet de l'application web
+- **[docs/FIREBASE-CONFIGURATION.md](./docs/FIREBASE-CONFIGURATION.md)** - Guide Firebase
+- **[docs/PROJET-RECAP-GLOBAL.md](./docs/PROJET-RECAP-GLOBAL.md)** - Vue d'ensemble du projet
+
+### Par Section
+
+- **[docs/sessions/](./docs/sessions/)** - Historique des sessions de développement
+- **[docs/phases/](./docs/phases/)** - Documentation par phase
+- **[docs/modules/](./docs/modules/)** - Documentation des modules
+- **[docs/guides/](./docs/guides/)** - Guides pratiques
+- **[docs/specs/](./docs/specs/)** - Spécifications techniques
+
+---
+
+## 🏗️ ARCHITECTURE
+
+### Stack Technique
+
+**Backend**
+- Laravel 11 (PHP 8.2)
+- MySQL 8.0
+- Laravel Sanctum (API)
+- Firebase Admin SDK
+
+**Frontend Web**
+- Blade Templates
+- Tailwind CSS 3
+- Alpine.js
+- Vite
+
+**Mobile (En développement)**
+- Flutter
+- Firebase Cloud Messaging
+- API REST Laravel
+
+### Structure Multi-tenant
+
+Chaque entreprise (hôtel) dispose de :
+- Ses propres utilisateurs (admin, staff, guests)
+- Ses propres données isolées
+- Son propre dashboard
+- Ses propres services et tarifs
+
+Le Super Admin peut :
+- Créer et gérer les entreprises
+- Voir toutes les statistiques
+- Gérer tous les utilisateurs
+
+---
+
+## 📱 MODULES DISPONIBLES
+
+### ✅ Application Web (100% Complétée)
+
+| Module | Statut | Description |
+|--------|--------|-------------|
+| Authentification | ✅ | Login, logout, changement MDP obligatoire |
+| Super Admin | ✅ | Gestion entreprises et utilisateurs |
+| Entreprises | ✅ | CRUD entreprises (hôtels) |
+| Utilisateurs | ✅ | Gestion multi-rôles |
+| Chambres | ✅ | Types, tarifs, disponibilités |
+| Réservations | ✅ | Booking, check-in, check-out |
+| Menus & Articles | ✅ | Catégories, prix, disponibilité |
+| Commandes | ✅ | Room service, workflow statuts |
+| Restaurants & Bars | ✅ | Horaires, capacité, réservations |
+| Spa & Bien-être | ✅ | Services, durées, réservations |
+| Blanchisserie | ✅ | Items, tarifs, demandes |
+| Services Palace | ✅ | Services premium, demandes |
+| Excursions | ✅ | Activités, participants, bookings |
+| Interface Guest | ✅ | Hub services, commandes, réservations |
+| Notifications | ✅ | Firebase configuré, prêt pour mobile |
+
+### 🔄 API Mobile (En développement)
+
+- Authentication endpoint
+- CRUD endpoints pour toutes les entités
+- FCM token management
+- Documentation Swagger
+
+### 📱 Application Mobile (Planifiée)
+
+- Flutter iOS & Android
+- Synchronisation offline
+- Notifications push
+- Interface intuitive
+
+---
+
+## 🎨 CAPTURES D'ÉCRAN
+
+### Dashboard Super Admin
+- Vue d'ensemble multi-entreprises
+- Statistiques globales
+- Gestion centralisée
+
+### Dashboard Admin Hôtel
+- Vue entreprise spécifique
+- Gestion opérationnelle complète
+- Statistiques détaillées
+
+### Interface Guest (Tablet)
+- Hub services centralisé
+- Commande room service avec panier
+- Réservations en un clic
+- Suivi des commandes en temps réel
+
+---
+
+## 🔒 SÉCURITÉ
+
+- ✅ Authentification sécurisée (Breeze + Sanctum)
+- ✅ Isolation des données par entreprise
+- ✅ Middleware de vérification d'appartenance
+- ✅ Changement de mot de passe obligatoire à la première connexion
+- ✅ Validation stricte des entrées
+- ✅ Protection CSRF
+- ✅ Hash des mots de passe (Bcrypt)
+- ✅ Credentials Firebase sécurisés
+
+---
+
+## 🧪 TESTS
+
+### Lancer les tests
+
+```bash
+# Tests unitaires
+php artisan test
+
+# Tests avec couverture
+php artisan test --coverage
+```
+
+### Tests manuels
+
+Voir le guide complet : [docs/guides/COMMENT-TESTER.md](./docs/guides/COMMENT-TESTER.md)
+
+---
+
+## 📊 STATISTIQUES DU PROJET
+
+- **Contrôleurs :** 20+
+- **Modèles :** 15+
+- **Migrations :** 25+
+- **Vues Blade :** 100+
+- **Routes :** 150+
+- **Lignes de code :** 15,000+
+
+---
+
+## 🗺️ ROADMAP
+
+### ✅ Phase 1 - Fondations (Terminée)
+- Architecture multi-tenant
+- Authentification
+- Super Admin
+
+### ✅ Phase 2 - Gestion Hôtelière (Terminée)
+- Chambres
+- Réservations
+- Menus & Commandes
+
+### ✅ Phase 3 - Services Additionnels (Terminée)
+- Restaurants & Bars
+- Spa & Bien-être
+- Blanchisserie
+- Services Palace
+- Excursions
+
+### ✅ Phase 4 - Interface Guest (Terminée)
+- Hub services
+- Room service
+- Réservations multiples
+- Suivi temps réel
+
+### 🔄 Phase 5 - API Mobile (En cours)
+- API REST complète
+- Documentation Swagger
+- Tests automatisés
+- Rate limiting
+
+### 📱 Phase 6 - Application Mobile (Planifiée)
+- Flutter iOS & Android
+- Firebase integration
+- Notifications push
+- Mode offline
+
+---
+
+## 🤝 CONTRIBUTION
+
+Les contributions sont les bienvenues !
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+---
+
+## 📄 LICENCE
+
+Ce projet est sous licence privée. Tous droits réservés.
+
+---
+
+## 📞 CONTACT & SUPPORT
+
+- **Repository :** [github.com/alaminefaye/terangaguest](https://github.com/alaminefaye/terangaguest)
+- **Documentation :** [docs/README.md](./docs/README.md)
+- **Issues :** [GitHub Issues](https://github.com/alaminefaye/terangaguest/issues)
+
+---
+
+## 🙏 REMERCIEMENTS
+
+Développé avec ❤️ pour révolutionner la gestion hôtelière en Afrique.
+
+**Technologies utilisées :**
+- [Laravel](https://laravel.com)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Alpine.js](https://alpinejs.dev)
+- [Firebase](https://firebase.google.com)
+- [Flutter](https://flutter.dev) (à venir)
+
+---
+
+**Version :** 1.1.0  
+**Date :** Février 2026  
+**Statut :** ✅ Application Web 100% | 🔄 API Mobile en cours | 📱 Mobile à venir
+
+**🚀 Teranga Guest - L'avenir de la gestion hôtelière**

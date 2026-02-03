@@ -2,164 +2,82 @@
 
 namespace Database\Seeders;
 
-use App\Models\Enterprise;
+use Illuminate\Database\Seeder;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Models\Enterprise;
 
 class MenuSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $this->command->info('🍽️  Création des menus et articles...');
+        $enterprises = Enterprise::all();
 
-        $enterprise = Enterprise::first();
-
-        if (!$enterprise) {
-            $this->command->error('Aucune entreprise trouvée. Exécutez d abord DemoDataSeeder.');
-            return;
-        }
-
-        // Catégories Room Service
-        $roomServiceCategories = [
-            ['name' => 'Petit déjeuner', 'type' => 'room_service', 'order' => 1],
-            ['name' => 'Plats chauds', 'type' => 'room_service', 'order' => 2],
-            ['name' => 'Sandwichs & Salades', 'type' => 'room_service', 'order' => 3],
-            ['name' => 'Desserts', 'type' => 'room_service', 'order' => 4],
-            ['name' => 'Boissons', 'type' => 'room_service', 'order' => 5],
+        $categoriesData = [
+            ['name' => 'Petit Déjeuner', 'description' => 'Options de petit déjeuner', 'type' => 'room_service'],
+            ['name' => 'Plats Principaux', 'description' => 'Plats principaux', 'type' => 'room_service'],
+            ['name' => 'Boissons', 'description' => 'Boissons chaudes et froides', 'type' => 'room_service'],
+            ['name' => 'Desserts', 'description' => 'Desserts et douceurs', 'type' => 'room_service'],
         ];
 
-        $createdCategories = [];
-
-        foreach ($roomServiceCategories as $cat) {
-            $category = MenuCategory::create([
-                'enterprise_id' => $enterprise->id,
-                'name' => $cat['name'],
-                'description' => 'Catégorie ' . $cat['name'],
-                'type' => $cat['type'],
-                'status' => 'active',
-                'display_order' => $cat['order'],
-            ]);
-            $createdCategories[$cat['name']] = $category;
-        }
-
-        $this->command->info('✅ Catégories créées : ' . count($createdCategories));
-
-        // Articles Petit déjeuner
-        $breakfastItems = [
-            ['name' => 'Continental Breakfast', 'price' => 8000, 'prep' => 15],
-            ['name' => 'American Breakfast', 'price' => 12000, 'prep' => 20],
-            ['name' => 'Omelette aux choix', 'price' => 6000, 'prep' => 15],
-            ['name' => 'Croissant & Café', 'price' => 3500, 'prep' => 5],
-            ['name' => 'Pain perdu', 'price' => 5000, 'prep' => 15],
+        $itemsData = [
+            // Petit Déjeuner
+            ['Omelette Complète', 'Omelette avec fromage, jambon et légumes', 4500, 15, 'Petit Déjeuner'],
+            ['Pancakes Américains', 'Stack de pancakes avec sirop d\'érable', 3500, 12, 'Petit Déjeuner'],
+            ['Continental', 'Croissants, pain, confiture, café/thé', 5000, 10, 'Petit Déjeuner'],
+            
+            // Plats Principaux
+            ['Poulet Yassa', 'Poulet mariné aux oignons et citron', 8500, 30, 'Plats Principaux'],
+            ['Thiéboudienne', 'Riz au poisson sénégalais', 9000, 35, 'Plats Principaux'],
+            ['Steak Frites', 'Steak de boeuf avec frites maison', 12000, 25, 'Plats Principaux'],
+            ['Spaghetti Bolognaise', 'Pâtes à la sauce bolognaise', 7500, 20, 'Plats Principaux'],
+            ['Salade César', 'Salade avec poulet grillé', 6500, 15, 'Plats Principaux'],
+            
+            // Boissons
+            ['Café Espresso', 'Café italien', 1500, 5, 'Boissons'],
+            ['Thé Vert', 'Thé vert nature', 1000, 5, 'Boissons'],
+            ['Jus d\'Orange Frais', 'Jus pressé maison', 2500, 8, 'Boissons'],
+            ['Coca Cola', 'Boisson gazeuse', 1500, 2, 'Boissons'],
+            ['Eau Minérale', 'Eau plate ou gazeuse', 1000, 2, 'Boissons'],
+            
+            // Desserts
+            ['Tiramisu', 'Dessert italien au café', 4000, 10, 'Desserts'],
+            ['Crème Brûlée', 'Dessert français classique', 4500, 12, 'Desserts'],
+            ['Salade de Fruits', 'Fruits frais de saison', 3000, 8, 'Desserts'],
         ];
 
-        foreach ($breakfastItems as $item) {
-            MenuItem::create([
-                'enterprise_id' => $enterprise->id,
-                'category_id' => $createdCategories['Petit déjeuner']->id,
-                'name' => $item['name'],
-                'description' => 'Délicieux ' . strtolower($item['name']),
-                'price' => $item['price'],
-                'preparation_time' => $item['prep'],
-                'is_available' => true,
-                'is_featured' => false,
-            ]);
+        foreach ($enterprises as $enterprise) {
+            // Créer les catégories
+            $categories = [];
+            foreach ($categoriesData as $catData) {
+                $category = MenuCategory::create([
+                    'enterprise_id' => $enterprise->id,
+                    'name' => $catData['name'],
+                    'description' => $catData['description'],
+                    'type' => $catData['type'],
+                    'status' => 'active',
+                    'display_order' => count($categories) + 1,
+                ]);
+                $categories[$catData['name']] = $category;
+            }
+
+            // Créer les articles
+            foreach ($itemsData as $itemData) {
+                $category = $categories[$itemData[4]];
+                MenuItem::create([
+                    'enterprise_id' => $enterprise->id,
+                    'category_id' => $category->id,
+                    'name' => $itemData[0],
+                    'description' => $itemData[1],
+                    'price' => $itemData[2],
+                    'preparation_time' => $itemData[3],
+                    'is_available' => true,
+                    'is_featured' => false,
+                    'display_order' => 0,
+                ]);
+            }
+
+            echo "✅ Menu créé pour : {$enterprise->name}\n";
         }
-
-        // Articles Plats chauds
-        $hotDishes = [
-            ['name' => 'Poulet Yassa', 'price' => 15000, 'prep' => 30],
-            ['name' => 'Thiéboudienne', 'price' => 18000, 'prep' => 35],
-            ['name' => 'Mafé', 'price' => 16000, 'prep' => 30],
-            ['name' => 'Steak frites', 'price' => 20000, 'prep' => 25],
-            ['name' => 'Pâtes Carbonara', 'price' => 12000, 'prep' => 20],
-        ];
-
-        foreach ($hotDishes as $item) {
-            MenuItem::create([
-                'enterprise_id' => $enterprise->id,
-                'category_id' => $createdCategories['Plats chauds']->id,
-                'name' => $item['name'],
-                'description' => 'Plat savoureux',
-                'price' => $item['price'],
-                'preparation_time' => $item['prep'],
-                'is_available' => true,
-                'is_featured' => true,
-            ]);
-        }
-
-        // Articles Sandwichs & Salades
-        $sandwiches = [
-            ['name' => 'Club Sandwich', 'price' => 7000, 'prep' => 10],
-            ['name' => 'Burger Royal', 'price' => 9000, 'prep' => 15],
-            ['name' => 'Salade César', 'price' => 6500, 'prep' => 10],
-            ['name' => 'Salade Niçoise', 'price' => 8000, 'prep' => 10],
-        ];
-
-        foreach ($sandwiches as $item) {
-            MenuItem::create([
-                'enterprise_id' => $enterprise->id,
-                'category_id' => $createdCategories['Sandwichs & Salades']->id,
-                'name' => $item['name'],
-                'description' => 'Frais et savoureux',
-                'price' => $item['price'],
-                'preparation_time' => $item['prep'],
-                'is_available' => true,
-                'is_featured' => false,
-            ]);
-        }
-
-        // Articles Desserts
-        $desserts = [
-            ['name' => 'Tarte au citron', 'price' => 4000, 'prep' => 5],
-            ['name' => 'Tiramisu', 'price' => 4500, 'prep' => 5],
-            ['name' => 'Fondant au chocolat', 'price' => 5000, 'prep' => 15],
-            ['name' => 'Salade de fruits', 'price' => 3000, 'prep' => 5],
-        ];
-
-        foreach ($desserts as $item) {
-            MenuItem::create([
-                'enterprise_id' => $enterprise->id,
-                'category_id' => $createdCategories['Desserts']->id,
-                'name' => $item['name'],
-                'description' => 'Douceur gourmande',
-                'price' => $item['price'],
-                'preparation_time' => $item['prep'],
-                'is_available' => true,
-                'is_featured' => false,
-            ]);
-        }
-
-        // Articles Boissons
-        $drinks = [
-            ['name' => 'Coca-Cola', 'price' => 1500, 'prep' => 2],
-            ['name' => 'Jus d\'orange frais', 'price' => 2500, 'prep' => 5],
-            ['name' => 'Café Expresso', 'price' => 2000, 'prep' => 5],
-            ['name' => 'Thé à la menthe', 'price' => 1500, 'prep' => 5],
-            ['name' => 'Eau minérale', 'price' => 1000, 'prep' => 1],
-        ];
-
-        foreach ($drinks as $item) {
-            MenuItem::create([
-                'enterprise_id' => $enterprise->id,
-                'category_id' => $createdCategories['Boissons']->id,
-                'name' => $item['name'],
-                'description' => 'Rafraîchissant',
-                'price' => $item['price'],
-                'preparation_time' => $item['prep'],
-                'is_available' => true,
-                'is_featured' => false,
-            ]);
-        }
-
-        $totalItems = MenuItem::count();
-        $this->command->info('✅ Articles créés : ' . $totalItems);
-        $this->command->info('');
-        $this->command->info('🎉 Menus créés avec succès !');
     }
 }

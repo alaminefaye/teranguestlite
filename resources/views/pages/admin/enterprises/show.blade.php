@@ -183,6 +183,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Administrateur principal -->
+        @php
+            $mainAdmin = $enterprise->users()->where('role', 'admin')->oldest()->first();
+        @endphp
+        @if($mainAdmin)
+        <div class="rounded-lg border border-brand-200 bg-brand-50 p-6 shadow-theme-sm dark:border-brand-700 dark:bg-brand-500/10">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-brand-800 dark:text-brand-300">Administrateur Principal</h3>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-brand-600 dark:text-brand-400 mb-1">Nom</label>
+                    <p class="text-sm text-brand-900 dark:text-brand-200 font-medium">{{ $mainAdmin->name }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-brand-600 dark:text-brand-400 mb-1">Email</label>
+                    <code class="text-sm bg-white dark:bg-gray-900 px-2 py-1 rounded text-brand-700 dark:text-brand-300 font-mono">{{ $mainAdmin->email }}</code>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-brand-600 dark:text-brand-400 mb-1">Département</label>
+                    <p class="text-sm text-brand-900 dark:text-brand-200">{{ $mainAdmin->department ?? 'N/A' }}</p>
+                </div>
+                <div class="pt-3 border-t border-brand-200 dark:border-brand-700">
+                    <p class="text-xs text-brand-600 dark:text-brand-400">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Créé automatiquement avec l'entreprise
+                    </p>
+                    <p class="text-xs text-brand-600 dark:text-brand-400 mt-1">
+                        Mot de passe par défaut : <code class="font-mono bg-white dark:bg-gray-900 px-1 py-0.5 rounded">passer123</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endsection

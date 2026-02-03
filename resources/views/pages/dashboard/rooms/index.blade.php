@@ -160,21 +160,12 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('dashboard.rooms.show', $room) }}" class="text-sm text-blue-light-500 hover:text-blue-light-600">
-                                        Voir
-                                    </a>
-                                    <a href="{{ route('dashboard.rooms.edit', $room) }}" class="text-sm text-warning-500 hover:text-warning-600">
-                                        Modifier
-                                    </a>
-                                    <form action="{{ route('dashboard.rooms.destroy', $room) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette chambre ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-sm text-error-500 hover:text-error-600">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-action-buttons 
+                                    :showRoute="route('dashboard.rooms.show', $room)"
+                                    :editRoute="route('dashboard.rooms.edit', $room)"
+                                    :deleteRoute="route('dashboard.rooms.destroy', $room)"
+                                    deleteMessage="Êtes-vous sûr de vouloir supprimer cette chambre ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

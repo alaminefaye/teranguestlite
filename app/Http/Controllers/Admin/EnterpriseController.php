@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class EnterpriseController extends Controller
 {
@@ -54,10 +57,34 @@ class EnterpriseController extends Controller
             $validated['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
-        Enterprise::create($validated);
+        // Créer l'entreprise
+        $enterprise = Enterprise::create($validated);
+
+        // Générer un slug pour l'email
+        $slug = Str::slug($enterprise->name);
+        
+        // Générer les credentials du compte admin
+        $adminEmail = "admin@{$slug}.com";
+        $adminPassword = 'passer123'; // Mot de passe par défaut
+        
+        // Créer automatiquement un compte administrateur pour cette entreprise
+        $admin = User::create([
+            'name' => "Administrateur {$enterprise->name}",
+            'email' => $adminEmail,
+            'password' => Hash::make($adminPassword),
+            'role' => 'admin',
+            'enterprise_id' => $enterprise->id,
+            'department' => 'Direction',
+            'must_change_password' => true, // Forcer le changement à la première connexion
+        ]);
 
         return redirect()->route('admin.enterprises.index')
-            ->with('success', 'Entreprise créée avec succès !');
+            ->with('success', "Entreprise créée avec succès !")
+            ->with('admin_credentials', [
+                'email' => $adminEmail,
+                'password' => $adminPassword,
+                'name' => $admin->name,
+            ]);
     }
 
     /**
