@@ -41,7 +41,7 @@ class RoomServiceController extends Controller
                     'description' => $category->description,
                     'image' => $category->image ? asset('storage/' . $category->image) : null,
                     'display_order' => $category->display_order,
-                    'is_available' => $category->is_available,
+                    'is_available' => $category->status === 'active',
                     'items_count' => $category->menu_items_count,
                 ];
             }),
