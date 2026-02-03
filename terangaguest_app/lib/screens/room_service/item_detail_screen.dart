@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../models/menu_item.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/quantity_selector.dart';
+import 'cart_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final MenuItem item;
@@ -77,7 +78,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           label: 'VOIR',
           textColor: Colors.white,
           onPressed: () {
-            // TODO: Naviguer vers le panier
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CartScreen()),
+            );
           },
         ),
       ),
@@ -149,7 +153,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.shopping_cart, color: AppTheme.accentGold),
                   onPressed: () {
-                    // TODO: Naviguer vers le panier
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartScreen()),
+                    );
                   },
                 ),
               ),

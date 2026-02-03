@@ -4,6 +4,8 @@ import 'package:weather/weather.dart';
 import '../../config/theme.dart';
 import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
+import '../room_service/categories_screen.dart';
+import '../room_service/cart_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,7 +17,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final WeatherService _weatherService = WeatherService();
   Weather? _currentWeather;
-  bool _isLoadingWeather = true;
 
   @override
   void initState() {
@@ -29,15 +30,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (mounted) {
         setState(() {
           _currentWeather = weather;
-          _isLoadingWeather = false;
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingWeather = false;
-        });
-      }
+      // Silently fail, keep default weather
+    }
+  }
+
+  void _handleServiceTap(BuildContext context, String route, String serviceName) {
+    switch (route) {
+      case '/room-service':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CategoriesScreen()),
+        );
+        break;
+      case '/cart':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CartScreen()),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Navigation vers $serviceName'),
+            backgroundColor: AppTheme.accentGold,
+            duration: const Duration(seconds: 1),
+          ),
+        );
     }
   }
 
@@ -298,14 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             title: service['title'] as String,
             icon: service['icon'] as IconData,
             onTap: () {
-              // TODO: Navigate to service screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Navigation vers ${service['title']}'),
-                  backgroundColor: AppTheme.accentGold,
-                  duration: const Duration(seconds: 1),
-                ),
-              );
+              _handleServiceTap(context, service['route'] as String, service['title'] as String);
             },
           );
         },

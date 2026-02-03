@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
 import 'config/theme.dart';
 import 'screens/dashboard/dashboard_screen.dart';
+import 'providers/cart_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +37,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Teranga Guest',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
-      home: const DashboardScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        // Ajouter d'autres providers ici si nécessaire
+      ],
+      child: MaterialApp(
+        title: 'Teranga Guest',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.theme,
+        home: const DashboardScreen(),
+      ),
     );
   }
 }

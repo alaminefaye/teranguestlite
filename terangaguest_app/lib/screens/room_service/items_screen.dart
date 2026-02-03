@@ -5,6 +5,7 @@ import '../../models/menu_item.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/menu_item_card.dart';
 import 'item_detail_screen.dart';
+import 'cart_screen.dart';
 
 class ItemsScreen extends StatefulWidget {
   final MenuCategory category;
@@ -170,7 +171,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
           IconButton(
             icon: const Icon(Icons.shopping_cart, color: AppTheme.accentGold),
             onPressed: () {
-              // TODO: Naviguer vers le panier
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartScreen()),
+              );
             },
           ),
         ],
