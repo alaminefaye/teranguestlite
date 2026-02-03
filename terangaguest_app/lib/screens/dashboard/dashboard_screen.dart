@@ -6,6 +6,7 @@ import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
+import '../profile/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -165,7 +166,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(width: 16),
                   // Profil
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileScreen(),
+                        ),
+                      );
+                    },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     iconSize: 36,
