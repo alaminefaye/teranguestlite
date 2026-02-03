@@ -20,10 +20,8 @@ class RoomServiceController extends Controller
             $q->where('is_available', true);
         }])->withCount('menuItems');
 
-        // Filtrer par disponibilité
-        if ($request->has('available')) {
-            $query->where('is_available', $request->boolean('available'));
-        }
+        // Filtrer seulement les catégories actives
+        $query->where('status', 'active');
 
         // Recherche
         if ($request->filled('search')) {
