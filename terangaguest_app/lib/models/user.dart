@@ -32,7 +32,7 @@ class User {
       name: json['name'] as String,
       email: json['email'] as String,
       role: json['role'] as String,
-      enterpriseId: json['enterprise_id'] as int?,
+      enterpriseId: _parseId(json['enterprise_id']),
       department: json['department'] as String?,
       roomNumber: json['room_number'] as String?,
       mustChangePassword: json['must_change_password'] as bool? ?? false,
@@ -44,6 +44,14 @@ class User {
           ? DateTime.parse(json['created_at'] as String)
           : null,
     );
+  }
+
+  // Helper pour parser un ID qui peut être string ou int
+  static int? _parseId(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   // Convertir en JSON
@@ -127,11 +135,19 @@ class Enterprise {
 
   factory Enterprise.fromJson(Map<String, dynamic> json) {
     return Enterprise(
-      id: json['id'] as int,
+      id: _parseIdSafe(json['id']),
       name: json['name'] as String,
       logo: json['logo'] as String?,
       type: json['type'] as String?,
     );
+  }
+
+  // Helper pour parser un ID qui peut être string ou int
+  static int _parseIdSafe(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {

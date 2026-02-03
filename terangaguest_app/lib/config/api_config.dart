@@ -1,6 +1,10 @@
 class ApiConfig {
   // Base URL de l'API
-  static const String baseUrl = 'http://localhost:8000/api';
+  // Production
+  static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+  
+  // Développement (localhost)
+  // static const String baseUrl = 'http://localhost:8000/api';
   
   // Timeout en millisecondes
   static const int connectTimeout = 30000;

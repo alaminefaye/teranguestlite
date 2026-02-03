@@ -1,165 +1,128 @@
-# 🚀 QUICKSTART - Teranga Guest Mobile
+# ⚡ QUICKSTART - 5 Minutes pour Lancer l'App
 
-## ⚡ Lancement Rapide
+---
 
-### 1. Vérifier Flutter
+## 🎯 Objectif
+
+Lancer l'application mobile TerangueST en **moins de 5 minutes**.
+
+---
+
+## 📋 Étape 1 : Vérifier Flutter
+
 ```bash
 flutter doctor
 ```
 
-### 2. Installer les dépendances
+**Résultat attendu :** ✅ Flutter SDK installé
+
+---
+
+## 📦 Étape 2 : Installer les Dépendances
+
 ```bash
 cd terangaguest_app
 flutter pub get
 ```
 
-### 3. Lancer l'application
+**Durée :** ~10 secondes
 
-**Sur émulateur/simulateur :**
+---
+
+## 🔧 Étape 3 : Lancer le Backend
+
+**Dans un nouveau terminal :**
+
+```bash
+cd /Users/Zhuanz/Desktop/projets/web/terangaguest
+php artisan serve
+```
+
+**Vérifier :** http://localhost:8000 accessible
+
+---
+
+## 🚀 Étape 4 : Lancer l'App Mobile
+
 ```bash
 flutter run
 ```
 
-**Sur appareil physique :**
+**Ou spécifier un device :**
+
 ```bash
-flutter devices
-flutter run -d <device_id>
+# iPad Pro
+flutter run -d "iPad Pro 13-inch (M5)"
+
+# macOS
+flutter run -d macos
 ```
 
----
-
-## 📱 Émulateurs Recommandés
-
-### Android
-- **Pixel 7 Pro** (API 34)
-- **Pixel 6** (API 33)
-
-### iOS
-- **iPhone 15 Pro** (iOS 17)
-- **iPad Pro 12.9"** (iOS 17)
+**Durée :** ~30 secondes (première fois)
 
 ---
 
-## 🎨 Ce Qui Est Prêt
+## 🔑 Étape 5 : Se Connecter
 
-✅ **Dashboard Principal**
-- Design bleu marine + or élégant
-- 8 services en grille 2x4
-- Header avec notifications/profil
-- Footer avec heure en temps réel
-
----
-
-## 🔧 Commandes Utiles
-
-### Hot Reload
-```bash
-# Pendant flutter run :
-r  → Hot reload (rapide)
-R  → Hot restart (complet)
-q  → Quitter
+**Compte de test :**
+```
+Email: guest@teranga.com
+Password: passer123
 ```
 
-### Clean Build
+**Actions :**
+1. Attendre le SplashScreen (2s)
+2. Sur LoginScreen, entrer email + password
+3. Tap "Se connecter"
+4. **Dashboard affiché !** ✅
+
+---
+
+## 🎉 TERMINÉ !
+
+Vous êtes maintenant dans l'application. Testez :
+
+- 🍽️ **Room Service** → Commandez un article
+- 👤 **Profil** → Icône en haut à droite
+- 🛒 **Panier** → Badge rouge après ajout
+
+---
+
+## 🆘 Problèmes ?
+
+### App ne démarre pas
 ```bash
 flutter clean
 flutter pub get
 flutter run
 ```
 
-### Analyser le Code
+### Backend non accessible
 ```bash
-flutter analyze
+# Vérifier que le serveur tourne
+php artisan serve
+
+# Tester dans le navigateur
+open http://localhost:8000
 ```
 
-### Formater le Code
+### Device non trouvé
 ```bash
-flutter format lib/
-```
+# Lister les devices
+flutter devices
 
----
-
-## 📸 Tester le Dashboard
-
-1. **Lancer l'app** avec `flutter run`
-2. **Voir** le dashboard avec 8 services
-3. **Taper** sur n'importe quel service
-4. **Voir** le SnackBar de confirmation
-
----
-
-## 🐛 Problèmes Courants
-
-### "No devices found"
-```bash
-# Android
-flutter emulators
-flutter emulators --launch <emulator_id>
-
-# iOS  
+# Ouvrir un simulateur
 open -a Simulator
 ```
 
-### "Gradle build failed"
-```bash
-cd android
-./gradlew clean
-cd ..
-flutter clean && flutter pub get
-```
+---
 
-### "Font loading failed"
-```bash
-flutter pub cache repair
-flutter clean && flutter pub get
-```
+## 📚 Pour Aller Plus Loin
+
+- **Guide de test complet :** `../docs/GUIDE-TEST-MOBILE-APP.md`
+- **Documentation :** `README.md`
+- **API :** `../docs/API-REST-DOCUMENTATION.md`
 
 ---
 
-## 📂 Structure Créée
-
-```
-lib/
-├── main.dart                 ✅ App entry point
-├── config/
-│   └── theme.dart           ✅ Colors, fonts, theme
-├── models/
-│   └── service_item.dart    ✅ Service model
-├── screens/
-│   └── dashboard/
-│       └── dashboard_screen.dart  ✅ Home screen
-└── widgets/
-    └── service_card.dart    ✅ Reusable service card
-```
-
----
-
-## 🎯 Prochaines Étapes
-
-### À Développer Ensuite
-1. **Room Service** (Priority #1)
-   - Liste catégories
-   - Liste articles
-   - Panier
-
-2. **Authentication**
-   - Splash screen
-   - Login screen
-   - API integration
-
-3. **Navigation**
-   - Bottom navigation bar
-   - Routes management
-
----
-
-## 📞 Besoin d'Aide ?
-
-Consultez :
-- `README.md` - Documentation complète
-- `docs/MOBILE-DASHBOARD-COMPLETE.md` - Dashboard détaillé
-- `docs/MOBILE-APP-FONCTIONNALITES.md` - Toutes les fonctionnalités
-
----
-
-**🎉 Prêt à développer ! Lancez `flutter run` et c'est parti ! 🚀**
+**⚡ PRÊT EN 5 MINUTES ! 🚀**

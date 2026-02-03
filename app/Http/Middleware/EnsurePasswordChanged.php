@@ -21,8 +21,23 @@ class EnsurePasswordChanged
             
             // Si l'utilisateur doit changer son mot de passe
             if ($user->must_change_password) {
-                // Ne pas rediriger si on est déjà sur la page de changement de mot de passe
-                if (!$request->is('auth/change-password') && !$request->is('logout')) {
+                // Liste des routes exemptées (où on ne redirige pas)
+                $exemptedRoutes = [
+                    'auth/change-password',  // Page et soumission du formulaire
+                    'logout',                 // Déconnexion
+                ];
+                
+                // Vérifier si on n'est pas sur une route exemptée
+                $isExempted = false;
+                foreach ($exemptedRoutes as $route) {
+                    if ($request->is($route)) {
+                        $isExempted = true;
+                        break;
+                    }
+                }
+                
+                // Rediriger vers la page de changement de mot de passe
+                if (!$isExempted) {
                     return redirect()->route('auth.change-password.form')
                         ->with('warning', 'Vous devez changer votre mot de passe avant de continuer.');
                 }

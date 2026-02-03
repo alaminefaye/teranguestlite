@@ -16,9 +16,9 @@ class RoomServiceController extends Controller
      */
     public function categories(Request $request)
     {
-        $query = MenuCategory::with(['items' => function($q) {
+        $query = MenuCategory::with(['menuItems' => function($q) {
             $q->where('is_available', true);
-        }])->withCount('items');
+        }])->withCount('menuItems');
 
         // Filtrer par disponibilité
         if ($request->has('available')) {
@@ -42,7 +42,7 @@ class RoomServiceController extends Controller
                     'image' => $category->image ? asset('storage/' . $category->image) : null,
                     'display_order' => $category->display_order,
                     'is_available' => $category->is_available,
-                    'items_count' => $category->items_count,
+                    'items_count' => $category->menu_items_count,
                 ];
             }),
         ], 200);
