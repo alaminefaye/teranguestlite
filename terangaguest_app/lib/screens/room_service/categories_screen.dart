@@ -3,8 +3,8 @@ import '../../config/theme.dart';
 import '../../models/menu_category.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/category_card.dart';
+import '../../widgets/cart_badge.dart';
 import 'items_screen.dart';
-import 'cart_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -110,16 +110,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             ),
           ),
 
-          // Icône panier
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: AppTheme.accentGold),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CartScreen()),
-              );
-            },
-          ),
+          // Badge panier
+          const CartBadge(),
         ],
       ),
     );

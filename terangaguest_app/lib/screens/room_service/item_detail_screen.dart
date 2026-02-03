@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../models/menu_item.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/quantity_selector.dart';
+import '../../widgets/cart_badge.dart';
 import 'cart_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
@@ -75,12 +76,15 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ),
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
-          label: 'VOIR',
+          label: 'VOIR PANIER',
           textColor: Colors.white,
           onPressed: () {
+            // Naviguer vers le panier
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CartScreen()),
+              MaterialPageRoute(
+                builder: (context) => const CartScreen(),
+              ),
             );
           },
         ),
@@ -137,7 +141,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
             ),
 
-            // Badge panier (optionnel)
+            // Badge panier
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               right: 8,
@@ -150,15 +154,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     width: 1.5,
                   ),
                 ),
-                child: IconButton(
-                  icon: const Icon(Icons.shopping_cart, color: AppTheme.accentGold),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CartScreen()),
-                    );
-                  },
-                ),
+                child: const CartBadge(),
               ),
             ),
           ],
