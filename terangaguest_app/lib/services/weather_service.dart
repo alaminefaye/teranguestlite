@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather/weather.dart';
 
@@ -46,7 +47,7 @@ class WeatherService {
       );
       return weather;
     } catch (e) {
-      print('Erreur météo: $e');
+      debugPrint('Erreur météo: $e');
       return null;
     }
   }

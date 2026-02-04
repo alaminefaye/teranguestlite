@@ -131,7 +131,7 @@ class RoomServiceApi {
         'items': items,
         if (specialInstructions != null && specialInstructions.isNotEmpty)
           'special_instructions': specialInstructions,
-        if (deliveryTime != null) 'delivery_time': deliveryTime,
+        ...? (deliveryTime != null ? {'delivery_time': deliveryTime} : null),
       };
 
       final response = await _apiService.post(

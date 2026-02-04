@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
@@ -47,7 +48,7 @@ class ApiService {
         },
         onError: (DioException error, handler) {
           // Gérer les erreurs globalement
-          print('❌ API Error: ${error.message}');
+          debugPrint('❌ API Error: ${error.message}');
           return handler.next(error);
         },
       ),

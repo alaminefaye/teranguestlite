@@ -27,7 +27,7 @@ class MenuItem {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
-      price: (json['price'] as num).toDouble(),
+      price: _parsePrice(json['price']),
       formattedPrice: json['formatted_price'] as String? ?? '${json['price']} FCFA',
       image: json['image'] as String?,
       preparationTime: json['preparation_time'] as int? ?? 0,
@@ -36,6 +36,14 @@ class MenuItem {
           ? MenuItemCategory.fromJson(json['category'] as Map<String, dynamic>)
           : null,
     );
+  }
+
+  // Helper pour parser un prix qui peut être string ou number
+  static double _parsePrice(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   // Convertir en JSON

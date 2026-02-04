@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../providers/cart_provider.dart';
 import '../screens/room_service/cart_screen.dart';
+import '../utils/navigation_helper.dart';
+import '../utils/haptic_helper.dart';
 
 class CartBadge extends StatelessWidget {
   final Color iconColor;
@@ -18,7 +21,10 @@ class CartBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
-        return Stack(
+        return Semantics(
+          button: true,
+          label: cart.itemCount > 0 ? '${AppLocalizations.of(context).cart}, ${AppLocalizations.of(context).articleCount(cart.itemCount)}' : AppLocalizations.of(context).cart,
+          child: Stack(
           clipBehavior: Clip.none,
           children: [
             IconButton(
@@ -28,10 +34,8 @@ class CartBadge extends StatelessWidget {
                 size: iconSize,
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CartScreen()),
-                );
+                HapticHelper.lightImpact();
+                context.navigateTo(const CartScreen());
               },
             ),
             
@@ -68,6 +72,7 @@ class CartBadge extends StatelessWidget {
                 ),
               ),
           ],
+        ),
         );
       },
     );

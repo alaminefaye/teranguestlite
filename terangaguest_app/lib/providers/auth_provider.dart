@@ -36,7 +36,7 @@ class AuthProvider with ChangeNotifier {
         _isAuthenticated = false;
       }
     } catch (e) {
-      print('❌ Error init auth: $e');
+      debugPrint('❌ Error init auth: $e');
       _user = null;
       _isAuthenticated = false;
     } finally {
@@ -86,7 +86,7 @@ class AuthProvider with ChangeNotifier {
     try {
       await _authService.logout();
     } catch (e) {
-      print('⚠️ Logout error: $e');
+      debugPrint('⚠️ Logout error: $e');
     } finally {
       _user = null;
       _isAuthenticated = false;
@@ -105,7 +105,7 @@ class AuthProvider with ChangeNotifier {
       _user = user;
       notifyListeners();
     } catch (e) {
-      print('❌ Error loading user: $e');
+      debugPrint('❌ Error loading user: $e');
       
       // Si erreur 401, déconnecter
       if (e.toString().contains('Session expirée')) {

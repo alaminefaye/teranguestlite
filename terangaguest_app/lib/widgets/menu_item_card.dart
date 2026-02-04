@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../config/theme.dart';
 import '../models/menu_item.dart';
 
@@ -14,179 +16,227 @@ class MenuItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryBlue.withOpacity(0.6),
-              AppTheme.primaryDark.withOpacity(0.8),
+    return Semantics(
+      button: true,
+      label: item.name,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // Perspective 3D
+          ..rotateX(-0.05) // Légère rotation X
+          ..rotateY(0.02), // Légère rotation Y
+        alignment: Alignment.center,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primaryBlue,
+                AppTheme.primaryDark,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.accentGold,
+              width: 1.5,
+            ),
+            boxShadow: [
+              // Ombre principale (profondeur)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+              // Ombre secondaire (lueur dorée)
+              BoxShadow(
+                color: AppTheme.accentGold.withValues(alpha: 0.1),
+                blurRadius: 15,
+                spreadRadius: -2,
+                offset: const Offset(0, -4),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppTheme.accentGold.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                bottomLeft: Radius.circular(16),
-              ),
-              child: item.image != null
-                  ? Image.network(
-                      item.image!,
-                      width: 110,
-                      height: 110,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return _buildPlaceholder();
-                      },
-                    )
-                  : _buildPlaceholder(),
-            ),
-
-            // Informations
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Image de l'article
+              Expanded(
+                flex: 5,
+                child: Stack(
                   children: [
-                    // Nom
-                    Text(
-                      item.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    // Image
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(14),
+                        topRight: Radius.circular(14),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      child: item.image != null
+                          ? CachedNetworkImage(
+                              imageUrl: item.image!,
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => _buildPlaceholder(),
+                              errorWidget: (context, url, error) => _buildPlaceholder(),
+                            )
+                          : _buildPlaceholder(),
                     ),
-                    const SizedBox(height: 6),
 
-                    // Description
-                    if (item.description != null) ...[
+                    // Badge temps de préparation
+                    if (item.preparationTime > 0)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryDark.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.accentGold,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 12,
+                                color: AppTheme.accentGold,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${item.preparationTime} min',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.accentGold,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // Badge indisponible
+                    if (!item.isAvailable)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.7),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(14),
+                              topRight: Radius.circular(14),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.of(context).unavailable,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              // Informations
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Nom
                       Text(
-                        item.description!,
+                        item.name,
                         style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textGray,
-                          height: 1.3,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.accentGold,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
-                    ],
 
-                    // Prix et temps de préparation
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Prix
-                        Text(
-                          item.formattedPrice,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.accentGold,
+                      // Description (si disponible)
+                      if (item.description != null && item.description!.isNotEmpty)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              item.description!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textGray,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
 
-                        // Temps de préparation
-                        if (item.preparationTime > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.accentGold.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppTheme.accentGold.withOpacity(0.3),
+                      const SizedBox(height: 8),
+
+                      // Prix
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.formattedPrice,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.accentGold,
+                                letterSpacing: 0.3,
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 12,
-                                  color: AppTheme.accentGold,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${item.preparationTime} min',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppTheme.accentGold,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Indicateur disponibilité
-            if (!item.isAvailable)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'Indisponible',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          // Icône pour indiquer que c'est cliquable
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 14,
+                            color: AppTheme.accentGold,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
+      ),
       ),
     );
   }
 
   Widget _buildPlaceholder() {
     return Container(
-      width: 110,
-      height: 110,
-      color: AppTheme.primaryBlue,
+      width: double.infinity,
+      height: double.infinity,
+      color: AppTheme.primaryBlue.withValues(alpha: 0.3),
       child: const Center(
         child: Icon(
           Icons.restaurant,
-          size: 40,
+          size: 48,
           color: AppTheme.accentGold,
         ),
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/animated_button.dart';
 import '../dashboard/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -50,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Afficher l'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Erreur de connexion'),
+          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context).loginError),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -113,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 120,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppTheme.accentGold.withOpacity(0.1),
+        color: AppTheme.accentGold.withValues(alpha: 0.1),
         border: Border.all(
           color: AppTheme.accentGold,
           width: 2,
@@ -155,9 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Connexion',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).login,
+          style: const TextStyle(
             fontSize: 18,
             color: AppTheme.textGray,
           ),
@@ -172,21 +174,21 @@ class _LoginScreenState extends State<LoginScreen> {
       keyboardType: TextInputType.emailAddress,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        labelText: 'Email',
+        labelText: AppLocalizations.of(context).email,
         labelStyle: const TextStyle(color: AppTheme.textGray),
         prefixIcon: const Icon(Icons.email, color: AppTheme.accentGold),
         filled: true,
-        fillColor: AppTheme.primaryBlue.withOpacity(0.5),
+        fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -204,11 +206,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       validator: (value) {
+        final l10n = AppLocalizations.of(context);
         if (value == null || value.isEmpty) {
-          return 'Veuillez entrer votre email';
+          return l10n.emailRequired;
         }
         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-          return 'Email invalide';
+          return l10n.emailInvalid;
         }
         return null;
       },
@@ -216,12 +219,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildPasswordField() {
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        labelText: 'Mot de passe',
+        labelText: l10n.password,
         labelStyle: const TextStyle(color: AppTheme.textGray),
         prefixIcon: const Icon(Icons.lock, color: AppTheme.accentGold),
         suffixIcon: IconButton(
@@ -236,17 +240,17 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
         filled: true,
-        fillColor: AppTheme.primaryBlue.withOpacity(0.5),
+        fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -264,11 +268,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       validator: (value) {
+        final l10n = AppLocalizations.of(context);
         if (value == null || value.isEmpty) {
-          return 'Veuillez entrer votre mot de passe';
+          return l10n.passwordRequired;
         }
         if (value.length < 6) {
-          return 'Mot de passe trop court (min. 6 caractères)';
+          return l10n.passwordTooShort;
         }
         return null;
       },
@@ -288,8 +293,8 @@ class _LoginScreenState extends State<LoginScreen> {
           activeColor: AppTheme.accentGold,
           checkColor: AppTheme.primaryDark,
         ),
-        const Text(
-          'Se souvenir de moi',
+        Text(
+          AppLocalizations.of(context).rememberMe,
           style: TextStyle(
             color: AppTheme.textGray,
             fontSize: 14,
@@ -302,41 +307,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginButton() {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        final isLoading = authProvider.isLoading;
-
-        return SizedBox(
+        return AnimatedButton(
+          text: AppLocalizations.of(context).loginButton,
+          onPressed: authProvider.isLoading ? null : _handleLogin,
+          isLoading: authProvider.isLoading,
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : _handleLogin,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentGold,
-              disabledBackgroundColor: AppTheme.textGray.withOpacity(0.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.primaryDark,
-                      ),
-                    ),
-                  )
-                : const Text(
-                    'Se connecter',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryDark,
-                    ),
-                  ),
-          ),
+          backgroundColor: AppTheme.accentGold,
+          textColor: AppTheme.primaryDark,
         );
       },
     );

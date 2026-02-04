@@ -34,7 +34,6 @@ class AppTheme {
         primary: accentGold,
         secondary: accentGoldLight,
         surface: primaryBlue,
-        background: primaryDark,
       ),
       
       // Typographie

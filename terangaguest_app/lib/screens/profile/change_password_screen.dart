@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/animated_button.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -46,13 +48,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (success) {
       // Succès
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text('Mot de passe modifié avec succès'),
+                child: Text(AppLocalizations.of(context).passwordChangedSuccess),
               ),
             ],
           ),
@@ -67,7 +69,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       // Erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Erreur'),
+          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context).error),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -104,7 +106,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         // Current password
                         _buildPasswordField(
                           controller: _currentPasswordController,
-                          label: 'Mot de passe actuel',
+                          label: AppLocalizations.of(context).currentPassword,
                           obscure: _obscureCurrentPassword,
                           onToggleVisibility: () {
                             setState(() {
@@ -113,7 +115,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Champ requis';
+                              return AppLocalizations.of(context).fieldRequired;
                             }
                             return null;
                           },
@@ -123,7 +125,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         // New password
                         _buildPasswordField(
                           controller: _newPasswordController,
-                          label: 'Nouveau mot de passe',
+                          label: AppLocalizations.of(context).newPassword,
                           obscure: _obscureNewPassword,
                           onToggleVisibility: () {
                             setState(() {
@@ -132,16 +134,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Champ requis';
+                              return AppLocalizations.of(context).fieldRequired;
                             }
                             if (value.length < 8) {
-                              return 'Minimum 8 caractères';
+                              return AppLocalizations.of(context).minChars;
                             }
                             if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                              return 'Doit contenir une majuscule';
+                              return AppLocalizations.of(context).needUpperCase;
                             }
                             if (!RegExp(r'[0-9]').hasMatch(value)) {
-                              return 'Doit contenir un chiffre';
+                              return AppLocalizations.of(context).needDigit;
                             }
                             return null;
                           },
@@ -151,7 +153,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         // Confirm password
                         _buildPasswordField(
                           controller: _confirmPasswordController,
-                          label: 'Confirmer le nouveau mot de passe',
+                          label: AppLocalizations.of(context).confirmPassword,
                           obscure: _obscureConfirmPassword,
                           onToggleVisibility: () {
                             setState(() {
@@ -160,10 +162,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Champ requis';
+                              return AppLocalizations.of(context).fieldRequired;
                             }
                             if (value != _newPasswordController.text) {
-                              return 'Les mots de passe ne correspondent pas';
+                              return AppLocalizations.of(context).passwordsDoNotMatch;
                             }
                             return null;
                           },
@@ -194,9 +196,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 12),
-          const Text(
-            'Changer le mot de passe',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).changePassword,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -211,20 +213,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.accentGold.withOpacity(0.1),
+        color: AppTheme.accentGold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.accentGold.withOpacity(0.3),
+          color: AppTheme.accentGold.withValues(alpha: 0.3),
         ),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.info_outline, color: AppTheme.accentGold),
-          SizedBox(width: 12),
+          const Icon(Icons.info_outline, color: AppTheme.accentGold),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.',
-              style: TextStyle(
+              AppLocalizations.of(context).passwordRulesHint,
+              style: const TextStyle(
                 fontSize: 13,
                 color: AppTheme.textGray,
                 height: 1.4,
@@ -259,17 +261,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           onPressed: onToggleVisibility,
         ),
         filled: true,
-        fillColor: AppTheme.primaryBlue.withOpacity(0.5),
+        fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -300,41 +302,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget _buildSubmitButton() {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        final isLoading = authProvider.isLoading;
-
-        return SizedBox(
+        return AnimatedButton(
+          text: AppLocalizations.of(context).save,
+          onPressed: authProvider.isLoading ? null : _handleChangePassword,
+          isLoading: authProvider.isLoading,
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : _handleChangePassword,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentGold,
-              disabledBackgroundColor: AppTheme.textGray.withOpacity(0.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.primaryDark,
-                      ),
-                    ),
-                  )
-                : const Text(
-                    'Enregistrer',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryDark,
-                    ),
-                  ),
-          ),
+          backgroundColor: AppTheme.accentGold,
+          textColor: AppTheme.primaryDark,
         );
       },
     );

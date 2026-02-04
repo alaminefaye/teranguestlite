@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/reserve', [RestaurantController::class, 'reserve']);
     });
     Route::get('/my-restaurant-reservations', [RestaurantController::class, 'myReservations']);
+    Route::post('/my-restaurant-reservations/{id}/cancel', [RestaurantController::class, 'cancelReservation']);
     
     // ==========================================
     // SPA & BIEN-ÊTRE
@@ -86,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/reserve', [SpaServiceController::class, 'reserve']);
     });
     Route::get('/my-spa-reservations', [SpaServiceController::class, 'myReservations']);
+    Route::post('/my-spa-reservations/{id}/cancel', [SpaServiceController::class, 'cancelReservation']);
     
     // ==========================================
     // EXCURSIONS

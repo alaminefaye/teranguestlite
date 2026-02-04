@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
@@ -41,7 +42,7 @@ class SecureStorage {
       try {
         _prefs = await SharedPreferences.getInstance();
       } catch (e) {
-        print('⚠️ SharedPreferences failed, using in-memory storage: $e');
+        debugPrint('⚠️ SharedPreferences failed, using in-memory storage: $e');
         _useSharedPreferences = false;
       }
     }
@@ -55,7 +56,7 @@ class SecureStorage {
         await _storage.write(key: key, value: value);
         return;
       } catch (e) {
-        print('⚠️ Secure storage failed: $e');
+        debugPrint('⚠️ Secure storage failed: $e');
         _useSecureStorage = false;
       }
     }
@@ -69,13 +70,13 @@ class SecureStorage {
           return;
         }
       } catch (e) {
-        print('⚠️ SharedPreferences failed: $e');
+        debugPrint('⚠️ SharedPreferences failed: $e');
         _useSharedPreferences = false;
       }
     }
     
     // Niveau 3 : Mémoire (fallback ultime - ne persiste pas)
-    print('ℹ️ Using in-memory storage (non-persistent)');
+    debugPrint('ℹ️ Using in-memory storage (non-persistent)');
     _memoryStorage[key] = value;
   }
 
@@ -86,7 +87,7 @@ class SecureStorage {
       try {
         return await _storage.read(key: key);
       } catch (e) {
-        print('⚠️ Secure storage failed: $e');
+        debugPrint('⚠️ Secure storage failed: $e');
         _useSecureStorage = false;
       }
     }
@@ -99,7 +100,7 @@ class SecureStorage {
           return _prefs!.getString(key);
         }
       } catch (e) {
-        print('⚠️ SharedPreferences failed: $e');
+        debugPrint('⚠️ SharedPreferences failed: $e');
         _useSharedPreferences = false;
       }
     }
@@ -116,7 +117,7 @@ class SecureStorage {
         await _storage.delete(key: key);
         return;
       } catch (e) {
-        print('⚠️ Secure storage failed: $e');
+        debugPrint('⚠️ Secure storage failed: $e');
         _useSecureStorage = false;
       }
     }
@@ -130,7 +131,7 @@ class SecureStorage {
           return;
         }
       } catch (e) {
-        print('⚠️ SharedPreferences failed: $e');
+        debugPrint('⚠️ SharedPreferences failed: $e');
         _useSharedPreferences = false;
       }
     }
@@ -179,7 +180,7 @@ class SecureStorage {
       final userMap = jsonDecode(userJson) as Map<String, dynamic>;
       return User.fromJson(userMap);
     } catch (e) {
-      print('❌ Error reading user from storage: $e');
+      debugPrint('❌ Error reading user from storage: $e');
       return null;
     }
   }
@@ -211,7 +212,7 @@ class SecureStorage {
       try {
         await _storage.deleteAll();
       } catch (e) {
-        print('⚠️ Secure storage failed: $e');
+        debugPrint('⚠️ Secure storage failed: $e');
         _useSecureStorage = false;
       }
     }
@@ -222,7 +223,7 @@ class SecureStorage {
         await _initPrefs();
         await _prefs?.clear();
       } catch (e) {
-        print('⚠️ SharedPreferences failed: $e');
+        debugPrint('⚠️ SharedPreferences failed: $e');
         _useSharedPreferences = false;
       }
     }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 import '../models/user.dart';
@@ -78,7 +79,7 @@ class AuthService {
       await _apiService.post(ApiConfig.logout);
     } catch (e) {
       // Continuer même en cas d'erreur API
-      print('⚠️ Logout API error (non-blocking): $e');
+      debugPrint('⚠️ Logout API error (non-blocking): $e');
     } finally {
       // Supprimer les données locales
       await _secureStorage.clearAuth();
@@ -185,7 +186,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
-      print('❌ Error initializing auth: $e');
+      debugPrint('❌ Error initializing auth: $e');
       return null;
     }
   }

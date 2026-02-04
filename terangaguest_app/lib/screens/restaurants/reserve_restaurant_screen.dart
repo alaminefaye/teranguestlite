@@ -1,0 +1,630 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../models/restaurant.dart';
+import '../../providers/restaurants_provider.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
+import '../../widgets/animated_button.dart';
+import 'my_reservations_screen.dart';
+
+class ReserveRestaurantScreen extends StatefulWidget {
+  final Restaurant restaurant;
+
+  const ReserveRestaurantScreen({
+    super.key,
+    required this.restaurant,
+  });
+
+  @override
+  State<ReserveRestaurantScreen> createState() => _ReserveRestaurantScreenState();
+}
+
+class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
+  DateTime? _selectedDate;
+  String? _selectedTime;
+  int _guests = 2;
+  final TextEditingController _specialRequestsController = TextEditingController();
+
+  final List<String> _availableTimes = [
+    '12:00', '12:30', '13:00', '13:30', '14:00',
+    '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00',
+  ];
+
+  @override
+  void dispose() {
+    _specialRequestsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Sélection date
+                      _buildDateSelector(),
+
+                      const SizedBox(height: 24),
+
+                      // Sélection heure
+                      _buildTimeSelector(),
+
+                      const SizedBox(height: 24),
+
+                      // Nombre de personnes
+                      _buildGuestsSelector(),
+
+                      const SizedBox(height: 24),
+
+                      // Demandes spéciales
+                      _buildSpecialRequests(),
+
+                      const SizedBox(height: 30),
+
+                      // Résumé
+                      _buildSummary(),
+
+                      const SizedBox(height: 30),
+
+                      // Bouton confirmer
+                      _buildConfirmButton(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+            onPressed: () {
+              HapticHelper.lightImpact();
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context).bookTable,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.restaurant.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Date',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () async {
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate ?? DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 90)),
+                builder: (context, child) {
+                  return Theme(
+                    data: ThemeData.dark().copyWith(
+                      colorScheme: const ColorScheme.dark(
+                        primary: AppTheme.accentGold,
+                        onPrimary: AppTheme.primaryDark,
+                        surface: AppTheme.primaryBlue,
+                        onSurface: Colors.white,
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+              if (picked != null) {
+                setState(() {
+                  _selectedDate = picked;
+                });
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _selectedDate != null
+                        ? DateFormat('dd MMMM yyyy', 'fr_FR').format(_selectedDate!)
+                        : AppLocalizations.of(context).selectDate,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: _selectedDate != null ? Colors.white : AppTheme.textGray,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.calendar_today,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Heure',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _availableTimes.map((time) {
+              final isSelected = _selectedTime == time;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedTime = time;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? LinearGradient(
+                            colors: [AppTheme.accentGold, AppTheme.accentGold.withValues(alpha: 0.8)],
+                          )
+                        : null,
+                    color: isSelected ? null : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestsSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).numberOfGuests,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _guests > 1
+                    ? () {
+                        setState(() {
+                          _guests--;
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.remove_circle_outline),
+                color: AppTheme.accentGold,
+                iconSize: 32,
+              ),
+              const SizedBox(width: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentGold.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.accentGold),
+                ),
+                child: Text(
+                  '$_guests',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentGold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              IconButton(
+                onPressed: _guests < 20
+                    ? () {
+                        setState(() {
+                          _guests++;
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.add_circle_outline),
+                color: AppTheme.accentGold,
+                iconSize: 32,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpecialRequests() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Demandes spéciales (optionnel)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _specialRequestsController,
+            style: const TextStyle(color: Colors.white),
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).restaurantHintExample,
+              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              filled: true,
+              fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.accentGold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummary() {
+    final canReserve = _selectedDate != null && _selectedTime != null;
+
+    if (!canReserve) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.accentGold.withValues(alpha: 0.2), AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).summary,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const Divider(height: 24, color: AppTheme.textGray),
+          _buildSummaryRow(AppLocalizations.of(context).restaurant, widget.restaurant.name),
+          const SizedBox(height: 12),
+          _buildSummaryRow(
+            AppLocalizations.of(context).date,
+            DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(_selectedDate!),
+          ),
+          const SizedBox(height: 12),
+          _buildSummaryRow(AppLocalizations.of(context).time, _selectedTime!),
+          const SizedBox(height: 12),
+          _buildSummaryRow(AppLocalizations.of(context).guests, AppLocalizations.of(context).guestsCount(_guests)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppTheme.textGray,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.right,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    final canReserve = _selectedDate != null && _selectedTime != null;
+
+    return AnimatedButton(
+      text: AppLocalizations.of(context).confirmReservation,
+      onPressed: canReserve ? _handleConfirmReservation : null,
+      width: double.infinity,
+      height: 56,
+      backgroundColor: AppTheme.accentGold,
+      textColor: AppTheme.primaryDark,
+    );
+  }
+
+  Future<void> _handleConfirmReservation() async {
+    if (_selectedDate == null || _selectedTime == null) return;
+
+    try {
+      // Afficher loader
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
+        ),
+      );
+
+      // Appeler l'API
+      await context.read<RestaurantsProvider>().reserveTable(
+            restaurantId: widget.restaurant.id,
+            date: _selectedDate!,
+            time: _selectedTime!,
+            guests: _guests,
+            specialRequests: _specialRequestsController.text.isEmpty
+                ? null
+                : _specialRequestsController.text,
+          );
+
+      // Fermer le loader
+      if (mounted) Navigator.pop(context);
+
+      // Afficher succès
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppTheme.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: AppTheme.accentGold, width: 2),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 32),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Réservation confirmée !',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Votre table pour $_guests personne${_guests > 1 ? 's' : ''} est réservée.',
+                  style: const TextStyle(color: AppTheme.textGray),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.accentGold.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.accentGold.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.notifications_active, color: AppTheme.accentGold, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Vous recevrez une confirmation par notification.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textGray,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Fermer dialog
+                  Navigator.pop(context); // Retour écran précédent
+                  Navigator.pop(context); // Retour liste
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: AppTheme.textGray, fontWeight: FontWeight.w600),
+                ),
+              ),
+              AnimatedButton(
+                text: 'Mes Réservations',
+                icon: Icons.restaurant,
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  HapticHelper.lightImpact();
+                  context.navigateTo(const MyRestaurantReservationsScreen());
+                },
+                height: 44,
+                backgroundColor: AppTheme.accentGold,
+                textColor: AppTheme.primaryDark,
+                enableHaptic: false,
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Fermer le loader
+      if (mounted) Navigator.pop(context);
+
+      // Afficher erreur
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+}

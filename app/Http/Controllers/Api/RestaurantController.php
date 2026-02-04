@@ -88,9 +88,9 @@ class RestaurantController extends Controller
             'restaurant_id' => $id,
             'enterprise_id' => $request->user()->enterprise_id,
             'room_id' => $request->user()->room_number,
-            'date' => $request->date,
-            'time' => $request->time,
-            'guests' => $request->guests,
+            'reservation_date' => $request->date,
+            'reservation_time' => $request->time,
+            'number_of_guests' => $request->guests,
             'special_requests' => $request->special_requests,
             'status' => 'confirmed',
         ]);
@@ -101,9 +101,9 @@ class RestaurantController extends Controller
             'data' => [
                 'id' => $reservation->id,
                 'restaurant' => ['id' => $restaurant->id, 'name' => $restaurant->name],
-                'date' => $reservation->date,
-                'time' => $reservation->time,
-                'guests' => $reservation->guests,
+                'date' => $reservation->reservation_date->format('Y-m-d'),
+                'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                'guests' => $reservation->number_of_guests,
                 'status' => $reservation->status,
             ],
         ], 201);
@@ -122,14 +122,53 @@ class RestaurantController extends Controller
                 return [
                     'id' => $res->id,
                     'restaurant' => ['id' => $res->restaurant->id, 'name' => $res->restaurant->name],
-                    'date' => $res->date,
-                    'time' => $res->time,
-                    'guests' => $res->guests,
+                    'date' => $res->reservation_date->format('Y-m-d'),
+                    'time' => \Carbon\Carbon::parse($res->reservation_time)->format('H:i'),
+                    'guests' => $res->number_of_guests,
                     'status' => $res->status,
                     'created_at' => $res->created_at->toISOString(),
                 ];
             }),
             'meta' => ['current_page' => $reservations->currentPage(), 'total' => $reservations->total()],
+        ], 200);
+    }
+
+    /**
+     * Annuler une réservation (si > 24h avant la date/heure)
+     */
+    public function cancelReservation(Request $request, $id)
+    {
+        $reservation = RestaurantReservation::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json(['success' => false, 'message' => 'Réservation non trouvée'], 404);
+        }
+
+        if ($reservation->status === 'cancelled') {
+            return response()->json(['success' => false, 'message' => 'Réservation déjà annulée'], 400);
+        }
+
+        $reservationDateTime = \Carbon\Carbon::parse(
+            $reservation->reservation_date->format('Y-m-d') . ' ' . $reservation->reservation_time
+        );
+        if ($reservationDateTime->lte(now()->addHours(24))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'L\'annulation n\'est possible que plus de 24h avant la réservation',
+            ], 400);
+        }
+
+        $reservation->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation annulée',
+            'data' => ['id' => $reservation->id, 'status' => $reservation->status],
         ], 200);
     }
 }

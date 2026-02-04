@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/quantity_selector.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/animated_button.dart';
+import '../../utils/haptic_helper.dart';
+import '../../utils/navigation_helper.dart';
 import 'order_confirmation_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -27,15 +33,19 @@ class _CartScreenState extends State<CartScreen> {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
     if (cartProvider.isEmpty) {
+      HapticHelper.error();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Votre panier est vide'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).emptyCart),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
+    // Feedback confirmation checkout
+    HapticHelper.confirm();
+    
     setState(() {
       _isProcessing = true;
     });
@@ -51,21 +61,25 @@ class _CartScreenState extends State<CartScreen> {
         _isProcessing = false;
       });
 
-      if (!mounted) return;
+      if (!context.mounted) return;
 
-      // Naviguer vers l'écran de confirmation
-      Navigator.pushReplacement(
+      // Feedback succès
+      HapticHelper.success();
+
+      // Naviguer vers l'écran de confirmation avec animation
+      NavigationHelper.replaceWith(
         context,
-        MaterialPageRoute(
-          builder: (context) => OrderConfirmationScreen(orderData: result),
-        ),
+        OrderConfirmationScreen(orderData: result),
       );
     } catch (e) {
       setState(() {
         _isProcessing = false;
       });
 
-      if (!mounted) return;
+      if (!context.mounted) return;
+
+      // Feedback erreur
+      HapticHelper.error();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -99,7 +113,7 @@ class _CartScreenState extends State<CartScreen> {
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) {
                     if (cart.isEmpty) {
-                      return _buildEmptyCart();
+                      return _buildEmptyCart(context);
                     }
                     return _buildCartItems(cart);
                   },
@@ -133,22 +147,23 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(width: 12),
 
           // Titre
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Mon Panier',
-                  style: TextStyle(
+                  AppLocalizations.of(context).myCart,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Vérifiez votre commande',
-                  style: TextStyle(
+                  AppLocalizations.of(context).verifyOrder,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
                   ),
@@ -174,56 +189,19 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildEmptyCart() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.shopping_cart_outlined,
-            size: 100,
-            color: AppTheme.textGray.withOpacity(0.5),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Votre panier est vide',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Ajoutez des articles pour commander',
-            style: TextStyle(
-              fontSize: 15,
-              color: AppTheme.textGray,
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentGold,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 14,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Parcourir le menu',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryDark,
-              ),
-            ),
-          ),
-        ],
+  Widget _buildEmptyCart(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return EmptyStateWidget(
+      icon: Icons.shopping_cart_outlined,
+      title: l10n.emptyCart,
+      subtitle: l10n.emptyCartHint,
+      iconSize: 100,
+      iconColor: AppTheme.textGray.withValues(alpha: 0.5),
+      action: AnimatedButton(
+        text: l10n.browseMenu,
+        onPressed: () => Navigator.pop(context),
+        backgroundColor: AppTheme.accentGold,
+        textColor: AppTheme.primaryDark,
       ),
     );
   }
@@ -238,9 +216,9 @@ class _CartScreenState extends State<CartScreen> {
         const SizedBox(height: 24),
 
         // Instructions spéciales
-        const Text(
-          'Instructions spéciales',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).specialInstructions,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -252,22 +230,22 @@ class _CartScreenState extends State<CartScreen> {
           maxLines: 3,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: 'Allergies, préférences, consignes de livraison...',
+            hintText: AppLocalizations.of(context).specialInstructionsHint,
             hintStyle: TextStyle(
-              color: AppTheme.textGray.withOpacity(0.6),
+              color: AppTheme.textGray.withValues(alpha: 0.6),
             ),
             filled: true,
-            fillColor: AppTheme.primaryBlue.withOpacity(0.5),
+            fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppTheme.accentGold.withOpacity(0.3),
+                color: AppTheme.accentGold.withValues(alpha: 0.3),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: AppTheme.accentGold.withOpacity(0.3),
+                color: AppTheme.accentGold.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -294,13 +272,13 @@ class _CartScreenState extends State<CartScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primaryBlue.withOpacity(0.6),
-            AppTheme.primaryDark.withOpacity(0.8),
+            AppTheme.primaryBlue.withValues(alpha: 0.6),
+            AppTheme.primaryDark.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.accentGold.withOpacity(0.3),
+          color: AppTheme.accentGold.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -313,14 +291,13 @@ class _CartScreenState extends State<CartScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: cartItem.menuItem.image != null
-                    ? Image.network(
-                        cartItem.menuItem.image!,
+                    ? CachedNetworkImage(
+                        imageUrl: cartItem.menuItem.image!,
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildItemPlaceholder();
-                        },
+                        placeholder: (context, url) => _buildItemPlaceholder(),
+                        errorWidget: (context, url, error) => _buildItemPlaceholder(),
                       )
                     : _buildItemPlaceholder(),
               ),
@@ -353,6 +330,7 @@ class _CartScreenState extends State<CartScreen> {
                             size: 20,
                           ),
                           onPressed: () {
+                            HapticHelper.mediumImpact();
                             cart.removeItem(cartItem.menuItem.id);
                           },
                         ),
@@ -374,9 +352,11 @@ class _CartScreenState extends State<CartScreen> {
                         QuantitySelector(
                           quantity: cartItem.quantity,
                           onIncrement: () {
+                            HapticHelper.lightImpact();
                             cart.incrementQuantity(cartItem.menuItem.id);
                           },
                           onDecrement: () {
+                            HapticHelper.lightImpact();
                             cart.decrementQuantity(cartItem.menuItem.id);
                           },
                         ),
@@ -403,10 +383,10 @@ class _CartScreenState extends State<CartScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.primaryBlue.withOpacity(0.3),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppTheme.accentGold.withOpacity(0.2),
+                  color: AppTheme.accentGold.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
@@ -465,13 +445,13 @@ class _CartScreenState extends State<CartScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.primaryDark.withOpacity(0.95),
+            AppTheme.primaryDark.withValues(alpha: 0.95),
             AppTheme.primaryDark,
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -517,49 +497,13 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(height: 16),
 
           // Bouton Commander
-          SizedBox(
+          AnimatedButton(
+            text: AppLocalizations.of(context).placeOrder,
+            icon: Icons.check_circle,
+            onPressed: _isProcessing ? null : () => _checkout(context),
+            isLoading: _isProcessing,
             width: double.infinity,
             height: 56,
-            child: ElevatedButton(
-              onPressed: _isProcessing ? null : () => _checkout(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentGold,
-                disabledBackgroundColor: AppTheme.textGray.withOpacity(0.3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
-              child: _isProcessing
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.primaryDark,
-                        ),
-                      ),
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: AppTheme.primaryDark,
-                        ),
-                        SizedBox(width: 12),
-                        Text(
-                          'Commander',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryDark,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
           ),
         ],
       ),
@@ -578,34 +522,32 @@ class _CartScreenState extends State<CartScreen> {
             width: 1,
           ),
         ),
-        title: const Text(
-          'Vider le panier',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          AppLocalizations.of(context).clear,
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Êtes-vous sûr de vouloir vider votre panier ?',
-          style: TextStyle(color: AppTheme.textGray),
+        content: Text(
+          AppLocalizations.of(context).clearCartConfirm,
+          style: const TextStyle(color: AppTheme.textGray),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Annuler',
-              style: TextStyle(color: AppTheme.textGray),
+            child: Text(
+              AppLocalizations.of(context).cancel,
+              style: const TextStyle(color: AppTheme.textGray),
             ),
           ),
-          ElevatedButton(
+          AnimatedButton(
+            text: AppLocalizations.of(context).clear,
             onPressed: () {
+              HapticHelper.heavyImpact();
               cart.clear();
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text(
-              'Vider',
-              style: TextStyle(color: Colors.white),
-            ),
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            enableHaptic: false,
           ),
         ],
       ),

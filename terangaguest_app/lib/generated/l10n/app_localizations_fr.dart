@@ -1,0 +1,848 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for French (`fr`).
+class AppLocalizationsFr extends AppLocalizations {
+  AppLocalizationsFr([String locale = 'fr']) : super(locale);
+
+  @override
+  String get appTitle => 'Teranga Guest';
+
+  @override
+  String get login => 'Connexion';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Mot de passe';
+
+  @override
+  String get rememberMe => 'Se souvenir de moi';
+
+  @override
+  String get loginButton => 'Se connecter';
+
+  @override
+  String get loginError => 'Erreur de connexion';
+
+  @override
+  String get emailRequired => 'Veuillez entrer votre email';
+
+  @override
+  String get emailInvalid => 'Email invalide';
+
+  @override
+  String get passwordRequired => 'Veuillez entrer votre mot de passe';
+
+  @override
+  String get passwordTooShort => 'Mot de passe trop court (min. 6 caractères)';
+
+  @override
+  String get myProfile => 'Mon Profil';
+
+  @override
+  String get myHistories => 'Mes Historiques';
+
+  @override
+  String get myFavorites => 'Mes Favoris';
+
+  @override
+  String get myOrders => 'Mes Commandes';
+
+  @override
+  String get myRestaurantReservations => 'Mes Réservations Restaurant';
+
+  @override
+  String get mySpaReservations => 'Mes Réservations Spa';
+
+  @override
+  String get myExcursions => 'Mes Excursions';
+
+  @override
+  String get myLaundryRequests => 'Mes Demandes Blanchisserie';
+
+  @override
+  String get myPalaceRequests => 'Mes Demandes Palace';
+
+  @override
+  String get settings => 'Paramètres';
+
+  @override
+  String get changePassword => 'Changer le mot de passe';
+
+  @override
+  String get about => 'À propos';
+
+  @override
+  String get contactSupport => 'Contacter le support';
+
+  @override
+  String get logout => 'Déconnexion';
+
+  @override
+  String get logoutConfirm => 'Êtes-vous sûr de vouloir vous déconnecter ?';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get preferences => 'Préférences';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get notificationsOn => 'Notifications activées';
+
+  @override
+  String get notificationsOff => 'Notifications désactivées';
+
+  @override
+  String get application => 'Application';
+
+  @override
+  String get language => 'Langue';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get welcomeTitle => 'Bienvenue au King Fahd Palace Hotel';
+
+  @override
+  String get welcomeSubtitle => 'Votre assistant digital est à votre service';
+
+  @override
+  String get roomService => 'Service en chambre';
+
+  @override
+  String get restaurantsBars => 'Restaurants et Bars';
+
+  @override
+  String get spaWellness => 'Spa et Bien-être';
+
+  @override
+  String get palaceServices => 'Services du Palais';
+
+  @override
+  String get excursions => 'Excursions';
+
+  @override
+  String get laundry => 'Blanchisserie';
+
+  @override
+  String get concierge => 'Conciergerie';
+
+  @override
+  String get callCenter => 'Centre d\'Appels';
+
+  @override
+  String get back => 'Retour';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String get errorHint => 'Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get noFavorites => 'Aucun favori';
+
+  @override
+  String get noFavoritesHint =>
+      'Ajoutez des articles, restaurants, soins ou excursions en favoris depuis leurs fiches.';
+
+  @override
+  String get contactSupportTitle => 'Contacter le support';
+
+  @override
+  String get chooseContact => 'Choisissez un moyen de contact :';
+
+  @override
+  String get aboutDescription =>
+      'Application d\'accueil et de services pour les clients du King Fahd Palace Hotel.';
+
+  @override
+  String get hotelName => 'KING FAHD PALACE HOTEL';
+
+  @override
+  String get noUser => 'Aucun utilisateur connecté';
+
+  @override
+  String get addToCart => 'Ajouter au panier';
+
+  @override
+  String get viewCart => 'Voir le panier';
+
+  @override
+  String get cart => 'Panier';
+
+  @override
+  String get emptyCart => 'Votre panier est vide';
+
+  @override
+  String get emptyCartHint => 'Ajoutez des articles pour commander.';
+
+  @override
+  String get browseMenu => 'Parcourir le menu';
+
+  @override
+  String get clearCartConfirm =>
+      'Êtes-vous sûr de vouloir vider votre panier ?';
+
+  @override
+  String get clear => 'Vider';
+
+  @override
+  String get orderSuccess => 'Commande enregistrée';
+
+  @override
+  String get orderSuccessHint =>
+      'Vous pouvez suivre votre commande dans Mes Commandes.';
+
+  @override
+  String get home => 'Accueil';
+
+  @override
+  String get myBookings => 'Mes réservations';
+
+  @override
+  String get excursionNotFound => 'Excursion introuvable';
+
+  @override
+  String get excursionNotFoundHint =>
+      'Cette excursion n\'existe pas ou n\'est plus disponible.';
+
+  @override
+  String get serviceNotFound => 'Service introuvable';
+
+  @override
+  String get serviceNotFoundHint =>
+      'Ce service n\'existe pas ou n\'est plus disponible.';
+
+  @override
+  String get restaurantNotFound => 'Restaurant introuvable';
+
+  @override
+  String get restaurantNotFoundHint =>
+      'Ce restaurant n\'existe pas ou n\'est plus disponible.';
+
+  @override
+  String get orderNotFound => 'Commande introuvable';
+
+  @override
+  String get orderNotFoundHint =>
+      'Cette commande n\'existe pas ou a été supprimée.';
+
+  @override
+  String get noLaundryService => 'Aucun service blanchisserie disponible';
+
+  @override
+  String get noLaundryServiceHint =>
+      'Les services de nettoyage seront listés ici.';
+
+  @override
+  String get noSpaService => 'Aucun service spa disponible';
+
+  @override
+  String get noSpaServiceInCategory => 'Aucun service dans cette catégorie';
+
+  @override
+  String get noSpaServiceHint => 'Les soins et massages seront proposés ici.';
+
+  @override
+  String get noPalaceService => 'Aucun service Palace disponible';
+
+  @override
+  String get noPalaceServiceHint => 'Les services premium seront affichés ici.';
+
+  @override
+  String get noExcursionAvailable => 'Aucune excursion disponible';
+
+  @override
+  String get noExcursionAvailableHint =>
+      'Les activités et sorties seront proposées ici.';
+
+  @override
+  String get noOrder => 'Aucune commande';
+
+  @override
+  String noOrderForStatus(String status) {
+    return 'Aucune commande $status';
+  }
+
+  @override
+  String get noOrderSubtitle => 'Vos commandes room service apparaîtront ici.';
+
+  @override
+  String get orderStatusPending => 'en attente';
+
+  @override
+  String get orderStatusConfirmed => 'confirmée';
+
+  @override
+  String get orderStatusPreparing => 'en préparation';
+
+  @override
+  String get orderStatusDelivering => 'en livraison';
+
+  @override
+  String get orderStatusDelivered => 'livrée';
+
+  @override
+  String get noRestaurantAvailable => 'Aucun restaurant disponible';
+
+  @override
+  String noRestaurantForType(String type) {
+    return 'Aucun $type disponible';
+  }
+
+  @override
+  String get noRestaurantSubtitle =>
+      'Les restaurants et bars seront listés ici.';
+
+  @override
+  String get typeRestaurant => 'restaurant';
+
+  @override
+  String get typeBar => 'bar';
+
+  @override
+  String get typeCafe => 'café';
+
+  @override
+  String get typeLounge => 'lounge';
+
+  @override
+  String get noItemAvailable => 'Aucun article disponible';
+
+  @override
+  String get noSearchResult => 'Aucun résultat trouvé';
+
+  @override
+  String get noItemSubtitle =>
+      'Les articles de cette catégorie seront listés ici.';
+
+  @override
+  String get tryAnotherSearch => 'Essayez un autre terme de recherche.';
+
+  @override
+  String get noCategoryAvailable => 'Aucune catégorie disponible';
+
+  @override
+  String get noCategoryHint => 'Le menu room service sera disponible ici.';
+
+  @override
+  String get noPalaceRequest => 'Aucune demande Palace';
+
+  @override
+  String get noPalaceRequestHint =>
+      'Envoyez une demande depuis les services Palace.';
+
+  @override
+  String get noLaundryRequest => 'Aucune demande blanchisserie';
+
+  @override
+  String get noLaundryRequestHint =>
+      'Passez une demande depuis le service Blanchisserie.';
+
+  @override
+  String get noExcursionBooked => 'Aucune excursion réservée';
+
+  @override
+  String get noExcursionBookedHint =>
+      'Réservez une excursion depuis la liste des activités.';
+
+  @override
+  String get noSpaReservation => 'Aucune réservation spa';
+
+  @override
+  String get noSpaReservationHint =>
+      'Réservez un soin depuis la liste des services spa.';
+
+  @override
+  String get noRestaurantReservation => 'Aucune réservation restaurant';
+
+  @override
+  String get noRestaurantReservationHint =>
+      'Réservez une table depuis la liste des restaurants.';
+
+  @override
+  String get itemNotFound => 'Article introuvable';
+
+  @override
+  String get filterAll => 'Toutes';
+
+  @override
+  String get filterPending => 'En attente';
+
+  @override
+  String get filterConfirmed => 'Confirmées';
+
+  @override
+  String get filterPreparing => 'En préparation';
+
+  @override
+  String get filterDelivering => 'En livraison';
+
+  @override
+  String get filterDelivered => 'Livrées';
+
+  @override
+  String get filterAllTypes => 'Tous';
+
+  @override
+  String get filterRestaurants => 'Restaurants';
+
+  @override
+  String get filterBars => 'Bars';
+
+  @override
+  String get filterCafes => 'Cafés';
+
+  @override
+  String get filterLounges => 'Lounges';
+
+  @override
+  String get ordersHistorySubtitle => 'Historique et suivi';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get spanish => 'Español';
+
+  @override
+  String get discoverRestaurants => 'Découvrez nos établissements';
+
+  @override
+  String get reservationsConfirmed => 'Réservations confirmées';
+
+  @override
+  String get myRequests => 'Mes Demandes';
+
+  @override
+  String requestNumber(int id) {
+    return 'Demande #$id';
+  }
+
+  @override
+  String get palaceServicesSubtitle => 'Services premium et conciergerie';
+
+  @override
+  String get spaWellnessSubtitle => 'Bien-être & Détente';
+
+  @override
+  String get myReservations => 'Mes Réservations';
+
+  @override
+  String get discoverRegion => 'Découvrez notre région';
+
+  @override
+  String get spaSubtitle => 'Détente et relaxation';
+
+  @override
+  String get chooseCategory => 'Choisissez une catégorie';
+
+  @override
+  String get orderDetailTitle => 'Détail Commande';
+
+  @override
+  String get orderTrackingSubtitle => 'Suivi de votre commande';
+
+  @override
+  String adultPrice(String price) {
+    return 'Adulte: $price';
+  }
+
+  @override
+  String childPrice(String price) {
+    return 'Enfant: $price';
+  }
+
+  @override
+  String get book => 'Réserver';
+
+  @override
+  String get unavailable => 'Indisponible';
+
+  @override
+  String get spaServiceDefaultName => 'Service Spa';
+
+  @override
+  String capacityPeople(int count) {
+    return 'Capacité : $count personnes';
+  }
+
+  @override
+  String get openingHours => 'Horaires d\'ouverture';
+
+  @override
+  String get bookTable => 'Réserver une table';
+
+  @override
+  String get closed => 'Fermé';
+
+  @override
+  String get search => 'Rechercher...';
+
+  @override
+  String get reviewOrder => 'Vérifiez votre commande';
+
+  @override
+  String get specialInstructions => 'Instructions spéciales';
+
+  @override
+  String get specialInstructionsHint =>
+      'Allergies, préférences, consignes de livraison...';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get specialInstructionsExample => 'Ex: Sans oignons, bien cuit...';
+
+  @override
+  String get viewCartCaps => 'VOIR PANIER';
+
+  @override
+  String get passwordChangedSuccess => 'Mot de passe modifié avec succès';
+
+  @override
+  String get currentPassword => 'Mot de passe actuel';
+
+  @override
+  String get newPassword => 'Nouveau mot de passe';
+
+  @override
+  String get confirmPassword => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get fieldRequired => 'Champ requis';
+
+  @override
+  String get minChars => 'Minimum 8 caractères';
+
+  @override
+  String get needUpperCase => 'Doit contenir une majuscule';
+
+  @override
+  String get needDigit => 'Doit contenir un chiffre';
+
+  @override
+  String get passwordsDoNotMatch => 'Les mots de passe ne correspondent pas';
+
+  @override
+  String get passwordRulesHint =>
+      'Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.';
+
+  @override
+  String get requestDetails => 'Détails de votre demande';
+
+  @override
+  String get describeRequest => 'Décrivez votre demande en détail...';
+
+  @override
+  String get preferredTimeOptional => 'Heure souhaitée (optionnel)';
+
+  @override
+  String get selectDateAndTime => 'Sélectionner date et heure';
+
+  @override
+  String get sendRequest => 'Envoyer la demande';
+
+  @override
+  String get requestSent => 'Demande envoyée !';
+
+  @override
+  String get requestSentMessage =>
+      'Votre demande de service a été enregistrée.';
+
+  @override
+  String get confirmRequest => 'Confirmer la demande';
+
+  @override
+  String get selectedItems => 'Articles sélectionnés';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get specialInstructionsOptional =>
+      'Instructions spéciales (optionnel)';
+
+  @override
+  String get laundryInstructionsExample =>
+      'Ex: Lessive sans parfum, repassage doux...';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get selectDate => 'Sélectionner une date';
+
+  @override
+  String get participants => 'Participants';
+
+  @override
+  String get adults => 'Adultes';
+
+  @override
+  String get children => 'Enfants';
+
+  @override
+  String get specialRequestsOptional => 'Demandes spéciales (optionnel)';
+
+  @override
+  String get summary => 'Récapitulatif';
+
+  @override
+  String get confirmReservation => 'Confirmer la réservation';
+
+  @override
+  String get reservationConfirmed => 'Réservation confirmée !';
+
+  @override
+  String excursionConfirmedMessage(int count) {
+    return 'Votre excursion pour $count personne(s) est confirmée.';
+  }
+
+  @override
+  String get confirmationNotification =>
+      'Vous recevrez une confirmation par notification.';
+
+  @override
+  String get numberOfGuests => 'Nombre de personnes';
+
+  @override
+  String tableReservedMessage(int count) {
+    return 'Votre table pour $count personne(s) est réservée.';
+  }
+
+  @override
+  String get orderConfirmed => 'Commande confirmée !';
+
+  @override
+  String get itemsAddedToCart => 'Articles ajoutés au panier !';
+
+  @override
+  String get errorPrefix => 'Erreur : ';
+
+  @override
+  String get cannotOpenLink => 'Impossible d\'ouvrir le lien';
+
+  @override
+  String get included => 'Inclus :';
+
+  @override
+  String get orderTracking => 'Suivi de commande';
+
+  @override
+  String get orderItems => 'Articles commandés';
+
+  @override
+  String get quantity => 'Quantité :';
+
+  @override
+  String get reorder => 'Recommander';
+
+  @override
+  String get laundryRequestSentMessage =>
+      'Votre demande de blanchisserie a été enregistrée.';
+
+  @override
+  String get demand => 'Demander';
+
+  @override
+  String get reserve => 'Réserver';
+
+  @override
+  String get myExcursionsShort => 'Mes Excursions';
+
+  @override
+  String get categoryFacial => 'Soins Visage';
+
+  @override
+  String get categoryBody => 'Soins Corps';
+
+  @override
+  String get excursionsTitle => 'Excursions';
+
+  @override
+  String articleCount(int count) {
+    return '$count article(s)';
+  }
+
+  @override
+  String appNameVersion(String version, String v) {
+    return 'TerangaGuest $version $v';
+  }
+
+  @override
+  String orderLabel(int id) {
+    return 'Commande $id';
+  }
+
+  @override
+  String navigationTo(String name) {
+    return 'Navigation vers $name';
+  }
+
+  @override
+  String get open => 'Ouvert';
+
+  @override
+  String get itemsLabel => 'Articles';
+
+  @override
+  String get statusLabel => 'Statut';
+
+  @override
+  String get laundrySubtitle => 'Service de nettoyage';
+
+  @override
+  String get spaHintExample => 'Ex: Pression douce, huile de lavande...';
+
+  @override
+  String get restaurantHintExample =>
+      'Ex: Table près de la fenêtre, anniversaire...';
+
+  @override
+  String get allergiesPreferencesExample => 'Ex: Allergies, préférences...';
+
+  @override
+  String get orderConfirmedMessage =>
+      'Votre commande a été enregistrée avec succès';
+
+  @override
+  String get orderNumberLabel => 'N° de commande';
+
+  @override
+  String get statusPending => 'En attente';
+
+  @override
+  String get statusConfirmed => 'Confirmée';
+
+  @override
+  String get statusPreparing => 'En préparation';
+
+  @override
+  String get statusDelivering => 'En livraison';
+
+  @override
+  String get statusInProgress => 'En cours';
+
+  @override
+  String get statusCompleted => 'Terminée';
+
+  @override
+  String get statusCancelled => 'Annulée';
+
+  @override
+  String get statusPickedUp => 'Récupérée';
+
+  @override
+  String get statusProcessing => 'En cours';
+
+  @override
+  String get statusReady => 'Prête';
+
+  @override
+  String get statusDelivered => 'Livrée';
+
+  @override
+  String get myCart => 'Mon Panier';
+
+  @override
+  String get orderNotificationHint =>
+      'Vous recevrez une notification dès que votre commande sera confirmée par le restaurant.';
+
+  @override
+  String spaReservationConfirmedMessage(String name) {
+    return 'Votre réservation pour $name est confirmée.';
+  }
+
+  @override
+  String get excursion => 'Excursion';
+
+  @override
+  String get verifyOrder => 'Vérifiez votre commande';
+
+  @override
+  String get personsShort => 'pers.';
+
+  @override
+  String get amenities => 'Commodités';
+
+  @override
+  String get placeOrder => 'Commander';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String get time => 'Heure';
+
+  @override
+  String get guests => 'Personnes';
+
+  @override
+  String guestsCount(int count) {
+    return '$count personne(s)';
+  }
+
+  @override
+  String get dayMonday => 'Lundi';
+
+  @override
+  String get dayTuesday => 'Mardi';
+
+  @override
+  String get dayWednesday => 'Mercredi';
+
+  @override
+  String get dayThursday => 'Jeudi';
+
+  @override
+  String get dayFriday => 'Vendredi';
+
+  @override
+  String get daySaturday => 'Samedi';
+
+  @override
+  String get daySunday => 'Dimanche';
+
+  @override
+  String get service => 'Service';
+
+  @override
+  String get duration => 'Durée';
+
+  @override
+  String get reservationCancelledMessage => 'Réservation annulée.';
+
+  @override
+  String get cancelReservationConfirm => 'Annuler cette réservation ?';
+}

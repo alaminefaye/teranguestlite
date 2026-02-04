@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../models/menu_item.dart';
+import '../../models/favorite_item.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/favorites_provider.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../widgets/cart_badge.dart';
+import '../../widgets/animated_button.dart';
+import '../../utils/haptic_helper.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../utils/navigation_helper.dart';
 import 'cart_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
@@ -22,6 +29,14 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   int _quantity = 1;
   final TextEditingController _instructionsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FavoritesProvider>().load();
+    });
+  }
 
   @override
   void dispose() {
@@ -44,6 +59,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   void _addToCart(BuildContext context) {
+    HapticHelper.addToCart();
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
     cartProvider.addItem(
@@ -76,16 +92,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ),
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
-          label: 'VOIR PANIER',
+          label: AppLocalizations.of(context).viewCartCaps,
           textColor: Colors.white,
           onPressed: () {
-            // Naviguer vers le panier
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CartScreen(),
-              ),
-            );
+            context.navigateTo(const CartScreen());
           },
         ),
       ),
@@ -97,7 +107,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final priceLabel = '${widget.item.price.toStringAsFixed(0)} FCFA';
+    return Semantics(
+      label: '${AppLocalizations.of(context).description} ${widget.item.name}, $priceLabel',
+      child: Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -127,7 +140,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               left: 8,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryDark.withOpacity(0.8),
+                  color: AppTheme.primaryDark.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: AppTheme.accentGold,
@@ -141,26 +154,57 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
             ),
 
-            // Badge panier
+            // Favori + Badge panier
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               right: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryDark.withOpacity(0.8),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.accentGold,
-                    width: 1.5,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Consumer<FavoritesProvider>(
+                    builder: (context, fav, _) {
+                      final isFav = fav.isFavorite(FavoriteType.menuItem, widget.item.id);
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            color: isFav ? Colors.red : AppTheme.accentGold,
+                          ),
+                          onPressed: () {
+                            HapticHelper.lightImpact();
+                            fav.toggle(FavoriteItem(
+                              type: FavoriteType.menuItem,
+                              id: widget.item.id,
+                              name: widget.item.name,
+                              imageUrl: widget.item.image,
+                            ));
+                          },
+                        ),
+                      );
+                    },
                   ),
-                ),
-                child: const CartBadge(),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                    ),
+                    child: const CartBadge(),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
+    ),
     );
   }
 
@@ -170,16 +214,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
         background: widget.item.image != null
-            ? Image.network(
-                widget.item.image!,
+            ? CachedNetworkImage(
+                imageUrl: widget.item.image!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildImagePlaceholder();
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return _buildImagePlaceholder();
-                },
+                placeholder: (context, url) => _buildImagePlaceholder(),
+                errorWidget: (context, url, error) => _buildImagePlaceholder(),
               )
             : _buildImagePlaceholder(),
       ),
@@ -237,10 +276,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.accentGold.withOpacity(0.2),
+                    color: AppTheme.accentGold.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppTheme.accentGold.withOpacity(0.3),
+                      color: AppTheme.accentGold.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -286,9 +325,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
           // Description
           if (widget.item.description != null) ...[
-            const Text(
-              'Description',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).description,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -324,9 +363,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           const SizedBox(height: 24),
 
           // Instructions spéciales
-          const Text(
-            'Instructions spéciales',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).specialInstructions,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -338,22 +377,22 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             maxLines: 3,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Ex: Sans oignons, bien cuit...',
+              hintText: AppLocalizations.of(context).specialInstructionsExample,
               hintStyle: TextStyle(
-                color: AppTheme.textGray.withOpacity(0.6),
+                color: AppTheme.textGray.withValues(alpha: 0.6),
               ),
               filled: true,
-              fillColor: AppTheme.primaryBlue.withOpacity(0.5),
+              fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppTheme.accentGold.withOpacity(0.3),
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: AppTheme.accentGold.withOpacity(0.3),
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -384,54 +423,27 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.primaryDark.withOpacity(0.95),
+            AppTheme.primaryDark.withValues(alpha: 0.95),
             AppTheme.primaryDark,
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: SizedBox(
+      child: AnimatedButton(
+        text: widget.item.isAvailable ? AppLocalizations.of(context).addToCart : AppLocalizations.of(context).unavailable,
+        icon: Icons.add_shopping_cart,
+        onPressed: widget.item.isAvailable ? () => _addToCart(context) : null,
         width: double.infinity,
         height: 56,
-        child: ElevatedButton(
-          onPressed: widget.item.isAvailable
-              ? () => _addToCart(context)
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.accentGold,
-            disabledBackgroundColor: AppTheme.textGray.withOpacity(0.3),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.add_shopping_cart,
-                color: AppTheme.primaryDark,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                widget.item.isAvailable
-                    ? 'Ajouter au panier'
-                    : 'Indisponible',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryDark,
-                ),
-              ),
-            ],
-          ),
-        ),
+        backgroundColor: AppTheme.accentGold,
+        textColor: AppTheme.primaryDark,
+        enableHaptic: false, // _addToCart already calls HapticHelper.addToCart
       ),
     );
   }

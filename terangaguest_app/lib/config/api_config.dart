@@ -37,7 +37,7 @@ class ApiConfig {
   static const String myExcursionBookings = '/my-excursion-bookings';
   
   // Laundry
-  static const String laundryServices = '/laundry-services';
+  static const String laundryServices = '/laundry/services';
   static const String laundryRequest = '/laundry/request';
   static const String myLaundryRequests = '/my-laundry-requests';
   

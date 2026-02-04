@@ -16,5 +16,8 @@ class PalaceService extends Model
     public function enterprise() { return $this->belongsTo(Enterprise::class); }
     public function scopeAvailable($query) { return $query->where('status', 'available'); }
     public function scopePremium($query) { return $query->where('is_premium', true); }
+    public function scopeOrdered($query) { return $query->orderBy('display_order', 'asc')->orderBy('name', 'asc'); }
     public function getFormattedPriceAttribute() { return $this->price_on_request ? 'Sur demande' : number_format($this->price, 0, ',', ' ') . ' FCFA'; }
+    public function getCategoryLabelAttribute() { return match($this->category ?? '') { 'concierge' => 'Conciergerie', 'transport' => 'Transport', 'vip' => 'VIP', 'butler' => 'Butler', default => ucfirst((string) $this->category) }; }
+    public function getIsAvailableAttribute() { return $this->status === 'available'; }
 }

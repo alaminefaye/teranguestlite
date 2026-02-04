@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
 import '../auth/login_screen.dart';
 import 'change_password_screen.dart';
+import 'settings_screen.dart';
+import '../../widgets/animated_button.dart';
+import '../orders/orders_list_screen.dart';
+import '../restaurants/my_reservations_screen.dart';
+import '../spa/my_spa_reservations_screen.dart';
+import '../excursions/my_excursion_bookings_screen.dart';
+import '../laundry/my_laundry_requests_screen.dart';
+import '../palace/my_palace_requests_screen.dart';
+import '../favorites/my_favorites_screen.dart';
+
+/// Email et téléphone du support (modifiables par l'hôtel).
+const String _supportEmail = 'support@kingfahdpalace.com';
+const String _supportPhone = '+221338699000';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   Future<void> _handleLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -20,31 +39,28 @@ class ProfileScreen extends StatelessWidget {
             width: 1,
           ),
         ),
-        title: const Text(
-          'Déconnexion',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          l10n.logout,
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Êtes-vous sûr de vouloir vous déconnecter ?',
-          style: TextStyle(color: AppTheme.textGray),
+        content: Text(
+          l10n.logoutConfirm,
+          style: const TextStyle(color: AppTheme.textGray),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Annuler',
-              style: TextStyle(color: AppTheme.textGray),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
             ),
           ),
-          ElevatedButton(
+          AnimatedButton(
+            text: l10n.logout,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text(
-              'Déconnexion',
-              style: TextStyle(color: Colors.white),
-            ),
+            height: 44,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
           ),
         ],
       ),
@@ -55,10 +71,7 @@ class ProfileScreen extends StatelessWidget {
       await authProvider.logout();
 
       if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
+        NavigationHelper.navigateAndRemoveUntil(context, const LoginScreen());
       }
     }
   }
@@ -76,10 +89,10 @@ class ProfileScreen extends StatelessWidget {
               final user = authProvider.user;
 
               if (user == null) {
-                return const Center(
+                return Center(
                   child: Text(
-                    'Aucun utilisateur connecté',
-                    style: TextStyle(color: Colors.white),
+                    AppLocalizations.of(context).noUser,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 );
               }
@@ -101,6 +114,8 @@ class ProfileScreen extends StatelessWidget {
 
                   // Bouton déconnexion
                   _buildLogoutButton(context),
+                  const SizedBox(height: 24),
+                  _buildVersionFooter(),
                 ],
               );
             },
@@ -115,12 +130,15 @@ class ProfileScreen extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            HapticHelper.lightImpact();
+            Navigator.pop(context);
+          },
         ),
         const SizedBox(width: 12),
-        const Text(
-          'Mon Profil',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).myProfile,
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -138,8 +156,8 @@ class ProfileScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primaryBlue.withOpacity(0.6),
-            AppTheme.primaryDark.withOpacity(0.8),
+            AppTheme.primaryBlue.withValues(alpha: 0.6),
+            AppTheme.primaryDark.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -156,7 +174,7 @@ class ProfileScreen extends StatelessWidget {
             height: 100,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.accentGold.withOpacity(0.2),
+              color: AppTheme.accentGold.withValues(alpha: 0.2),
               border: Border.all(
                 color: AppTheme.accentGold,
                 width: 2,
@@ -244,34 +262,156 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildActions(BuildContext context) {
     return Column(
       children: [
-        // Changer mot de passe
+        // Section: Mes Historiques
+        Text(
+          AppLocalizations.of(context).myHistories,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.accentGold,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Mes Favoris
         _buildActionTile(
           context: context,
-          icon: Icons.lock_outline,
-          title: 'Changer le mot de passe',
+          icon: Icons.favorite_outline,
+          title: AppLocalizations.of(context).myFavorites,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ChangePasswordScreen(),
-              ),
-            );
+            HapticHelper.lightImpact();
+            context.navigateTo(const MyFavoritesScreen());
           },
         ),
         const SizedBox(height: 12),
 
-        // Paramètres (à venir)
+        // Mes Commandes
+        _buildActionTile(
+          context: context,
+          icon: Icons.receipt_long_outlined,
+          title: AppLocalizations.of(context).myOrders,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const OrdersListScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Réservations Restaurant
+        _buildActionTile(
+          context: context,
+          icon: Icons.restaurant_outlined,
+          title: AppLocalizations.of(context).myRestaurantReservations,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const MyRestaurantReservationsScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Réservations Spa
+        _buildActionTile(
+          context: context,
+          icon: Icons.spa_outlined,
+          title: AppLocalizations.of(context).mySpaReservations,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const MySpaReservationsScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Bookings Excursions
+        _buildActionTile(
+          context: context,
+          icon: Icons.landscape_outlined,
+          title: AppLocalizations.of(context).myExcursions,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const MyExcursionBookingsScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Demandes Blanchisserie
+        _buildActionTile(
+          context: context,
+          icon: Icons.local_laundry_service_outlined,
+          title: AppLocalizations.of(context).myLaundryRequests,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const MyLaundryRequestsScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Demandes Palace
+        _buildActionTile(
+          context: context,
+          icon: Icons.star_outline,
+          title: AppLocalizations.of(context).myPalaceRequests,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const MyPalaceRequestsScreen());
+          },
+        ),
+        const SizedBox(height: 24),
+
+        // Section: Paramètres
+        Text(
+          AppLocalizations.of(context).settings,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.accentGold,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Changer mot de passe
+        _buildActionTile(
+          context: context,
+          icon: Icons.lock_outline,
+          title: AppLocalizations.of(context).changePassword,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const ChangePasswordScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // À propos
+        _buildActionTile(
+          context: context,
+          icon: Icons.info_outline,
+          title: AppLocalizations.of(context).about,
+          onTap: () {
+            HapticHelper.lightImpact();
+            _showAboutDialog(context);
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Contacter le support
+        _buildActionTile(
+          context: context,
+          icon: Icons.support_agent_outlined,
+          title: AppLocalizations.of(context).contactSupport,
+          onTap: () {
+            HapticHelper.lightImpact();
+            _showContactSupportDialog(context);
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Paramètres
         _buildActionTile(
           context: context,
           icon: Icons.settings_outlined,
-          title: 'Paramètres',
+          title: AppLocalizations.of(context).settings,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Écran "Paramètres" à venir'),
-                backgroundColor: AppTheme.primaryBlue,
-              ),
-            );
+            HapticHelper.lightImpact();
+            context.navigateTo(const SettingsScreen());
           },
         ),
       ],
@@ -292,10 +432,10 @@ class ProfileScreen extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.5),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppTheme.accentGold.withOpacity(0.3),
+              color: AppTheme.accentGold.withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -324,36 +464,231 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
-    return SizedBox(
+    return AnimatedOutlineButton(
+      text: AppLocalizations.of(context).logout,
+      icon: Icons.logout,
+      onPressed: () => _handleLogout(context),
       width: double.infinity,
       height: 56,
-      child: OutlinedButton(
-        onPressed: () => _handleLogout(context),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(
-            color: Colors.red,
-            width: 2,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+      borderColor: Colors.red,
+      textColor: Colors.red,
+    );
+  }
+
+  Future<void> _launchUrl(Uri uri, BuildContext context) async {
+    final launched = await canLaunchUrl(uri)
+        ? await launchUrl(uri, mode: LaunchMode.externalApplication)
+        : false;
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).cannotOpenLink),
+          backgroundColor: AppTheme.primaryBlue,
         ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      );
+    }
+  }
+
+  void _showContactSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
+        ),
+        title: Row(
           children: [
-            Icon(Icons.logout, color: Colors.red),
-            SizedBox(width: 12),
+            const Icon(Icons.support_agent, color: AppTheme.accentGold),
+            const SizedBox(width: 12),
             Text(
-              'Déconnexion',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
+              AppLocalizations.of(context).contactSupportTitle,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              AppLocalizations.of(context).chooseContact,
+              style: TextStyle(color: AppTheme.textGray),
+            ),
+            const SizedBox(height: 20),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchUrl(Uri.parse('mailto:$_supportEmail'), context);
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.email_outlined, color: AppTheme.accentGold),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Email',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              _supportEmail,
+                              style: const TextStyle(
+                                color: AppTheme.textGray,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.open_in_new, size: 18, color: AppTheme.textGray),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchUrl(Uri.parse('tel:$_supportPhone'), context);
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.phone_outlined, color: AppTheme.accentGold),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Téléphone',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              _supportPhone,
+                              style: const TextStyle(
+                                color: AppTheme.textGray,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.open_in_new, size: 18, color: AppTheme.textGray),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context).close, style: const TextStyle(color: AppTheme.accentGold)),
+          ),
+        ],
       ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
+        ),
+        title: Text(
+          AppLocalizations.of(context).about,
+          style: const TextStyle(color: AppTheme.accentGold),
+        ),
+        content: FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            final l10n = AppLocalizations.of(context);
+            final version = snapshot.hasData
+                ? '${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+                : '—';
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'TerangaGuest',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${l10n.version} $version',
+                  style: const TextStyle(color: AppTheme.textGray),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.aboutDescription,
+                  style: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context).ok, style: const TextStyle(color: AppTheme.accentGold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVersionFooter() {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final l10n = AppLocalizations.of(context);
+        final version = snapshot.hasData
+            ? '${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+            : '2.0.10';
+        return Center(
+          child: Text(
+            l10n.appNameVersion(l10n.version, version),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppTheme.textGray.withValues(alpha: 0.7),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -23,8 +23,8 @@ class QuantitySelector extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.primaryBlue.withOpacity(0.6),
-            AppTheme.primaryDark.withOpacity(0.8),
+            AppTheme.primaryBlue.withValues(alpha: 0.6),
+            AppTheme.primaryDark.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(30),
@@ -84,7 +84,7 @@ class QuantitySelector extends StatelessWidget {
             icon,
             color: onPressed != null
                 ? AppTheme.accentGold
-                : AppTheme.textGray.withOpacity(0.5),
+                : AppTheme.textGray.withValues(alpha: 0.5),
             size: 24,
           ),
         ),

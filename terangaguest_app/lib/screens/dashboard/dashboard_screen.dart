@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
 import '../profile/profile_screen.dart';
+import '../orders/orders_list_screen.dart';
+import '../restaurants/restaurants_list_screen.dart';
+import '../spa/spa_services_list_screen.dart';
+import '../excursions/excursions_list_screen.dart';
+import '../laundry/laundry_list_screen.dart';
+import '../palace/palace_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -39,23 +48,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _handleServiceTap(BuildContext context, String route, String serviceName) {
+    // Feedback haptique au tap
+    HapticHelper.lightImpact();
+    
     switch (route) {
       case '/room-service':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CategoriesScreen()),
-        );
+        context.navigateTo(const CategoriesScreen());
         break;
       case '/cart':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CartScreen()),
-        );
+        context.navigateTo(const CartScreen());
+        break;
+      case '/orders':
+        context.navigateTo(const OrdersListScreen());
+        break;
+      case '/restaurants':
+        context.navigateTo(const RestaurantsListScreen());
+        break;
+      case '/spa':
+        context.navigateTo(const SpaServicesListScreen());
+        break;
+      case '/excursions':
+        context.navigateTo(const ExcursionsListScreen());
+        break;
+      case '/laundry':
+        context.navigateTo(const LaundryListScreen());
+        break;
+      case '/palace':
+        context.navigateTo(const PalaceListScreen());
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Navigation vers $serviceName'),
+            content: Text(AppLocalizations.of(context).navigationTo(serviceName)),
             backgroundColor: AppTheme.accentGold,
             duration: const Duration(seconds: 1),
           ),
@@ -167,12 +191,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Profil
                   IconButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileScreen(),
-                        ),
-                      );
+                      HapticHelper.lightImpact();
+                      context.navigateTo(const ProfileScreen());
                     },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -202,7 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 8),
               // Nom de l'hôtel
               Text(
-                'KING FAHD PALACE HOTEL',
+                AppLocalizations.of(context).hotelName,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 16,
@@ -235,12 +255,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildWelcomeSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 25.0, bottom: 15.0),
       child: Column(
         children: [
           Text(
-            'Bienvenue au King Fahd Palace Hotel',
+            l10n.welcomeTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontSize: 32,
@@ -251,7 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Votre assistant digital est à votre service',
+            l10n.welcomeSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppTheme.textGray,
@@ -265,48 +286,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildServicesGrid(BuildContext context) {
-    // 8 services selon la documentation MOBILE-APP-FONCTIONNALITES.md
+    final l10n = AppLocalizations.of(context);
     final services = [
-      {
-        'title': 'Room Service',
-        'icon': Icons.room_service_outlined,
-        'route': '/room-service',
-      },
-      {
-        'title': 'Restaurants & Bars',
-        'icon': Icons.restaurant_menu_outlined,
-        'route': '/restaurants',
-      },
-      {
-        'title': 'Spa & Bien-être',
-        'icon': Icons.spa_outlined,
-        'route': '/spa',
-      },
-      {
-        'title': 'Services Palace',
-        'icon': Icons.auto_awesome_outlined,
-        'route': '/palace',
-      },
-      {
-        'title': 'Excursions',
-        'icon': Icons.terrain_outlined,
-        'route': '/excursions',
-      },
-      {
-        'title': 'Blanchisserie',
-        'icon': Icons.local_laundry_service_outlined,
-        'route': '/laundry',
-      },
-      {
-        'title': 'Conciergerie',
-        'icon': Icons.headset_mic_outlined,
-        'route': '/concierge',
-      },
-      {
-        'title': 'Centre d\'Appels',
-        'icon': Icons.phone_outlined,
-        'route': 'tel:',
-      },
+      {'title': l10n.roomService, 'icon': Icons.room_service_outlined, 'route': '/room-service'},
+      {'title': l10n.restaurantsBars, 'icon': Icons.restaurant_menu_outlined, 'route': '/restaurants'},
+      {'title': l10n.spaWellness, 'icon': Icons.spa_outlined, 'route': '/spa'},
+      {'title': l10n.palaceServices, 'icon': Icons.auto_awesome_outlined, 'route': '/palace'},
+      {'title': l10n.excursions, 'icon': Icons.terrain_outlined, 'route': '/excursions'},
+      {'title': l10n.laundry, 'icon': Icons.local_laundry_service_outlined, 'route': '/laundry'},
+      {'title': l10n.concierge, 'icon': Icons.headset_mic_outlined, 'route': '/concierge'},
+      {'title': l10n.callCenter, 'icon': Icons.phone_outlined, 'route': 'tel:'},
     ];
 
     // Layout pour tablette: 4 colonnes x 2 rangées
@@ -370,7 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppTheme.accentGold.withOpacity(0.15),
+                          color: AppTheme.accentGold.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: AppTheme.accentGold,

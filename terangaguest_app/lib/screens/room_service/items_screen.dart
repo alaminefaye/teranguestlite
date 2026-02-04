@@ -5,6 +5,11 @@ import '../../models/menu_item.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/menu_item_card.dart';
 import '../../widgets/cart_badge.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
 import 'item_detail_screen.dart';
 
 class ItemsScreen extends StatefulWidget {
@@ -179,18 +184,18 @@ class _ItemsScreenState extends State<ItemsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.primaryBlue.withOpacity(0.5),
+          color: AppTheme.primaryBlue.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppTheme.accentGold.withOpacity(0.3),
+            color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         child: TextField(
           controller: _searchController,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: 'Rechercher...',
-            hintStyle: TextStyle(color: AppTheme.textGray.withOpacity(0.6)),
+            hintText: AppLocalizations.of(context).search,
+            hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
             prefixIcon: const Icon(Icons.search, color: AppTheme.accentGold),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -223,81 +228,23 @@ class _ItemsScreenState extends State<ItemsScreen> {
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: AppTheme.accentGold,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Erreur',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textGray,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadItems,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentGold,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text(
-                  'Réessayer',
-                  style: TextStyle(
-                    color: AppTheme.primaryDark,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      return ErrorStateWidget(
+        message: _errorMessage!,
+        hint: AppLocalizations.of(context).errorHint,
+        onRetry: _loadItems,
       );
     }
 
     if (_items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 64,
-              color: AppTheme.textGray,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isEmpty
-                  ? 'Aucun article disponible'
-                  : 'Aucun résultat trouvé',
-              style: const TextStyle(
-                fontSize: 18,
-                color: AppTheme.textGray,
-              ),
-            ),
-          ],
-        ),
+      final l10n = AppLocalizations.of(context);
+      return EmptyStateWidget(
+        icon: Icons.restaurant_outlined,
+        title: _searchQuery.isEmpty
+            ? l10n.noItemAvailable
+            : l10n.noSearchResult,
+        subtitle: _searchQuery.isEmpty
+            ? l10n.noItemSubtitle
+            : l10n.tryAnotherSearch,
       );
     }
 
@@ -311,34 +258,36 @@ class _ItemsScreenState extends State<ItemsScreen> {
           }
           return false;
         },
-        child: ListView.builder(
-          padding: const EdgeInsets.all(20),
-          itemCount: _items.length + (_hasMorePages ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == _items.length) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          child: GridView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, // 4 colonnes pour les articles
+              childAspectRatio: 0.75, // Format portrait
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: _items.length + (_hasMorePages ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == _items.length) {
+                return const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
                   ),
-                ),
-              );
-            }
-
-            final item = _items[index];
-            return MenuItemCard(
-              item: item,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ItemDetailScreen(item: item),
-                  ),
                 );
-              },
-            );
-          },
+              }
+
+              final item = _items[index];
+              return MenuItemCard(
+                item: item,
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  context.navigateTo(ItemDetailScreen(item: item));
+                },
+              );
+            },
+          ),
         ),
       ),
     );

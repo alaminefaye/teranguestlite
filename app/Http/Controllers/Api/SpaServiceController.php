@@ -118,9 +118,9 @@ class SpaServiceController extends Controller
             'user_id' => $request->user()->id,
             'spa_service_id' => $id,
             'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
-            'date' => $request->date,
-            'time' => $request->time,
+            'room_id' => null,
+            'reservation_date' => $request->date,
+            'reservation_time' => $request->time,
             'special_requests' => $request->special_requests,
             'price' => $service->price,
             'status' => 'confirmed',
@@ -144,9 +144,9 @@ class SpaServiceController extends Controller
                     'name' => $service->name,
                     'duration' => $service->duration,
                 ],
-                'date' => $reservation->date,
-                'time' => $reservation->time,
-                'price' => $reservation->price,
+                'date' => $reservation->reservation_date->format('Y-m-d'),
+                'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                'price' => (float) $reservation->price,
                 'formatted_price' => number_format($reservation->price, 0, '', ' ') . ' FCFA',
                 'status' => $reservation->status,
             ],
@@ -173,9 +173,9 @@ class SpaServiceController extends Controller
                         'name' => $res->spaService->name,
                         'duration' => $res->spaService->duration,
                     ],
-                    'date' => $res->date,
-                    'time' => $res->time,
-                    'price' => $res->price,
+                    'date' => $res->reservation_date->format('Y-m-d'),
+                    'time' => \Carbon\Carbon::parse($res->reservation_time)->format('H:i'),
+                    'price' => (float) $res->price,
                     'formatted_price' => number_format($res->price, 0, '', ' ') . ' FCFA',
                     'status' => $res->status,
                     'created_at' => $res->created_at->toISOString(),
@@ -185,6 +185,45 @@ class SpaServiceController extends Controller
                 'current_page' => $reservations->currentPage(),
                 'total' => $reservations->total(),
             ],
+        ], 200);
+    }
+
+    /**
+     * Annuler une réservation spa (si > 24h avant la date/heure)
+     */
+    public function cancelReservation(Request $request, $id)
+    {
+        $reservation = SpaReservation::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json(['success' => false, 'message' => 'Réservation non trouvée'], 404);
+        }
+
+        if ($reservation->status === 'cancelled') {
+            return response()->json(['success' => false, 'message' => 'Réservation déjà annulée'], 400);
+        }
+
+        $reservationDateTime = \Carbon\Carbon::parse(
+            $reservation->reservation_date->format('Y-m-d') . ' ' . $reservation->reservation_time
+        );
+        if ($reservationDateTime->lte(now()->addHours(24))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'L\'annulation n\'est possible que plus de 24h avant la réservation',
+            ], 400);
+        }
+
+        $reservation->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation annulée',
+            'data' => ['id' => $reservation->id, 'status' => $reservation->status],
         ], 200);
     }
 }

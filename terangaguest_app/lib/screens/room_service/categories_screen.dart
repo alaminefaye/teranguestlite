@@ -4,6 +4,11 @@ import '../../models/menu_category.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/category_card.dart';
 import '../../widgets/cart_badge.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
 import 'items_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -90,9 +95,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Room Service',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).roomService,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -100,7 +105,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Choisissez une catégorie',
+                  AppLocalizations.of(context).chooseCategory,
                   style: TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
@@ -127,108 +132,50 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: AppTheme.accentGold,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Erreur',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textGray,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadCategories,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentGold,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text(
-                  'Réessayer',
-                  style: TextStyle(
-                    color: AppTheme.primaryDark,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      return ErrorStateWidget(
+        message: _errorMessage!,
+        hint: AppLocalizations.of(context).errorHint,
+        onRetry: _loadCategories,
       );
     }
 
     if (_categories.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.restaurant_menu,
-              size: 64,
-              color: AppTheme.textGray,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Aucune catégorie disponible',
-              style: TextStyle(
-                fontSize: 18,
-                color: AppTheme.textGray,
-              ),
-            ),
-          ],
-        ),
+      final l10n = AppLocalizations.of(context);
+      return EmptyStateWidget(
+        icon: Icons.restaurant_menu_outlined,
+        title: l10n.noCategoryAvailable,
+        subtitle: l10n.noCategoryHint,
       );
     }
 
     return RefreshIndicator(
       color: AppTheme.accentGold,
       onRefresh: _loadCategories,
-      child: GridView.builder(
-        padding: const EdgeInsets.all(20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.85,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final category = _categories[index];
-          return CategoryCard(
-            category: category,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ItemsScreen(category: category),
-                ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 40.0),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, // 4 colonnes comme le dashboard
+              childAspectRatio: 1.0, // Format plus carré
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: _categories.length,
+            itemBuilder: (context, index) {
+              final category = _categories[index];
+              return CategoryCard(
+                category: category,
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  context.navigateTo(ItemsScreen(category: category));
+                },
               );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }

@@ -23,8 +23,16 @@ class MenuCategory {
       description: json['description'] as String?,
       image: json['image'] as String?,
       displayOrder: json['display_order'] as int? ?? 0,
-      itemsCount: json['items_count'] as int? ?? 0,
+      itemsCount: _parseInt(json['items_count']),
     );
+  }
+
+  // Helper pour parser un count qui peut être string ou int
+  static int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   // Convertir en JSON

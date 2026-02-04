@@ -1,0 +1,159 @@
+class Restaurant {
+  final int id;
+  final String name;
+  final String? description;
+  final String? type;
+  final String? cuisine;
+  final int? capacity;
+  final String? image;
+  final Map<String, String>? openingHours;
+  final bool isOpen;
+  final List<String>? amenities;
+
+  Restaurant({
+    required this.id,
+    required this.name,
+    this.description,
+    this.type,
+    this.cuisine,
+    this.capacity,
+    this.image,
+    this.openingHours,
+    required this.isOpen,
+    this.amenities,
+  });
+
+  factory Restaurant.fromJson(Map<String, dynamic> json) {
+    return Restaurant(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      type: json['type'] as String?,
+      cuisine: (json['cuisine_type'] ?? json['cuisine']) as String?,
+      capacity: _parseInt(json['capacity']),
+      image: json['image'] as String?,
+      openingHours: _parseOpeningHours(json['opening_hours']),
+      isOpen: json['is_open_now'] as bool? ?? json['is_open'] as bool? ?? false,
+      amenities: _parseAmenities(json['amenities']),
+    );
+  }
+
+  static Map<String, String>? _parseOpeningHours(dynamic raw) {
+    if (raw == null) return null;
+    final map = raw is Map ? raw as Map<String, dynamic> : null;
+    if (map == null) return null;
+    final Map<String, String> result = {};
+    for (final entry in map.entries) {
+      if (entry.value is String) {
+        result[entry.key] = entry.value as String;
+      } else if (entry.value is Map) {
+        final m = entry.value as Map<String, dynamic>;
+        final open = m['open'] as String? ?? '';
+        final close = m['close'] as String? ?? '';
+        result[entry.key] = '$open - $close';
+      }
+    }
+    return result.isEmpty ? null : result;
+  }
+
+  static List<String>? _parseAmenities(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is! List) return null;
+    return raw.map((e) => e is String ? e : e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'type': type,
+      'cuisine': cuisine,
+      'capacity': capacity,
+      'image': image,
+      'opening_hours': openingHours,
+      'is_open': isOpen,
+      'amenities': amenities,
+    };
+  }
+}
+
+class RestaurantReservation {
+  final int id;
+  final int restaurantId;
+  final String restaurantName;
+  final DateTime date;
+  final String time;
+  final int guests;
+  final String status;
+  final String? specialRequests;
+  final DateTime createdAt;
+
+  RestaurantReservation({
+    required this.id,
+    required this.restaurantId,
+    required this.restaurantName,
+    required this.date,
+    required this.time,
+    required this.guests,
+    required this.status,
+    this.specialRequests,
+    required this.createdAt,
+  });
+
+  factory RestaurantReservation.fromJson(Map<String, dynamic> json) {
+    final restaurant = json['restaurant'] as Map<String, dynamic>?;
+    return RestaurantReservation(
+      id: json['id'] as int,
+      restaurantId: restaurant != null ? (restaurant['id'] as int) : (json['restaurant_id'] as int? ?? 0),
+      restaurantName: restaurant != null ? (restaurant['name'] as String) : (json['restaurant_name'] as String? ?? ''),
+      date: DateTime.parse(json['date'] as String),
+      time: json['time'] as String,
+      guests: _parseInt(json['guests']) ?? 1,
+      status: json['status'] as String,
+      specialRequests: json['special_requests'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  String get statusLabel {
+    switch (status) {
+      case 'pending':
+        return 'En attente';
+      case 'confirmed':
+        return 'Confirmée';
+      case 'cancelled':
+        return 'Annulée';
+      default:
+        return status;
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'restaurant_id': restaurantId,
+      'restaurant_name': restaurantName,
+      'date': date.toIso8601String(),
+      'time': time,
+      'guests': guests,
+      'status': status,
+      'special_requests': specialRequests,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+}

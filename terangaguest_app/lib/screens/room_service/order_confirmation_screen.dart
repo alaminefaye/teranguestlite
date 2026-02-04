@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../config/theme.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
+import '../../widgets/animated_button.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../orders/orders_list_screen.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
   final Map<String, dynamic> orderData;
@@ -37,9 +42,9 @@ class OrderConfirmationScreen extends StatelessWidget {
                           const SizedBox(height: 32),
 
                           // Message de confirmation
-                          const Text(
-                            'Commande confirmée !',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context).orderConfirmed,
+                            style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -48,8 +53,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          const Text(
-                            'Votre commande a été enregistrée avec succès',
+                          Text(
+                            AppLocalizations.of(context).orderConfirmedMessage,
                             style: TextStyle(
                               fontSize: 16,
                               color: AppTheme.textGray,
@@ -59,7 +64,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                           const SizedBox(height: 40),
 
                           // Carte avec les détails de la commande
-                          _buildOrderDetails(),
+                          _buildOrderDetails(context),
 
                           const SizedBox(height: 32),
 
@@ -87,7 +92,7 @@ class OrderConfirmationScreen extends StatelessWidget {
       height: 120,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.green.withOpacity(0.2),
+        color: Colors.green.withValues(alpha: 0.2),
         border: Border.all(
           color: Colors.green,
           width: 3,
@@ -101,7 +106,7 @@ class OrderConfirmationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderDetails() {
+  Widget _buildOrderDetails(BuildContext context) {
     final orderNumber = orderData['order_number'] ?? 'N/A';
     final total = orderData['formatted_total'] ?? orderData['total_amount']?.toString() ?? '0';
     final itemsCount = (orderData['items'] as List?)?.length ?? 0;
@@ -113,8 +118,8 @@ class OrderConfirmationScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primaryBlue.withOpacity(0.6),
-            AppTheme.primaryDark.withOpacity(0.8),
+            AppTheme.primaryBlue.withValues(alpha: 0.6),
+            AppTheme.primaryDark.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -124,7 +129,7 @@ class OrderConfirmationScreen extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -136,8 +141,8 @@ class OrderConfirmationScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'N° de commande',
+              Text(
+                AppLocalizations.of(context).orderNumberLabel,
                 style: TextStyle(
                   fontSize: 14,
                   color: AppTheme.textGray,
@@ -149,10 +154,10 @@ class OrderConfirmationScreen extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentGold.withOpacity(0.2),
+                  color: AppTheme.accentGold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppTheme.accentGold.withOpacity(0.3),
+                    color: AppTheme.accentGold.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
@@ -175,8 +180,8 @@ class OrderConfirmationScreen extends StatelessWidget {
           // Nombre d'articles
           _buildDetailRow(
             icon: Icons.restaurant_menu,
-            label: 'Articles',
-            value: '$itemsCount article${itemsCount > 1 ? 's' : ''}',
+            label: AppLocalizations.of(context).itemsLabel,
+            value: AppLocalizations.of(context).articleCount(itemsCount),
           ),
 
           const SizedBox(height: 16),
@@ -184,7 +189,7 @@ class OrderConfirmationScreen extends StatelessWidget {
           // Montant total
           _buildDetailRow(
             icon: Icons.payments,
-            label: 'Total',
+            label: AppLocalizations.of(context).total,
             value: total is String ? total : '$total FCFA',
             valueColor: AppTheme.accentGold,
             valueFontSize: 20,
@@ -196,8 +201,8 @@ class OrderConfirmationScreen extends StatelessWidget {
           // Statut
           _buildDetailRow(
             icon: Icons.info,
-            label: 'Statut',
-            value: 'En attente',
+            label: AppLocalizations.of(context).statusLabel,
+            value: AppLocalizations.of(context).statusPending,
             valueColor: Colors.orange,
           ),
         ],
@@ -249,10 +254,10 @@ class OrderConfirmationScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.accentGold.withOpacity(0.1),
+        color: AppTheme.accentGold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.accentGold.withOpacity(0.3),
+          color: AppTheme.accentGold.withValues(alpha: 0.3),
         ),
       ),
       child: const Row(
@@ -282,70 +287,40 @@ class OrderConfirmationScreen extends StatelessWidget {
     return Column(
       children: [
         // Bouton principal : Retour à l'accueil
-        SizedBox(
+        AnimatedButton(
+          text: 'Retour à l\'accueil',
+          onPressed: () {
+            HapticHelper.lightImpact();
+            NavigationHelper.navigateAndRemoveUntil(
+              context,
+              const DashboardScreen(),
+            );
+          },
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (context) => const DashboardScreen(),
-                ),
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentGold,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Retour à l\'accueil',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryDark,
-              ),
-            ),
-          ),
+          backgroundColor: AppTheme.accentGold,
+          textColor: AppTheme.primaryDark,
+          enableHaptic: false,
         ),
 
         const SizedBox(height: 12),
 
         // Bouton secondaire : Voir mes commandes
-        SizedBox(
+        AnimatedOutlineButton(
+          text: 'Voir mes commandes',
+          icon: Icons.receipt_long,
+          onPressed: () {
+            HapticHelper.lightImpact();
+            NavigationHelper.navigateAndRemoveUntil(
+              context,
+              const OrdersListScreen(),
+            );
+          },
           width: double.infinity,
           height: 56,
-          child: OutlinedButton(
-            onPressed: () {
-              // TODO: Naviguer vers l'écran de mes commandes
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Écran "Mes commandes" à venir'),
-                  backgroundColor: AppTheme.primaryBlue,
-                ),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(
-                color: AppTheme.accentGold,
-                width: 1.5,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: const Text(
-              'Suivre ma commande',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.accentGold,
-              ),
-            ),
-          ),
+          borderColor: AppTheme.accentGold,
+          textColor: AppTheme.accentGold,
+          enableHaptic: false,
         ),
       ],
     );

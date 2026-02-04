@@ -1,0 +1,235 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
+import '../../providers/spa_provider.dart';
+import '../../widgets/spa_service_card.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
+import 'spa_service_detail_screen.dart';
+
+class SpaServicesListScreen extends StatefulWidget {
+  const SpaServicesListScreen({super.key});
+
+  @override
+  State<SpaServicesListScreen> createState() => _SpaServicesListScreenState();
+}
+
+class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
+  String? _selectedCategory;
+
+  final List<Map<String, String>> _categoryFilters = [
+    {'value': '', 'label': 'Tous'},
+    {'value': 'massage', 'label': 'Massages'},
+    {'value': 'facial', 'label': 'Soins Visage'},
+    {'value': 'body', 'label': 'Soins Corps'},
+    {'value': 'hammam', 'label': 'Hammam'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SpaProvider>().fetchSpaServices();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              _buildFilters(),
+              Expanded(
+                child: _buildContent(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+            onPressed: () {
+              HapticHelper.lightImpact();
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Spa & Bien-être',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Détente et relaxation',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _categoryFilters.length,
+        itemBuilder: (context, index) {
+          final filter = _categoryFilters[index];
+          final isSelected = _selectedCategory == filter['value'] ||
+              (_selectedCategory == null && filter['value'] == '');
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedCategory =
+                      filter['value']!.isEmpty ? null : filter['value'];
+                });
+                context.read<SpaProvider>().fetchSpaServices(
+                      category: _selectedCategory,
+                    );
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: isSelected
+                      ? LinearGradient(
+                          colors: [
+                            AppTheme.accentGold,
+                            AppTheme.accentGold.withValues(alpha: 0.8)
+                          ],
+                        )
+                      : null,
+                  color: isSelected
+                      ? null
+                      : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppTheme.accentGold
+                        : AppTheme.accentGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  filter['label']!,
+                  style: TextStyle(
+                    color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Consumer<SpaProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
+        }
+
+        if (provider.errorMessage != null) {
+          return ErrorStateWidget(
+            message: provider.errorMessage!,
+            hint: AppLocalizations.of(context).errorHint,
+            onRetry: () => provider.refreshSpaServices(),
+          );
+        }
+
+        if (provider.services.isEmpty) {
+          final l10n = AppLocalizations.of(context);
+          return EmptyStateWidget(
+            icon: Icons.spa_outlined,
+            title: _selectedCategory == null
+                ? l10n.noSpaService
+                : l10n.noSpaServiceInCategory,
+            subtitle: l10n.noSpaServiceHint,
+          );
+        }
+
+        return RefreshIndicator(
+          color: AppTheme.accentGold,
+          onRefresh: provider.refreshSpaServices,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 60.0, vertical: 20.0),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+                itemCount: provider.services.length,
+                itemBuilder: (context, index) {
+                  final service = provider.services[index];
+                  return SpaServiceCard(
+                    service: service,
+                    onTap: () {
+                      HapticHelper.lightImpact();
+                      context.navigateTo(SpaServiceDetailScreen(
+                        serviceId: service.id,
+                      ));
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

@@ -16,5 +16,9 @@ class Excursion extends Model
     public function enterprise() { return $this->belongsTo(Enterprise::class); }
     public function scopeAvailable($query) { return $query->where('status', 'available'); }
     public function scopeFeatured($query) { return $query->where('is_featured', true); }
+    public function scopeOrdered($query) { return $query->orderBy('display_order', 'asc')->orderBy('name', 'asc'); }
     public function getFormattedPriceAdultAttribute() { return number_format($this->price_adult, 0, ',', ' ') . ' FCFA'; }
+    public function getFormattedPriceChildAttribute() { return $this->price_child ? number_format($this->price_child, 0, ',', ' ') . ' FCFA' : ''; }
+    public function getTypeLabelAttribute() { return match($this->type ?? '') { 'cultural' => 'Culturel', 'adventure' => 'Aventure', 'relaxation' => 'Détente', 'city_tour' => 'Tour de ville', default => ucfirst((string) $this->type) }; }
+    public function getIsAvailableAttribute() { return $this->status === 'available'; }
 }

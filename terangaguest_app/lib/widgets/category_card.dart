@@ -14,118 +14,111 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryBlue,
-              AppTheme.primaryDark,
+    return Semantics(
+      button: true,
+      label: category.name,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // Perspective
+          ..rotateX(-0.05) // Légère rotation pour effet 3D
+          ..rotateY(0.02),
+        alignment: Alignment.center,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primaryBlue,
+                AppTheme.primaryDark,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.accentGold,
+              width: 1.5,
+            ),
+            boxShadow: [
+              // Ombre principale (plus prononcée)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
+              ),
+              // Ombre secondaire (effet de profondeur)
+              BoxShadow(
+                color: AppTheme.accentGold.withValues(alpha: 0.1),
+                blurRadius: 15,
+                spreadRadius: -2,
+                offset: const Offset(0, -4),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppTheme.accentGold,
-            width: 1.5,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icône de la catégorie (plus grand et centré)
+              _buildPlaceholder(),
+              
+              const SizedBox(height: 12),
+
+            // Nom de la catégorie
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                category.name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.accentGold,
+                  height: 1.1,
+                  letterSpacing: 0.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+              
+            const SizedBox(height: 8),
+
+            // Nombre d'articles
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.restaurant_menu,
+                  size: 16,
+                  color: AppTheme.textGray,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${category.itemsCount} article${category.itemsCount > 1 ? 's' : ''}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textGray,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image de la catégorie
-            Expanded(
-              flex: 3,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(14),
-                  topRight: Radius.circular(14),
-                ),
-                child: category.image != null
-                    ? Image.network(
-                        category.image!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildPlaceholder();
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return _buildPlaceholder();
-                        },
-                      )
-                    : _buildPlaceholder(),
-              ),
-            ),
-
-            // Informations
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Nom de la catégorie
-                    Text(
-                      category.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.accentGold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-
-                    // Nombre d'articles
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.restaurant_menu,
-                          size: 14,
-                          color: AppTheme.textGray,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${category.itemsCount} article${category.itemsCount > 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.textGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+      ),
       ),
     );
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      color: AppTheme.primaryBlue,
-      child: const Center(
-        child: Icon(
-          Icons.restaurant,
-          size: 48,
-          color: AppTheme.accentGold,
-        ),
-      ),
+    return const Icon(
+      Icons.restaurant,
+      size: 70,
+      color: AppTheme.accentGold,
     );
   }
 }
