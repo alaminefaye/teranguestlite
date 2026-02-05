@@ -49,7 +49,7 @@ class EnterpriseController extends Controller
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|max:10240',
+            'logo' => 'nullable|image|max:30720',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -131,7 +131,7 @@ class EnterpriseController extends Controller
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|max:10240',
+            'logo' => 'nullable|image|max:30720',
             'status' => 'required|in:active,inactive',
         ]);
 
