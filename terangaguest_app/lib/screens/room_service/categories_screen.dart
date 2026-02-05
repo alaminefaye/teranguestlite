@@ -9,6 +9,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 import 'items_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -153,15 +154,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       onRefresh: _loadCategories,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 40.0),
+          padding: EdgeInsets.only(
+            left: LayoutHelper.horizontalPaddingValue(context),
+            right: LayoutHelper.horizontalPaddingValue(context),
+            top: 24,
+            bottom: 24,
+          ),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, // 4 colonnes comme le dashboard
-              childAspectRatio: 1.0, // Format plus carré
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+              childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+              crossAxisSpacing: LayoutHelper.gridSpacing(context),
+              mainAxisSpacing: LayoutHelper.gridSpacing(context),
             ),
             itemCount: _categories.length,
             itemBuilder: (context, index) {

@@ -61,19 +61,17 @@ class ServiceCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon
-              Icon(icon, size: 70, color: AppTheme.accentGold),
-              const SizedBox(height: 10),
-              // Title
+              Icon(icon, size: 62, color: AppTheme.accentGold),
+              const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 21,
                     fontWeight: FontWeight.w900,
                     color: AppTheme.accentGold,
                     height: 1.1,

@@ -42,3 +42,8 @@ android {
 flutter {
     source = "../.."
 }
+
+// Supprimer les warnings "source value 8 is obsolete" (certains modules utilisent encore Java 8)
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:-options")
+}

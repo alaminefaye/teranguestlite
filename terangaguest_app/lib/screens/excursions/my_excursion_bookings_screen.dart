@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/excursions_provider.dart';
+import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 
 class MyExcursionBookingsScreen extends StatefulWidget {
@@ -103,14 +104,14 @@ class _MyExcursionBookingsScreenState
           color: AppTheme.accentGold,
           onRefresh: () => provider.fetchMyExcursionBookings(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 60.0),
+            padding: LayoutHelper.horizontalPadding(context),
             child: GridView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.9,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
+              padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                mainAxisSpacing: LayoutHelper.gridSpacing(context),
               ),
               itemCount: provider.bookings.length,
               itemBuilder: (context, index) {

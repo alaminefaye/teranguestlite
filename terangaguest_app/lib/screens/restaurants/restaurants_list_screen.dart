@@ -8,6 +8,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 import 'restaurant_detail_screen.dart';
 
 class RestaurantsListScreen extends StatefulWidget {
@@ -195,15 +196,20 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
           onRefresh: provider.refreshRestaurants,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
+              padding: EdgeInsets.only(
+                left: LayoutHelper.horizontalPaddingValue(context),
+                right: LayoutHelper.horizontalPaddingValue(context),
+                top: 20,
+                bottom: 20,
+              ),
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const AlwaysScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // 4 colonnes
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
                 itemCount: provider.restaurants.length,
                 itemBuilder: (context, index) {

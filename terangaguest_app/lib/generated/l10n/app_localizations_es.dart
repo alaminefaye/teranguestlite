@@ -121,6 +121,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get welcomeTitle => 'Bienvenido al King Fahd Palace Hotel';
 
   @override
+  String welcomeToEnterprise(String enterpriseName) {
+    return 'Bienvenido al $enterpriseName';
+  }
+
+  @override
   String get welcomeSubtitle => 'Su asistente digital a su servicio';
 
   @override

@@ -127,31 +127,31 @@ class RestaurantCard extends StatelessWidget {
                 ),
               ),
 
-              // Informations
+              // Informations : FittedBox pour éviter l'overflow
               Expanded(
                 flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Nom
-                      Text(
-                        restaurant.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          restaurant.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      // Type et Cuisine
-                      if (restaurant.type != null || restaurant.cuisine != null)
-                        Expanded(
-                          child: Padding(
+                        if (restaurant.type != null || restaurant.cuisine != null)
+                          Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
                               [
@@ -167,40 +167,39 @@ class RestaurantCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-
-                      const SizedBox(height: 8),
-
-                      // Capacité + Flèche
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (restaurant.capacity != null)
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.people_outline,
-                                  size: 14,
-                                  color: AppTheme.textGray,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${restaurant.capacity} pers.',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (restaurant.capacity != null)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.people_outline,
+                                    size: 14,
                                     color: AppTheme.textGray,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${restaurant.capacity} pers.',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textGray,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 14,
+                              color: AppTheme.accentGold,
                             ),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: AppTheme.accentGold,
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

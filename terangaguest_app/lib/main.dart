@@ -32,11 +32,11 @@ void main() async {
     ),
   );
 
-  // Orientation portrait et paysage (pour tablette)
+  // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
+    DeviceOrientation.portraitUp,
   ]).then((_) {
     runApp(const MyApp());
   });

@@ -6,6 +6,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
 import '../../widgets/empty_state.dart';
 import '../../providers/restaurants_provider.dart';
+import '../../utils/layout_helper.dart';
 
 class MyRestaurantReservationsScreen extends StatefulWidget {
   const MyRestaurantReservationsScreen({super.key});
@@ -113,14 +114,14 @@ class _MyRestaurantReservationsScreenState
           color: AppTheme.accentGold,
           onRefresh: () => provider.fetchMyReservations(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 60.0),
+            padding: LayoutHelper.horizontalPadding(context),
             child: GridView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.9,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
+              padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                mainAxisSpacing: LayoutHelper.gridSpacing(context),
               ),
               itemCount: provider.reservations.length,
               itemBuilder: (context, index) {

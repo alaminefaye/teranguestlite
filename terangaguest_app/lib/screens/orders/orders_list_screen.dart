@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/orders_provider.dart';
 import '../../widgets/order_card.dart';
@@ -211,14 +212,14 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               return false;
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 60.0),
+              padding: LayoutHelper.horizontalPadding(context),
               child: GridView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // 4 colonnes comme les autres modules
-                  childAspectRatio: 0.9,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
+                padding: EdgeInsets.symmetric(vertical: 20),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
                 itemCount: provider.orders.length + (provider.hasMorePages ? 1 : 0),
                 itemBuilder: (context, index) {

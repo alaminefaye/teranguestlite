@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
+import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 
 class MyPalaceRequestsScreen extends StatefulWidget {
@@ -102,15 +103,15 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
           color: AppTheme.accentGold,
           onRefresh: () => provider.fetchMyPalaceRequests(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 60.0),
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.9,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-              ),
+              padding: LayoutHelper.horizontalPadding(context),
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
+                ),
               itemCount: provider.requests.length,
               itemBuilder: (context, index) {
                 final request = provider.requests[index];

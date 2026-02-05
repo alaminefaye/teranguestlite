@@ -37,6 +37,14 @@
   "french": "Français",
   "english": "English",
   "welcomeTitle": "Welcome to King Fahd Palace Hotel",
+  "welcomeToEnterprise": "Welcome to {enterpriseName}",
+  "@welcomeToEnterprise": {
+    "placeholders": {
+      "enterpriseName": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeSubtitle": "Your digital assistant is at your service",
   "roomService": "Room Service",
   "restaurantsBars": "Restaurants & Bars",

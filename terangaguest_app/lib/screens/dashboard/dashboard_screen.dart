@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:weather/weather.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
 import '../profile/profile_screen.dart';
@@ -118,134 +121,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isCompact = isLandscape ? (h < 900) : (h < 600);
+    final isVeryCompact = h < 500;
+    final topPad = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 16.0);
+    final bottomPad = isVeryCompact ? 2.0 : (isCompact ? 2.0 : 6.0);
+    final logoSize = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 22.0);
+    final iconSize = isVeryCompact ? 22.0 : (isCompact ? 24.0 : 30.0);
+
     return Padding(
-      padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 30.0, bottom: 10.0),
-      child: Column(
+      padding: EdgeInsets.only(left: 24.0, right: 24.0, top: topPad, bottom: bottomPad),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Ligne 1 : TERANGUEST + Icônes (reste en haut)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Gauche : TERANGUEST (TERAN blanc + GUEST or)
-              RichText(
-                text: const TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'TERAN',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textWhite,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'GUEST',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.accentGold,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Droite : Icônes notification + profil
-              Row(
-                children: [
-                  // Notification avec badge rouge
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        iconSize: 36,
-                        icon: const Icon(
-                          Icons.notifications_none,
-                          color: AppTheme.accentGold,
-                        ),
-                      ),
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppTheme.primaryDark,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'TERAN',
+                  style: TextStyle(
+                    fontSize: logoSize,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textWhite,
+                    letterSpacing: 2.0,
                   ),
-                  const SizedBox(width: 16),
-                  // Profil
+                ),
+                TextSpan(
+                  text: 'GUEST',
+                  style: TextStyle(
+                    fontSize: logoSize,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentGold,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
                   IconButton(
-                    onPressed: () {
-                      HapticHelper.lightImpact();
-                      context.navigateTo(const ProfileScreen());
-                    },
+                    onPressed: () {},
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    iconSize: 36,
-                    icon: const Icon(
-                      Icons.person_outline,
-                      color: AppTheme.accentGold,
+                    iconSize: iconSize,
+                    icon: const Icon(Icons.notifications_none, color: AppTheme.accentGold),
+                  ),
+                  Positioned(
+                    right: 2,
+                    top: 2,
+                    child: Container(
+                      width: isVeryCompact ? 6 : 8,
+                      height: isVeryCompact ? 6 : 8,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppTheme.primaryDark, width: 1),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          
-          // ESPACE pour descendre la couronne + nom
-          const SizedBox(height: 40),
-          
-          // Ligne 2 : Couronne + Nom + Étoiles (descendu)
-          Column(
-            children: [
-              // Couronne dorée
-              const Icon(
-                Icons.diamond,
-                color: AppTheme.accentGold,
-                size: 32,
-              ),
-              const SizedBox(height: 8),
-              // Nom de l'hôtel
-              Text(
-                AppLocalizations.of(context).hotelName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                      color: AppTheme.textWhite,
-                    ),
-              ),
-              const SizedBox(height: 6),
-              // 3 étoiles dorées
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  3,
-                  (index) => const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 3.0),
-                    child: Icon(
-                      Icons.star,
-                      color: AppTheme.accentGold,
-                      size: 14,
-                    ),
-                  ),
-                ),
+              SizedBox(width: isCompact ? 8 : 16),
+              IconButton(
+                onPressed: () {
+                  HapticHelper.lightImpact();
+                  context.navigateTo(const ProfileScreen());
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                iconSize: iconSize,
+                icon: const Icon(Icons.person_outline, color: AppTheme.accentGold),
               ),
             ],
           ),
@@ -256,29 +207,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildWelcomeSection(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final user = context.watch<AuthProvider>().user;
+    final enterpriseName = user?.enterprise?.name.trim();
+    final welcomeTitleText = (enterpriseName != null && enterpriseName.isNotEmpty)
+        ? l10n.welcomeToEnterprise(enterpriseName)
+        : l10n.welcomeTitle;
+
+    final h = MediaQuery.sizeOf(context).height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isCompact = isLandscape ? (h < 900) : (h < 600);
+    final isVeryCompact = h < 500;
+    final pad = LayoutHelper.horizontalPaddingValue(context);
+    final titleSize = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 24.0);
+    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 11.0 : 13.0);
+    final topPad = isVeryCompact ? 2.0 : (isCompact ? 4.0 : 12.0);
+    final bottomPad = isVeryCompact ? 2.0 : (isCompact ? 4.0 : 10.0);
+    final gap = isVeryCompact ? 1.0 : (isCompact ? 2.0 : 6.0);
+
     return Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 25.0, bottom: 15.0),
+      padding: EdgeInsets.only(left: pad, right: pad, top: topPad, bottom: bottomPad),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            l10n.welcomeTitle,
+            welcomeTitleText,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textWhite,
-                  height: 1.2,
-                ),
+              fontSize: titleSize,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textWhite,
+              height: 1.2,
+            ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: gap),
           Text(
             l10n.welcomeSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.textGray,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                ),
+              color: AppTheme.textGray,
+              fontSize: subtitleSize,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ],
       ),
@@ -298,16 +267,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'title': l10n.callCenter, 'icon': Icons.phone_outlined, 'route': 'tel:'},
     ];
 
-    // Layout pour tablette: 4 colonnes x 2 rangées
+    final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
+    final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
+    final spacing = LayoutHelper.gridSpacing(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      padding: LayoutHelper.horizontalPadding(context),
       child: GridView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4, // 4 colonnes comme sur la tablette
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-          childAspectRatio: 1.35, // Un peu plus petit
+        padding: EdgeInsets.symmetric(vertical: spacing),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
+          childAspectRatio: aspectRatio,
         ),
         itemCount: services.length,
         itemBuilder: (context, index) {
@@ -325,8 +297,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildFooter(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isCompact = isLandscape ? (h < 900) : (h < 600);
+    final isVeryCompact = h < 500;
+    final padV = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 12.0);
+    final padH = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 20.0);
+    final timeSize = isVeryCompact ? 14.0 : (isCompact ? 16.0 : 20.0);
+    final weatherIconSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 18.0);
+    final tempSize = isVeryCompact ? 14.0 : (isCompact ? 16.0 : 20.0);
+    final dateSize = isVeryCompact ? 9.0 : (isCompact ? 10.0 : 12.0);
+    final badgePadH = isVeryCompact ? 6.0 : (isCompact ? 8.0 : 10.0);
+    final badgePadV = isVeryCompact ? 3.0 : (isCompact ? 4.0 : 5.0);
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 28),
+      padding: EdgeInsets.symmetric(vertical: padV, horizontal: padH),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -335,71 +320,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
             builder: (context, snapshot) {
               final now = DateTime.now();
               final temperature = _currentWeather?.temperature?.celsius?.round() ?? 25;
-              
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              return Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Heure + Badge météo sur la MÊME LIGNE
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Heure
-                      Text(
-                        DateFormat('hh:mm a').format(now).toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
-                          height: 1.0,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Badge météo avec icône + température
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accentGold.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppTheme.accentGold,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Icône météo
-                            Text(
-                              _currentWeather != null 
-                                  ? WeatherService.getWeatherIcon(_currentWeather?.weatherMain)
-                                  : '☀️',
-                              style: const TextStyle(fontSize: 22),
-                            ),
-                            const SizedBox(width: 8),
-                            // Température
-                            Text(
-                              '$temperature°',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.accentGold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  Text(
+                    DateFormat('hh:mm a').format(now).toUpperCase(),
+                    style: TextStyle(
+                      fontSize: timeSize,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGold,
+                      height: 1.0,
+                    ),
                   ),
-                  const SizedBox(height: 6),
-                  // Date en dessous
+                  SizedBox(width: isCompact ? 10 : 14),
                   Text(
                     DateFormat('EEEE d MMMM', 'fr_FR').format(now),
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: dateSize,
                       fontWeight: FontWeight.w400,
                       color: AppTheme.textGray,
-                      height: 1.2,
+                      height: 1.0,
+                    ),
+                  ),
+                  SizedBox(width: isCompact ? 10 : 14),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentGold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _currentWeather != null
+                              ? WeatherService.getWeatherIcon(_currentWeather?.weatherMain)
+                              : '☀️',
+                          style: TextStyle(fontSize: weatherIconSize),
+                        ),
+                        SizedBox(width: isCompact ? 6 : 8),
+                        Text(
+                          '$temperature°',
+                          style: TextStyle(
+                            fontSize: tempSize,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

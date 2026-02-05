@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/laundry_provider.dart';
 import '../../widgets/empty_state.dart';
@@ -113,15 +114,18 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 60.0, vertical: 20.0),
+                padding: EdgeInsets.only(
+                  left: LayoutHelper.horizontalPaddingValue(context),
+                  right: LayoutHelper.horizontalPaddingValue(context),
+                  top: 20,
+                  bottom: 20,
+                ),
                 child: GridView.builder(
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    childAspectRatio: 1.2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                    childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                    crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                    mainAxisSpacing: LayoutHelper.gridSpacing(context),
                   ),
                   itemCount: provider.services.length,
                   itemBuilder: (context, index) {

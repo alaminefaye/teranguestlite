@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../utils/layout_helper.dart';
 import '../../models/menu_category.dart';
 import '../../models/menu_item.dart';
 import '../../services/room_service_api.dart';
@@ -261,12 +262,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 60.0),
           child: GridView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, // 4 colonnes pour les articles
-              childAspectRatio: 0.75, // Format portrait
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
+            padding: EdgeInsets.only(
+              top: 20,
+              bottom: 20,
+              left: LayoutHelper.horizontalPaddingValue(context),
+              right: LayoutHelper.horizontalPaddingValue(context),
+            ),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+              childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+              crossAxisSpacing: LayoutHelper.gridSpacing(context),
+              mainAxisSpacing: LayoutHelper.gridSpacing(context),
             ),
             itemCount: _items.length + (_hasMorePages ? 1 : 0),
             itemBuilder: (context, index) {

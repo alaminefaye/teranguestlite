@@ -152,36 +152,36 @@ class MenuItemCard extends StatelessWidget {
                 ),
               ),
 
-              // Informations
+              // Informations : FittedBox pour s'adapter à la hauteur disponible (évite overflow)
               Expanded(
                 flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Nom
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          item.name,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      // Description (si disponible)
-                      if (item.description != null && item.description!.isNotEmpty)
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
+                        if (item.description != null && item.description!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
                             child: Text(
                               item.description!,
                               style: const TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color: AppTheme.textGray,
                                 height: 1.2,
                               ),
@@ -189,34 +189,31 @@ class MenuItemCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-
-                      const SizedBox(height: 8),
-
-                      // Prix
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
                               item.formattedPrice,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 color: AppTheme.accentGold,
                                 letterSpacing: 0.3,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          // Icône pour indiquer que c'est cliquable
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: AppTheme.accentGold,
-                          ),
-                        ],
-                      ),
-                    ],
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 12,
+                              color: AppTheme.accentGold,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

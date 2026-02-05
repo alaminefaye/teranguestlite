@@ -39,6 +39,14 @@
   "arabic": "العربية",
   "spanish": "Español",
   "welcomeTitle": "مرحباً بكم في فندق قصر الملك فهد",
+  "welcomeToEnterprise": "مرحباً بكم في {enterpriseName}",
+  "@welcomeToEnterprise": {
+    "placeholders": {
+      "enterpriseName": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeSubtitle": "مساعدكم الرقمي في خدمتكم",
   "roomService": "خدمة الغرف",
   "restaurantsBars": "المطاعم والبارات",

@@ -15,5 +15,8 @@ class LaundryService extends Model
 
     public function enterprise() { return $this->belongsTo(Enterprise::class); }
     public function scopeAvailable($query) { return $query->where('status', 'available'); }
+    public function scopeOrdered($query) { return $query->orderBy('display_order', 'asc')->orderBy('name', 'asc'); }
     public function getFormattedPriceAttribute() { return number_format($this->price, 0, ',', ' ') . ' FCFA'; }
+    public function getCategoryLabelAttribute() { return match($this->category ?? '') { 'washing' => 'Lavage', 'ironing' => 'Repassage', 'dry_cleaning' => 'Nettoyage à sec', 'express' => 'Express', default => ucfirst((string) $this->category) }; }
+    public function getIsAvailableAttribute() { return $this->status === 'available'; }
 }

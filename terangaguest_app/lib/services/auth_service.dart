@@ -93,7 +93,11 @@ class AuthService {
       final response = await _apiService.get(ApiConfig.user);
 
       if (response.statusCode == 200) {
-        final userData = response.data;
+        final data = response.data;
+        // API renvoie { "success": true, "data": { ... user ... } }
+        final Map<String, dynamic> userData = data is Map && data['data'] != null
+            ? data['data'] as Map<String, dynamic>
+            : data as Map<String, dynamic>;
         final user = User.fromJson(userData);
 
         // Mettre à jour le stockage local
@@ -167,20 +171,39 @@ class AuthService {
   Future<User?> initAuth() async {
     try {
       final token = await _secureStorage.getToken();
-      
+
       if (token == null || token.isEmpty) {
         return null;
       }
 
-      // Définir le token dans ApiService
+      // Définir le token dans ApiService pour les requêtes
       _apiService.setAuthToken(token);
 
-      // Vérifier si le token est toujours valide
+      // Vérifier si le token est toujours valide via l'API
       try {
         final user = await getCurrentUser();
         return user;
+      } on DioException catch (e) {
+        // 401 = token invalide ou expiré → déconnecter
+        if (e.response?.statusCode == 401) {
+          await _secureStorage.clearAuth();
+          _apiService.removeAuthToken();
+          return null;
+        }
+        // Autre erreur (réseau, timeout, 5xx) → garder la session, restaurer l'utilisateur depuis le stockage
+        final storedUser = await _secureStorage.getUser();
+        if (storedUser != null) {
+          return storedUser;
+        }
+        await _secureStorage.clearAuth();
+        _apiService.removeAuthToken();
+        return null;
       } catch (e) {
-        // Token invalide, nettoyer le stockage
+        // Erreur de parsing ou autre → tenter de restaurer depuis le stockage
+        final storedUser = await _secureStorage.getUser();
+        if (storedUser != null) {
+          return storedUser;
+        }
         await _secureStorage.clearAuth();
         _apiService.removeAuthToken();
         return null;

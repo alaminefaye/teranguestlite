@@ -39,6 +39,14 @@
   "arabic": "العربية",
   "spanish": "Español",
   "welcomeTitle": "Bienvenido al King Fahd Palace Hotel",
+  "welcomeToEnterprise": "Bienvenido al {enterpriseName}",
+  "@welcomeToEnterprise": {
+    "placeholders": {
+      "enterpriseName": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeSubtitle": "Su asistente digital a su servicio",
   "roomService": "Servicio a la habitación",
   "restaurantsBars": "Restaurantes y Bares",
