@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../models/palace.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
@@ -117,8 +118,8 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
               padding: EdgeInsets.only(
                 left: LayoutHelper.horizontalPaddingValue(context),
                 right: LayoutHelper.horizontalPaddingValue(context),
-                top: 20,
-                bottom: 20,
+                top: 24,
+                bottom: 24,
               ),
               child: GridView.builder(
                 shrinkWrap: true,
@@ -180,8 +181,8 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.star,
-                                  size: 60, color: AppTheme.accentGold),
+                              Icon(_iconForPalaceService(service),
+                                  size: 48, color: AppTheme.accentGold),
                               const SizedBox(height: 16),
                               Text(service.name,
                                   style: const TextStyle(
@@ -212,5 +213,23 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
         );
       },
     );
+  }
+
+  /// Icône spécifique selon le nom ou la catégorie du service Palace
+  static IconData _iconForPalaceService(PalaceService service) {
+    final name = service.name.toLowerCase();
+    final cat = (service.category ?? '').toLowerCase();
+    if (name.contains('baby') || name.contains('enfant') || name.contains('garderie')) return Icons.child_care;
+    if (name.contains('billetterie') || name.contains('spectacle') || name.contains('ticket')) return Icons.confirmation_number;
+    if (name.contains('voiture') || name.contains('chauffeur') || name.contains('location')) return Icons.directions_car;
+    if (name.contains('événement') || name.contains('event') || name.contains('organisation')) return Icons.event;
+    if (name.contains('pressing') || name.contains('repassage') || name.contains('laundry')) return Icons.local_laundry_service;
+    if (name.contains('majordome') || name.contains('butler')) return Icons.support_agent;
+    if (name.contains('transfert') || name.contains('aéroport') || name.contains('airport')) return Icons.flight_takeoff;
+    if (name.contains('conciergerie') || name.contains('vip')) return Icons.luggage;
+    if (cat == 'transport') return Icons.directions_car;
+    if (cat == 'butler') return Icons.support_agent;
+    if (cat == 'vip') return Icons.star;
+    return Icons.auto_awesome;
   }
 }

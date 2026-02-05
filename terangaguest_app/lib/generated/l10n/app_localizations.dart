@@ -357,7 +357,7 @@ abstract class AppLocalizations {
   /// No description provided for @palaceServices.
   ///
   /// In fr, this message translates to:
-  /// **'Services du Palais'**
+  /// **'Autres services'**
   String get palaceServices;
 
   /// No description provided for @excursions.

@@ -123,8 +123,8 @@ class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
               padding: EdgeInsets.only(
                 left: LayoutHelper.horizontalPaddingValue(context),
                 right: LayoutHelper.horizontalPaddingValue(context),
-                top: 20,
-                bottom: 20,
+                top: 24,
+                bottom: 24,
               ),
               child: GridView.builder(
                 shrinkWrap: true,

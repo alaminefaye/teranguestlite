@@ -137,7 +137,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get spaWellness => 'Spa et Bien-être';
 
   @override
-  String get palaceServices => 'Services du Palais';
+  String get palaceServices => 'Autres services';
 
   @override
   String get excursions => 'Excursions';

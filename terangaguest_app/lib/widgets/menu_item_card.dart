@@ -67,22 +67,33 @@ class MenuItemCard extends StatelessWidget {
                 flex: 5,
                 child: Stack(
                   children: [
-                    // Image
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(14),
-                        topRight: Radius.circular(14),
+                    // Image : contain pour afficher la photo en entier (pas de coupure bouteille, etc.)
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryDark.withValues(alpha: 0.5),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(14),
+                          topRight: Radius.circular(14),
+                        ),
                       ),
-                      child: item.image != null
-                          ? CachedNetworkImage(
-                              imageUrl: item.image!,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => _buildPlaceholder(),
-                              errorWidget: (context, url, error) => _buildPlaceholder(),
-                            )
-                          : _buildPlaceholder(),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(14),
+                          topRight: Radius.circular(14),
+                        ),
+                        child: item.image != null
+                            ? CachedNetworkImage(
+                                imageUrl: item.image!,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.contain,
+                                placeholder: (context, url) => _buildPlaceholder(),
+                                errorWidget: (context, url, error) => _buildPlaceholder(),
+                              )
+                            : _buildPlaceholder(),
+                      ),
                     ),
 
                     // Badge temps de préparation

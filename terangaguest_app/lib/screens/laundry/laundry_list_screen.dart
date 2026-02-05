@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../models/laundry.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/laundry_provider.dart';
@@ -117,8 +118,8 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                 padding: EdgeInsets.only(
                   left: LayoutHelper.horizontalPaddingValue(context),
                   right: LayoutHelper.horizontalPaddingValue(context),
-                  top: 20,
-                  bottom: 20,
+                  top: 24,
+                  bottom: 24,
                 ),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -173,7 +174,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                             children: [
                               Column(
                                 children: [
-                                  const Icon(Icons.local_laundry_service,
+                                  Icon(_iconForLaundryService(service),
                                       size: 48, color: AppTheme.accentGold),
                                   const SizedBox(height: 12),
                                   Text(service.name,
@@ -305,5 +306,22 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
         );
       },
     );
+  }
+
+  /// Icône spécifique selon le type de service blanchisserie (vêtements et linge)
+  static IconData _iconForLaundryService(LaundryService service) {
+    final n = service.name.toLowerCase();
+    // Vêtements : icône nettoyage à sec / vêtement
+    if (n.contains('chemise') || n.contains('shirt')) return Icons.dry_cleaning;
+    if (n.contains('costume') || n.contains('suit')) return Icons.dry_cleaning;
+    if (n.contains('pantalon') || n.contains('pants') || n.contains('trousers')) return Icons.dry_cleaning;
+    if (n.contains('robe') || n.contains('dress')) return Icons.dry_cleaning;
+    // Linge de maison
+    if (n.contains('draps') || n.contains('sheet') || n.contains('linge') && !n.contains('serviette')) return Icons.bed;
+    if (n.contains('serviette') || n.contains('towel')) return Icons.local_laundry_service;
+    // Services
+    if (n.contains('nettoyage') && (n.contains('sec') || n.contains('délicat'))) return Icons.dry_cleaning;
+    if (n.contains('repassage') || n.contains('iron')) return Icons.cleaning_services;
+    return Icons.local_laundry_service;
   }
 }

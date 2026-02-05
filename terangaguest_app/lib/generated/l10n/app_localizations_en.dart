@@ -137,7 +137,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spaWellness => 'Spa & Wellness';
 
   @override
-  String get palaceServices => 'Palace Services';
+  String get palaceServices => 'Other services';
 
   @override
   String get excursions => 'Excursions';

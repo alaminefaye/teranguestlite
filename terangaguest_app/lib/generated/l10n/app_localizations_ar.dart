@@ -137,7 +137,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get spaWellness => 'السبا والعافية';
 
   @override
-  String get palaceServices => 'خدمات القصر';
+  String get palaceServices => 'خدمات أخرى';
 
   @override
   String get excursions => 'الجولات';

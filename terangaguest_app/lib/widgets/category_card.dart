@@ -60,8 +60,8 @@ class CategoryCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icône de la catégorie (plus grand et centré)
-              _buildPlaceholder(),
+              // Icône spécifique à la catégorie
+              _buildCategoryIcon(),
               
               const SizedBox(height: 12),
 
@@ -114,11 +114,27 @@ class CategoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return const Icon(
-      Icons.restaurant,
-      size: 70,
+  /// Icône adaptée au nom de la catégorie (petit déjeuner, plats, boissons, desserts, etc.)
+  Widget _buildCategoryIcon() {
+    final iconData = _getIconForCategory(category.name);
+    return Icon(
+      iconData,
+      size: 48,
       color: AppTheme.accentGold,
     );
+  }
+
+  static IconData _getIconForCategory(String name) {
+    final n = name.toLowerCase().trim();
+    if (n.contains('petit') && n.contains('déjeuner')) return Icons.free_breakfast;
+    if (n.contains('breakfast')) return Icons.free_breakfast;
+    if (n.contains('plats') && n.contains('principal')) return Icons.dinner_dining;
+    if (n.contains('main') && (n.contains('course') || n.contains('dish'))) return Icons.dinner_dining;
+    if (n.contains('boisson')) return Icons.local_bar;
+    if (n.contains('drink') || n.contains('beverage')) return Icons.local_bar;
+    if (n.contains('dessert')) return Icons.cake;
+    if (n.contains('snack') || n.contains('collation')) return Icons.cookie;
+    // Défaut : restaurant
+    return Icons.restaurant;
   }
 }

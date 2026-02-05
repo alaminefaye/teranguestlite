@@ -200,13 +200,14 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
         return RefreshIndicator(
           color: AppTheme.accentGold,
           onRefresh: provider.refreshSpaServices,
-          child: Center(
+          child: Align(
+            alignment: Alignment.topCenter,
             child: Padding(
               padding: EdgeInsets.only(
                 left: LayoutHelper.horizontalPaddingValue(context),
                 right: LayoutHelper.horizontalPaddingValue(context),
-                top: 20,
-                bottom: 20,
+                top: 12,
+                bottom: 24,
               ),
               child: GridView.builder(
                 shrinkWrap: true,

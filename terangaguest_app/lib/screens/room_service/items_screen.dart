@@ -260,14 +260,14 @@ class _ItemsScreenState extends State<ItemsScreen> {
           return false;
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          padding: EdgeInsets.only(
+            left: LayoutHelper.horizontalPaddingValue(context),
+            right: LayoutHelper.horizontalPaddingValue(context),
+            top: 24,
+            bottom: 24,
+          ),
           child: GridView.builder(
-            padding: EdgeInsets.only(
-              top: 20,
-              bottom: 20,
-              left: LayoutHelper.horizontalPaddingValue(context),
-              right: LayoutHelper.horizontalPaddingValue(context),
-            ),
+            physics: const AlwaysScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
               childAspectRatio: LayoutHelper.listCellAspectRatio(context),

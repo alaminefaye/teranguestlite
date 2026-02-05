@@ -209,16 +209,35 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   Widget _buildImageHeader() {
+    final size = MediaQuery.sizeOf(context);
+    final screenHeight = size.height;
+    final isLandscape = size.width > size.height;
+    // En paysage : image très réduite pour laisser la place au contenu (éviter coupure)
+    final double expandedHeight;
+    if (isLandscape) {
+      expandedHeight = (screenHeight * 0.22).clamp(100.0, 160.0);
+    } else {
+      final isTablet = size.shortestSide >= 600;
+      expandedHeight = isTablet
+          ? (screenHeight * 0.28).clamp(200.0, 280.0)
+          : 300.0;
+    }
     return SliverAppBar(
-      expandedHeight: 300,
+      expandedHeight: expandedHeight,
       automaticallyImplyLeading: false,
+      pinned: false,
+      floating: true,
+      snap: true,
       flexibleSpace: FlexibleSpaceBar(
         background: widget.item.image != null
-            ? CachedNetworkImage(
-                imageUrl: widget.item.image!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => _buildImagePlaceholder(),
-                errorWidget: (context, url, error) => _buildImagePlaceholder(),
+            ? Container(
+                color: AppTheme.primaryDark,
+                child: CachedNetworkImage(
+                  imageUrl: widget.item.image!,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => _buildImagePlaceholder(),
+                  errorWidget: (context, url, error) => _buildImagePlaceholder(),
+                ),
               )
             : _buildImagePlaceholder(),
       ),
@@ -404,7 +423,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 100), // Espace pour le bouton fixe
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 100), // Espace pour scroll + bouton fixe
         ],
       ),
     );

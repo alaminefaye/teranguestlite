@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Services Spa & Bien-être</h1>
-    <a href="{{ route('dashboard.spa-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Créer un service</a>
+    <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Services Palace</h1>
+    <a href="{{ route('dashboard.palace-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Créer un service</a>
 </div>
 
 @if(session('success'))
@@ -23,12 +23,12 @@
         <p class="text-2xl font-semibold text-success-700 dark:text-success-300">{{ $stats['available'] }}</p>
     </div>
     <div class="rounded-lg border border-brand-200 bg-brand-50 p-4 dark:border-brand-800 dark:bg-brand-900/20">
-        <p class="text-sm text-brand-600 dark:text-brand-400">En vedette</p>
-        <p class="text-2xl font-semibold text-brand-700 dark:text-brand-300">{{ $stats['featured'] }}</p>
+        <p class="text-sm text-brand-600 dark:text-brand-400">Premium</p>
+        <p class="text-2xl font-semibold text-brand-700 dark:text-brand-300">{{ $stats['premium'] }}</p>
     </div>
     <div class="rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20">
-        <p class="text-sm text-primary-600 dark:text-primary-400">Massages</p>
-        <p class="text-2xl font-semibold text-primary-700 dark:text-primary-300">{{ $stats['massages'] }}</p>
+        <p class="text-sm text-primary-600 dark:text-primary-400">Conciergerie</p>
+        <p class="text-2xl font-semibold text-primary-700 dark:text-primary-300">{{ $stats['concierge'] }}</p>
     </div>
 </div>
 
@@ -43,11 +43,8 @@
                     @else
                         <div class="h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 text-gray-400 dark:text-gray-500 text-xs">Pas d'image</div>
                     @endif
-                    @if($service->is_featured)
-                        <span class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 mb-1">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            Populaire
-                        </span>
+                    @if($service->is_premium)
+                        <span class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 mb-1">★ Premium</span>
                     @endif
                     <h3 class="font-semibold text-gray-800 dark:text-white/90">{{ $service->name }}</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ $service->category_label }}</p>
@@ -56,12 +53,11 @@
             <div class="flex items-center justify-between mt-3">
                 <div>
                     <p class="text-lg font-bold text-brand-600 dark:text-brand-400">{{ $service->formatted_price }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">⏱️ {{ $service->duration_text }}</p>
                 </div>
                 <div class="flex items-center gap-1">
-                    <a href="{{ route('dashboard.spa-services.show', $service) }}" class="inline-flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-800">Voir</a>
-                    <a href="{{ route('dashboard.spa-services.edit', $service) }}" class="inline-flex items-center px-2 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600">Modifier</a>
-                    <form action="{{ route('dashboard.spa-services.destroy', $service) }}" method="POST" onsubmit="return confirm('Supprimer ce service ?');" class="inline">
+                    <a href="{{ route('dashboard.palace-services.show', $service) }}" class="inline-flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-800">Voir</a>
+                    <a href="{{ route('dashboard.palace-services.edit', $service) }}" class="inline-flex items-center px-2 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600">Modifier</a>
+                    <form action="{{ route('dashboard.palace-services.destroy', $service) }}" method="POST" onsubmit="return confirm('Supprimer ce service ?');" class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="inline-flex items-center px-2 py-1 text-xs text-error-600 dark:text-error-400 border border-error-300 dark:border-error-700 rounded hover:bg-error-50 dark:hover:bg-error-900/20">Suppr.</button>
@@ -72,7 +68,7 @@
     @empty
         <div class="col-span-3 text-center py-12">
             <p class="text-gray-600 dark:text-gray-400 mb-4">Aucun service trouvé.</p>
-            <a href="{{ route('dashboard.spa-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Créer un service</a>
+            <a href="{{ route('dashboard.palace-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Créer un service</a>
         </div>
     @endforelse
 </div>
