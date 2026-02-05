@@ -271,15 +271,31 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                   color: AppTheme.accentGold)),
                         ],
                       ),
-                      AnimatedButton(
-                        text: 'Confirmer',
-                        onPressed: () {
-                          HapticHelper.confirm();
-                          context.navigateTo(const CreateLaundryRequestScreen());
-                        },
-                        backgroundColor: AppTheme.accentGold,
-                        textColor: AppTheme.primaryDark,
-                        enableHaptic: false,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedOutlineButton(
+                            text: AppLocalizations.of(context).cancel,
+                            onPressed: () {
+                              HapticHelper.lightImpact();
+                              provider.clearSelection();
+                            },
+                            borderColor: AppTheme.accentGold,
+                            textColor: AppTheme.accentGold,
+                            enableHaptic: false,
+                          ),
+                          const SizedBox(width: 12),
+                          AnimatedButton(
+                            text: AppLocalizations.of(context).confirmRequest,
+                            onPressed: () {
+                              HapticHelper.confirm();
+                              context.navigateTo(const CreateLaundryRequestScreen());
+                            },
+                            backgroundColor: AppTheme.accentGold,
+                            textColor: AppTheme.primaryDark,
+                            enableHaptic: false,
+                          ),
+                        ],
                       ),
                     ],
                   ),

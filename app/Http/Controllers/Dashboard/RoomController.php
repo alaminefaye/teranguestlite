@@ -70,7 +70,7 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string',
             'amenities' => 'nullable|array',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:10240',
         ]);
 
         // Ajouter enterprise_id automatiquement
@@ -140,7 +140,7 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1|max:10',
             'description' => 'nullable|string',
             'amenities' => 'nullable|array',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:10240',
         ]);
 
         // Upload nouvelle image
