@@ -47,4 +47,11 @@ class ApiConfig {
   
   // FCM Token
   static const String fcmToken = '/fcm-token';
+
+  // Tablette - connexion par code client (sans auth)
+  static const String tabletSession = '/tablet/session';
+  static const String tabletLogout = '/tablet/logout';
+
+  /// ID de l'établissement (hôtel) pour la tablette. À configurer par build/env.
+  static const int tabletEnterpriseId = 1;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../config/api_config.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 
@@ -42,6 +43,40 @@ class AuthProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Connexion tablette par code client
+  Future<bool> loginWithCode(String code) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _authService.loginByTabletCode(
+        code: code,
+        enterpriseId: ApiConfig.tabletEnterpriseId,
+      );
+
+      final user = result['user'];
+      if (user != null) {
+        _user = user as User;
+        _isAuthenticated = true;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      _user = null;
+      _isAuthenticated = false;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      _isAuthenticated = false;
+      notifyListeners();
+      return false;
     }
   }
 

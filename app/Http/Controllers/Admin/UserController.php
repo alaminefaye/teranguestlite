@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -87,11 +88,13 @@ class UserController extends Controller
             $validated['department'] = null;
         }
 
-        // Si ce n'est pas un guest, room_number = null
+        // Si ce n'est pas un guest, room_number et tablet_code = null
         if ($validated['role'] !== 'guest') {
             $validated['room_number'] = null;
+            $validated['tablet_code'] = null;
         }
 
+        $validated['tablet_code'] = $validated['tablet_code'] ? strtoupper(trim($validated['tablet_code'])) : null;
         $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
@@ -131,6 +134,14 @@ class UserController extends Controller
             'enterprise_id' => 'nullable|exists:enterprises,id',
             'department' => 'nullable|string|max:255',
             'room_number' => 'nullable|string|max:50',
+            'tablet_code' => [
+                'nullable',
+                'string',
+                'max:20',
+                Rule::unique('users', 'tablet_code')->where(function ($q) use ($request) {
+                    $q->where('enterprise_id', $request->input('enterprise_id'));
+                })->ignore($user->id),
+            ],
         ]);
 
         // Si c'est un super_admin, pas d'entreprise
@@ -138,16 +149,21 @@ class UserController extends Controller
             $validated['enterprise_id'] = null;
             $validated['department'] = null;
             $validated['room_number'] = null;
+            $validated['tablet_code'] = null;
         }
 
-        // Si c'est un guest, département = null
+        // Si c'est un guest, département = null, normaliser tablet_code
         if ($validated['role'] === 'guest') {
             $validated['department'] = null;
+            $validated['tablet_code'] = isset($validated['tablet_code']) && $validated['tablet_code'] !== ''
+                ? strtoupper(trim($validated['tablet_code']))
+                : null;
         }
 
-        // Si ce n'est pas un guest, room_number = null
+        // Si ce n'est pas un guest, room_number et tablet_code = null
         if ($validated['role'] !== 'guest') {
             $validated['room_number'] = null;
+            $validated['tablet_code'] = null;
         }
 
         // Ne mettre à jour le mot de passe que s'il est fourni

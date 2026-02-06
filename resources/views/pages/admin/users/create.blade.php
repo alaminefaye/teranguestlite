@@ -100,6 +100,19 @@
                 @enderror
             </div>
 
+            <!-- Code tablette (pour guest uniquement) -->
+            <div x-data="{ role: '{{ old('role', 'admin') }}' }" x-show="role === 'guest'">
+                <label for="tablet_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Code tablette
+                </label>
+                <input type="text" name="tablet_code" id="tablet_code" value="{{ old('tablet_code') }}" placeholder="Ex: 1234" maxlength="20"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Code utilisé par le client sur la tablette (unique par établissement).</p>
+                @error('tablet_code')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Mot de passe -->
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

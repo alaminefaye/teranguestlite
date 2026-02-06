@@ -28,8 +28,8 @@ class Reservation extends Model
     ];
 
     protected $casts = [
-        'check_in' => 'date',
-        'check_out' => 'date',
+        'check_in' => 'datetime',
+        'check_out' => 'datetime',
         'total_price' => 'decimal:2',
         'checked_in_at' => 'datetime',
         'checked_out_at' => 'datetime',
@@ -119,6 +119,18 @@ class Reservation extends Model
     public function scopeCheckOutToday($query)
     {
         return $query->whereDate('check_out', today());
+    }
+
+    /**
+     * Scope : réservation valide à l'instant donné (check_in <= now <= check_out, statut confirmé ou checked_in)
+     */
+    public function scopeValidAt($query, $at = null)
+    {
+        $at = $at ?? now();
+        return $query
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', $at)
+            ->where('check_out', '>=', $at);
     }
 
     /**

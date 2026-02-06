@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
-import 'login_screen.dart';
+import 'code_entry_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -67,9 +67,9 @@ class _SplashScreenState extends State<SplashScreen>
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } else {
-      // Pas connecté → Login
+      // Pas connecté → écran code client (tablette)
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const CodeEntryScreen()),
       );
     }
   }

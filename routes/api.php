@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SpaServiceController;
 use App\Http\Controllers\Api\ExcursionController;
 use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
+use App\Http\Controllers\Api\TabletSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,13 @@ use App\Http\Controllers\Api\PalaceServiceController;
 // ==========================================
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+});
+
+// ==========================================
+// TABLETTE - Connexion par code client (Public)
+// ==========================================
+Route::prefix('tablet')->group(function () {
+    Route::post('/session', [TabletSessionController::class, 'session']);
 });
 
 // ==========================================
@@ -117,4 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/request', [PalaceServiceController::class, 'request']);
     });
     Route::get('/my-palace-requests', [PalaceServiceController::class, 'myRequests']);
+
+    // Déconnexion tablette (même token que auth)
+    Route::post('/tablet/logout', [TabletSessionController::class, 'logout']);
 });
