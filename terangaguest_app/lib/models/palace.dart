@@ -4,6 +4,8 @@ class PalaceService {
   final String? description;
   final String? category;
   final bool isAvailable;
+  /// URL complète de l'image (fournie par le serveur)
+  final String? image;
 
   PalaceService({
     required this.id,
@@ -11,6 +13,7 @@ class PalaceService {
     this.description,
     this.category,
     required this.isAvailable,
+    this.image,
   });
 
   factory PalaceService.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class PalaceService {
       description: json['description'] as String?,
       category: json['category'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
+      image: json['image'] as String?,
     );
   }
 
@@ -30,6 +34,7 @@ class PalaceService {
       'description': description,
       'category': category,
       'is_available': isAvailable,
+      'image': image,
     };
   }
 }

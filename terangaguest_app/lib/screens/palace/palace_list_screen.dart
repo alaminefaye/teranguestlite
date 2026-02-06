@@ -177,26 +177,31 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(12.0),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(_iconForPalaceService(service),
-                                  size: 48, color: AppTheme.accentGold),
-                              const SizedBox(height: 16),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: _buildServiceImage(service),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
                               Text(service.name,
                                   style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.accentGold),
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis),
                               if (service.category != null) ...[
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 4),
                                 Text(service.category!,
                                     style: const TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 11,
                                         color: AppTheme.textGray),
                                     textAlign: TextAlign.center),
                               ],
@@ -210,6 +215,42 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  /// Image du serveur qui occupe tout l'espace, ou icône par défaut centrée
+  Widget _buildServiceImage(PalaceService service) {
+    final fallbackIcon = Center(
+      child: Icon(
+        _iconForPalaceService(service),
+        size: 48,
+        color: AppTheme.accentGold,
+      ),
+    );
+    final imageUrl = service.image?.trim();
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Container(
+        color: AppTheme.primaryDark.withValues(alpha: 0.5),
+        child: fallbackIcon,
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (_, __, ___) => Container(
+        color: AppTheme.primaryDark.withValues(alpha: 0.5),
+        child: fallbackIcon,
+      ),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: AppTheme.primaryDark.withValues(alpha: 0.5),
+          child: fallbackIcon,
         );
       },
     );

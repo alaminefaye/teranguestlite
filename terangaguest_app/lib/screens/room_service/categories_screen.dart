@@ -69,9 +69,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               _buildHeader(),
 
               // Contenu
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -107,10 +105,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 const SizedBox(height: 4),
                 Text(
                   AppLocalizations.of(context).chooseCategory,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textGray,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppTheme.textGray),
                 ),
               ],
             ),

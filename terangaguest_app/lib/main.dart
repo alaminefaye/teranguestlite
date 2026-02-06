@@ -104,7 +104,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
                 builder: (context, child) {
                   if (child == null) return const SizedBox.shrink();
                   return Directionality(
-                    textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection: isRtl
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     child: child,
                   );
                 },
