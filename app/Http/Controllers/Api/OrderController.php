@@ -27,7 +27,7 @@ class OrderController extends Controller
         $query->orderBy($sortBy, $sortOrder);
 
         $perPage = $request->input('per_page', 15);
-        $orders = $query->paginate($perPage);
+        $orders = $query->withCount('orderItems')->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -35,11 +35,12 @@ class OrderController extends Controller
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
-                    'total_amount' => $order->total_amount,
+                    'total' => (float) $order->total,
+                    'total_amount' => (float) $order->total,
                     'formatted_total' => $order->formatted_total,
                     'status' => $order->status,
                     'status_label' => $order->status_name,
-                    'items_count' => count($order->items),
+                    'items_count' => $order->order_items_count,
                     'created_at' => $order->created_at->toISOString(),
                     'estimated_delivery' => $order->created_at->addMinutes(30)->toISOString(),
                 ];
@@ -60,7 +61,8 @@ class OrderController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $order = Order::where('user_id', $request->user()->id)
+        $order = Order::with('orderItems.menuItem')
+            ->where('user_id', $request->user()->id)
             ->where('id', $id)
             ->first();
 
@@ -71,21 +73,24 @@ class OrderController extends Controller
             ], 404);
         }
 
-        // Charger les détails des articles
-        $itemsWithDetails = collect($order->items)->map(function ($item) {
-            $menuItem = MenuItem::find($item['menu_item_id']);
+        $itemsWithDetails = $order->orderItems->map(function ($orderItem) {
+            $menuItem = $orderItem->menuItem;
+            $imageUrl = null;
+            if ($menuItem && $menuItem->image) {
+                $imageUrl = asset('storage/' . $menuItem->image);
+            }
             return [
-                'id' => $item['menu_item_id'],
+                'id' => $orderItem->menu_item_id,
                 'menu_item' => [
-                    'id' => $menuItem->id,
-                    'name' => $menuItem->name,
-                    'image' => $menuItem->image ? asset('storage/' . $menuItem->image) : null,
-                    'description' => $menuItem->description,
+                    'id' => $orderItem->menu_item_id,
+                    'name' => $orderItem->item_name,
+                    'image' => $imageUrl,
+                    'description' => $orderItem->item_description,
                 ],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'subtotal' => $item['subtotal'],
-                'special_instructions' => $item['special_instructions'] ?? null,
+                'quantity' => $orderItem->quantity,
+                'unit_price' => (float) $orderItem->unit_price,
+                'subtotal' => (float) $orderItem->total_price,
+                'special_instructions' => $orderItem->special_requests,
             ];
         });
 
@@ -94,11 +99,13 @@ class OrderController extends Controller
             'data' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
-                'total_amount' => $order->total_amount,
+                'total' => (float) $order->total,
+                'total_amount' => (float) $order->total,
                 'formatted_total' => $order->formatted_total,
                 'status' => $order->status,
                 'status_label' => $order->status_name,
                 'special_instructions' => $order->special_instructions,
+                'instructions' => $order->special_instructions,
                 'items' => $itemsWithDetails,
                 'created_at' => $order->created_at->toISOString(),
                 'updated_at' => $order->updated_at->toISOString(),
@@ -111,7 +118,8 @@ class OrderController extends Controller
      */
     public function reorder(Request $request, $id)
     {
-        $order = Order::where('user_id', $request->user()->id)
+        $order = Order::with('orderItems')
+            ->where('user_id', $request->user()->id)
             ->where('id', $id)
             ->first();
 
@@ -124,10 +132,10 @@ class OrderController extends Controller
 
         // Vérifier la disponibilité des articles
         $unavailableItems = [];
-        foreach ($order->items as $item) {
-            $menuItem = MenuItem::find($item['menu_item_id']);
+        foreach ($order->orderItems as $orderItem) {
+            $menuItem = MenuItem::find($orderItem->menu_item_id);
             if (!$menuItem || !$menuItem->is_available) {
-                $unavailableItems[] = $menuItem ? $menuItem->name : 'Article supprimé';
+                $unavailableItems[] = $menuItem ? $menuItem->name : $orderItem->item_name;
             }
         }
 
@@ -139,17 +147,45 @@ class OrderController extends Controller
             ], 400);
         }
 
-        // Créer une nouvelle commande avec les mêmes articles
+        $user = $request->user();
+        $roomId = null;
+        if ($user->room_number) {
+            $room = \App\Models\Room::where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+            $roomId = $room?->id;
+        }
+
+        $subtotal = $order->orderItems->sum('total_price');
+        $tax = 0;
+        $deliveryFee = 0;
+        $total = $subtotal + $tax + $deliveryFee;
+
         $newOrder = Order::create([
-            'user_id' => $request->user()->id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
+            'user_id' => $user->id,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $roomId,
             'order_number' => $this->generateOrderNumber(),
-            'items' => $order->items,
-            'total_amount' => $order->total_amount,
+            'type' => 'room_service',
             'status' => 'pending',
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'delivery_fee' => $deliveryFee,
+            'total' => $total,
             'special_instructions' => $order->special_instructions,
         ]);
+
+        foreach ($order->orderItems as $orderItem) {
+            $newOrder->orderItems()->create([
+                'menu_item_id' => $orderItem->menu_item_id,
+                'item_name' => $orderItem->item_name,
+                'item_description' => $orderItem->item_description,
+                'unit_price' => $orderItem->unit_price,
+                'quantity' => $orderItem->quantity,
+                'total_price' => $orderItem->total_price,
+                'special_requests' => $orderItem->special_requests,
+            ]);
+        }
 
         // Notification
         try {
@@ -165,7 +201,8 @@ class OrderController extends Controller
             'data' => [
                 'id' => $newOrder->id,
                 'order_number' => $newOrder->order_number,
-                'total_amount' => $newOrder->total_amount,
+                'total' => (float) $newOrder->total,
+                'total_amount' => (float) $newOrder->total,
                 'formatted_total' => $newOrder->formatted_total,
                 'status' => $newOrder->status,
             ],
