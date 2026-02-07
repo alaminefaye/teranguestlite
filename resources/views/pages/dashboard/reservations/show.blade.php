@@ -104,8 +104,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Client</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->user->name }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $reservation->user->email }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->guest?->name ?? $reservation->user?->name ?? '—' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $reservation->guest?->email ?? $reservation->user?->email ?? '—' }}</p>
                 </div>
 
                 <div>
@@ -170,6 +170,86 @@
                     <p class="text-gray-800 dark:text-white/90">{{ $reservation->updated_at->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Note de chambre / Facture -->
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Note de chambre (facture)</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Commandes « Mettre sur la note de la chambre » pour ce séjour. Avant le check-out, réglez la note et indiquez le moyen de paiement (Wave, Orange Money, Espèce, Carte bancaire).</p>
+
+            @if($roomBillOrders->count() > 0)
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-800/50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">N° commande</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($roomBillOrders as $order)
+                                <tr>
+                                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="px-3 py-2">
+                                        <a href="{{ route('dashboard.orders.show', $order) }}" class="text-brand-600 dark:text-brand-400 hover:underline font-mono">{{ $order->order_number }}</a>
+                                    </td>
+                                    <td class="px-3 py-2 text-right font-medium">{{ number_format($order->total, 0, ',', ' ') }} FCFA</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
+                    <span class="font-semibold text-gray-800 dark:text-white/90">Total à régler</span>
+                    <span class="text-xl font-bold text-brand-600 dark:text-brand-400">{{ number_format($totalRoomBill, 0, ',', ' ') }} FCFA</span>
+                </div>
+                <form action="{{ route('dashboard.reservations.settle', $reservation) }}" method="POST" class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-800/30">
+                    @csrf
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Moyen de paiement pour la facture</p>
+                    <div class="flex flex-wrap gap-4 mb-3">
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="payment_method" value="wave" class="rounded-full border-gray-300 text-brand-500" required>
+                            <span class="text-sm">Wave</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="payment_method" value="orange_money" class="rounded-full border-gray-300 text-brand-500">
+                            <span class="text-sm">Orange Money</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="payment_method" value="cash" class="rounded-full border-gray-300 text-brand-500">
+                            <span class="text-sm">Espèce</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="payment_method" value="card" class="rounded-full border-gray-300 text-brand-500">
+                            <span class="text-sm">Carte bancaire</span>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="settle_notes" class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Notes (optionnel)</label>
+                        <input type="text" name="notes" id="settle_notes" maxlength="500" class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Réf. transaction, etc.">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 text-sm font-medium">
+                        Régler la note / Établir la facture
+                    </button>
+                </form>
+            @else
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Aucune charge en attente sur la note de chambre pour ce séjour.</p>
+            @endif
+
+            @if($reservation->settlements->count() > 0)
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Règlements effectués</h4>
+                    <ul class="space-y-2 text-sm">
+                        @foreach($reservation->settlements as $s)
+                            <li class="flex justify-between items-center">
+                                <span>{{ $s->paid_at->format('d/m/Y H:i') }} — {{ $s->payment_method_name }}</span>
+                                <span class="font-medium">{{ number_format($s->amount, 0, ',', ' ') }} FCFA</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
     </div>
 

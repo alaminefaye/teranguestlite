@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Guest;
 use App\Models\Reservation;
+use App\Models\ReservationSettlement;
 use App\Models\Room;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -129,12 +131,48 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        $reservation->load(['room', 'user', 'guest', 'enterprise']);
+        $reservation->load(['room', 'user', 'guest', 'enterprise', 'settlements']);
+        $roomBillOrders = $reservation->roomBillOrdersUnsettled()->with('orderItems')->orderBy('created_at')->get();
+        $totalRoomBill = $roomBillOrders->sum('total');
 
         return view('pages.dashboard.reservations.show', [
             'title' => 'Réservation ' . $reservation->reservation_number,
             'reservation' => $reservation,
+            'roomBillOrders' => $roomBillOrders,
+            'totalRoomBill' => $totalRoomBill,
         ]);
+    }
+
+    /**
+     * Régler la note de chambre (facture) : Wave, Orange Money, Espèce, Carte bancaire
+     */
+    public function settle(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $request->validate([
+            'payment_method' => 'required|in:wave,orange_money,cash,card',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $orders = $reservation->roomBillOrdersUnsettled()->get();
+        $amount = $orders->sum('total');
+
+        if ($amount <= 0) {
+            return back()->with('error', 'Aucun montant à régler sur la note de chambre.');
+        }
+
+        ReservationSettlement::create([
+            'reservation_id' => $reservation->id,
+            'amount' => $amount,
+            'payment_method' => $request->payment_method,
+            'paid_at' => now(),
+            'notes' => $request->notes,
+        ]);
+
+        foreach ($orders as $order) {
+            $order->update(['settled_at' => now()]);
+        }
+
+        return back()->with('success', 'Note de chambre réglée : ' . number_format($amount, 0, ',', ' ') . ' FCFA (' . (ReservationSettlement::paymentMethodLabels()[$request->payment_method] ?? $request->payment_method) . ').');
     }
 
     /**

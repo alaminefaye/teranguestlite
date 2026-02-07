@@ -29,6 +29,7 @@ class Order extends Model
         'confirmed_at',
         'prepared_at',
         'delivered_at',
+        'settled_at',
     ];
 
     protected $casts = [
@@ -39,6 +40,7 @@ class Order extends Model
         'confirmed_at' => 'datetime',
         'prepared_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'settled_at' => 'datetime',
     ];
 
     /**

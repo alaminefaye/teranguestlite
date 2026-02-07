@@ -83,6 +83,27 @@ class Reservation extends Model
     }
 
     /**
+     * Règlements / factures (Wave, Orange Money, Espèce, Carte bancaire)
+     */
+    public function settlements()
+    {
+        return $this->hasMany(ReservationSettlement::class);
+    }
+
+    /**
+     * Commandes « note de chambre » non encore réglées pour ce séjour
+     */
+    public function roomBillOrdersUnsettled()
+    {
+        return Order::withoutGlobalScope('enterprise')
+            ->where('payment_method', 'room_bill')
+            ->whereNull('settled_at')
+            ->where('guest_id', $this->guest_id)
+            ->where('room_id', $this->room_id)
+            ->whereBetween('created_at', [$this->check_in, $this->check_out]);
+    }
+
+    /**
      * Scope pour les réservations en attente
      */
     public function scopePending($query)

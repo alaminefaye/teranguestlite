@@ -52,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('reservations.checkout');
         Route::post('reservations/{reservation}/cancel', [\App\Http\Controllers\Dashboard\ReservationController::class, 'cancel'])
             ->name('reservations.cancel');
+        Route::post('reservations/{reservation}/settle', [\App\Http\Controllers\Dashboard\ReservationController::class, 'settle'])
+            ->name('reservations.settle');
         
         // Clients (invités) - code tablette
         Route::resource('guests', \App\Http\Controllers\Dashboard\GuestController::class);
