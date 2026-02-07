@@ -22,16 +22,23 @@ class LaundryApi {
   }
 
   /// Créer une demande de blanchisserie
+  /// Backend attend: items[].laundry_service_id, items[].quantity, special_instructions, pickup_time (optionnel)
   Future<LaundryRequest> createLaundryRequest({
     required List<Map<String, int>> items,
     String? specialInstructions,
   }) async {
     try {
+      final payloadItems = items.map((e) => {
+        'laundry_service_id': e['service_id'] ?? e['laundry_service_id']!,
+        'quantity': e['quantity']!,
+      }).toList();
+
       final response = await _apiService.post(
         ApiConfig.laundryRequest,
         data: {
-          'items': items,
-          'special_instructions': specialInstructions,
+          'items': payloadItems,
+          if (specialInstructions != null && specialInstructions.isNotEmpty)
+            'special_instructions': specialInstructions,
         },
       );
 
@@ -39,8 +46,26 @@ class LaundryApi {
           response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      rethrow;
+      final message = _messageFromDio(e);
+      throw Exception(message);
     }
+  }
+
+  static String _messageFromDio(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+    if (e.response?.statusCode == 422) {
+      final errors = data is Map ? data['errors'] : null;
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first as String;
+      }
+      return 'Vérifiez les articles et quantités.';
+    }
+    return e.message ?? 'Erreur lors de la demande de blanchisserie.';
   }
 
   /// Récupère les demandes de l'utilisateur

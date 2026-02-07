@@ -261,12 +261,18 @@ class ReservationController extends Controller
     }
 
     /**
-     * Check-out action
+     * Check-out — autorisé seulement si la note de chambre est réglée.
      */
     public function checkOut(Reservation $reservation)
     {
         if ($reservation->status !== 'checked_in') {
             return back()->with('error', 'Seules les réservations avec check-in peuvent être check-out.');
+        }
+
+        $orders = $reservation->roomBillOrdersUnsettled()->get();
+        $totalRoomBill = $orders->sum(fn ($o) => (float) $o->total);
+        if ($totalRoomBill > 0) {
+            return back()->with('error', 'La note de chambre doit être réglée avant le check-out. Réglez la facture dans la section « Note de chambre » ci-dessous, puis réessayez.');
         }
 
         $reservation->update([

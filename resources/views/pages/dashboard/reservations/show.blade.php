@@ -26,15 +26,27 @@
             @endif
 
             @if($reservation->status === 'checked_in')
-                <form action="{{ route('dashboard.reservations.checkout', $reservation) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-success-500 text-white rounded-md hover:bg-success-600">
+                @php
+                    $canCheckout = ($totalRoomBill ?? 0) == 0;
+                @endphp
+                @if($canCheckout)
+                    <form action="{{ route('dashboard.reservations.checkout', $reservation) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-success-500 text-white rounded-md hover:bg-success-600">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            Check-out
+                        </button>
+                    </form>
+                @else
+                    <span class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md cursor-not-allowed" title="Réglez d'abord la note de chambre ci-dessous">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
-                        Check-out
-                    </button>
-                </form>
+                        Check-out (réglez la note d'abord)
+                    </span>
+                @endif
             @endif
 
             @if(in_array($reservation->status, ['pending', 'confirmed']))

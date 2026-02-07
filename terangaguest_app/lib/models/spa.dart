@@ -94,16 +94,20 @@ class SpaReservation {
 
   factory SpaReservation.fromJson(Map<String, dynamic> json) {
     final spaService = json['spa_service'] as Map<String, dynamic>?;
+    final dateRaw = json['date'];
+    final timeRaw = json['time'];
+    final statusRaw = json['status'];
+    final createdAtRaw = json['created_at'];
     return SpaReservation(
       id: json['id'] as int,
       serviceId: spaService != null ? (spaService['id'] as int) : (json['service_id'] as int? ?? 0),
       serviceName: spaService != null ? (spaService['name'] as String) : (json['service_name'] as String? ?? ''),
-      date: DateTime.parse(json['date'] as String),
-      time: json['time'] as String,
-      status: json['status'] as String,
+      date: dateRaw != null ? DateTime.parse(dateRaw as String) : DateTime.now(),
+      time: timeRaw != null ? (timeRaw as String) : '00:00',
+      status: statusRaw != null ? (statusRaw as String) : 'confirmed',
       specialRequests: json['special_requests'] as String?,
       price: _parseDouble(json['price']),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: createdAtRaw != null ? DateTime.parse(createdAtRaw as String) : DateTime.now(),
     );
   }
 

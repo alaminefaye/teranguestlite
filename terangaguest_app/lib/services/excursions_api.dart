@@ -51,9 +51,10 @@ class ExcursionsApi {
         '${ApiConfig.excursions}/$excursionId/book',
         data: {
           'date': date.toIso8601String().split('T')[0],
-          'adults_count': adultsCount,
-          'children_count': childrenCount,
-          'special_requests': specialRequests,
+          'adults': adultsCount,
+          'children': childrenCount,
+          if (specialRequests != null && specialRequests.isNotEmpty)
+            'special_requests': specialRequests,
         },
       );
 
@@ -62,8 +63,26 @@ class ExcursionsApi {
       );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      rethrow;
+      final message = _messageFromDio(e);
+      throw Exception(message);
     }
+  }
+
+  static String _messageFromDio(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+    if (e.response?.statusCode == 422) {
+      final errors = data is Map ? data['errors'] : null;
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first as String;
+      }
+      return 'Vérifiez la date et le nombre de participants.';
+    }
+    return e.message ?? 'Erreur lors de la réservation.';
   }
 
   /// Récupère les bookings de l'utilisateur

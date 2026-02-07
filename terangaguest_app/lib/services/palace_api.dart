@@ -22,17 +22,25 @@ class PalaceApi {
   }
 
   /// Créer une demande de service palace
+  /// Backend attend: description (requis), requested_for (Y-m-d H:i), special_requirements (optionnel)
   Future<PalaceRequest> createPalaceRequest({
     required int serviceId,
     String? details,
     DateTime? scheduledTime,
   }) async {
     try {
+      final description = (details?.trim() ?? '').isEmpty
+          ? 'Demande sans précision'
+          : details!.trim();
+      final requestedFor = scheduledTime != null
+          ? '${scheduledTime.year.toString().padLeft(4, '0')}-${scheduledTime.month.toString().padLeft(2, '0')}-${scheduledTime.day.toString().padLeft(2, '0')} ${scheduledTime.hour.toString().padLeft(2, '0')}:${scheduledTime.minute.toString().padLeft(2, '0')}'
+          : null;
+
       final response = await _apiService.post(
         '/palace-services/$serviceId/request',
         data: {
-          'details': details,
-          'scheduled_time': scheduledTime?.toIso8601String(),
+          'description': description,
+          if (requestedFor != null) 'requested_for': requestedFor,
         },
       );
 
@@ -40,8 +48,26 @@ class PalaceApi {
           response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      rethrow;
+      final message = _messageFromDio(e);
+      throw Exception(message);
     }
+  }
+
+  static String _messageFromDio(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+    if (e.response?.statusCode == 422) {
+      final errors = data is Map ? data['errors'] : null;
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first as String;
+      }
+      return 'Vérifiez les informations saisies.';
+    }
+    return e.message ?? 'Erreur lors de l\'envoi de la demande.';
   }
 
   /// Récupère les demandes de l'utilisateur
