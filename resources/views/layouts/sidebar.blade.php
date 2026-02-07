@@ -114,7 +114,7 @@
                                     @if (isset($item['subItems']))
                                         <!-- Menu Item with Submenu -->
                                         <button @click="toggleSubmenu({{ $groupIndex }}, {{ $itemIndex }})"
-                                            class="menu-item group w-full"
+                                            class="menu-item group w-full items-start"
                                             :class="[
                                                 isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) ?
                                                 'menu-item-active' : 'menu-item-inactive',
@@ -123,15 +123,15 @@
                                             ]">
 
                                             <!-- Icon -->
-                                            <span :class="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) ?
+                                            <span class="flex-shrink-0" :class="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) ?
                                                     'menu-item-icon-active' : 'menu-item-icon-inactive'">
                                                 {!! MenuHelper::getIconSvg($item['icon']) !!}
                                             </span>
 
-                                            <!-- Text -->
+                                            <!-- Text (retour à la ligne si long) -->
                                             <span
                                                 x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                                                class="menu-item-text flex items-center gap-2">
+                                                class="menu-item-text min-w-0 flex-1 break-words text-left leading-tight">
                                                 {{ $item['name'] }}
                                                 @if (!empty($item['new']))
                                                     <span class="absolute right-10"
@@ -145,7 +145,7 @@
 
                                             <!-- Chevron Down Icon -->
                                             <svg x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                                                class="ml-auto w-5 h-5 transition-transform duration-200"
+                                                class="flex-shrink-0 ml-auto w-5 h-5 transition-transform duration-200"
                                                 :class="{
                                                     'rotate-180 text-brand-500': isSubmenuOpen({{ $groupIndex }},
                                                         {{ $itemIndex }})
@@ -160,12 +160,12 @@
                                             <ul class="mt-2 space-y-1 ml-9">
                                                 @foreach ($item['subItems'] as $subItem)
                                                     <li>
-                                                        <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
+                                                        <a href="{{ $subItem['path'] }}" class="menu-dropdown-item flex-wrap"
                                                             :class="isActiveOrChild('{{ $subItem['path'] }}') ?
                                                                 'menu-dropdown-item-active' :
                                                                 'menu-dropdown-item-inactive'">
-                                                            {{ $subItem['name'] }}
-                                                            <span class="flex items-center gap-1 ml-auto">
+                                                            <span class="min-w-0 flex-1 break-words text-left leading-tight">{{ $subItem['name'] }}</span>
+                                                            <span class="flex items-center gap-1 ml-auto flex-shrink-0">
                                                                 @if (!empty($subItem['new']))
                                                                     <span
                                                                         :class="isActive('{{ $subItem['path'] }}') ?
@@ -190,7 +190,7 @@
                                         </div>
                                     @else
                                         <!-- Simple Menu Item -->
-                                        <a href="{{ $item['path'] }}" class="menu-item group"
+                                        <a href="{{ $item['path'] }}" class="menu-item group items-start"
                                             :class="[
                                                 isActive('{{ $item['path'] }}') ? 'menu-item-active' :
                                                 'menu-item-inactive',
@@ -200,16 +200,16 @@
                                             ]">
 
                                             <!-- Icon -->
-                                            <span
+                                            <span class="flex-shrink-0"
                                                 :class="isActive('{{ $item['path'] }}') ? 'menu-item-icon-active' :
                                                     'menu-item-icon-inactive'">
                                                 {!! MenuHelper::getIconSvg($item['icon']) !!}
                                             </span>
 
-                                            <!-- Text -->
+                                            <!-- Text (retour à la ligne si long) -->
                                             <span
                                                 x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                                                class="menu-item-text flex items-center gap-2">
+                                                class="menu-item-text min-w-0 flex-1 break-words text-left leading-tight">
                                                 {{ $item['name'] }}
                                                 @if (!empty($item['new']))
                                                     <span

@@ -85,7 +85,9 @@ class Room extends Model
     }
 
     /**
-     * Vérifier si la chambre est disponible pour une période
+     * Vérifier si la chambre est disponible pour une période.
+     * On ne bloque que les réservations actives : pending, confirmed, checked_in.
+     * Les réservations annulées ou déjà terminées (checked_out) ne bloquent pas.
      */
     public function isAvailableForPeriod($checkIn, $checkOut)
     {
@@ -93,8 +95,10 @@ class Room extends Model
             return false;
         }
 
+        $activeStatuses = ['pending', 'confirmed', 'checked_in'];
+
         return !$this->reservations()
-            ->where('status', '!=', 'cancelled')
+            ->whereIn('status', $activeStatuses)
             ->where(function ($query) use ($checkIn, $checkOut) {
                 $query->whereBetween('check_in', [$checkIn, $checkOut])
                     ->orWhereBetween('check_out', [$checkIn, $checkOut])
