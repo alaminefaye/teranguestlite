@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../widgets/quantity_selector.dart';
@@ -28,8 +29,16 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TabletSessionProvider>().load();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final tabletSession = context.read<TabletSessionProvider>();
+      await tabletSession.load();
+      // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
+      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+        final authUser = context.read<AuthProvider>().user;
+        if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
+          await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
+        }
+      }
     });
   }
 
@@ -61,6 +70,13 @@ class _CartScreenState extends State<CartScreen> {
     // Spec tablette : le code client est toujours demandé à la validation (pas de checkout "utilisateur connecté").
     // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
     if (!tabletSession.hasSession) {
+      // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
+      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+        final authUser = context.read<AuthProvider>().user;
+        if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
+          await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
+        }
+      }
       final success = await _showGuestCodeDialog(context, tabletSession);
       if (!success || !context.mounted) return;
       if (!tabletSession.hasSession) return;
@@ -194,7 +210,7 @@ class _CartScreenState extends State<CartScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
-                      obscureText: true,
+                      obscureText: false,
                       maxLength: 6,
                       style: const TextStyle(color: Colors.white, letterSpacing: 8),
                       onChanged: (v) => code = v.trim(),
@@ -242,7 +258,18 @@ class _CartScreenState extends State<CartScreen> {
                             await ts.validateCode(c);
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop(true);
-                          } catch (_) {}
+                          } catch (e) {
+                            final message = e.toString().replaceFirst('Exception: ', '');
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                SnackBar(
+                                  content: Text(message),
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(seconds: 5),
+                                ),
+                              );
+                            }
+                          }
                         },
                   style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold),
                   child: loading

@@ -8,6 +8,7 @@ class TabletSessionApi {
   final ApiService _api = ApiService();
 
   /// Valide le code client. Envoie [roomId] ou [roomNumber] pour lier à la chambre.
+  /// En cas d'erreur (401/403), lance une Exception avec le message clair du serveur.
   Future<GuestSession> validateCode({
     required String code,
     int? roomId,
@@ -16,19 +17,35 @@ class TabletSessionApi {
     if (roomId == null && (roomNumber == null || roomNumber.isEmpty)) {
       throw Exception('Indiquez le numéro de chambre ou l\'identifiant de la chambre.');
     }
-    final response = await _api.post(
-      ApiConfig.tabletValidateCode,
-      data: {
-        'code': code.trim(),
-        if (roomId != null) 'room_id': roomId,
-        if (roomNumber != null && roomNumber.isNotEmpty) 'room_number': roomNumber,
-      },
-    );
-    final data = response.data;
-    if (data['success'] != true || data['data'] == null) {
-      throw Exception(data['message'] ?? 'Code invalide ou séjour expiré.');
+    try {
+      final response = await _api.post(
+        ApiConfig.tabletValidateCode,
+        data: {
+          'code': code.trim(),
+          if (roomId != null) 'room_id': roomId,
+          if (roomNumber != null && roomNumber.isNotEmpty) 'room_number': roomNumber,
+        },
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true || data['data'] == null) {
+        throw Exception(data?['message'] ?? 'Code invalide ou séjour expiré.');
+      }
+      return GuestSession.fromJson(data['data'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final message = body is Map && body.containsKey('message')
+          ? (body['message'] as String?)
+          : null;
+      throw Exception(
+        message?.trim().isNotEmpty == true
+            ? message!
+            : (e.response?.statusCode == 401
+                ? 'Le code saisi est incorrect. Vérifiez le code à 6 chiffres reçu à l\'enregistrement.'
+                : e.response?.statusCode == 403
+                    ? 'Votre réservation est terminée ou n\'est pas encore active. Vérifiez vos dates de séjour avec la réception.'
+                    : 'Impossible de valider le code. Réessayez ou contactez la réception.'),
+      );
     }
-    return GuestSession.fromJson(data['data'] as Map<String, dynamic>);
   }
 
   /// Checkout room service avec session client (tablette).

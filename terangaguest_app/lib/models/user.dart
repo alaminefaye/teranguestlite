@@ -34,7 +34,7 @@ class User {
       role: json['role'] as String,
       enterpriseId: _parseId(json['enterprise_id']),
       department: json['department'] as String?,
-      roomNumber: json['room_number'] as String?,
+      roomNumber: _parseStringNullable(json['room_number']),
       mustChangePassword: json['must_change_password'] as bool? ?? false,
       fcmToken: json['fcm_token'] as String?,
       enterprise: json['enterprise'] != null
@@ -51,6 +51,13 @@ class User {
     if (value == null) return null;
     if (value is int) return value;
     if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static String? _parseStringNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is int) return value.toString();
     return null;
   }
 

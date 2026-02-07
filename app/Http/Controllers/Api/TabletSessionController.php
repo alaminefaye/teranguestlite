@@ -58,7 +58,7 @@ class TabletSessionController extends Controller
         if (!$guest) {
             return response()->json([
                 'success' => false,
-                'message' => 'Code invalide.',
+                'message' => 'Le code saisi est incorrect. Vérifiez le code à 6 chiffres reçu à l\'enregistrement.',
             ], 401);
         }
 
@@ -73,7 +73,7 @@ class TabletSessionController extends Controller
         if (!$reservation) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucun séjour valide pour cette chambre. Vérifiez les dates de check-in et check-out.',
+                'message' => 'Votre réservation est terminée ou n\'est pas encore active. Vérifiez vos dates de séjour avec la réception.',
             ], 403);
         }
 
