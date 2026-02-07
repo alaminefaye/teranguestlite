@@ -139,8 +139,8 @@ class MenuHelper
                     ],
                     [
                         'icon' => 'task',
-                        'name' => 'Tablettes',
-                        'path' => '/dashboard/tablets',
+                        'name' => 'Accès tablettes',
+                        'path' => '/dashboard/tablet-accesses',
                     ],
                 ],
             ],

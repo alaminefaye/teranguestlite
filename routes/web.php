@@ -80,8 +80,13 @@ Route::middleware(['auth'])->group(function () {
         // Staff (personnel de l'hôtel)
         Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');
 
-        // Tablettes (tablettes en chambre reliées à une chambre)
-        Route::resource('tablets', \App\Http\Controllers\Dashboard\TabletController::class)->only(['index', 'create', 'store', 'destroy']);
+        // Accès tablettes : comptes "Client Chambre XXX" (User role=guest) — gérant de l'hôtel
+        Route::get('tablet-accesses', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'index'])->name('tablet-accesses.index');
+        Route::get('tablet-accesses/create', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'create'])->name('tablet-accesses.create');
+        Route::post('tablet-accesses', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'store'])->name('tablet-accesses.store');
+        Route::get('tablet-accesses/{id}/edit', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'edit'])->name('tablet-accesses.edit');
+        Route::put('tablet-accesses/{id}', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'update'])->name('tablet-accesses.update');
+        Route::delete('tablet-accesses/{id}', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'destroy'])->name('tablet-accesses.destroy');
 
         // Commandes
         Route::resource('orders', \App\Http\Controllers\Dashboard\OrderController::class);
