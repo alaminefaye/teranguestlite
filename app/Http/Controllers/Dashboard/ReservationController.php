@@ -280,7 +280,7 @@ class ReservationController extends Controller
             'checked_out_at' => now(),
         ]);
 
-        // Mettre à jour le statut de la chambre
+        // Norme : après check-out, la chambre redevient disponible jusqu'à la prochaine réservation (check-in).
         $reservation->room->update(['status' => 'available']);
 
         return back()->with('success', 'Check-out effectué avec succès !');
@@ -297,8 +297,8 @@ class ReservationController extends Controller
 
         $reservation->update(['status' => 'cancelled']);
 
-        // Mettre à jour le statut de la chambre si elle était réservée
-        if ($reservation->room->status === 'reserved') {
+        // Remettre la chambre disponible : si elle était réservée (confirmée) ou occupée (check-in).
+        if (in_array($reservation->room->status, ['reserved', 'occupied'], true)) {
             $reservation->room->update(['status' => 'available']);
         }
 
