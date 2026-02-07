@@ -14,8 +14,24 @@ class Guest extends Model
         'name',
         'email',
         'phone',
+        'gender',
+        'date_of_birth',
+        'nationality',
+        'address',
+        'city',
+        'country',
+        'id_document_type',
+        'id_document_number',
+        'id_document_place_of_issue',
+        'id_document_issued_at',
+        'id_document_photo',
         'access_code',
         'notes',
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'id_document_issued_at' => 'date',
     ];
 
     /**

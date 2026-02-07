@@ -82,6 +82,8 @@ class TabletSessionController extends Controller
             'data' => [
                 'guest_id' => $guest->id,
                 'guest_name' => $guest->name,
+                'guest_phone' => $guest->phone,
+                'guest_email' => $guest->email,
                 'room_id' => $room->id,
                 'room_number' => $room->room_number,
                 'reservation_id' => $reservation->id,

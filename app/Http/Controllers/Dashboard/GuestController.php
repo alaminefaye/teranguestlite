@@ -7,6 +7,7 @@ use App\Models\Guest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 
 class GuestController extends Controller
 {
@@ -19,7 +20,8 @@ class GuestController extends Controller
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('email', 'like', '%' . $request->search . '%')
                   ->orWhere('phone', 'like', '%' . $request->search . '%')
-                  ->orWhere('access_code', 'like', '%' . $request->search . '%');
+                  ->orWhere('access_code', 'like', '%' . $request->search . '%')
+                  ->orWhere('id_document_number', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -37,25 +39,25 @@ class GuestController extends Controller
 
     public function create(): View
     {
-        return view('pages.dashboard.guests.create', ['title' => 'Créer un client']);
+        return view('pages.dashboard.guests.create', ['title' => 'Enregistrer un client']);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validate($this->validationRules());
 
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
         $validated['access_code'] = Guest::generateAccessCode($validated['enterprise_id']);
 
+        if ($request->hasFile('id_document_photo')) {
+            $validated['id_document_photo'] = $request->file('id_document_photo')
+                ->store('guests/id-documents', 'public');
+        }
+
         $guest = Guest::create($validated);
 
         return redirect()->route('dashboard.guests.show', $guest)
-            ->with('success', 'Client créé avec succès ! Code tablette : ' . $guest->access_code);
+            ->with('success', 'Client enregistré avec succès ! Code tablette : ' . $guest->access_code);
     }
 
     public function show(Guest $guest): View
@@ -77,17 +79,41 @@ class GuestController extends Controller
 
     public function update(Request $request, Guest $guest): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validate($this->validationRules());
+
+        if ($request->hasFile('id_document_photo')) {
+            if ($guest->id_document_photo) {
+                Storage::disk('public')->delete($guest->id_document_photo);
+            }
+            $validated['id_document_photo'] = $request->file('id_document_photo')
+                ->store('guests/id-documents', 'public');
+        }
 
         $guest->update($validated);
 
         return redirect()->route('dashboard.guests.show', $guest)
             ->with('success', 'Client mis à jour avec succès !');
+    }
+
+    private function validationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|in:male,female,other',
+            'date_of_birth' => 'nullable|date',
+            'nationality' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'id_document_type' => 'nullable|string|max:50',
+            'id_document_number' => 'nullable|string|max:100',
+            'id_document_place_of_issue' => 'nullable|string|max:150',
+            'id_document_issued_at' => 'nullable|date',
+            'id_document_photo' => 'nullable|file|mimes:jpeg,jpg,png,pdf|max:5120',
+            'notes' => 'nullable|string',
+        ];
     }
 
     public function destroy(Guest $guest): RedirectResponse

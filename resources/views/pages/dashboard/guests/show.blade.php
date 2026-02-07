@@ -45,12 +45,76 @@
         <p class="text-gray-800 dark:text-white/90 mt-1">{{ $guest->phone ?? '—' }}</p>
     </div>
 </div>
+
+{{-- Identité --}}
+@if($guest->gender || $guest->date_of_birth || $guest->nationality)
+<div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Identité</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        @if($guest->gender)
+        <dt class="text-gray-500 dark:text-gray-400">Genre</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->gender === 'male' ? 'Homme' : ($guest->gender === 'female' ? 'Femme' : 'Autre') }}</dd>
+        @endif
+        @if($guest->date_of_birth)
+        <dt class="text-gray-500 dark:text-gray-400">Date de naissance</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->date_of_birth->format('d/m/Y') }}</dd>
+        @endif
+        @if($guest->nationality)
+        <dt class="text-gray-500 dark:text-gray-400">Nationalité</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->nationality }}</dd>
+        @endif
+    </dl>
+</div>
+@endif
+
+{{-- Pièce d'identité --}}
+@if($guest->id_document_type || $guest->id_document_number || $guest->id_document_photo)
+<div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Pièce d'identité</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        @if($guest->id_document_type)
+        <dt class="text-gray-500 dark:text-gray-400">Type</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->id_document_type }}</dd>
+        @endif
+        @if($guest->id_document_number)
+        <dt class="text-gray-500 dark:text-gray-400">N°</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->id_document_number }}</dd>
+        @endif
+        @if($guest->id_document_place_of_issue)
+        <dt class="text-gray-500 dark:text-gray-400">Lieu de délivrance</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->id_document_place_of_issue }}</dd>
+        @endif
+        @if($guest->id_document_issued_at)
+        <dt class="text-gray-500 dark:text-gray-400">Date de délivrance</dt>
+        <dd class="text-gray-800 dark:text-white/90">{{ $guest->id_document_issued_at->format('d/m/Y') }}</dd>
+        @endif
+    </dl>
+    @if($guest->id_document_photo)
+    <p class="mt-3">
+        <a href="{{ asset('storage/'.$guest->id_document_photo) }}" target="_blank" class="text-brand-600 dark:text-brand-400 hover:underline text-sm">Voir la photo / scan de la pièce →</a>
+    </p>
+    @endif
+</div>
+@endif
+
+{{-- Adresse --}}
+@if($guest->address || $guest->city || $guest->country)
+<div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Adresse</h2>
+    <p class="text-gray-800 dark:text-white/90">
+        @if($guest->address){{ $guest->address }}<br>@endif
+        @if($guest->city || $guest->country){{ trim(implode(', ', array_filter([$guest->city, $guest->country]))) ?: '—' }}@endif
+    </p>
+</div>
+@endif
+
 @if($guest->notes)
 <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
     <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Notes</h2>
     <p class="text-gray-700 dark:text-gray-300">{{ $guest->notes }}</p>
 </div>
 @endif
+
 <div class="mt-6">
     <p class="text-sm text-gray-500 dark:text-gray-400">Réservations associées : {{ $guest->reservations_count }}</p>
     <a href="{{ route('dashboard.reservations.index') }}?guest_id={{ $guest->id }}" class="text-brand-600 dark:text-brand-400 text-sm hover:underline">Voir les réservations</a>

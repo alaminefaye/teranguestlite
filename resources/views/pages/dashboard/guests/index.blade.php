@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-6 flex items-center justify-between">
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Clients (invités)</h1>
-    <a href="{{ route('dashboard.guests.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Créer un client</a>
+    <a href="{{ route('dashboard.guests.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Enregistrer un client</a>
 </div>
 
 @if(session('success'))

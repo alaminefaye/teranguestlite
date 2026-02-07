@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../widgets/quantity_selector.dart';
@@ -10,6 +9,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/animated_button.dart';
 import '../../utils/haptic_helper.dart';
+import '../../models/guest_session.dart';
 import '../../utils/navigation_helper.dart';
 import 'order_confirmation_screen.dart';
 
@@ -41,7 +41,6 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> _checkout(BuildContext context) async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final tabletSession = Provider.of<TabletSessionProvider>(context, listen: false);
 
     if (cartProvider.isEmpty) {
@@ -59,26 +58,26 @@ class _CartScreenState extends State<CartScreen> {
         ? null
         : _specialInstructionsController.text;
 
-    // Si utilisateur connecté : checkout classique. Sinon : session tablette (code client).
-    final useTabletSession = !authProvider.isAuthenticated;
-    if (useTabletSession && !tabletSession.hasSession) {
+    // Spec tablette : le code client est toujours demandé à la validation (pas de checkout "utilisateur connecté").
+    // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
+    if (!tabletSession.hasSession) {
       final success = await _showGuestCodeDialog(context, tabletSession);
       if (!success || !context.mounted) return;
       if (!tabletSession.hasSession) return;
     }
 
+    // Confirmation identité : afficher nom, chambre, téléphone pour que le client vérifie que c'est bien lui.
+    final confirmed = await _showConfirmIdentityDialog(context, tabletSession.session!);
+    if (!confirmed || !context.mounted) return;
+
     HapticHelper.confirm();
     setState(() => _isProcessing = true);
 
     try {
-      final result = (useTabletSession && tabletSession.hasSession)
-          ? await cartProvider.checkoutWithTabletSession(
-              tabletSession.session!,
-              specialInstructions: specialInstructions,
-            )
-          : await cartProvider.checkout(
-              specialInstructions: specialInstructions,
-            );
+      final result = await cartProvider.checkoutWithTabletSession(
+        tabletSession.session!,
+        specialInstructions: specialInstructions,
+      );
 
       setState(() => _isProcessing = false);
       if (!context.mounted) return;
@@ -220,6 +219,83 @@ class _CartScreenState extends State<CartScreen> {
     );
     tabletSession.clearError();
     return ok == true;
+  }
+
+  /// Affiche les infos client (nom, chambre, tél) pour qu'il confirme que c'est bien lui avant envoi.
+  Future<bool> _showConfirmIdentityDialog(BuildContext context, GuestSession session) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
+        ),
+        title: const Text(
+          'Confirmer que c\'est bien vous',
+          style: TextStyle(color: AppTheme.accentGold, fontSize: 20),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Vérifiez vos informations avant d\'envoyer la commande :',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              _buildIdentityRow(Icons.person_outline, 'Nom', session.guestName),
+              const SizedBox(height: 10),
+              _buildIdentityRow(Icons.bed, 'Chambre', session.roomNumber),
+              const SizedBox(height: 10),
+              _buildIdentityRow(
+                Icons.phone_outlined,
+                'Téléphone',
+                (session.guestPhone ?? '').isNotEmpty ? (session.guestPhone ?? '') : '—',
+              ),
+              if ((session.guestEmail ?? '').isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _buildIdentityRow(Icons.email_outlined, 'Email', session.guestEmail ?? ''),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Annuler', style: TextStyle(color: AppTheme.textGray)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirmer la commande', style: TextStyle(color: AppTheme.accentGold, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
+  Widget _buildIdentityRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: AppTheme.accentGold),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+              children: [
+                TextSpan(text: '$label : ', style: TextStyle(color: AppTheme.textGray, fontWeight: FontWeight.w500)),
+                TextSpan(text: value),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   /// Localisations avec repli si of(context) est null (évite le crash "Null check operator").

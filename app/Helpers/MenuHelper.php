@@ -98,6 +98,11 @@ class MenuHelper
                         'path' => '/dashboard/reservations',
                     ],
                     [
+                        'icon' => 'user-profile',
+                        'name' => 'Clients (invités)',
+                        'path' => '/dashboard/guests',
+                    ],
+                    [
                         'icon' => 'ecommerce',
                         'name' => 'Commandes',
                         'path' => '/dashboard/orders',
