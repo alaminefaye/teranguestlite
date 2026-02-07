@@ -23,10 +23,18 @@ class Excursion {
     this.inclusions,
   });
 
+  static int _parseIntSafe(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
   factory Excursion.fromJson(Map<String, dynamic> json) {
     return Excursion(
-      id: json['id'] as int,
-      name: json['name'] as String,
+      id: _parseIntSafe(json['id']),
+      name: json['name'] as String? ?? '',
       description: json['description'] as String?,
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
@@ -100,17 +108,35 @@ class ExcursionBooking {
   });
 
   factory ExcursionBooking.fromJson(Map<String, dynamic> json) {
+    final excursion = json['excursion'] as Map<String, dynamic>?;
+    final excursionId = excursion != null
+        ? Excursion._parseIntSafe(excursion['id'])
+        : Excursion._parseIntSafe(json['excursion_id']);
+    final excursionName = excursion != null
+        ? (excursion['name'] as String? ?? '')
+        : (json['excursion_name'] as String? ?? '');
+    final dateStr = json['date'] as String?;
+    final date = dateStr != null
+        ? (DateTime.tryParse(dateStr) ?? DateTime.now())
+        : DateTime.now();
+    final adultsCount = Excursion._parseIntSafe(json['adults'] ?? json['adults_count']);
+    final childrenCount = Excursion._parseIntSafe(json['children'] ?? json['children_count']);
+    final createdAtStr = json['created_at'] as String?;
+    final createdAt = createdAtStr != null
+        ? (DateTime.tryParse(createdAtStr) ?? DateTime.now())
+        : DateTime.now();
+
     return ExcursionBooking(
-      id: json['id'] as int,
-      excursionId: json['excursion_id'] as int,
-      excursionName: json['excursion_name'] as String,
-      date: DateTime.parse(json['date'] as String),
-      adultsCount: _parseInt(json['adults_count']) ?? 0,
-      childrenCount: _parseInt(json['children_count']) ?? 0,
+      id: Excursion._parseIntSafe(json['id']),
+      excursionId: excursionId,
+      excursionName: excursionName,
+      date: date,
+      adultsCount: adultsCount,
+      childrenCount: childrenCount,
       totalPrice: _parseDouble(json['total_price']),
-      status: json['status'] as String,
+      status: json['status'] as String? ?? 'confirmed',
       specialRequests: json['special_requests'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: createdAt,
     );
   }
 
@@ -119,13 +145,6 @@ class ExcursionBooking {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
-  }
-
-  static int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value);
-    return null;
   }
 
   String get formattedTotalPrice => '${totalPrice.toStringAsFixed(0)} FCFA';

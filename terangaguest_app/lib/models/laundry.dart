@@ -13,10 +13,18 @@ class LaundryService {
     required this.isAvailable,
   });
 
+  static int _parseIntSafe(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
   factory LaundryService.fromJson(Map<String, dynamic> json) {
     return LaundryService(
-      id: json['id'] as int,
-      name: json['name'] as String,
+      id: _parseIntSafe(json['id']),
+      name: json['name'] as String? ?? '',
       description: json['description'] as String?,
       pricePerItem: _parseDouble(json['price_per_item'] ?? json['price']),
       isAvailable: json['is_available'] as bool? ?? true,
@@ -64,23 +72,41 @@ class LaundryRequest {
     this.deliveryTime,
   });
 
+  static int _parseIntSafe(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
   factory LaundryRequest.fromJson(Map<String, dynamic> json) {
+    final itemsList = json['items'] as List? ?? [];
+    final createdAtStr = json['created_at'] as String?;
+    final createdAt = createdAtStr != null
+        ? (DateTime.tryParse(createdAtStr) ?? DateTime.now())
+        : DateTime.now();
+    final pickupRaw = json['pickup_time'];
+    final pickupTime = pickupRaw != null
+        ? DateTime.tryParse(pickupRaw.toString())
+        : null;
+    final deliveryRaw = json['delivery_time'] ?? json['estimated_delivery'];
+    final deliveryTime = deliveryRaw != null
+        ? DateTime.tryParse(deliveryRaw.toString())
+        : null;
+
     return LaundryRequest(
-      id: json['id'] as int,
-      items: (json['items'] as List)
+      id: _parseIntSafe(json['id']),
+      items: itemsList
           .map((item) =>
               LaundryRequestItem.fromJson(item as Map<String, dynamic>))
           .toList(),
       totalPrice: _parseDouble(json['total_price'] ?? json['total']),
-      status: json['status'] as String,
+      status: json['status'] as String? ?? 'pending',
       specialInstructions: json['special_instructions'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      pickupTime: json['pickup_time'] != null
-          ? DateTime.parse(json['pickup_time'] as String)
-          : null,
-      deliveryTime: json['delivery_time'] != null
-          ? DateTime.parse(json['delivery_time'] as String)
-          : null,
+      createdAt: createdAt,
+      pickupTime: pickupTime,
+      deliveryTime: deliveryTime,
     );
   }
 
@@ -142,11 +168,20 @@ class LaundryRequestItem {
   });
 
   factory LaundryRequestItem.fromJson(Map<String, dynamic> json) {
+    final service = json['service'] as Map<String, dynamic>?;
+    final serviceId = service != null
+        ? LaundryRequest._parseIntSafe(service['id'])
+        : LaundryRequest._parseIntSafe(json['service_id']);
+    final serviceName = service != null
+        ? (service['name'] as String? ?? '')
+        : (json['service_name'] as String? ?? '');
+    final pricePerItem = _parseDouble(
+        json['price_per_item'] ?? json['unit_price'] ?? json['price']);
     return LaundryRequestItem(
-      serviceId: json['service_id'] as int,
-      serviceName: json['service_name'] as String,
+      serviceId: serviceId,
+      serviceName: serviceName,
       quantity: _parseInt(json['quantity']),
-      pricePerItem: _parseDouble(json['price_per_item'] ?? json['price']),
+      pricePerItem: pricePerItem,
     );
   }
 
