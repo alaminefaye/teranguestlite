@@ -46,15 +46,15 @@
             
             @php
                 $statuses = [
-                    'pending' => ['name' => 'En attente', 'icon' => '⏱️', 'color' => 'warning'],
-                    'confirmed' => ['name' => 'Confirmée', 'icon' => '✓', 'color' => 'brand'],
-                    'preparing' => ['name' => 'Préparation', 'icon' => '👨‍🍳', 'color' => 'primary'],
-                    'ready' => ['name' => 'Prête', 'icon' => '✅', 'color' => 'success'],
-                    'delivering' => ['name' => 'Livraison', 'icon' => '🚚', 'color' => 'info'],
-                    'delivered' => ['name' => 'Livrée', 'icon' => '🎉', 'color' => 'success'],
+                    'pending' => ['name' => 'En attente', 'icon' => '⏱️', 'color' => 'warning', 'route' => null],
+                    'confirmed' => ['name' => 'Confirmée', 'icon' => '✓', 'color' => 'brand', 'route' => 'dashboard.orders.confirm'],
+                    'preparing' => ['name' => 'Préparation', 'icon' => '👨‍🍳', 'color' => 'primary', 'route' => 'dashboard.orders.prepare'],
+                    'ready' => ['name' => 'Prête', 'icon' => '✅', 'color' => 'success', 'route' => 'dashboard.orders.ready'],
+                    'delivering' => ['name' => 'Livraison', 'icon' => '🚚', 'color' => 'info', 'route' => 'dashboard.orders.deliver'],
+                    'delivered' => ['name' => 'Livrée', 'icon' => '🎉', 'color' => 'success', 'route' => 'dashboard.orders.complete'],
                 ];
-                
-                $currentStatusIndex = array_search($order->status, array_keys($statuses));
+                $statusKeys = array_keys($statuses);
+                $currentStatusIndex = array_search($order->status, $statusKeys);
                 $isCancelled = $order->status === 'cancelled';
             @endphp
 
@@ -65,26 +65,36 @@
                     </span>
                 </div>
             @else
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between gap-1 mb-2">
                     @foreach($statuses as $key => $status)
                         @php
-                            $statusIndex = array_search($key, array_keys($statuses));
+                            $statusIndex = array_search($key, $statusKeys);
                             $isActive = $statusIndex === $currentStatusIndex;
                             $isCompleted = $statusIndex < $currentStatusIndex;
+                            $isNextStep = $currentStatusIndex !== false && $statusIndex === $currentStatusIndex + 1;
+                            $showButton = $status['route'] && $isNextStep;
                         @endphp
-                        
-                        <div class="flex flex-col items-center {{ $loop->last ? '' : 'flex-1' }}">
-                            <div class="relative flex items-center justify-center w-12 h-12 rounded-full 
-                                {{ $isActive ? 'bg-' . $status['color'] . '-500 text-white' : '' }}
+                        <div class="flex flex-col items-center flex-1 min-w-0">
+                            <div class="relative flex items-center justify-center w-12 h-12 rounded-full shrink-0
+                                {{ $isActive ? 'bg-' . $status['color'] . '-500 text-white ring-2 ring-offset-2 ring-' . $status['color'] . '-300' : '' }}
                                 {{ $isCompleted ? 'bg-success-500 text-white' : '' }}
                                 {{ !$isActive && !$isCompleted ? 'bg-gray-200 dark:bg-gray-700 text-gray-500' : '' }}">
                                 <span class="text-lg">{{ $status['icon'] }}</span>
                             </div>
-                            <p class="mt-2 text-xs text-center text-gray-600 dark:text-gray-400">{{ $status['name'] }}</p>
+                            <p class="mt-2 text-xs text-center text-gray-600 dark:text-gray-400 font-medium">{{ $status['name'] }}</p>
+                            @if($showButton)
+                                <form action="{{ route($status['route'], $order) }}" method="POST" class="mt-2 w-full max-w-[120px]">
+                                    @csrf
+                                    <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium rounded-md bg-brand-500 text-white hover:bg-brand-600 transition-colors">
+                                        Passer à cette étape
+                                    </button>
+                                </form>
+                            @elseif($isCompleted)
+                                <p class="mt-2 text-xs text-success-600 dark:text-success-400">✓ Fait</p>
+                            @endif
                         </div>
-                        
                         @if(!$loop->last)
-                            <div class="flex-1 h-1 mx-2 
+                            <div class="flex-1 h-1 mx-0.5 min-w-[8px] self-start mt-6
                                 {{ $isCompleted ? 'bg-success-500' : 'bg-gray-200 dark:bg-gray-700' }}">
                             </div>
                         @endif
@@ -92,63 +102,18 @@
                 </div>
             @endif
 
-            <!-- Actions de workflow -->
-            <div class="mt-6 flex flex-wrap gap-2">
-                @if($order->status === 'pending')
-                    <form action="{{ route('dashboard.orders.confirm', $order) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
-                            ✓ Confirmer
-                        </button>
-                    </form>
-                @endif
-
-                @if($order->status === 'confirmed')
-                    <form action="{{ route('dashboard.orders.prepare', $order) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600">
-                            👨‍🍳 Commencer préparation
-                        </button>
-                    </form>
-                @endif
-
-                @if($order->status === 'preparing')
-                    <form action="{{ route('dashboard.orders.ready', $order) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-success-500 text-white rounded-md hover:bg-success-600">
-                            ✅ Marquer prête
-                        </button>
-                    </form>
-                @endif
-
-                @if($order->status === 'ready')
-                    <form action="{{ route('dashboard.orders.deliver', $order) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-info-500 text-white rounded-md hover:bg-info-600">
-                            🚚 Commencer livraison
-                        </button>
-                    </form>
-                @endif
-
-                @if($order->status === 'delivering')
-                    <form action="{{ route('dashboard.orders.complete', $order) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-success-500 text-white rounded-md hover:bg-success-600">
-                            🎉 Marquer livrée
-                        </button>
-                    </form>
-                @endif
-
-                @if(!in_array($order->status, ['delivered', 'cancelled']))
+            <!-- Bouton Annuler -->
+            @if(!$isCancelled && !in_array($order->status, ['delivered']))
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <form action="{{ route('dashboard.orders.cancel', $order) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                        onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
                         @csrf
-                        <button type="submit" class="px-4 py-2 bg-error-500 text-white rounded-md hover:bg-error-600">
-                            🚫 Annuler
+                        <button type="submit" class="px-4 py-2 bg-error-500 text-white rounded-md hover:bg-error-600 text-sm font-medium">
+                            🚫 Annuler la commande
                         </button>
                     </form>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
 
         <!-- Articles commandés -->
