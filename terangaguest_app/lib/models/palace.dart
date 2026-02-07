@@ -58,17 +58,43 @@ class PalaceRequest {
     this.scheduledTime,
   });
 
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
   factory PalaceRequest.fromJson(Map<String, dynamic> json) {
+    final palaceService = json['palace_service'] as Map<String, dynamic>?;
+    final serviceId = palaceService != null
+        ? _parseInt(palaceService['id'])
+        : _parseInt(json['service_id']);
+    final serviceName = palaceService != null
+        ? (palaceService['name'] as String? ?? '')
+        : (json['service_name'] as String? ?? '');
+    final details = json['description'] as String? ?? json['details'] as String?;
+    final status = json['status'] as String? ?? 'pending';
+    final createdAtRaw = json['created_at'];
+    final createdAt = createdAtRaw != null
+        ? DateTime.tryParse(createdAtRaw as String) ?? DateTime.now()
+        : DateTime.now();
+    final requestedFor = json['requested_for'];
+    final scheduledTime = requestedFor != null
+        ? DateTime.tryParse(requestedFor as String)
+        : (json['scheduled_time'] != null
+            ? DateTime.tryParse(json['scheduled_time'] as String)
+            : null);
+
     return PalaceRequest(
-      id: json['id'] as int,
-      serviceId: json['service_id'] as int,
-      serviceName: json['service_name'] as String,
-      details: json['details'] as String?,
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      scheduledTime: json['scheduled_time'] != null
-          ? DateTime.parse(json['scheduled_time'] as String)
-          : null,
+      id: _parseInt(json['id']),
+      serviceId: serviceId,
+      serviceName: serviceName,
+      details: details,
+      status: status,
+      createdAt: createdAt,
+      scheduledTime: scheduledTime,
     );
   }
 

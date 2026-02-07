@@ -102,7 +102,7 @@ class MenuHelper
                             ['name' => 'Réservations Excursions', 'path' => '/dashboard/excursion-bookings'],
                             ['name' => 'Réservations Restaurants', 'path' => '/dashboard/restaurant-reservations'],
                             ['name' => 'Demandes Blanchisserie', 'path' => '/dashboard/laundry-requests'],
-                            ['name' => 'Demandes Palace', 'path' => '/dashboard/palace-requests'],
+                            ['name' => 'Demandes - Services Palace', 'path' => '/dashboard/palace-requests'],
                         ],
                     ],
                     [
