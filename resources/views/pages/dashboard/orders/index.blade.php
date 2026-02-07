@@ -141,10 +141,10 @@
                             {{ $order->type_name }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-white/90">
-                            {{ $order->user->name }}
+                            {{ $order->user?->name ?? $order->guest?->name ?? '—' }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-white/90">
-                            {{ $order->room->room_number }}
+                            {{ $order->room?->room_number ?? '—' }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-white/90">
                             {{ $order->formatted_total }}

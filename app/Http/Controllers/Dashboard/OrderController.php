@@ -14,7 +14,7 @@ class OrderController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Order::with(['user', 'room']);
+        $query = Order::with(['user', 'guest', 'room']);
 
         // Filtre par statut
         if ($request->filled('status')) {
@@ -137,7 +137,7 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load(['user', 'room', 'orderItems.menuItem']);
+        $order->load(['user', 'guest', 'room', 'orderItems.menuItem']);
 
         return view('pages.dashboard.orders.show', [
             'title' => 'Commande #' . $order->order_number,

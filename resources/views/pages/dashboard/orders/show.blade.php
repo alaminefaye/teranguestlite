@@ -215,14 +215,14 @@
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Client</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $order->user->name }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $order->user->email }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $order->user?->name ?? $order->guest?->name ?? '—' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $order->user?->email ?? $order->guest?->email ?? '—' }}</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chambre</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $order->room->room_number }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $order->room->type }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $order->room?->room_number ?? '—' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $order->room?->type_name ?? '—' }}</p>
                 </div>
 
                 <div>
