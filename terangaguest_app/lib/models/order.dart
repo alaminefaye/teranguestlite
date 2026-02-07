@@ -72,6 +72,11 @@ class Order {
 
   String get formattedTotal => '${total.toStringAsFixed(0)} FCFA';
 
+  /// Annulation possible tant que la commande n'est pas "Prête" (ready), en livraison ou livrée.
+  bool get canCancel {
+    return status == 'pending' || status == 'confirmed' || status == 'preparing';
+  }
+
   String get statusLabel {
     switch (status) {
       case 'pending':
@@ -80,6 +85,8 @@ class Order {
         return 'Confirmée';
       case 'preparing':
         return 'En préparation';
+      case 'ready':
+        return 'Prête';
       case 'delivering':
         return 'En livraison';
       case 'delivered':

@@ -262,6 +262,52 @@ class OrderController extends Controller
     }
 
     /**
+     * Annuler une commande (uniquement si statut = pending, confirmed ou preparing).
+     * Dès que la commande est "Prête" (ready), en livraison ou livrée, l'annulation n'est plus possible.
+     */
+    public function cancel(Request $request, $id)
+    {
+        $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
+
+        $order = Order::where('id', $id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (count($guestIds) > 0) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
+            ->first();
+
+        if (! $order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée',
+            ], 404);
+        }
+
+        $cancelAllowed = in_array($order->status, ['pending', 'confirmed', 'preparing'], true);
+        if (! $cancelAllowed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette commande ne peut plus être annulée (elle est déjà prête, en livraison ou livrée).',
+            ], 400);
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Commande annulée.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+            ],
+        ], 200);
+    }
+
+    /**
      * Générer un numéro de commande unique
      */
     private function generateOrderNumber()

@@ -174,6 +174,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           const SizedBox(height: 30),
 
           // Boutons d'action
+          if (_order!.canCancel) _buildCancelButton(),
           if (_order!.status == 'delivered') _buildReorderButton(),
         ],
       ),
@@ -449,6 +450,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
+  Widget _buildCancelButton() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: OutlinedButton(
+        onPressed: _handleCancelOrder,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(double.infinity, 56),
+          side: const BorderSide(color: Colors.red),
+          foregroundColor: Colors.red,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.cancel_outlined, size: 22),
+            const SizedBox(width: 8),
+            const Text('Annuler la commande'),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildReorderButton() {
     return AnimatedButton(
       text: AppLocalizations.of(context).reorder,
@@ -504,6 +527,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'border': Colors.purple,
           'text': Colors.purple,
         };
+      case 'ready':
+        return {
+          'bg': AppTheme.accentGold.withValues(alpha: 0.2),
+          'border': AppTheme.accentGold,
+          'text': AppTheme.accentGold,
+        };
       case 'delivering':
         return {
           'bg': Colors.cyan.withValues(alpha: 0.2),
@@ -528,6 +557,51 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'border': AppTheme.textGray,
           'text': AppTheme.textGray,
         };
+    }
+  }
+
+  Future<void> _handleCancelOrder() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Annuler la commande'),
+        content: const Text(
+          'Voulez-vous vraiment annuler cette commande ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Oui, annuler'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await context.read<OrdersProvider>().cancelOrder(widget.orderId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Commande annulée'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
