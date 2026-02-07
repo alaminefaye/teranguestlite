@@ -98,6 +98,18 @@ class MenuHelper
                         'path' => '/dashboard/reservations',
                     ],
                     [
+                        'icon' => 'calendar',
+                        'name' => 'Réservations & demandes',
+                        'path' => '#',
+                        'subItems' => [
+                            ['name' => 'Réservations Spa', 'path' => '/dashboard/spa-reservations'],
+                            ['name' => 'Réservations Excursions', 'path' => '/dashboard/excursion-bookings'],
+                            ['name' => 'Réservations Restaurants', 'path' => '/dashboard/restaurant-reservations'],
+                            ['name' => 'Demandes Blanchisserie', 'path' => '/dashboard/laundry-requests'],
+                            ['name' => 'Demandes Palace', 'path' => '/dashboard/palace-requests'],
+                        ],
+                    ],
+                    [
                         'icon' => 'user-profile',
                         'name' => 'Clients (invités)',
                         'path' => '/dashboard/guests',

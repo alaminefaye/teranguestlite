@@ -78,6 +78,13 @@ Route::middleware(['auth'])->group(function () {
         
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);
+
+        // Réservations & demandes (spa, excursions, restaurants, blanchisserie, palace)
+        Route::get('spa-reservations', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'index'])->name('spa-reservations.index');
+        Route::get('excursion-bookings', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'index'])->name('excursion-bookings.index');
+        Route::get('restaurant-reservations', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'index'])->name('restaurant-reservations.index');
+        Route::get('laundry-requests', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'index'])->name('laundry-requests.index');
+        Route::get('palace-requests', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'index'])->name('palace-requests.index');
         
         // Staff (personnel de l'hôtel)
         Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');
