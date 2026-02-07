@@ -7,6 +7,8 @@ import '../../models/spa.dart';
 import '../../widgets/empty_state.dart';
 import '../../providers/spa_provider.dart';
 import '../../utils/layout_helper.dart';
+import '../../utils/navigation_helper.dart';
+import 'spa_reservation_detail_screen.dart';
 
 class MySpaReservationsScreen extends StatefulWidget {
   const MySpaReservationsScreen({super.key});
@@ -125,7 +127,18 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
               itemCount: provider.reservations.length,
               itemBuilder: (context, index) {
                 final reservation = provider.reservations[index];
-                return _buildReservationCard(reservation);
+                return InkWell(
+                  onTap: () async {
+                    final updated = await context.navigateTo(
+                      SpaReservationDetailScreen(reservation: reservation),
+                    );
+                    if (updated == true && context.mounted) {
+                      context.read<SpaProvider>().fetchMySpaReservations();
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: _buildReservationCard(reservation),
+                );
               },
             ),
           ),
