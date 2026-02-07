@@ -82,9 +82,9 @@ class _CartScreenState extends State<CartScreen> {
       if (!tabletSession.hasSession) return;
     }
 
-    // Confirmation identité : afficher nom, chambre, téléphone pour que le client vérifie que c'est bien lui.
-    final confirmed = await _showConfirmIdentityDialog(context, tabletSession.session!);
-    if (!confirmed || !context.mounted) return;
+    // Confirmation identité + moyen de paiement.
+    final confirmResult = await _showConfirmIdentityDialog(context, tabletSession.session!);
+    if (!confirmResult.confirmed || confirmResult.paymentMethod == null || !context.mounted) return;
 
     HapticHelper.confirm();
     setState(() => _isProcessing = true);
@@ -93,6 +93,7 @@ class _CartScreenState extends State<CartScreen> {
       final result = await cartProvider.checkoutWithTabletSession(
         tabletSession.session!,
         specialInstructions: specialInstructions,
+        paymentMethod: confirmResult.paymentMethod!,
       );
 
       setState(() => _isProcessing = false);
@@ -290,60 +291,89 @@ class _CartScreenState extends State<CartScreen> {
     return ok == true;
   }
 
-  /// Affiche les infos client (nom, chambre, tél) pour qu'il confirme que c'est bien lui avant envoi.
-  Future<bool> _showConfirmIdentityDialog(BuildContext context, GuestSession session) async {
-    final ok = await showDialog<bool>(
+  /// Résultat de la boîte de dialogue de confirmation (identité + moyen de paiement).
+  static const _paymentMethods = [
+    ('cash', 'Espèce'),
+    ('room_bill', 'Mettre sur la note de la chambre'),
+    ('wave', 'Wave'),
+    ('orange_money', 'Orange Money'),
+  ];
+
+  /// Affiche les infos client (nom, chambre, tél) + choix du moyen de paiement avant envoi.
+  Future<({bool confirmed, String? paymentMethod})> _showConfirmIdentityDialog(BuildContext context, GuestSession session) async {
+    String? selectedPayment = 'room_bill';
+    final result = await showDialog<({bool confirmed, String? paymentMethod})>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppTheme.accentGold, width: 1),
-        ),
-        title: const Text(
-          'Confirmer que c\'est bien vous',
-          style: TextStyle(color: AppTheme.accentGold, fontSize: 20),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Vérifiez vos informations avant d\'envoyer la commande :',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            backgroundColor: AppTheme.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: AppTheme.accentGold, width: 1),
+            ),
+            title: const Text(
+              'Confirmer que c\'est bien vous',
+              style: TextStyle(color: AppTheme.accentGold, fontSize: 20),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Vérifiez vos informations avant d\'envoyer la commande :',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildIdentityRow(Icons.person_outline, 'Nom', session.guestName),
+                  const SizedBox(height: 10),
+                  _buildIdentityRow(Icons.bed, 'Chambre', session.roomNumber),
+                  const SizedBox(height: 10),
+                  _buildIdentityRow(
+                    Icons.phone_outlined,
+                    'Téléphone',
+                    (session.guestPhone ?? '').isNotEmpty ? (session.guestPhone ?? '') : '—',
+                  ),
+                  if ((session.guestEmail ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _buildIdentityRow(Icons.email_outlined, 'Email', session.guestEmail ?? ''),
+                  ],
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Moyen de paiement',
+                    style: TextStyle(color: AppTheme.accentGold, fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 10),
+                  ..._paymentMethods.map((e) => RadioListTile<String>(
+                    value: e.$1,
+                    groupValue: selectedPayment,
+                    onChanged: (v) => setState(() => selectedPayment = v),
+                    title: Text(e.$2, style: const TextStyle(color: Colors.white, fontSize: 15)),
+                    activeColor: AppTheme.accentGold,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  )),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildIdentityRow(Icons.person_outline, 'Nom', session.guestName),
-              const SizedBox(height: 10),
-              _buildIdentityRow(Icons.bed, 'Chambre', session.roomNumber),
-              const SizedBox(height: 10),
-              _buildIdentityRow(
-                Icons.phone_outlined,
-                'Téléphone',
-                (session.guestPhone ?? '').isNotEmpty ? (session.guestPhone ?? '') : '—',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop((confirmed: false, paymentMethod: null as String?)),
+                child: Text('Annuler', style: TextStyle(color: AppTheme.textGray)),
               ),
-              if ((session.guestEmail ?? '').isNotEmpty) ...[
-                const SizedBox(height: 10),
-                _buildIdentityRow(Icons.email_outlined, 'Email', session.guestEmail ?? ''),
-              ],
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop((confirmed: true, paymentMethod: selectedPayment)),
+                style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold, foregroundColor: AppTheme.primaryDark),
+                child: const Text('Confirmer la commande', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Annuler', style: TextStyle(color: AppTheme.textGray)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirmer la commande', style: TextStyle(color: AppTheme.accentGold, fontWeight: FontWeight.bold)),
-          ),
-        ],
+          );
+        },
       ),
     );
-    return ok == true;
+    return result ?? (confirmed: false, paymentMethod: null);
   }
 
   Widget _buildIdentityRow(IconData icon, String label, String value) {

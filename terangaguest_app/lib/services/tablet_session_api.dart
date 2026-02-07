@@ -53,6 +53,7 @@ class TabletSessionApi {
     required GuestSession session,
     required List<Map<String, dynamic>> items,
     String? specialInstructions,
+    required String paymentMethod,
   }) async {
     final response = await _api.post(
       ApiConfig.tabletCheckout,
@@ -63,6 +64,7 @@ class TabletSessionApi {
         'items': items,
         if (specialInstructions != null && specialInstructions.isNotEmpty)
           'special_instructions': specialInstructions,
+        'payment_method': paymentMethod,
       },
     );
     final data = response.data;

@@ -108,6 +108,7 @@ class TabletSessionController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.special_instructions' => 'nullable|string|max:500',
             'special_instructions' => 'nullable|string|max:1000',
+            'payment_method' => 'required|in:cash,room_bill,wave,orange_money',
         ]);
 
         $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
@@ -173,6 +174,7 @@ class TabletSessionController extends Controller
             'delivery_fee' => $deliveryFee,
             'total' => $total,
             'special_instructions' => $request->special_instructions,
+            'payment_method' => $request->payment_method,
         ]);
 
         foreach ($itemsData as $itemData) {

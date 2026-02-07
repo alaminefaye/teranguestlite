@@ -24,6 +24,7 @@ class Order extends Model
         'delivery_fee',
         'total',
         'special_instructions',
+        'payment_method',
         'delivery_notes',
         'confirmed_at',
         'prepared_at',

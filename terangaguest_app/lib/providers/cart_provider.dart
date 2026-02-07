@@ -173,6 +173,7 @@ class CartProvider with ChangeNotifier {
   Future<Map<String, dynamic>> checkoutWithTabletSession(
     GuestSession session, {
     String? specialInstructions,
+    required String paymentMethod,
   }) async {
     if (_items.isEmpty) {
       throw Exception('Le panier est vide');
@@ -188,6 +189,7 @@ class CartProvider with ChangeNotifier {
         session: session,
         items: itemsData,
         specialInstructions: specialInstructions,
+        paymentMethod: paymentMethod,
       );
       clear();
       _isLoading = false;
