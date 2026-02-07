@@ -313,7 +313,7 @@ class OrderConfirmationScreen extends StatelessWidget {
             HapticHelper.lightImpact();
             NavigationHelper.navigateAndRemoveUntil(
               context,
-              const OrdersListScreen(),
+              const OrdersListScreen(fromOrderCreation: true),
             );
           },
           width: double.infinity,

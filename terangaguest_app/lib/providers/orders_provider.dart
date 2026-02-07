@@ -112,4 +112,14 @@ class OrdersProvider with ChangeNotifier {
   Future<void> refreshOrders() async {
     await fetchOrders(status: _selectedStatus);
   }
+
+  /// Vide la liste et met en état de chargement (pour forcer un affichage
+  /// "loading" avant de recharger, ex. après création d'une commande).
+  void clearOrdersAndSetLoading() {
+    _orders = [];
+    _isLoading = true;
+    _errorMessage = null;
+    _currentPage = 1;
+    notifyListeners();
+  }
 }

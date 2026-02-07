@@ -12,7 +12,11 @@ import '../../utils/haptic_helper.dart';
 import 'order_detail_screen.dart';
 
 class OrdersListScreen extends StatefulWidget {
-  const OrdersListScreen({super.key});
+  /// Si true, la liste est vidée puis rechargée à l'ouverture (après un court
+  /// délai) pour afficher la commande venant d'être créée.
+  final bool fromOrderCreation;
+
+  const OrdersListScreen({super.key, this.fromOrderCreation = false});
 
   @override
   State<OrdersListScreen> createState() => _OrdersListScreenState();
@@ -36,9 +40,23 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   @override
   void initState() {
     super.initState();
-    // Charger les commandes au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrdersProvider>().fetchOrders();
+      if (!mounted) return;
+      final provider = context.read<OrdersProvider>();
+      // Toujours vider et afficher le chargement pour forcer une liste à jour
+      // (évite d'afficher un cache sans la commande venant d'être créée).
+      provider.clearOrdersAndSetLoading();
+      final delay = widget.fromOrderCreation
+          ? const Duration(milliseconds: 500)
+          : Duration.zero;
+      if (delay == Duration.zero) {
+        provider.refreshOrders();
+      } else {
+        Future.delayed(delay, () {
+          if (!mounted) return;
+          provider.refreshOrders();
+        });
+      }
     });
   }
 

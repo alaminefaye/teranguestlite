@@ -6,15 +6,51 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\MenuItem;
+use App\Models\Reservation;
+use App\Models\Room;
 
 class OrderController extends Controller
 {
     /**
-     * Liste des commandes de l'utilisateur
+     * IDs des guests dont l'utilisateur (tablette en chambre) peut voir les commandes :
+     * réservation active dans la chambre de l'utilisateur (room_number).
+     */
+    private function guestIdsForUserRoom(\App\Models\User $user): array
+    {
+        if (! $user->room_number || ! $user->enterprise_id) {
+            return [];
+        }
+        $room = Room::where('enterprise_id', $user->enterprise_id)
+            ->where('room_number', $user->room_number)
+            ->first();
+        if (! $room) {
+            return [];
+        }
+        return Reservation::where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->pluck('guest_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Liste des commandes : celles de l'utilisateur + celles du guest de la chambre (tablette).
      */
     public function index(Request $request)
     {
-        $query = Order::where('user_id', $request->user()->id);
+        $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
+
+        $query = Order::where(function ($q) use ($user, $guestIds) {
+            $q->where('user_id', $user->id);
+            if (count($guestIds) > 0) {
+                $q->orWhereIn('guest_id', $guestIds);
+            }
+        });
 
         // Filtrer par statut
         if ($request->filled('status')) {
@@ -57,13 +93,21 @@ class OrderController extends Controller
     }
 
     /**
-     * Détails d'une commande
+     * Détails d'une commande (utilisateur ou guest de la chambre)
      */
     public function show(Request $request, $id)
     {
+        $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
+
         $order = Order::with('orderItems.menuItem')
-            ->where('user_id', $request->user()->id)
             ->where('id', $id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (count($guestIds) > 0) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
             ->first();
 
         if (!$order) {
@@ -114,13 +158,21 @@ class OrderController extends Controller
     }
 
     /**
-     * Recommander une commande
+     * Recommander une commande (utilisateur ou guest de la chambre)
      */
     public function reorder(Request $request, $id)
     {
+        $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
+
         $order = Order::with('orderItems')
-            ->where('user_id', $request->user()->id)
             ->where('id', $id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (count($guestIds) > 0) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
             ->first();
 
         if (!$order) {
