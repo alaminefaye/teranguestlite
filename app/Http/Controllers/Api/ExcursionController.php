@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Excursion;
 use App\Models\ExcursionBooking;
+use App\Models\Room;
 
 class ExcursionController extends Controller
 {
@@ -148,14 +149,19 @@ class ExcursionController extends Controller
         // Calculer le prix total
         $totalPrice = ($adults * $excursion->price_adult) + ($children * $excursion->price_child);
 
+        $user = $request->user();
+        $roomId = $user->room_number
+            ? Room::where('room_number', $user->room_number)->first()?->id
+            : null;
+
         $booking = ExcursionBooking::create([
-            'user_id' => $request->user()->id,
-            'excursion_id' => $id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
-            'date' => $request->date,
-            'adults' => $adults,
-            'children' => $children,
+            'user_id' => $user->id,
+            'excursion_id' => (int) $id,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $roomId,
+            'booking_date' => $request->date,
+            'number_of_adults' => $adults,
+            'number_of_children' => $children,
             'total_price' => $totalPrice,
             'special_requests' => $request->special_requests,
             'status' => 'confirmed',
@@ -179,9 +185,9 @@ class ExcursionController extends Controller
                     'name' => $excursion->name,
                     'departure_time' => $excursion->departure_time,
                 ],
-                'date' => $booking->date,
-                'adults' => $booking->adults,
-                'children' => $booking->children,
+                'date' => $booking->booking_date?->format('Y-m-d'),
+                'adults' => $booking->number_of_adults,
+                'children' => $booking->number_of_children,
                 'total_price' => $booking->total_price,
                 'formatted_total' => number_format($booking->total_price, 0, '', ' ') . ' FCFA',
                 'status' => $booking->status,
@@ -209,9 +215,9 @@ class ExcursionController extends Controller
                         'name' => $booking->excursion->name,
                         'type' => $booking->excursion->type,
                     ],
-                    'date' => $booking->date,
-                    'adults' => $booking->adults,
-                    'children' => $booking->children,
+                    'date' => $booking->booking_date?->format('Y-m-d'),
+                    'adults' => $booking->number_of_adults,
+                    'children' => $booking->number_of_children,
                     'total_price' => $booking->total_price,
                     'formatted_total' => number_format($booking->total_price, 0, '', ' ') . ' FCFA',
                     'status' => $booking->status,

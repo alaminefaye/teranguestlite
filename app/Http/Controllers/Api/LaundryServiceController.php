@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LaundryService;
 use App\Models\LaundryRequest;
+use App\Models\Room;
 
 class LaundryServiceController extends Controller
 {
@@ -93,11 +94,16 @@ class LaundryServiceController extends Controller
         $pickupTime = $request->pickup_time ? $request->pickup_time : now()->addHours(1)->format('Y-m-d H:i');
         $deliveryTime = \Carbon\Carbon::parse($pickupTime)->addHours($maxTurnaround)->format('Y-m-d H:i');
 
+        $user = $request->user();
+        $roomId = $user->room_number
+            ? Room::where('room_number', $user->room_number)->first()?->id
+            : null;
+
         // Créer la demande
         $laundryRequest = LaundryRequest::create([
-            'user_id' => $request->user()->id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
+            'user_id' => $user->id,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $roomId,
             'request_number' => $this->generateRequestNumber(),
             'items' => $itemsData,
             'total_price' => $total,

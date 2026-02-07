@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PalaceService;
 use App\Models\PalaceRequest;
+use App\Models\Room;
 
 class PalaceServiceController extends Controller
 {
@@ -120,15 +121,22 @@ class PalaceServiceController extends Controller
         // Déterminer le prix
         $estimatedPrice = $service->price_on_request ? null : $service->price;
 
+        // room_id = id de la chambre dans la table rooms (pas le numéro 101, 102…)
+        $user = $request->user();
+        $roomId = null;
+        if ($user->room_number) {
+            $room = Room::where('room_number', $user->room_number)->first();
+            $roomId = $room?->id;
+        }
+
         $palaceRequest = PalaceRequest::create([
-            'user_id' => $request->user()->id,
-            'palace_service_id' => $id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
+            'user_id' => $user->id,
+            'palace_service_id' => (int) $id,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $roomId,
             'request_number' => $this->generateRequestNumber(),
             'requested_for' => $request->requested_for ?? now()->addHours(2)->format('Y-m-d H:i'),
             'description' => $request->description,
-            'special_requirements' => $request->special_requirements,
             'estimated_price' => $estimatedPrice,
             'status' => 'pending',
         ]);

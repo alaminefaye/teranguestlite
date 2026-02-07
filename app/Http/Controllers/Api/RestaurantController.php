@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Restaurant;
 use App\Models\RestaurantReservation;
+use App\Models\Room;
 
 class RestaurantController extends Controller
 {
@@ -83,11 +84,16 @@ class RestaurantController extends Controller
             return response()->json(['success' => false, 'message' => 'Restaurant non trouvé'], 404);
         }
 
+        $user = $request->user();
+        $roomId = $user->room_number
+            ? Room::where('room_number', $user->room_number)->first()?->id
+            : null;
+
         $reservation = RestaurantReservation::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'restaurant_id' => $id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => $request->user()->room_number,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $roomId,
             'reservation_date' => $request->date,
             'reservation_time' => $request->time,
             'number_of_guests' => $request->guests,
