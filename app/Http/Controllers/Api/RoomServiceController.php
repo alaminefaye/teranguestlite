@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\Order;
+use App\Models\Room;
 use App\Services\FirebaseNotificationService;
 
 class RoomServiceController extends Controller
@@ -160,43 +161,68 @@ class RoomServiceController extends Controller
 
         $user = $request->user();
 
-        // Calculer le total
-        $total = 0;
-        $orderItems = [];
+        // Calculer sous-total et total, préparer les lignes pour order_items
+        $subtotal = 0;
+        $itemsData = [];
 
         foreach ($request->items as $item) {
             $menuItem = MenuItem::find($item['menu_item_id']);
-            
+
             if (!$menuItem || !$menuItem->is_available) {
                 return response()->json([
                     'success' => false,
-                    'message' => "L'article {$menuItem->name} n'est plus disponible",
+                    'message' => "L'article " . ($menuItem->name ?? '') . " n'est plus disponible",
                 ], 400);
             }
 
-            $subtotal = $menuItem->price * $item['quantity'];
-            $total += $subtotal;
+            $qty = (int) $item['quantity'];
+            $lineTotal = $menuItem->price * $qty;
+            $subtotal += $lineTotal;
 
-            $orderItems[] = [
+            $itemsData[] = [
                 'menu_item_id' => $menuItem->id,
-                'quantity' => $item['quantity'],
+                'item_name' => $menuItem->name,
+                'item_description' => $menuItem->description,
                 'unit_price' => $menuItem->price,
-                'subtotal' => $subtotal,
-                'special_instructions' => $item['special_instructions'] ?? null,
+                'quantity' => $qty,
+                'total_price' => $lineTotal,
+                'special_requests' => $item['special_instructions'] ?? null,
             ];
         }
 
-        // Créer la commande
+        $tax = 0;
+        $deliveryFee = 0;
+        $total = $subtotal + $tax + $deliveryFee;
+
+        // Résoudre room_id à partir du numéro de chambre de l'utilisateur
+        $roomId = null;
+        if ($user->room_number) {
+            $room = Room::where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+            $roomId = $room?->id;
+        }
+
+        // Créer la commande (colonnes réelles de la table orders)
         $order = Order::create([
             'user_id' => $user->id,
             'enterprise_id' => $user->enterprise_id,
-            'room_id' => $user->room_number,
+            'room_id' => $roomId,
             'order_number' => $this->generateOrderNumber(),
-            'items' => $orderItems,
-            'total_amount' => $total,
+            'type' => 'room_service',
             'status' => 'pending',
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'delivery_fee' => $deliveryFee,
+            'total' => $total,
             'special_instructions' => $request->special_instructions,
         ]);
+
+        foreach ($itemsData as $itemData) {
+            $order->orderItems()->create($itemData);
+        }
+
+        $order->load('orderItems.menuItem');
 
         // Envoyer notification push
         try {
@@ -220,21 +246,20 @@ class RoomServiceController extends Controller
             'data' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
-                'total_amount' => $order->total_amount,
+                'total' => (float) $order->total,
                 'formatted_total' => $order->formatted_total,
                 'status' => $order->status,
-                'items' => collect($orderItems)->map(function ($item) {
-                    $menuItem = MenuItem::find($item['menu_item_id']);
+                'items' => $order->orderItems->map(function ($orderItem) {
                     return [
                         'menu_item' => [
-                            'id' => $menuItem->id,
-                            'name' => $menuItem->name,
-                            'image' => $menuItem->image ? asset('storage/' . $menuItem->image) : null,
+                            'id' => $orderItem->menu_item_id,
+                            'name' => $orderItem->item_name,
+                            'image' => $orderItem->menuItem?->image ? asset('storage/' . $orderItem->menuItem->image) : null,
                         ],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price'],
-                        'subtotal' => $item['subtotal'],
-                        'special_instructions' => $item['special_instructions'],
+                        'quantity' => $orderItem->quantity,
+                        'unit_price' => (float) $orderItem->unit_price,
+                        'subtotal' => (float) $orderItem->total_price,
+                        'special_instructions' => $orderItem->special_requests,
                     ];
                 }),
                 'created_at' => $order->created_at->toISOString(),

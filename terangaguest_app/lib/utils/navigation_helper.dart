@@ -90,12 +90,22 @@ class NavigationHelper {
     );
   }
 
+  /// Récupère le Navigator de façon sûre (évite "Null check operator" si le contexte
+  /// est désactivé, ex. bouton SnackBar après un pop, ou pas de Navigator).
+  static NavigatorState? _navigator(BuildContext context) {
+    try {
+      return Navigator.maybeOf(context);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Navigation avec animation slide standard
   static Future<T?> navigateToSlide<T>(
     BuildContext context,
     Widget page,
   ) {
-    return Navigator.of(context).push<T>(slideRoute(page));
+    return _navigator(context)?.push<T>(slideRoute(page)) ?? Future<T?>.value(null);
   }
 
   /// Navigation avec animation fade
@@ -103,7 +113,7 @@ class NavigationHelper {
     BuildContext context,
     Widget page,
   ) {
-    return Navigator.of(context).push<T>(fadeRoute(page));
+    return _navigator(context)?.push<T>(fadeRoute(page)) ?? Future<T?>.value(null);
   }
 
   /// Navigation avec animation scale
@@ -111,7 +121,7 @@ class NavigationHelper {
     BuildContext context,
     Widget page,
   ) {
-    return Navigator.of(context).push<T>(scaleRoute(page));
+    return _navigator(context)?.push<T>(scaleRoute(page)) ?? Future<T?>.value(null);
   }
 
   /// Navigation avec animation slide+fade combinée (recommandé)
@@ -119,7 +129,7 @@ class NavigationHelper {
     BuildContext context,
     Widget page,
   ) {
-    return Navigator.of(context).push<T>(slideFadeRoute(page));
+    return _navigator(context)?.push<T>(slideFadeRoute(page)) ?? Future<T?>.value(null);
   }
 
   /// Remplacer l'écran actuel avec animation
@@ -127,7 +137,8 @@ class NavigationHelper {
     BuildContext context,
     Widget page,
   ) {
-    return Navigator.of(context).pushReplacement<T, void>(slideFadeRoute(page));
+    return _navigator(context)?.pushReplacement<T, void>(slideFadeRoute(page)) ??
+        Future<T?>.value(null);
   }
 
   /// Navigation vers écran et supprimer tous les précédents
@@ -136,10 +147,11 @@ class NavigationHelper {
     Widget page, {
     bool Function(Route<dynamic>)? predicate,
   }) {
-    return Navigator.of(context).pushAndRemoveUntil<T>(
-      slideFadeRoute(page),
-      predicate ?? (route) => false,
-    );
+    return _navigator(context)?.pushAndRemoveUntil<T>(
+          slideFadeRoute(page),
+          predicate ?? (route) => false,
+        ) ??
+        Future<T?>.value(null);
   }
 }
 

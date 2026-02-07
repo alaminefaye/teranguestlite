@@ -70,6 +70,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           : _instructionsController.text,
     );
 
+    // Récupérer le Navigator avant le pop pour que "VOIR PANIER" fonctionne
+    final navigator = Navigator.maybeOf(context);
+
     // Afficher un message de confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -95,7 +98,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           label: AppLocalizations.of(context).viewCartCaps,
           textColor: Colors.white,
           onPressed: () {
-            context.navigateTo(const CartScreen());
+            navigator?.push(
+              NavigationHelper.slideFadeRoute(const CartScreen()),
+            );
           },
         ),
       ),

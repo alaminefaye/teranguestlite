@@ -217,13 +217,13 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Infos supplémentaires
-          if (user.roomNumber != null) ...[
+          if (user.roomNumber != null && (user.roomNumber ?? '').isNotEmpty) ...[
             const Divider(color: AppTheme.textGray, height: 32),
-            _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber!),
+            _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber ?? ''),
           ],
           if (user.enterprise != null) ...[
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.business, 'Hôtel', user.enterprise!.name),
+            _buildInfoRow(Icons.business, 'Hôtel', user.enterprise?.name ?? ''),
           ],
           const SizedBox(height: 12),
           _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
@@ -629,8 +629,9 @@ class ProfileScreen extends StatelessWidget {
           future: PackageInfo.fromPlatform(),
           builder: (context, snapshot) {
             final l10n = AppLocalizations.of(context);
-            final version = snapshot.hasData
-                ? '${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+            final data = snapshot.data;
+            final version = data != null
+                ? '${data.version}+${data.buildNumber}'
                 : '—';
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -676,8 +677,9 @@ class ProfileScreen extends StatelessWidget {
       future: PackageInfo.fromPlatform(),
       builder: (context, snapshot) {
         final l10n = AppLocalizations.of(context);
-        final version = snapshot.hasData
-            ? '${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+        final data = snapshot.data;
+        final version = data != null
+            ? '${data.version}+${data.buildNumber}'
             : '2.0.10';
         return Center(
           child: Text(
