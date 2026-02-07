@@ -93,15 +93,11 @@ class MenuHelper
                         'path' => '/dashboard/rooms',
                     ],
                     [
-                        'icon' => 'reservation',
-                        'name' => 'Réservations',
-                        'path' => '/dashboard/reservations',
-                    ],
-                    [
                         'icon' => 'calendar',
                         'name' => 'Réservations & demandes',
                         'path' => '#',
                         'subItems' => [
+                            ['name' => 'Réservations chambres', 'path' => '/dashboard/reservations'],
                             ['name' => 'Réservations Spa', 'path' => '/dashboard/spa-reservations'],
                             ['name' => 'Réservations Excursions', 'path' => '/dashboard/excursion-bookings'],
                             ['name' => 'Réservations Restaurants', 'path' => '/dashboard/restaurant-reservations'],
@@ -121,7 +117,7 @@ class MenuHelper
                     ],
                     [
                         'icon' => 'task',
-                        'name' => 'Menus & Services',
+                        'name' => 'Menus',
                         'path' => '#',
                         'subItems' => [
                             ['name' => 'Catégories de menu', 'path' => '/dashboard/menu-categories'],
@@ -135,7 +131,7 @@ class MenuHelper
                     ],
                     [
                         'icon' => 'task',
-                        'name' => 'Autres Services',
+                        'name' => 'Services',
                         'path' => '#',
                         'subItems' => [
                             ['name' => 'Spa & Bien-être', 'path' => '/dashboard/spa-services'],

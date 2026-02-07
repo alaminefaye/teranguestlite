@@ -21,14 +21,20 @@
             @foreach ($menuGroups as $groupIndex => $menuGroup)
                 @foreach ($menuGroup['items'] as $itemIndex => $item)
                     @if (isset($item['subItems']))
-                        // Check if any submenu item matches current path
+                        // Ouvrir le sous-menu si la route actuelle correspond à un subItem (exact ou sous-route)
                         @foreach ($item['subItems'] as $subItem)
-                            if (currentPath === '{{ ltrim($subItem['path'], '/') }}' ||
-                                window.location.pathname === '{{ $subItem['path'] }}') {
+                            @php
+                                $subPath = ltrim($subItem['path'], '/');
+                            @endphp
+                            if (currentPath === '{{ $subPath }}' ||
+                                currentPath.startsWith('{{ $subPath }}/') ||
+                                window.location.pathname === '{{ $subItem['path'] }}' ||
+                                window.location.pathname.startsWith('{{ $subItem['path'] }}/')) {
                                 this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
-                            } @endforeach
-            @endif
-            @endforeach
+                            }
+                        @endforeach
+                    @endif
+                @endforeach
             @endforeach
         },
         toggleSubmenu(groupIndex, itemIndex) {
@@ -47,7 +53,13 @@
             return this.openSubmenus[key] || false;
         },
         isActive(path) {
-            return window.location.pathname === path || '{{ $currentPath }}' === path.replace(/^\//, '');
+            const normalized = path.replace(/^\//, '');
+            return window.location.pathname === path || '{{ $currentPath }}' === normalized;
+        },
+        isActiveOrChild(path) {
+            const normalized = path.replace(/^\//, '');
+            const current = '{{ $currentPath }}';
+            return current === normalized || current.startsWith(normalized + '/');
         }
     }"
     :class="{
@@ -149,7 +161,7 @@
                                                 @foreach ($item['subItems'] as $subItem)
                                                     <li>
                                                         <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
-                                                            :class="isActive('{{ $subItem['path'] }}') ?
+                                                            :class="isActiveOrChild('{{ $subItem['path'] }}') ?
                                                                 'menu-dropdown-item-active' :
                                                                 'menu-dropdown-item-inactive'">
                                                             {{ $subItem['name'] }}
