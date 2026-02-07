@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import '../models/cart_item.dart';
+import '../models/guest_session.dart';
 import '../models/menu_item.dart';
 import '../services/room_service_api.dart';
+import '../services/tablet_session_api.dart';
 
 class CartProvider with ChangeNotifier {
   final RoomServiceApi _roomServiceApi = RoomServiceApi();
+  final TabletSessionApi _tabletApi = TabletSessionApi();
   
   // Liste des articles dans le panier
   final List<CartItem> _items = [];
@@ -138,7 +141,7 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Passer la commande (checkout)
+  // Passer la commande (checkout) avec auth utilisateur
   Future<Map<String, dynamic>> checkout({String? specialInstructions}) async {
     if (_items.isEmpty) {
       throw Exception('Le panier est vide');
@@ -149,24 +152,49 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Préparer les données pour l'API
       final itemsData = _items.map((item) => item.toCheckoutJson()).toList();
-
-      // Appeler l'API
       final result = await _roomServiceApi.checkout(
         items: itemsData,
         specialInstructions: specialInstructions,
       );
-
-      // Vider le panier après une commande réussie
       clear();
-
       _isLoading = false;
       notifyListeners();
-
       return result;
     } catch (e) {
       _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  /// Checkout avec session tablette (code client déjà validé).
+  Future<Map<String, dynamic>> checkoutWithTabletSession(
+    GuestSession session, {
+    String? specialInstructions,
+  }) async {
+    if (_items.isEmpty) {
+      throw Exception('Le panier est vide');
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final itemsData = _items.map((item) => item.toCheckoutJson()).toList();
+      final result = await _tabletApi.checkout(
+        session: session,
+        items: itemsData,
+        specialInstructions: specialInstructions,
+      );
+      clear();
+      _isLoading = false;
+      notifyListeners();
+      return result;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
       rethrow;

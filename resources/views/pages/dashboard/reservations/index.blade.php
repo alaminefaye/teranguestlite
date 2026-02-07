@@ -86,10 +86,18 @@
                 @endforeach
             </select>
         </div>
+        <div class="min-w-[180px]">
+            <select name="guest_id" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <option value="">Tous les clients</option>
+                @foreach($guests as $g)
+                    <option value="{{ $g->id }}" {{ request('guest_id') == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                @endforeach
+            </select>
+        </div>
         <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
             Filtrer
         </button>
-        @if(request()->hasAny(['search', 'status', 'room_id']))
+        @if(request()->hasAny(['search', 'status', 'room_id', 'guest_id']))
             <a href="{{ route('dashboard.reservations.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
                 Réinitialiser
             </a>
@@ -119,10 +127,10 @@
                     @foreach($reservations as $reservation)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $reservation->reservation_number }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->user->name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->guest ? $reservation->guest->name : ($reservation->user?->name ?? '—') }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->room->room_number }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_in->format('d/m/Y') }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_out->format('d/m/Y') }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_in->format('d/m/Y H:i') }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_out->format('d/m/Y H:i') }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->nights_count }}</td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format($reservation->total_price, 0, ',', ' ') }} FCFA</td>
                             <td class="px-6 py-4">

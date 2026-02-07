@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
@@ -24,6 +26,14 @@ class _CartScreenState extends State<CartScreen> {
   bool _isProcessing = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TabletSessionProvider>().load();
+    });
+  }
+
+  @override
   void dispose() {
     _specialInstructionsController.dispose();
     super.dispose();
@@ -31,6 +41,8 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> _checkout(BuildContext context) async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final tabletSession = Provider.of<TabletSessionProvider>(context, listen: false);
 
     if (cartProvider.isEmpty) {
       HapticHelper.error();
@@ -43,52 +55,171 @@ class _CartScreenState extends State<CartScreen> {
       return;
     }
 
-    // Feedback confirmation checkout
+    final specialInstructions = _specialInstructionsController.text.isEmpty
+        ? null
+        : _specialInstructionsController.text;
+
+    // Si utilisateur connecté : checkout classique. Sinon : session tablette (code client).
+    final useTabletSession = !authProvider.isAuthenticated;
+    if (useTabletSession && !tabletSession.hasSession) {
+      final success = await _showGuestCodeDialog(context, tabletSession);
+      if (!success || !context.mounted) return;
+      if (!tabletSession.hasSession) return;
+    }
+
     HapticHelper.confirm();
-    
-    setState(() {
-      _isProcessing = true;
-    });
+    setState(() => _isProcessing = true);
 
     try {
-      final result = await cartProvider.checkout(
-        specialInstructions: _specialInstructionsController.text.isEmpty
-            ? null
-            : _specialInstructionsController.text,
-      );
+      final result = (useTabletSession && tabletSession.hasSession)
+          ? await cartProvider.checkoutWithTabletSession(
+              tabletSession.session!,
+              specialInstructions: specialInstructions,
+            )
+          : await cartProvider.checkout(
+              specialInstructions: specialInstructions,
+            );
 
-      setState(() {
-        _isProcessing = false;
-      });
-
+      setState(() => _isProcessing = false);
       if (!context.mounted) return;
-
-      // Feedback succès
       HapticHelper.success();
-
-      // Naviguer vers l'écran de confirmation avec animation
       NavigationHelper.replaceWith(
         context,
         OrderConfirmationScreen(orderData: result),
       );
     } catch (e) {
-      setState(() {
-        _isProcessing = false;
-      });
-
+      setState(() => _isProcessing = false);
       if (!context.mounted) return;
-
-      // Feedback erreur
       HapticHelper.error();
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 4),
         ),
       );
     }
+  }
+
+  /// Affiche le dialogue "Entrez votre code client" pour la tablette.
+  /// Retourne true si la session est valide (code validé ou déjà en session).
+  Future<bool> _showGuestCodeDialog(
+    BuildContext context,
+    TabletSessionProvider tabletSession,
+  ) async {
+    String? code;
+    String? roomNumber = tabletSession.roomNumber;
+    final codeController = TextEditingController();
+    final roomController = TextEditingController(text: roomNumber);
+
+    final ok = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return Consumer<TabletSessionProvider>(
+          builder: (ctx, ts, _) {
+            final loading = ts.isLoading;
+            final error = ts.error;
+            return AlertDialog(
+              backgroundColor: AppTheme.primaryBlue,
+              title: const Text(
+                'Code client',
+                style: TextStyle(color: AppTheme.accentGold),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Entrez le code reçu à l\'enregistrement pour valider la commande.',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: roomController,
+                      decoration: InputDecoration(
+                        labelText: 'Numéro de chambre',
+                        labelStyle: const TextStyle(color: AppTheme.textGray),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.1),
+                        border: const OutlineInputBorder(),
+                        hintText: 'ex: 101',
+                      ),
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
+                      onChanged: (v) => roomNumber = v.trim().isEmpty ? null : v.trim(),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: codeController,
+                      decoration: InputDecoration(
+                        labelText: 'Code à 6 chiffres',
+                        labelStyle: const TextStyle(color: AppTheme.textGray),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.1),
+                        border: const OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      obscureText: true,
+                      maxLength: 6,
+                      style: const TextStyle(color: Colors.white, letterSpacing: 8),
+                      onChanged: (v) => code = v.trim(),
+                    ),
+                    if (error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(error, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: loading ? null : () => Navigator.of(ctx).pop(false),
+                  child: const Text('Annuler', style: TextStyle(color: Colors.white70)),
+                ),
+                FilledButton(
+                  onPressed: loading
+                      ? null
+                      : () async {
+                          final c = code ?? codeController.text.trim();
+                          final r = roomNumber ?? roomController.text.trim();
+                          if (c.isEmpty) return;
+                          if (r.isEmpty) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(
+                                content: Text('Indiquez le numéro de chambre.'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                            return;
+                          }
+                          await ts.setRoomNumber(r);
+                          try {
+                            await ts.validateCode(c);
+                            if (!ctx.mounted) return;
+                            Navigator.of(ctx).pop(true);
+                          } catch (_) {
+                            // Error affiché via ts.error dans le Consumer
+                          }
+                        },
+                  style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold),
+                  child: loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Valider'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    tabletSession.clearError();
+    return ok == true;
   }
 
   @override

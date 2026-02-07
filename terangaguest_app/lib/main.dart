@@ -15,6 +15,7 @@ import 'providers/laundry_provider.dart';
 import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/tablet_session_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PalaceProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
       ],
       child: const _LocalizedApp(),
     );

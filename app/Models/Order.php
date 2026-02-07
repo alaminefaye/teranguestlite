@@ -14,6 +14,7 @@ class Order extends Model
     protected $fillable = [
         'enterprise_id',
         'user_id',
+        'guest_id',
         'room_id',
         'order_number',
         'type',
@@ -64,6 +65,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class);
     }
 
     public function room()

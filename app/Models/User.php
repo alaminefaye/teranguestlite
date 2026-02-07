@@ -26,7 +26,6 @@ class User extends Authenticatable
         'enterprise_id',
         'department',
         'room_number',
-        'tablet_code',
         'must_change_password',
         'fcm_token',
         'fcm_token_updated_at',

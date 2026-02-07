@@ -14,6 +14,7 @@ class Reservation extends Model
     protected $fillable = [
         'enterprise_id',
         'user_id',
+        'guest_id',
         'room_id',
         'reservation_number',
         'check_in',
@@ -58,11 +59,19 @@ class Reservation extends Model
     }
 
     /**
-     * Relation avec l'utilisateur (guest)
+     * Relation avec l'utilisateur (optionnel, pour résa créées par le staff)
      */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relation avec le client (invité) pour résa tablette / code
+     */
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class);
     }
 
     /**
@@ -122,23 +131,20 @@ class Reservation extends Model
     }
 
     /**
-     * Scope : réservation valide à l'instant donné (check_in <= now <= check_out, statut confirmé ou checked_in)
-     */
-    public function scopeValidAt($query, $at = null)
-    {
-        $at = $at ?? now();
-        return $query
-            ->whereIn('status', ['confirmed', 'checked_in'])
-            ->where('check_in', '<=', $at)
-            ->where('check_out', '>=', $at);
-    }
-
-    /**
      * Calculer le nombre de nuits
      */
     public function getNightsCountAttribute()
     {
-        return $this->check_in->diffInDays($this->check_out);
+        return $this->check_in->diffInDays($this->check_out, false);
+    }
+
+    /**
+     * Vérifie si le séjour est valide (now entre check_in et check_out)
+     */
+    public function isStayValid(): bool
+    {
+        $now = now();
+        return $now->between($this->check_in, $this->check_out);
     }
 
     /**

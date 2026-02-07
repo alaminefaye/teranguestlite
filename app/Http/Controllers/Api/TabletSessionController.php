@@ -3,110 +3,198 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Guest;
+use App\Models\MenuItem;
+use App\Models\Order;
 use App\Models\Reservation;
-use App\Models\User;
+use App\Models\Room;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
+/**
+ * Validation du code client sur la tablette en chambre.
+ * Pas d'auth utilisateur : la tablette envoie code + room_id pour lier la session au client et à la chambre.
+ */
 class TabletSessionController extends Controller
 {
     /**
-     * Connexion tablette par code client.
-     * Vérifie que le client a une réservation de chambre valide (check_in <= now <= check_out).
+     * Valide le code et retourne la session (guest + room + reservation) si le séjour est valide.
+     * POST /api/tablet/validate-code
+     * Body: { "code": "123456", "room_id": 1 } ou { "code": "123456", "room_number": "101" }
      */
-    public function session(Request $request): JsonResponse
+    public function validateCode(Request $request): JsonResponse
     {
         $request->validate([
             'code' => 'required|string|max:20',
-            'enterprise_id' => 'required|exists:enterprises,id',
+            'room_id' => 'nullable|exists:rooms,id',
+            'room_number' => 'nullable|string|max:20',
         ]);
 
-        $code = Str::upper(Str::trim($request->input('code')));
-        $enterpriseId = (int) $request->input('enterprise_id');
+        $code = trim($request->input('code'));
+        $room = null;
 
-        $user = User::where('enterprise_id', $enterpriseId)
-            ->where('role', 'guest')
-            ->where('tablet_code', $code)
+        if ($request->filled('room_id')) {
+            $room = Room::find($request->room_id);
+        } elseif ($request->filled('room_number')) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('room_number', $request->room_number)
+                ->first();
+        }
+
+        if (!$room) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chambre non trouvée. Indiquez room_id ou room_number.',
+            ], 400);
+        }
+
+        $enterpriseId = $room->enterprise_id;
+
+        $guest = Guest::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $enterpriseId)
+            ->where('access_code', $code)
             ->first();
 
-        if (!$user) {
+        if (!$guest) {
             return response()->json([
                 'success' => false,
                 'message' => 'Code invalide.',
-            ], 422);
+            ], 401);
         }
 
-        $reservation = Reservation::where('user_id', $user->id)
-            ->where('enterprise_id', $enterpriseId)
-            ->validAt(now())
-            ->with('room')
-            ->orderByDesc('check_in')
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('guest_id', $guest->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
             ->first();
 
         if (!$reservation) {
-            $futureOrPast = Reservation::where('user_id', $user->id)
-                ->where('enterprise_id', $enterpriseId)
-                ->whereIn('status', ['confirmed', 'checked_in'])
-                ->first();
-
-            if ($futureOrPast) {
-                if ($futureOrPast->check_in > now()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Votre réservation n\'est pas encore active. Date d\'arrivée : ' . $futureOrPast->check_in->format('d/m/Y H:i'),
-                    ], 422);
-                }
-                if ($futureOrPast->check_out < now()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Votre séjour est terminé. Merci de votre visite.',
-                    ], 422);
-                }
-            }
-
             return response()->json([
                 'success' => false,
-                'message' => 'Aucune réservation de chambre active pour ce code.',
-            ], 422);
+                'message' => 'Aucun séjour valide pour cette chambre. Vérifiez les dates de check-in et check-out.',
+            ], 403);
         }
-
-        // Synchroniser la chambre du user avec la réservation active (pour les APIs qui utilisent room_number)
-        $user->update(['room_number' => $reservation->room->room_number ?? $user->room_number]);
-
-        $token = $user->createToken('tablet', ['tablet'])->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message' => 'Connexion réussie.',
             'data' => [
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'guest' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'room_number' => $user->room_number ?? $reservation->room->room_number ?? null,
-                    'room_id' => $reservation->room_id,
-                    'reservation_id' => $reservation->id,
-                    'reservation_number' => $reservation->reservation_number,
-                    'check_in' => $reservation->check_in->toIso8601String(),
-                    'check_out' => $reservation->check_out->toIso8601String(),
-                ],
+                'guest_id' => $guest->id,
+                'guest_name' => $guest->name,
+                'room_id' => $room->id,
+                'room_number' => $room->room_number,
+                'reservation_id' => $reservation->id,
+                'reservation_number' => $reservation->reservation_number,
             ],
         ], 200);
     }
 
     /**
-     * Déconnexion tablette (révoquer le token).
+     * Passer une commande room service depuis la tablette (session client).
+     * POST /api/tablet/checkout
+     * Body: guest_id, room_id, reservation_id (pour revalidation), items[], special_instructions
      */
-    public function logout(Request $request): JsonResponse
+    public function checkout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->validate([
+            'guest_id' => 'required|exists:guests,id',
+            'room_id' => 'required|exists:rooms,id',
+            'reservation_id' => 'required|exists:reservations,id',
+            'items' => 'required|array|min:1',
+            'items.*.menu_item_id' => 'required|exists:menu_items,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.special_instructions' => 'nullable|string|max:500',
+            'special_instructions' => 'nullable|string|max:1000',
+        ]);
+
+        $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
+        $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
+        if (!$guest || !$room || $room->enterprise_id !== $guest->enterprise_id) {
+            return response()->json(['success' => false, 'message' => 'Session invalide.'], 403);
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('id', $request->reservation_id)
+            ->where('guest_id', $guest->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ], 403);
+        }
+
+        $subtotal = 0;
+        $itemsData = [];
+        foreach ($request->items as $item) {
+            $menuItem = MenuItem::find($item['menu_item_id']);
+            if (!$menuItem || !$menuItem->is_available) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "L'article {$menuItem->name} n'est plus disponible.",
+                ], 400);
+            }
+            $qty = (int) $item['quantity'];
+            $total = $menuItem->price * $qty;
+            $subtotal += $total;
+            $itemsData[] = [
+                'menu_item_id' => $menuItem->id,
+                'item_name' => $menuItem->name,
+                'item_description' => $menuItem->description,
+                'unit_price' => $menuItem->price,
+                'quantity' => $qty,
+                'total_price' => $total,
+                'special_requests' => $item['special_instructions'] ?? null,
+            ];
+        }
+
+        $tax = 0;
+        $deliveryFee = 0;
+        $total = $subtotal + $tax + $deliveryFee;
+
+        $order = Order::withoutGlobalScope('enterprise')->create([
+            'enterprise_id' => $room->enterprise_id,
+            'user_id' => null,
+            'guest_id' => $guest->id,
+            'room_id' => $room->id,
+            'order_number' => $this->generateOrderNumber(),
+            'type' => 'room_service',
+            'status' => 'pending',
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'delivery_fee' => $deliveryFee,
+            'total' => $total,
+            'special_instructions' => $request->special_instructions,
+        ]);
+
+        foreach ($itemsData as $itemData) {
+            $order->orderItems()->create($itemData);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Déconnexion réussie.',
-        ], 200);
+            'message' => 'Commande enregistrée.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'total' => (float) $order->total,
+                'formatted_total' => number_format($order->total, 0, ',', ' ') . ' FCFA',
+                'status' => $order->status,
+            ],
+        ], 201);
+    }
+
+    private function generateOrderNumber(): string
+    {
+        $date = now()->format('Ymd');
+        $last = Order::withoutGlobalScope('enterprise')->whereDate('created_at', today())->latest()->first();
+        $seq = $last ? (int) substr($last->order_number, -3) + 1 : 1;
+        return 'CMD-' . $date . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
     }
 }

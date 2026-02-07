@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
@@ -15,7 +16,7 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Reservation::with(['room', 'user']);
+        $query = Reservation::with(['room', 'user', 'guest']);
 
         // Filtres
         if ($request->filled('status')) {
@@ -26,9 +27,16 @@ class ReservationController extends Controller
             $query->where('room_id', $request->room_id);
         }
 
+        if ($request->filled('guest_id')) {
+            $query->where('guest_id', $request->guest_id);
+        }
+
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('reservation_number', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('guest', function ($g) use ($request) {
+                      $g->where('name', 'like', '%' . $request->search . '%');
+                  })
                   ->orWhereHas('user', function ($userQuery) use ($request) {
                       $userQuery->where('name', 'like', '%' . $request->search . '%');
                   });
@@ -47,14 +55,15 @@ class ReservationController extends Controller
             'today_checkouts' => Reservation::checkOutToday()->count(),
         ];
 
-        // Pour les filtres
         $rooms = Room::orderBy('room_number')->get();
+        $guests = Guest::orderBy('name')->get();
 
         return view('pages.dashboard.reservations.index', [
             'title' => 'Réservations',
             'reservations' => $reservations,
             'stats' => $stats,
             'rooms' => $rooms,
+            'guests' => $guests,
         ]);
     }
 
@@ -64,7 +73,7 @@ class ReservationController extends Controller
     public function create()
     {
         $rooms = Room::available()->orderBy('room_number')->get();
-        $guests = User::guests()->orderBy('name')->get();
+        $guests = Guest::orderBy('name')->get();
 
         return view('pages.dashboard.reservations.create', [
             'title' => 'Créer une réservation',
@@ -79,9 +88,9 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
-            'check_in' => 'required|date|after_or_equal:today',
+            'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'guests_count' => 'required|integer|min:1|max:10',
             'special_requests' => 'nullable|string',
@@ -89,24 +98,21 @@ class ReservationController extends Controller
             'status' => 'required|in:pending,confirmed',
         ]);
 
-        // Ajouter enterprise_id automatiquement
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
+        $checkIn = \Carbon\Carbon::parse($validated['check_in']);
+        $checkOut = \Carbon\Carbon::parse($validated['check_out']);
 
         // Vérifier la disponibilité de la chambre
         $room = Room::findOrFail($validated['room_id']);
-        if (!$room->isAvailableForPeriod($validated['check_in'], $validated['check_out'])) {
+        if (!$room->isAvailableForPeriod($checkIn, $checkOut)) {
             return back()
                 ->withInput()
                 ->with('error', 'Cette chambre n\'est pas disponible pour la période sélectionnée.');
         }
 
-        // Calculer le prix total
-        $checkIn = \Carbon\Carbon::parse($validated['check_in']);
-        $checkOut = \Carbon\Carbon::parse($validated['check_out']);
-        $nights = $checkIn->diffInDays($checkOut);
+        $nights = $checkIn->diffInDays($checkOut, false) ?: 1;
         $validated['total_price'] = $room->price_per_night * $nights;
 
-        // Créer la réservation
         $reservation = Reservation::create($validated);
 
         // Mettre à jour le statut de la chambre si confirmée
@@ -123,7 +129,7 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        $reservation->load(['room', 'user', 'enterprise']);
+        $reservation->load(['room', 'user', 'guest', 'enterprise']);
 
         return view('pages.dashboard.reservations.show', [
             'title' => 'Réservation ' . $reservation->reservation_number,
@@ -137,7 +143,7 @@ class ReservationController extends Controller
     public function edit(Reservation $reservation)
     {
         $rooms = Room::orderBy('room_number')->get();
-        $guests = User::guests()->orderBy('name')->get();
+        $guests = Guest::orderBy('name')->get();
 
         return view('pages.dashboard.reservations.edit', [
             'title' => 'Modifier réservation ' . $reservation->reservation_number,
@@ -153,7 +159,7 @@ class ReservationController extends Controller
     public function update(Request $request, Reservation $reservation)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
@@ -163,21 +169,20 @@ class ReservationController extends Controller
             'status' => 'required|in:pending,confirmed,checked_in,checked_out,cancelled',
         ]);
 
-        // Si la chambre a changé, vérifier la disponibilité
+        $checkIn = \Carbon\Carbon::parse($validated['check_in']);
+        $checkOut = \Carbon\Carbon::parse($validated['check_out']);
+
         if ($validated['room_id'] != $reservation->room_id) {
             $room = Room::findOrFail($validated['room_id']);
-            if (!$room->isAvailableForPeriod($validated['check_in'], $validated['check_out'])) {
+            if (!$room->isAvailableForPeriod($checkIn, $checkOut)) {
                 return back()
                     ->withInput()
                     ->with('error', 'Cette chambre n\'est pas disponible pour la période sélectionnée.');
             }
         }
 
-        // Recalculer le prix si les dates ont changé
         $room = Room::findOrFail($validated['room_id']);
-        $checkIn = \Carbon\Carbon::parse($validated['check_in']);
-        $checkOut = \Carbon\Carbon::parse($validated['check_out']);
-        $nights = $checkIn->diffInDays($checkOut);
+        $nights = $checkIn->diffInDays($checkOut, false) ?: 1;
         $validated['total_price'] = $room->price_per_night * $nights;
 
         $reservation->update($validated);

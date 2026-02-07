@@ -20,8 +20,8 @@
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     <form action="{{ route('dashboard.reservations.update', $reservation) }}" method="POST" x-data="{
-        checkIn: '{{ old('check_in', $reservation->check_in->format('Y-m-d')) }}',
-        checkOut: '{{ old('check_out', $reservation->check_out->format('Y-m-d')) }}',
+        checkIn: '{{ old('check_in', $reservation->check_in->format('Y-m-d\TH:i')) }}',
+        checkOut: '{{ old('check_out', $reservation->check_out->format('Y-m-d\TH:i')) }}',
         roomId: '{{ old('room_id', $reservation->room_id) }}',
         pricePerNight: {{ $reservation->room->price_per_night }},
         calculateTotal() {
@@ -49,30 +49,30 @@
         @method('PUT')
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Client -->
+            <!-- Client (invité) -->
             <div class="md:col-span-2">
-                <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Client <span class="text-error-500">*</span>
+                <label for="guest_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Client (invité) <span class="text-error-500">*</span>
                 </label>
-                <select name="user_id" id="user_id" required
+                <select name="guest_id" id="guest_id" required
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    @foreach($guests as $guest)
-                        <option value="{{ $guest->id }}" {{ old('user_id', $reservation->user_id) == $guest->id ? 'selected' : '' }}>
-                            {{ $guest->name }} ({{ $guest->email }})
+                    @foreach($guests as $g)
+                        <option value="{{ $g->id }}" {{ old('guest_id', $reservation->guest_id) == $g->id ? 'selected' : '' }}>
+                            {{ $g->name }} @if($g->email)({{ $g->email }})@endif — Code {{ $g->access_code }}
                         </option>
                     @endforeach
                 </select>
-                @error('user_id')
+                @error('guest_id')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <!-- Dates -->
+            <!-- Check-in / check-out (date et heure) -->
             <div>
                 <label for="check_in" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Date de check-in <span class="text-error-500">*</span>
+                    Check-in (date et heure) <span class="text-error-500">*</span>
                 </label>
-                <input type="date" name="check_in" id="check_in" x-model="checkIn" required
+                <input type="datetime-local" name="check_in" id="check_in" x-model="checkIn" required
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('check_in')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
@@ -81,10 +81,9 @@
 
             <div>
                 <label for="check_out" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Date de check-out <span class="text-error-500">*</span>
+                    Check-out (date et heure) <span class="text-error-500">*</span>
                 </label>
-                <input type="date" name="check_out" id="check_out" x-model="checkOut" required
-                    :min="checkIn"
+                <input type="datetime-local" name="check_out" id="check_out" x-model="checkOut" required
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('check_out')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>

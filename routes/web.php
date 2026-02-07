@@ -53,6 +53,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('reservations/{reservation}/cancel', [\App\Http\Controllers\Dashboard\ReservationController::class, 'cancel'])
             ->name('reservations.cancel');
         
+        // Clients (invités) - code tablette
+        Route::resource('guests', \App\Http\Controllers\Dashboard\GuestController::class);
+        Route::post('guests/{guest}/regenerate-code', [\App\Http\Controllers\Dashboard\GuestController::class, 'regenerateCode'])
+            ->name('guests.regenerate-code');
+        
         // Menus
         Route::resource('menu-categories', \App\Http\Controllers\Dashboard\MenuCategoryController::class);
         Route::resource('menu-items', \App\Http\Controllers\Dashboard\MenuItemController::class);

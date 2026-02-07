@@ -42,6 +42,14 @@ class Enterprise extends Model
     }
 
     /**
+     * Relation avec les clients (invités) - par entreprise
+     */
+    public function guests()
+    {
+        return $this->hasMany(Guest::class);
+    }
+
+    /**
      * Relation avec les réservations
      */
     public function reservations()

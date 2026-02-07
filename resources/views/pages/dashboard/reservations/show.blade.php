@@ -10,7 +10,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">{{ $reservation->reservation_number }}</h1>
-            <p class="text-gray-600 dark:text-gray-400">Réservation pour {{ $reservation->user->name }}</p>
+            <p class="text-gray-600 dark:text-gray-400">Réservation pour {{ $reservation->guest ? $reservation->guest->name : ($reservation->user?->name ?? '—') }}</p>
         </div>
         <div class="flex items-center gap-3">
             @if($reservation->status === 'confirmed')

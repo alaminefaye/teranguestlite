@@ -9,63 +9,6 @@ class AuthService {
   final ApiService _apiService = ApiService();
   final SecureStorage _secureStorage = SecureStorage();
 
-  /// Connexion tablette par code client (réservation valide requise)
-  Future<Map<String, dynamic>> loginByTabletCode({
-    required String code,
-    required int enterpriseId,
-  }) async {
-    try {
-      final response = await _apiService.post(
-        ApiConfig.tabletSession,
-        data: {
-          'code': code.trim().toUpperCase(),
-          'enterprise_id': enterpriseId,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data['success'] == true && data['data'] != null) {
-          final token = data['data']['token'] as String;
-
-          await _secureStorage.saveToken(token);
-          _apiService.setAuthToken(token);
-
-          try {
-            final user = await getCurrentUser();
-            await _secureStorage.saveUser(user);
-            return {'user': user, 'token': token};
-          } catch (_) {
-            final guest = data['data']['guest'] as Map<String, dynamic>?;
-            if (guest != null) {
-              final user = User(
-                id: guest['id'] as int,
-                name: guest['name'] as String? ?? 'Invité',
-                email: guest['email'] as String? ?? '',
-                role: 'guest',
-                enterpriseId: enterpriseId,
-                roomNumber: guest['room_number'] as String?,
-              );
-              await _secureStorage.saveUser(user);
-              return {'user': user, 'token': token};
-            }
-            return {'token': token};
-          }
-        }
-        throw Exception(data['message'] ?? 'Erreur de connexion');
-      }
-      throw Exception('Erreur serveur: ${response.statusCode}');
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final errorData = e.response?.data;
-        if (errorData is Map && errorData.containsKey('message')) {
-          throw Exception(errorData['message'] as String? ?? 'Code invalide');
-        }
-      }
-      throw Exception('Impossible de se connecter au serveur');
-    }
-  }
-
   /// Login avec email et mot de passe
   Future<Map<String, dynamic>> login({
     required String email,
