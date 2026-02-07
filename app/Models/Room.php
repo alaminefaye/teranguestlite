@@ -45,6 +45,14 @@ class Room extends Model
     }
 
     /**
+     * Tablette associée à cette chambre (une chambre = une tablette)
+     */
+    public function tablet()
+    {
+        return $this->hasOne(Tablet::class);
+    }
+
+    /**
      * Scope pour les chambres disponibles
      */
     public function scopeAvailable($query)

@@ -23,24 +23,37 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'] as int,
-      orderNumber: json['order_number'] as String,
-      status: json['status'] as String,
+      id: _parseInt(json['id']),
+      orderNumber: _parseString(json['order_number']),
+      status: _parseString(json['status']),
       total: _parseDouble(json['total_amount'] ?? json['total']),
-      instructions: json['special_instructions'] ?? json['instructions'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      deliveryTime: json['estimated_delivery'] != null
-          ? DateTime.parse(json['estimated_delivery'] as String)
-          : (json['delivery_time'] != null
-              ? DateTime.parse(json['delivery_time'] as String)
-              : null),
+      instructions: _parseStringNullable(json['special_instructions'] ?? json['instructions']),
+      createdAt: DateTime.parse(_parseString(json['created_at'])),
+      deliveryTime: () {
+        final raw = json['estimated_delivery'] ?? json['delivery_time'];
+        if (raw == null) return null;
+        return DateTime.tryParse(_parseString(raw));
+      }(),
       itemsCount: _parseInt(json['items_count']),
       items: json['items'] != null
           ? (json['items'] as List)
-              .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
+              .map((item) => OrderItem.fromJson(item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
               .toList()
           : null,
     );
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  static String? _parseStringNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value.isEmpty ? null : value;
+    final s = value.toString();
+    return s.isEmpty ? null : s;
   }
 
   static double _parseDouble(dynamic value) {
@@ -97,17 +110,33 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
-    // Support pour les 2 formats d'API
-    final menuItemData = json['menu_item'] as Map<String, dynamic>?;
-    
+    final menuItemData = json['menu_item'] is Map ? json['menu_item'] as Map<String, dynamic>? : null;
+    final id = _parseInt(json['id']);
+    final menuItemId = _parseInt(menuItemData?['id'] ?? json['menu_item_id']);
+    final name = _parseString(menuItemData?['name'] ?? json['name'] ?? json['item_name']);
+    final image = _parseStringNullable(menuItemData?['image'] ?? json['image']);
+
     return OrderItem(
-      id: json['id'] as int,
-      menuItemId: menuItemData?['id'] ?? json['menu_item_id'] as int,
-      name: menuItemData?['name'] ?? json['name'] as String,
+      id: id != 0 ? id : menuItemId,
+      menuItemId: menuItemId,
+      name: name,
       quantity: _parseInt(json['quantity']),
       price: _parseDouble(json['unit_price'] ?? json['price']),
-      image: menuItemData?['image'] ?? json['image'] as String?,
+      image: image,
     );
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  static String? _parseStringNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value.isEmpty ? null : value;
+    final s = value.toString();
+    return s.isEmpty ? null : s;
   }
 
   static double _parseDouble(dynamic value) {

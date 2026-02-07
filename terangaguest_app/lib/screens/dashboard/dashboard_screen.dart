@@ -5,6 +5,7 @@ import 'package:weather/weather.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/orders_provider.dart';
 import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
 import '../../utils/navigation_helper.dart';
@@ -35,6 +36,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadWeather();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrdersProvider>().fetchOrdersForDashboard();
+    });
   }
 
   Future<void> _loadWeather() async {
@@ -312,72 +316,157 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: padV, horizontal: padH),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          StreamBuilder(
-            stream: Stream.periodic(const Duration(seconds: 1)),
-            builder: (context, snapshot) {
-              final now = DateTime.now();
-              final temperature = _currentWeather?.temperature?.celsius?.round() ?? 25;
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    DateFormat('hh:mm a').format(now).toUpperCase(),
-                    style: TextStyle(
-                      fontSize: timeSize,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentGold,
-                      height: 1.0,
-                    ),
-                  ),
-                  SizedBox(width: isCompact ? 10 : 14),
-                  Text(
-                    DateFormat('EEEE d MMMM', 'fr_FR').format(now),
-                    style: TextStyle(
-                      fontSize: dateSize,
-                      fontWeight: FontWeight.w400,
-                      color: AppTheme.textGray,
-                      height: 1.0,
-                    ),
-                  ),
-                  SizedBox(width: isCompact ? 10 : 14),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentGold.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppTheme.accentGold, width: 1.5),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _currentWeather != null
-                              ? WeatherService.getWeatherIcon(_currentWeather?.weatherMain)
-                              : '☀️',
-                          style: TextStyle(fontSize: weatherIconSize),
-                        ),
-                        SizedBox(width: isCompact ? 6 : 8),
-                        Text(
-                          '$temperature°',
-                          style: TextStyle(
-                            fontSize: tempSize,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.accentGold,
+      child: Consumer<OrdersProvider>(
+        builder: (context, ordersProvider, _) {
+          final inProgressCount = ordersProvider.inProgressOrdersCount;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Commande(s) en cours — affiché seulement s'il y en a au moins une (animé, clignotant)
+              if (inProgressCount > 0)
+                _BlinkingOrdersBadge(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticHelper.lightImpact();
+                      context.navigateTo(const OrdersListScreen());
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: badgePadH + 4, vertical: badgePadV + 2),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.orange, width: 1.5),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.receipt_long, size: weatherIconSize + 2, color: Colors.orange),
+                          SizedBox(width: isCompact ? 6 : 8),
+                          Text(
+                            inProgressCount == 1
+                                ? '1 commande en cours'
+                                : '$inProgressCount commandes en cours',
+                            style: TextStyle(
+                              fontSize: isVeryCompact ? 11.0 : (isCompact ? 12.0 : 14.0),
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              );
-            },
-          ),
-        ],
+                )
+              else
+                const SizedBox.shrink(),
+              // Heure, date, météo
+              StreamBuilder(
+                stream: Stream.periodic(const Duration(seconds: 1)),
+                builder: (context, snapshot) {
+                  final now = DateTime.now();
+                  final temperature = _currentWeather?.temperature?.celsius?.round() ?? 25;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        DateFormat('hh:mm a').format(now).toUpperCase(),
+                        style: TextStyle(
+                          fontSize: timeSize,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.accentGold,
+                          height: 1.0,
+                        ),
+                      ),
+                      SizedBox(width: isCompact ? 10 : 14),
+                      Text(
+                        DateFormat('EEEE d MMMM', 'fr_FR').format(now),
+                        style: TextStyle(
+                          fontSize: dateSize,
+                          fontWeight: FontWeight.w400,
+                          color: AppTheme.textGray,
+                          height: 1.0,
+                        ),
+                      ),
+                      SizedBox(width: isCompact ? 10 : 14),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentGold.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _currentWeather != null
+                                  ? WeatherService.getWeatherIcon(_currentWeather?.weatherMain)
+                                  : '☀️',
+                              style: TextStyle(fontSize: weatherIconSize),
+                            ),
+                            SizedBox(width: isCompact ? 6 : 8),
+                            Text(
+                              '$temperature°',
+                              style: TextStyle(
+                                fontSize: tempSize,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.accentGold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+}
+
+/// Badge « commande(s) en cours » avec animation de clignotement (opacité).
+class _BlinkingOrdersBadge extends StatefulWidget {
+  const _BlinkingOrdersBadge({required this.child});
+  final Widget child;
+
+  @override
+  State<_BlinkingOrdersBadge> createState() => _BlinkingOrdersBadgeState();
+}
+
+class _BlinkingOrdersBadgeState extends State<_BlinkingOrdersBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 900),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.45, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: widget.child,
     );
   }
 }

@@ -18,6 +18,17 @@ class OrdersProvider with ChangeNotifier {
   bool get hasMorePages => _hasMorePages;
   String? get selectedStatus => _selectedStatus;
 
+  /// Nombre de commandes en cours (pending, confirmed, preparing, delivering)
+  int get inProgressOrdersCount {
+    const inProgress = ['pending', 'confirmed', 'preparing', 'delivering'];
+    return _orders.where((o) => inProgress.contains(o.status)).length;
+  }
+
+  /// Charge les commandes pour le footer (sans filtre) — appelé au démarrage du dashboard
+  Future<void> fetchOrdersForDashboard() async {
+    await fetchOrders(status: null);
+  }
+
   /// Récupère les commandes
   Future<void> fetchOrders({
     String? status,

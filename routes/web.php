@@ -77,6 +77,12 @@ Route::middleware(['auth'])->group(function () {
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);
         
+        // Staff (personnel de l'hôtel)
+        Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');
+
+        // Tablettes (tablettes en chambre reliées à une chambre)
+        Route::resource('tablets', \App\Http\Controllers\Dashboard\TabletController::class)->only(['index', 'create', 'store', 'destroy']);
+
         // Commandes
         Route::resource('orders', \App\Http\Controllers\Dashboard\OrderController::class);
         

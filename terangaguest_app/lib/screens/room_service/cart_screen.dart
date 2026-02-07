@@ -101,15 +101,14 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   /// Affiche le dialogue "Entrez votre code client" pour la tablette.
-  /// Retourne true si la session est valide (code validé ou déjà en session).
+  /// La chambre est en lecture seule (tablette reliée à une chambre) ; seul le code est saisi.
   Future<bool> _showGuestCodeDialog(
     BuildContext context,
     TabletSessionProvider tabletSession,
   ) async {
     String? code;
-    String? roomNumber = tabletSession.roomNumber;
     final codeController = TextEditingController();
-    final roomController = TextEditingController(text: roomNumber);
+    final roomController = TextEditingController(text: tabletSession.roomNumber);
 
     final ok = await showDialog<bool>(
       context: context,
@@ -119,6 +118,9 @@ class _CartScreenState extends State<CartScreen> {
           builder: (ctx, ts, _) {
             final loading = ts.isLoading;
             final error = ts.error;
+            final currentRoom = (ts.roomNumber ?? '').trim();
+            final showRoomSetup = currentRoom.isEmpty;
+
             return AlertDialog(
               backgroundColor: AppTheme.primaryBlue,
               title: const Text(
@@ -135,21 +137,53 @@ class _CartScreenState extends State<CartScreen> {
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: roomController,
-                      decoration: InputDecoration(
-                        labelText: 'Numéro de chambre',
-                        labelStyle: const TextStyle(color: AppTheme.textGray),
-                        filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.1),
-                        border: const OutlineInputBorder(),
-                        hintText: 'ex: 101',
+                    // Chambre : lecture seule si déjà définie, sinon champ unique "Définir la chambre"
+                    if (showRoomSetup) ...[
+                      TextField(
+                        controller: roomController,
+                        decoration: InputDecoration(
+                          labelText: 'Numéro de chambre (cette tablette)',
+                          labelStyle: const TextStyle(color: AppTheme.textGray),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.1),
+                          border: const OutlineInputBorder(),
+                          hintText: 'ex: 101',
+                        ),
+                        keyboardType: TextInputType.number,
+                        style: const TextStyle(color: Colors.white),
+                        readOnly: false,
                       ),
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
-                      onChanged: (v) => roomNumber = v.trim().isEmpty ? null : v.trim(),
-                    ),
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 8),
+                      Text(
+                        'La chambre sera mémorisée pour les prochaines validations.',
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                      const SizedBox(height: 12),
+                    ] else ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bed, color: AppTheme.accentGold, size: 20),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Chambre : ${ts.roomNumber ?? "—"}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     TextField(
                       controller: codeController,
                       decoration: InputDecoration(
@@ -181,26 +215,34 @@ class _CartScreenState extends State<CartScreen> {
                   onPressed: loading
                       ? null
                       : () async {
-                          final c = code ?? codeController.text.trim();
-                          final r = roomNumber ?? roomController.text.trim();
-                          if (c.isEmpty) return;
-                          if (r.isEmpty) {
+                          final c = (code ?? codeController.text.trim());
+                          if (c.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
                               const SnackBar(
-                                content: Text('Indiquez le numéro de chambre.'),
+                                content: Text('Entrez le code à 6 chiffres.'),
                                 backgroundColor: Colors.orange,
                               ),
                             );
                             return;
                           }
-                          await ts.setRoomNumber(r);
+                          final r = showRoomSetup
+                              ? roomController.text.trim()
+                              : (ts.roomNumber ?? '').trim();
+                          if (r.isEmpty) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              const SnackBar(
+                                content: Text('Définissez le numéro de chambre de cette tablette.'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                            return;
+                          }
+                          if (showRoomSetup) await ts.setRoomNumber(r);
                           try {
                             await ts.validateCode(c);
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop(true);
-                          } catch (_) {
-                            // Error affiché via ts.error dans le Consumer
-                          }
+                          } catch (_) {}
                         },
                   style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold),
                   child: loading

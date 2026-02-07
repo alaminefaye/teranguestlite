@@ -137,6 +137,11 @@ class MenuHelper
                         'name' => 'Staff',
                         'path' => '/dashboard/staff',
                     ],
+                    [
+                        'icon' => 'task',
+                        'name' => 'Tablettes',
+                        'path' => '/dashboard/tablets',
+                    ],
                 ],
             ],
             [
