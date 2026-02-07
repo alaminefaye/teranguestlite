@@ -48,6 +48,69 @@ class TabletSessionApi {
     }
   }
 
+  /// Vérifie que la session (séjour) est encore valide avant d'afficher la confirmation de commande.
+  /// Lance une Exception si la session a expiré ou est invalide (403).
+  Future<GuestSession> validateSession(GuestSession session) async {
+    try {
+      final response = await _api.post(
+        ApiConfig.tabletValidateSession,
+        data: {
+          'guest_id': session.guestId,
+          'room_id': session.roomId,
+          'reservation_id': session.reservationId,
+        },
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true || data['data'] == null) {
+        throw Exception(data?['message'] ?? 'Séjour invalide ou expiré. Entrez à nouveau votre code.');
+      }
+      return GuestSession.fromJson(data['data'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final message = body is Map && body['message'] != null
+          ? (body['message'] as String?)
+          : null;
+      throw Exception(
+        message?.trim().isNotEmpty == true
+            ? message!
+            : 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+      );
+    }
+  }
+
+  /// Message explicite pour les erreurs HTTP courantes (panier / checkout).
+  static String _messageFromDio(DioException e) {
+    final body = e.response?.data;
+    if (body is Map && body['message'] != null) {
+      final msg = body['message'];
+      if (msg is String && msg.trim().isNotEmpty) return msg;
+    }
+    final code = e.response?.statusCode;
+    if (code == 403) {
+      return 'Accès refusé. Vérifiez que votre code client est encore valide et que vous êtes bien enregistré pour cette chambre. Si le problème continue, contactez la réception.';
+    }
+    if (code == 401) {
+      return 'Session expirée. Entrez à nouveau votre code client pour valider la commande.';
+    }
+    if (code == 422) {
+      if (body is Map && body['errors'] != null) {
+        final errors = body['errors'] as Map<String, dynamic>?;
+        if (errors != null && errors.isNotEmpty) {
+          final first = errors.values.first;
+          if (first is List && first.isNotEmpty) return first.first.toString();
+        }
+      }
+      return 'Données invalides. Vérifiez votre panier et réessayez.';
+    }
+    if (code != null && code >= 500) {
+      return 'Le serveur est temporairement indisponible. Réessayez dans quelques instants.';
+    }
+    if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+      return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
+    }
+    return 'Impossible de valider la commande. Réessayez ou contactez la réception.';
+  }
+
   /// Checkout room service avec session client (tablette).
   Future<Map<String, dynamic>> checkout({
     required GuestSession session,
@@ -55,22 +118,26 @@ class TabletSessionApi {
     String? specialInstructions,
     required String paymentMethod,
   }) async {
-    final response = await _api.post(
-      ApiConfig.tabletCheckout,
-      data: {
-        'guest_id': session.guestId,
-        'room_id': session.roomId,
-        'reservation_id': session.reservationId,
-        'items': items,
-        if (specialInstructions != null && specialInstructions.isNotEmpty)
-          'special_instructions': specialInstructions,
-        'payment_method': paymentMethod,
-      },
-    );
-    final data = response.data;
-    if (data['success'] != true) {
-      throw Exception(data['message'] ?? 'Erreur lors de la commande.');
+    try {
+      final response = await _api.post(
+        ApiConfig.tabletCheckout,
+        data: {
+          'guest_id': session.guestId,
+          'room_id': session.roomId,
+          'reservation_id': session.reservationId,
+          'items': items,
+          if (specialInstructions != null && specialInstructions.isNotEmpty)
+            'special_instructions': specialInstructions,
+          'payment_method': paymentMethod,
+        },
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true) {
+        throw Exception(data?['message'] ?? 'Erreur lors de la commande.');
+      }
+      return data['data'] as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw Exception(_messageFromDio(e));
     }
-    return data['data'] as Map<String, dynamic>;
   }
 }

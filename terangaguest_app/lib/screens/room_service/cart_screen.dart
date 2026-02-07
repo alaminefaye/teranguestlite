@@ -31,6 +31,9 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final tabletSession = context.read<TabletSessionProvider>();
+      final cart = context.read<CartProvider>();
+      tabletSession.clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
+      cart.clearError(); // Idem pour une erreur de checkout précédente
       await tabletSession.load();
       // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
       if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
@@ -69,18 +72,41 @@ class _CartScreenState extends State<CartScreen> {
 
     // Spec tablette : le code client est toujours demandé à la validation (pas de checkout "utilisateur connecté").
     // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
-    if (!tabletSession.hasSession) {
-      // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
-      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
-        final authUser = context.read<AuthProvider>().user;
-        if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
-          await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
-        }
+    if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+      final authUser = context.read<AuthProvider>().user;
+      if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
+        await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
       }
+    }
+    if (!tabletSession.hasSession) {
       final success = await _showGuestCodeDialog(context, tabletSession);
       if (!success || !context.mounted) return;
       if (!tabletSession.hasSession) return;
     }
+
+    // À ce niveau : s'actualiser et vérifier que la session (séjour) est encore valide avant la confirmation.
+    // Si la session a expiré, effacer et redemander le code.
+    bool sessionValid = false;
+    while (!sessionValid && context.mounted) {
+      try {
+        await tabletSession.validateCurrentSession();
+        sessionValid = true;
+      } catch (_) {
+        await tabletSession.clearSession();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        final success = await _showGuestCodeDialog(context, tabletSession);
+        if (!success || !context.mounted) return;
+        if (!tabletSession.hasSession) return;
+      }
+    }
+    if (!context.mounted || !tabletSession.hasSession) return;
 
     // Confirmation identité + moyen de paiement.
     final confirmResult = await _showConfirmIdentityDialog(context, tabletSession.session!);
@@ -99,6 +125,9 @@ class _CartScreenState extends State<CartScreen> {
       setState(() => _isProcessing = false);
       if (!context.mounted) return;
       HapticHelper.success();
+      // Norme : après checkout, déconnecter automatiquement la session code client.
+      await tabletSession.clearSession();
+      if (!context.mounted) return;
       NavigationHelper.replaceWith(
         context,
         OrderConfirmationScreen(orderData: result),
@@ -107,14 +136,29 @@ class _CartScreenState extends State<CartScreen> {
       setState(() => _isProcessing = false);
       if (!context.mounted) return;
       HapticHelper.error();
+      final message = _userFriendlyErrorMessage(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          content: Text(message),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
         ),
       );
     }
+  }
+
+  /// Retourne un message d'erreur compréhensible pour l'utilisateur (sans détail technique).
+  String _userFriendlyErrorMessage(dynamic e) {
+    final str = e.toString()
+        .replaceFirst('Exception: ', '')
+        .replaceFirst('DioException [bad response]: ', '')
+        .trim();
+    // Si le message est déjà court et lisible, le garder
+    if (str.length <= 200 && !str.contains('status code') && !str.contains('validateStatus')) {
+      return str;
+    }
+    // Sinon message générique pour éviter d'afficher la stack technique
+    return 'Impossible de valider la commande. Vérifiez votre code client ou contactez la réception.';
   }
 
   /// Affiche le dialogue "Entrez votre code client" pour la tablette.
@@ -123,6 +167,7 @@ class _CartScreenState extends State<CartScreen> {
     BuildContext context,
     TabletSessionProvider tabletSession,
   ) async {
+    tabletSession.clearError(); // Dialogue ouvert sans message d'erreur précédent
     String? code;
     final codeController = TextEditingController();
     final roomController = TextEditingController(text: tabletSession.roomNumber);

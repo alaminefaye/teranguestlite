@@ -78,8 +78,32 @@ class TabletSessionProvider with ChangeNotifier {
     }
   }
 
+  /// Vérifie que la session en cours est encore valide (séjour actif).
+  /// Met à jour la session avec les données serveur si valide.
+  /// Lance une exception si la session a expiré ou est invalide.
+  Future<GuestSession> validateCurrentSession() async {
+    if (_session == null) {
+      throw StateError('Aucune session en cours');
+    }
+    _error = null;
+    notifyListeners();
+    try {
+      final s = await _api.validateSession(_session!);
+      _session = s;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keySession, jsonEncode(s.toJson()));
+      notifyListeners();
+      return s;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> clearSession() async {
     _session = null;
+    _error = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keySession);
     notifyListeners();

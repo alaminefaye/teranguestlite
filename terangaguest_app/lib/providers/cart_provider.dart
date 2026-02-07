@@ -141,6 +141,13 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Efface le message d'erreur sans vider le panier (ex. à l'ouverture de l'écran panier).
+  void clearError() {
+    if (_errorMessage == null) return;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   // Passer la commande (checkout) avec auth utilisateur
   Future<Map<String, dynamic>> checkout({String? specialInstructions}) async {
     if (_items.isEmpty) {

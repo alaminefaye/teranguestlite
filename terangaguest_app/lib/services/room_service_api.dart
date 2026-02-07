@@ -152,19 +152,31 @@ class RoomServiceApi {
     } on DioException catch (e) {
       if (e.response != null) {
         final errorData = e.response?.data;
-        if (errorData is Map && errorData.containsKey('message')) {
-          throw Exception(errorData['message']);
-        } else if (errorData is Map && errorData.containsKey('errors')) {
-          // Erreurs de validation
+        final statusCode = e.response?.statusCode;
+        if (errorData is Map && errorData['message'] != null) {
+          final msg = errorData['message'];
+          if (msg is String && msg.trim().isNotEmpty) {
+            throw Exception(msg);
+          }
+        }
+        if (statusCode == 403) {
+          throw Exception(
+            'Accès refusé. Utilisez le code client de la chambre pour valider la commande depuis cette tablette.',
+          );
+        }
+        if (statusCode == 401) {
+          throw Exception('Session expirée. Reconnectez-vous ou entrez votre code client.');
+        }
+        if (errorData is Map && errorData.containsKey('errors')) {
           final errors = errorData['errors'] as Map<String, dynamic>;
           final firstError = errors.values.first;
           if (firstError is List && firstError.isNotEmpty) {
-            throw Exception(firstError.first);
+            throw Exception(firstError.first.toString());
           }
         }
-        throw Exception('Erreur lors de la commande');
+        throw Exception('Erreur lors de la commande. Réessayez ou contactez la réception.');
       } else {
-        throw Exception('Impossible de se connecter au serveur');
+        throw Exception('Impossible de se connecter au serveur. Vérifiez votre connexion.');
       }
     }
   }

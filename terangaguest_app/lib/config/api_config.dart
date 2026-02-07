@@ -50,5 +50,6 @@ class ApiConfig {
   
   // Tablette en chambre - code client (sans auth)
   static const String tabletValidateCode = '/tablet/validate-code';
+  static const String tabletValidateSession = '/tablet/validate-session';
   static const String tabletCheckout = '/tablet/checkout';
 }
