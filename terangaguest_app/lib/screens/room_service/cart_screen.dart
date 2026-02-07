@@ -48,7 +48,7 @@ class _CartScreenState extends State<CartScreen> {
       HapticHelper.error();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).emptyCart),
+          content: Text(_l10n(context).emptyCart),
           backgroundColor: Colors.red,
         ),
       );
@@ -222,8 +222,15 @@ class _CartScreenState extends State<CartScreen> {
     return ok == true;
   }
 
+  /// Localisations avec repli si of(context) est null (évite le crash "Null check operator").
+  AppLocalizations _l10n(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+        lookupAppLocalizations(const Locale('fr'));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10n(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -237,16 +244,16 @@ class _CartScreenState extends State<CartScreen> {
           child: Column(
             children: [
               // Header
-              _buildHeader(),
+              _buildHeader(context, l10n),
 
               // Contenu
               Expanded(
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) {
                     if (cart.isEmpty) {
-                      return _buildEmptyCart(context);
+                      return _buildEmptyCart(context, l10n);
                     }
-                    return _buildCartItems(cart);
+                    return _buildCartItems(context, cart, l10n);
                   },
                 ),
               ),
@@ -255,7 +262,7 @@ class _CartScreenState extends State<CartScreen> {
               Consumer<CartProvider>(
                 builder: (context, cart, child) {
                   if (cart.isEmpty) return const SizedBox.shrink();
-                  return _buildBottomBar(context, cart);
+                  return _buildBottomBar(context, cart, l10n);
                 },
               ),
             ],
@@ -265,7 +272,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -284,7 +291,7 @@ class _CartScreenState extends State<CartScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context).myCart,
+                  l10n.myCart,
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -293,7 +300,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context).verifyOrder,
+                  l10n.verifyOrder,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
@@ -310,7 +317,7 @@ class _CartScreenState extends State<CartScreen> {
               return IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
                 onPressed: () {
-                  _showClearCartDialog(context, cart);
+                  _showClearCartDialog(context, cart, _l10n(context));
                 },
               );
             },
@@ -320,8 +327,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildEmptyCart(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+  Widget _buildEmptyCart(BuildContext context, AppLocalizations l10n) {
     return EmptyStateWidget(
       icon: Icons.shopping_cart_outlined,
       title: l10n.emptyCart,
@@ -337,7 +343,8 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildCartItems(CartProvider cart) {
+  Widget _buildCartItems(
+      BuildContext context, CartProvider cart, AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -348,7 +355,7 @@ class _CartScreenState extends State<CartScreen> {
 
         // Instructions spéciales
         Text(
-          AppLocalizations.of(context).specialInstructions,
+          l10n.specialInstructions,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -361,7 +368,7 @@ class _CartScreenState extends State<CartScreen> {
           maxLines: 3,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).specialInstructionsHint,
+            hintText: l10n.specialInstructionsHint,
             hintStyle: TextStyle(
               color: AppTheme.textGray.withValues(alpha: 0.6),
             ),
@@ -421,7 +428,8 @@ class _CartScreenState extends State<CartScreen> {
               // Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: cartItem.menuItem.image != null
+                child: (cartItem.menuItem.image != null &&
+                        cartItem.menuItem.image!.isNotEmpty)
                     ? CachedNetworkImage(
                         imageUrl: cartItem.menuItem.image!,
                         width: 80,
@@ -508,8 +516,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
 
           // Instructions spéciales de l'article
-          if (cartItem.specialInstructions != null &&
-              cartItem.specialInstructions!.isNotEmpty) ...[
+          if ((cartItem.specialInstructions ?? '').isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
@@ -530,7 +537,7 @@ class _CartScreenState extends State<CartScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      cartItem.specialInstructions!,
+                      cartItem.specialInstructions ?? '',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppTheme.textGray,
@@ -563,7 +570,8 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, CartProvider cart) {
+  Widget _buildBottomBar(
+      BuildContext context, CartProvider cart, AppLocalizations l10n) {
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -629,7 +637,7 @@ class _CartScreenState extends State<CartScreen> {
 
           // Bouton Commander
           AnimatedButton(
-            text: AppLocalizations.of(context).placeOrder,
+            text: l10n.placeOrder,
             icon: Icons.check_circle,
             onPressed: _isProcessing ? null : () => _checkout(context),
             isLoading: _isProcessing,
@@ -641,10 +649,11 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  void _showClearCartDialog(BuildContext context, CartProvider cart) {
+  void _showClearCartDialog(
+      BuildContext context, CartProvider cart, AppLocalizations l10n) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -654,23 +663,23 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
         title: Text(
-          AppLocalizations.of(context).clear,
+          l10n.clear,
           style: const TextStyle(color: Colors.white),
         ),
         content: Text(
-          AppLocalizations.of(context).clearCartConfirm,
+          l10n.clearCartConfirm,
           style: const TextStyle(color: AppTheme.textGray),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              AppLocalizations.of(context).cancel,
+              l10n.cancel,
               style: const TextStyle(color: AppTheme.textGray),
             ),
           ),
           AnimatedButton(
-            text: AppLocalizations.of(context).clear,
+            text: l10n.clear,
             onPressed: () {
               HapticHelper.heavyImpact();
               cart.clear();

@@ -288,7 +288,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           // Catégorie + Temps de préparation
           Row(
             children: [
-              if (widget.item.category != null) ...[
+              if (widget.item.category != null &&
+                  (widget.item.category?.name ?? '').isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,

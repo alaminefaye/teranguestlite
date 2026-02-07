@@ -66,7 +66,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
       );
 
       final items = result['items'] as List<MenuItem>;
-      final meta = result['meta'] as Map<String, dynamic>;
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+      final currentPage = meta['current_page'] as int? ?? 1;
+      final lastPage = meta['last_page'] as int? ?? 1;
 
       setState(() {
         if (loadMore) {
@@ -75,7 +77,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
           _items = items;
         }
         _isLoading = false;
-        _hasMorePages = meta['current_page'] < (meta['last_page'] ?? 1);
+        _hasMorePages = currentPage < lastPage;
       });
     } catch (e) {
       setState(() {
