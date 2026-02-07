@@ -186,4 +186,15 @@ class Order extends Model
     {
         return number_format($this->total, 0, ',', ' ') . ' FCFA';
     }
+
+    public function getPaymentMethodNameAttribute(): ?string
+    {
+        $methods = [
+            'cash' => 'Espèce',
+            'room_bill' => 'Note de chambre',
+            'wave' => 'Wave',
+            'orange_money' => 'Orange Money',
+        ];
+        return $this->payment_method ? ($methods[$this->payment_method] ?? $this->payment_method) : null;
+    }
 }

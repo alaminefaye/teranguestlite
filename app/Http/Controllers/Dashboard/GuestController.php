@@ -63,9 +63,15 @@ class GuestController extends Controller
     public function show(Guest $guest): View
     {
         $guest->loadCount('reservations');
+        $orders = $guest->orders()
+            ->with(['orderItems', 'room'])
+            ->orderByDesc('created_at')
+            ->take(50)
+            ->get();
         return view('pages.dashboard.guests.show', [
             'title' => $guest->name,
             'guest' => $guest,
+            'orders' => $orders,
         ]);
     }
 
