@@ -21,15 +21,65 @@ class OrderDetailScreen extends StatefulWidget {
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
-class _OrderDetailScreenState extends State<OrderDetailScreen> {
+class _OrderDetailScreenState extends State<OrderDetailScreen>
+    with TickerProviderStateMixin {
   Order? _order;
   bool _isLoading = true;
   String? _errorMessage;
+
+  late AnimationController _entranceController;
+  late AnimationController _pulseController;
+  late Animation<double> _headerAnim;
+  late Animation<double> _timelineAnim;
+  late Animation<double> _itemsAnim;
+  late Animation<double> _summaryAnim;
+  late Animation<double> _buttonsAnim;
 
   @override
   void initState() {
     super.initState();
     _loadOrderDetail();
+
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _headerAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic),
+    );
+    _timelineAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.12, 0.5, curve: Curves.easeOutCubic),
+    );
+    _itemsAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.35, 0.7, curve: Curves.easeOutCubic),
+    );
+    _summaryAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.6, 0.88, curve: Curves.easeOutCubic),
+    );
+    _buttonsAnim = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.8, 1.0, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _startEntranceAnimations() {
+    _entranceController.forward();
   }
 
   Future<void> _loadOrderDetail() async {
@@ -44,6 +94,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         _order = order;
         _isLoading = false;
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startEntranceAnimations());
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -150,33 +201,78 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Numéro de commande + Statut
-          _buildOrderHeader(),
-
-          const SizedBox(height: 30),
-
-          // Timeline
-          _buildTimeline(),
-
-          const SizedBox(height: 30),
-
-          // Articles commandés
-          _buildOrderItems(),
-
-          const SizedBox(height: 30),
-
-          // Résumé
-          _buildSummary(),
-
-          const SizedBox(height: 30),
-
-          // Boutons d'action
-          if (_order!.canCancel) _buildCancelButton(),
-          if (_order!.status == 'delivered') _buildReorderButton(),
-        ],
+      child: AnimatedBuilder(
+        animation: _entranceController,
+        builder: (context, child) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FadeTransition(
+                opacity: _headerAnim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.15),
+                    end: Offset.zero,
+                  ).animate(_headerAnim),
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.96, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: _entranceController,
+                        curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic),
+                      ),
+                    ),
+                    child: _buildOrderHeader(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              FadeTransition(
+                opacity: _timelineAnim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.12),
+                    end: Offset.zero,
+                  ).animate(_timelineAnim),
+                  child: _buildTimeline(),
+                ),
+              ),
+              const SizedBox(height: 30),
+              FadeTransition(
+                opacity: _itemsAnim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(_itemsAnim),
+                  child: _buildOrderItems(),
+                ),
+              ),
+              const SizedBox(height: 30),
+              FadeTransition(
+                opacity: _summaryAnim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.08),
+                    end: Offset.zero,
+                  ).animate(_summaryAnim),
+                  child: _buildSummary(),
+                ),
+              ),
+              const SizedBox(height: 30),
+              if (_order!.status == 'delivered')
+                FadeTransition(
+                  opacity: _buttonsAnim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.06),
+                      end: Offset.zero,
+                    ).animate(_buttonsAnim),
+                    child: _buildReorderButton(),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -215,7 +311,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               ),
             ],
           ),
-          _buildStatusBadge(_order!.status),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildStatusBadge(_order!.status),
+              if (_order!.canCancel) ...[
+                const SizedBox(width: 12),
+                _buildCancelButtonInline(),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -227,11 +332,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       {'key': 'pending', 'label': l10n.statusPending, 'icon': Icons.access_time},
       {'key': 'confirmed', 'label': l10n.statusConfirmed, 'icon': Icons.check_circle},
       {'key': 'preparing', 'label': l10n.statusPreparing, 'icon': Icons.restaurant},
+      {'key': 'ready', 'label': l10n.statusReady, 'icon': Icons.breakfast_dining},
       {'key': 'delivering', 'label': l10n.statusDelivering, 'icon': Icons.delivery_dining},
       {'key': 'delivered', 'label': l10n.statusDelivered, 'icon': Icons.done_all},
     ];
 
-    final currentIndex = statuses.indexWhere((s) => s['key'] == _order!.status);
+    int currentIndex = statuses.indexWhere((s) => s['key'] == _order!.status);
+    if (currentIndex < 0) currentIndex = 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,59 +355,103 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         ...List.generate(statuses.length, (index) {
           final status = statuses[index];
           final isCompleted = index <= currentIndex;
+          final isCurrent = index == currentIndex;
           final isLast = index == statuses.length - 1;
+          final stepAnim = CurvedAnimation(
+            parent: _entranceController,
+            curve: Interval(
+              0.2 + index * 0.08,
+              0.2 + index * 0.08 + 0.18,
+              curve: Curves.easeOutCubic,
+            ),
+          );
 
-          return Column(
-            children: [
-              Row(
+          return FadeTransition(
+            opacity: stepAnim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(-0.03, 0.06),
+                end: Offset.zero,
+              ).animate(stepAnim),
+              child: Column(
                 children: [
-                  // Icône
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isCompleted
-                          ? AppTheme.accentGold
-                          : AppTheme.primaryBlue,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppTheme.accentGold,
-                        width: 2,
+                  Row(
+                    children: [
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          final scale = isCurrent
+                              ? 1.0 + 0.06 * _pulseController.value
+                              : 1.0;
+                          return Transform.scale(
+                            scale: scale,
+                            child: child,
+                          );
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? AppTheme.accentGold
+                                : AppTheme.primaryBlue,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.accentGold,
+                              width: isCurrent ? 2.5 : 2,
+                            ),
+                            boxShadow: isCompleted
+                                ? [
+                                    BoxShadow(
+                                      color: AppTheme.accentGold.withValues(alpha: 0.4),
+                                      blurRadius: isCurrent ? 12 : 6,
+                                      spreadRadius: isCurrent ? 1 : 0,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Icon(
+                            status['icon'] as IconData,
+                            color: isCompleted
+                                ? AppTheme.primaryDark
+                                : AppTheme.textGray,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 300),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+                            color: isCompleted ? Colors.white : AppTheme.textGray,
+                          ),
+                          child: Text(status['label'] as String),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isLast)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 450),
+                      curve: Curves.easeOutCubic,
+                      margin: const EdgeInsets.only(left: 19),
+                      width: 2,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppTheme.accentGold
+                            : AppTheme.textGray.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
-                    child: Icon(
-                      status['icon'] as IconData,
-                      color: isCompleted
-                          ? AppTheme.primaryDark
-                          : AppTheme.textGray,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Label
-                  Expanded(
-                    child: Text(
-                      status['label'] as String,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
-                        color: isCompleted ? Colors.white : AppTheme.textGray,
-                      ),
-                    ),
-                  ),
                 ],
               ),
-              // Ligne de connexion
-              if (!isLast)
-                Container(
-                  margin: const EdgeInsets.only(left: 19),
-                  width: 2,
-                  height: 30,
-                  color: isCompleted
-                      ? AppTheme.accentGold
-                      : AppTheme.textGray.withValues(alpha: 0.3),
-                ),
-            ],
+            ),
           );
         }),
       ],
@@ -308,6 +459,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildOrderItems() {
+    final items = _order!.items ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -320,57 +472,77 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        ...(_order!.items ?? []).map((item) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryBlue.withValues(alpha: 0.6),
-                    AppTheme.primaryDark.withValues(alpha: 0.8),
+        ...List.generate(items.length, (index) {
+          final item = items[index];
+          final itemAnim = CurvedAnimation(
+            parent: _entranceController,
+            curve: Interval(
+              0.35 + index * 0.06,
+              0.35 + index * 0.06 + 0.2,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+          return FadeTransition(
+            opacity: itemAnim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.02, 0.04),
+                end: Offset.zero,
+              ).animate(itemAnim),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryBlue.withValues(alpha: 0.6),
+                      AppTheme.primaryDark.withValues(alpha: 0.8),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${AppLocalizations.of(context).quantity} ${item.quantity}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      item.formattedSubtotal,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentGold,
+                      ),
+                    ),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.accentGold.withValues(alpha: 0.3),
-                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${AppLocalizations.of(context).quantity} ${item.quantity}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.textGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    item.formattedSubtotal,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentGold,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -450,23 +622,34 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _buildCancelButton() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: OutlinedButton(
-        onPressed: _handleCancelOrder,
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 56),
-          side: const BorderSide(color: Colors.red),
-          foregroundColor: Colors.red,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.cancel_outlined, size: 22),
-            const SizedBox(width: 8),
-            const Text('Annuler la commande'),
-          ],
+  /// Bouton annuler à côté du statut (dans l'en-tête).
+  Widget _buildCancelButtonInline() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _handleCancelOrder,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.red.withValues(alpha: 0.8)),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+              SizedBox(width: 6),
+              Text(
+                'Annuler',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

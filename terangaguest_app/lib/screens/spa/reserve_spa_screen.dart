@@ -533,11 +533,12 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       if (mounted) Navigator.pop(context);
 
       if (mounted) {
+        final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
       }

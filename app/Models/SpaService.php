@@ -68,6 +68,11 @@ class SpaService extends Model
     /**
      * Accessors
      */
+    public function getIsAvailableAttribute(): bool
+    {
+        return $this->status === 'available';
+    }
+
     public function getCategoryLabelAttribute()
     {
         return match($this->category) {

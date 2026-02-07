@@ -71,8 +71,30 @@ class SpaApi {
       );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      rethrow;
+      final message = _messageFromDioException(e);
+      throw Exception(message);
     }
+  }
+
+  static String _messageFromDioException(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+    if (e.response?.statusCode == 400) {
+      return 'Requête invalide. Vérifiez la date et l\'heure.';
+    }
+    if (e.response?.statusCode == 422) {
+      final errors = data is Map ? data['errors'] : null;
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first as String;
+      }
+      if (data is Map && data['message'] != null) return data['message'] as String;
+      return 'Vérifiez les informations saisies (date, heure).';
+    }
+    return e.message ?? 'Erreur lors de la réservation.';
   }
 
   /// Récupère les réservations spa de l'utilisateur
