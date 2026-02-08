@@ -5,13 +5,7 @@
         <div class="relative flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
             <!-- Form -->
             <div class="flex w-full flex-1 flex-col lg:w-1/2">
-                <!-- Logo TERANGUEST -->
-                <div class="bg-brand-950 flex w-full items-center justify-center py-6 dark:bg-brand-950">
-                    <span class="text-2xl font-bold tracking-tight sm:text-3xl">
-                        <span class="text-white" style="text-shadow: 0 0 1px rgba(255,255,255,0.5);">TERAN</span><span class="text-[#D4AF37]" style="text-shadow: 0 0 1px rgba(212,175,55,0.6);">GUEST</span>
-                    </span>
-                </div>
-                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10 pt-8">
+                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10 pt-10">
                     <div>
                         <div class="mb-5 sm:mb-8">
                             <h1 class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
