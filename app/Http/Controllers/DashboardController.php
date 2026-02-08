@@ -24,7 +24,7 @@ class DashboardController extends Controller
         $confirmedReservations = Reservation::confirmed()->count();
 
         // Réservations récentes
-        $recentReservations = Reservation::with(['room', 'user'])
+        $recentReservations = Reservation::with(['room', 'user', 'guest'])
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();

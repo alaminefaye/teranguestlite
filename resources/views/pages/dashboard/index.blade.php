@@ -159,7 +159,7 @@
                             @foreach($recentReservations as $reservation)
                                 <tr class="border-b border-gray-100 dark:border-gray-800">
                                     <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white/90">{{ $reservation->reservation_number }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->user->name }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->user?->name ?? $reservation->guest?->name ?? '—' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->room->room_number }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_in->format('d/m/Y') }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $reservation->check_out->format('d/m/Y') }}</td>

@@ -93,6 +93,59 @@ class TabletSessionController extends Controller
     }
 
     /**
+     * Vérifie que la session (guest + room + réservation) est encore valide.
+     * POST /api/tablet/validate-session
+     * Body: { "guest_id": 1, "room_id": 1, "reservation_id": 1 }
+     */
+    public function validateSession(Request $request): JsonResponse
+    {
+        $request->validate([
+            'guest_id' => 'required|exists:guests,id',
+            'room_id' => 'required|exists:rooms,id',
+            'reservation_id' => 'required|exists:reservations,id',
+        ]);
+
+        $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
+        $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
+        if (!$guest || !$room || $room->enterprise_id !== $guest->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ], 403);
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('id', $request->reservation_id)
+            ->where('guest_id', $guest->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'guest_id' => $guest->id,
+                'guest_name' => $guest->name,
+                'guest_phone' => $guest->phone,
+                'guest_email' => $guest->email,
+                'room_id' => $room->id,
+                'room_number' => $room->room_number,
+                'reservation_id' => $reservation->id,
+                'reservation_number' => $reservation->reservation_number,
+            ],
+        ], 200);
+    }
+
+    /**
      * Passer une commande room service depuis la tablette (session client).
      * POST /api/tablet/checkout
      * Body: guest_id, room_id, reservation_id (pour revalidation), items[], special_instructions
