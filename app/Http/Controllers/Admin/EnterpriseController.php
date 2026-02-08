@@ -50,11 +50,15 @@ class EnterpriseController extends Controller
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'logo' => 'nullable|image|max:30720',
+            'cover_photo' => 'nullable|image|max:30720',
             'status' => 'required|in:active,inactive',
         ]);
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+        if ($request->hasFile('cover_photo')) {
+            $validated['cover_photo'] = $request->file('cover_photo')->store('covers', 'public');
         }
 
         // Créer l'entreprise
@@ -132,15 +136,21 @@ class EnterpriseController extends Controller
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'logo' => 'nullable|image|max:30720',
+            'cover_photo' => 'nullable|image|max:30720',
             'status' => 'required|in:active,inactive',
         ]);
 
         if ($request->hasFile('logo')) {
-            // Supprimer l'ancien logo
             if ($enterprise->logo) {
                 Storage::disk('public')->delete($enterprise->logo);
             }
             $validated['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+        if ($request->hasFile('cover_photo')) {
+            if ($enterprise->cover_photo) {
+                Storage::disk('public')->delete($enterprise->cover_photo);
+            }
+            $validated['cover_photo'] = $request->file('cover_photo')->store('covers', 'public');
         }
 
         $enterprise->update($validated);
@@ -154,9 +164,11 @@ class EnterpriseController extends Controller
      */
     public function destroy(Enterprise $enterprise)
     {
-        // Supprimer le logo
         if ($enterprise->logo) {
             Storage::disk('public')->delete($enterprise->logo);
+        }
+        if ($enterprise->cover_photo) {
+            Storage::disk('public')->delete($enterprise->cover_photo);
         }
 
         $enterprise->delete();

@@ -15,6 +15,7 @@ class Enterprise extends Model
         'phone',
         'email',
         'logo',
+        'cover_photo',
         'city',
         'country',
         'status',

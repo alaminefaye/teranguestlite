@@ -105,7 +105,27 @@
                 </label>
                 <input type="file" name="logo" id="logo" accept="image/*"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Logo (petit, pour l’app si besoin).</p>
                 @error('logo')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Image de couverture (photo accueil app) -->
+            @if($enterprise->cover_photo)
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image de couverture actuelle</label>
+                <img src="{{ asset('storage/' . $enterprise->cover_photo) }}" alt="Couverture" class="max-h-32 w-auto rounded-lg border border-gray-200 dark:border-gray-700">
+            </div>
+            @endif
+            <div>
+                <label for="cover_photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ $enterprise->cover_photo ? 'Changer l\'image de couverture' : 'Image de couverture (photo accueil)' }}
+                </label>
+                <input type="file" name="cover_photo" id="cover_photo" accept="image/*"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Grande photo en fond sur l’écran d’accueil de l’app (ex. photo de l’hôtel).</p>
+                @error('cover_photo')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>

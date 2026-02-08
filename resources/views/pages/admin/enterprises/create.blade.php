@@ -99,6 +99,19 @@
                 @enderror
             </div>
 
+            <!-- Image de couverture (photo accueil app) -->
+            <div>
+                <label for="cover_photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Image de couverture (photo accueil)
+                </label>
+                <input type="file" name="cover_photo" id="cover_photo" accept="image/*"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Grande photo en fond sur l’écran d’accueil (ex. photo de l’hôtel).</p>
+                @error('cover_photo')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Statut -->
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

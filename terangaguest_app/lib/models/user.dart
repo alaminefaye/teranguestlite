@@ -131,12 +131,15 @@ class Enterprise {
   final int id;
   final String name;
   final String? logo;
+  /// Image de couverture pour l'écran d'accueil (grande photo en fond).
+  final String? coverPhoto;
   final String? type;
 
   Enterprise({
     required this.id,
     required this.name,
     this.logo,
+    this.coverPhoto,
     this.type,
   });
 
@@ -145,6 +148,7 @@ class Enterprise {
       id: _parseIdSafe(json['id']),
       name: json['name'] as String,
       logo: json['logo'] as String?,
+      coverPhoto: json['cover_photo'] as String?,
       type: json['type'] as String?,
     );
   }
@@ -162,6 +166,7 @@ class Enterprise {
       'id': id,
       'name': name,
       'logo': logo,
+      'cover_photo': coverPhoto,
       'type': type,
     };
   }
