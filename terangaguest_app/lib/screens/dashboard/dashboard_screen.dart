@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/weather.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/orders_provider.dart';
@@ -104,18 +106,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
+              // Header (icônes notifications + profil)
               _buildHeader(context),
-              
-              // Welcome Message
-              _buildWelcomeSection(context),
-              
-              // Services Grid
+              // Bloc style 3e image : logo centré + slogan, puis bannière avec photo et nom entreprise
+              _buildEnterpriseHero(context),
+              // Grille des services
               Expanded(
                 child: _buildServicesGrid(context),
               ),
-              
-              // Footer
               _buildFooter(context),
             ],
           ),
@@ -129,9 +127,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
-    final topPad = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 16.0);
+    final topPad = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 12.0);
     final bottomPad = isVeryCompact ? 2.0 : (isCompact ? 2.0 : 6.0);
-    final logoSize = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 22.0);
     final iconSize = isVeryCompact ? 22.0 : (isCompact ? 24.0 : 30.0);
 
     return Padding(
@@ -140,30 +137,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'TERAN',
-                  style: TextStyle(
-                    fontSize: logoSize,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textWhite,
-                    letterSpacing: 2.0,
-                  ),
-                ),
-                TextSpan(
-                  text: 'GUEST',
-                  style: TextStyle(
-                    fontSize: logoSize,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.accentGold,
-                    letterSpacing: 2.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const SizedBox(width: 40),
+          const Spacer(),
           Row(
             children: [
               Stack(
@@ -209,48 +184,195 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeSection(BuildContext context) {
+  /// Bloc style 3e image : logo entreprise centré + slogan, puis bannière avec image et nom en overlay.
+  Widget _buildEnterpriseHero(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final user = context.watch<AuthProvider>().user;
-    final enterpriseName = user?.enterprise?.name.trim();
-    final welcomeTitleText = (enterpriseName != null && enterpriseName.isNotEmpty)
-        ? l10n.welcomeToEnterprise(enterpriseName)
-        : l10n.welcomeTitle;
+    final enterprise = user?.enterprise;
+    final enterpriseName = enterprise?.name.trim() ?? '';
+    final logoPath = enterprise?.logo;
+    final logoUrl = (logoPath != null && logoPath.isNotEmpty)
+        ? ApiConfig.storageUrl(logoPath)
+        : null;
 
     final h = MediaQuery.sizeOf(context).height;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
     final pad = LayoutHelper.horizontalPaddingValue(context);
-    final titleSize = isVeryCompact ? 16.0 : (isCompact ? 18.0 : 24.0);
-    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 11.0 : 13.0);
-    final topPad = isVeryCompact ? 2.0 : (isCompact ? 4.0 : 12.0);
-    final bottomPad = isVeryCompact ? 2.0 : (isCompact ? 4.0 : 10.0);
-    final gap = isVeryCompact ? 1.0 : (isCompact ? 2.0 : 6.0);
+    final logoSize = isVeryCompact ? 48.0 : (isCompact ? 64.0 : 88.0);
+    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
+    final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 22.0 : 28.0);
+    final heroTopPad = isVeryCompact ? 4.0 : (isCompact ? 8.0 : 12.0);
+    final bannerHeight = isVeryCompact ? 72.0 : (isCompact ? 96.0 : 120.0);
 
-    return Padding(
-      padding: EdgeInsets.only(left: pad, right: pad, top: topPad, bottom: bottomPad),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            welcomeTitleText,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(
-              fontSize: titleSize,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textWhite,
-              height: 1.2,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Zone dégradé : logo centré + slogan (comme 3e image)
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(left: pad, right: pad, top: heroTopPad, bottom: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primaryDark,
+                AppTheme.primaryBlue,
+                AppTheme.primaryBlue.withValues(alpha: 0.98),
+              ],
             ),
           ),
-          SizedBox(height: gap),
-          Text(
-            l10n.welcomeSubtitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppTheme.textGray,
-              fontSize: subtitleSize,
-              fontWeight: FontWeight.w400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (logoUrl != null && logoUrl.isNotEmpty)
+                ClipRect(
+                  child: CachedNetworkImage(
+                    imageUrl: logoUrl,
+                    height: logoSize,
+                    fit: BoxFit.contain,
+                    placeholder: (_, __) => SizedBox(
+                      height: logoSize,
+                      child: Center(
+                        child: SizedBox(
+                          width: logoSize * 0.5,
+                          height: logoSize * 0.5,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppTheme.accentGold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => _buildTerangaGuestText(logoSize),
+                  ),
+                )
+              else
+                _buildTerangaGuestText(logoSize),
+              SizedBox(height: isVeryCompact ? 4 : 8),
+              Text(
+                l10n.welcomeSubtitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppTheme.textGray,
+                  fontSize: subtitleSize,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Bannière : image de fond (logo ou dégradé) + nom entreprise en gros en bas à gauche
+        Container(
+          height: bannerHeight,
+          width: double.infinity,
+          margin: EdgeInsets.only(left: pad, right: pad, top: 8, bottom: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (logoUrl != null && logoUrl.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: logoUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppTheme.backgroundGradient,
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppTheme.backgroundGradient,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: AppTheme.backgroundGradient,
+                    ),
+                  ),
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black54,
+                          Colors.black87,
+                        ],
+                      ),
+                    ),
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, bottom: 12, right: 16),
+                    child: Text(
+                      enterpriseName.isNotEmpty ? enterpriseName : l10n.welcomeTitle,
+                      style: TextStyle(
+                        fontSize: nameOnBannerSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.8),
+                            offset: const Offset(0, 1),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTerangaGuestText(double logoSize) {
+    final fontSize = (logoSize * 0.28).clamp(14.0, 26.0);
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'TERAN',
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textWhite,
+              letterSpacing: 2.0,
+            ),
+          ),
+          TextSpan(
+            text: 'GUEST',
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+              letterSpacing: 2.0,
             ),
           ),
         ],
