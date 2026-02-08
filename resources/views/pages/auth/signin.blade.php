@@ -63,8 +63,8 @@
                                                 class="flex cursor-pointer items-center text-sm font-normal text-gray-700 select-none dark:text-gray-400">
                                                 <div class="relative">
                                                     <input type="checkbox" id="remember" name="remember" class="sr-only" @change="checkboxToggle = !checkboxToggle" />
-                                                    <div :class="checkboxToggle ? 'border-brand-500 bg-brand-500' :
-                                                        'bg-transparent border-gray-300 dark:border-gray-700'"
+                                                    <div :class="checkboxToggle ? '' : 'bg-transparent border-gray-300 dark:border-gray-700'"
+                                                        :style="checkboxToggle ? 'border-color: #D4AF37; background-color: #D4AF37;' : ''"
                                                         class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
                                                         <span :class="checkboxToggle ? '' : 'opacity-0'">
                                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,7 +80,8 @@
                                     <!-- Button -->
                                     <div>
                                         <button
-                                            class="bg-brand-500 shadow-theme-xs hover:bg-brand-600 flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white transition">
+                                            class="shadow-theme-xs flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
+                                            style="background-color: #D4AF37;">
                                             Connexion
                                         </button>
                                     </div>
