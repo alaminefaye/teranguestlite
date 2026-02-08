@@ -5,8 +5,13 @@
         <div class="relative flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
             <!-- Form -->
             <div class="flex w-full flex-1 flex-col lg:w-1/2">
-                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-10 pt-10">
+                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center pt-10">
                     <div>
+                        <div class="mb-6 flex justify-center">
+                            <div class="inline-flex items-center rounded-full px-6 py-2.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                                <span class="text-xl font-bold tracking-wide text-white">TERAN</span><span class="text-xl font-bold tracking-wide" style="color: #D4AF37;">GUEST</span>
+                            </div>
+                        </div>
                         <div class="mb-5 sm:mb-8">
                             <h1 class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
                                 Connexion
