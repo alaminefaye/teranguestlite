@@ -38,19 +38,12 @@ class OrderController extends Controller
     }
 
     /**
-     * Liste des commandes : celles de l'utilisateur + celles du guest de la chambre (tablette).
+     * Liste des commandes : uniquement celles de l'utilisateur connecté (pas les autres clients).
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-
-        $query = Order::where(function ($q) use ($user, $guestIds) {
-            $q->where('user_id', $user->id);
-            if (count($guestIds) > 0) {
-                $q->orWhereIn('guest_id', $guestIds);
-            }
-        });
+        $query = Order::where('user_id', $user->id);
 
         // Filtrer par statut
         if ($request->filled('status')) {
@@ -93,21 +86,14 @@ class OrderController extends Controller
     }
 
     /**
-     * Détails d'une commande (utilisateur ou guest de la chambre)
+     * Détails d'une commande (uniquement si elle appartient à l'utilisateur connecté)
      */
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-
         $order = Order::with('orderItems.menuItem')
             ->where('id', $id)
-            ->where(function ($q) use ($user, $guestIds) {
-                $q->where('user_id', $user->id);
-                if (count($guestIds) > 0) {
-                    $q->orWhereIn('guest_id', $guestIds);
-                }
-            })
+            ->where('user_id', $user->id)
             ->first();
 
         if (!$order) {
@@ -158,21 +144,14 @@ class OrderController extends Controller
     }
 
     /**
-     * Recommander une commande (utilisateur ou guest de la chambre)
+     * Recommander une commande (uniquement si elle appartient à l'utilisateur connecté)
      */
     public function reorder(Request $request, $id)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-
         $order = Order::with('orderItems')
             ->where('id', $id)
-            ->where(function ($q) use ($user, $guestIds) {
-                $q->where('user_id', $user->id);
-                if (count($guestIds) > 0) {
-                    $q->orWhereIn('guest_id', $guestIds);
-                }
-            })
+            ->where('user_id', $user->id)
             ->first();
 
         if (!$order) {
@@ -268,15 +247,8 @@ class OrderController extends Controller
     public function cancel(Request $request, $id)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-
         $order = Order::where('id', $id)
-            ->where(function ($q) use ($user, $guestIds) {
-                $q->where('user_id', $user->id);
-                if (count($guestIds) > 0) {
-                    $q->orWhereIn('guest_id', $guestIds);
-                }
-            })
+            ->where('user_id', $user->id)
             ->first();
 
         if (! $order) {

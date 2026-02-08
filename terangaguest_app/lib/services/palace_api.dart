@@ -21,27 +21,31 @@ class PalaceApi {
     }
   }
 
-  /// Créer une demande de service palace
-  /// Backend attend: description (requis), requested_for (Y-m-d H:i), special_requirements (optionnel)
+  /// Créer une demande de service palace.
+  /// Backend attend: description (optionnel si metadata véhicule), requested_for, metadata (optionnel).
   Future<PalaceRequest> createPalaceRequest({
     required int serviceId,
     String? details,
     DateTime? scheduledTime,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
       final description = (details?.trim() ?? '').isEmpty
-          ? 'Demande sans précision'
+          ? null
           : details!.trim();
       final requestedFor = scheduledTime != null
           ? '${scheduledTime.year.toString().padLeft(4, '0')}-${scheduledTime.month.toString().padLeft(2, '0')}-${scheduledTime.day.toString().padLeft(2, '0')} ${scheduledTime.hour.toString().padLeft(2, '0')}:${scheduledTime.minute.toString().padLeft(2, '0')}'
           : null;
 
+      final data = <String, dynamic>{
+        if (description != null && description.isNotEmpty) 'description': description,
+        'requested_for': ?requestedFor,
+        if (metadata != null && metadata.isNotEmpty) 'metadata': metadata,
+      };
+
       final response = await _apiService.post(
         '/palace-services/$serviceId/request',
-        data: {
-          'description': description,
-          if (requestedFor != null) 'requested_for': requestedFor,
-        },
+        data: data,
       );
 
       return PalaceRequest.fromJson(

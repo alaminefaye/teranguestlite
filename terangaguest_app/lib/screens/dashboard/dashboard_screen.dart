@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/orders_provider.dart';
 import '../../widgets/service_card.dart';
 import '../../services/weather_service.dart';
@@ -141,9 +142,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
     final pad = LayoutHelper.horizontalPaddingValue(context);
+    final logoSize = isVeryCompact ? 88.0 : (isCompact ? 120.0 : 160.0);
     final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
     final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 24.0 : 30.0);
     final iconSize = isVeryCompact ? 22.0 : (isCompact ? 26.0 : 32.0);
+    final logoUrl = (logoPath != null && logoPath.isNotEmpty)
+        ? ApiConfig.storageUrl(logoPath)
+        : null;
     // Hauteur du hero pour que l'image s'affiche bien (une seule grande zone image)
     final heroHeight = isVeryCompact ? 180.0 : (isCompact ? 220.0 : 260.0);
 
@@ -194,38 +199,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const SizedBox.shrink(),
             ),
           ),
-          // 3) Slogan au centre uniquement (pas de logo superposé)
-          Center(
+          // 3) Logo + slogan sur le cover (remontés pour que "Votre assistant digital" soit plus haut)
+          Align(
+            alignment: const Alignment(0, -0.95),
             child: Padding(
-              padding: EdgeInsets.only(left: pad, right: pad, top: 24, bottom: 12),
-              child: Text(
-                l10n.welcomeSubtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppTheme.textWhite,
-                  fontSize: subtitleSize,
-                  fontWeight: FontWeight.w400,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.8),
-                      offset: const Offset(0, 1),
-                      blurRadius: 3,
+              padding: EdgeInsets.only(left: pad, right: pad, top: 12, bottom: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (logoUrl != null && logoUrl.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: logoUrl,
+                      height: logoSize,
+                      fit: BoxFit.contain,
+                      placeholder: (_, __) => SizedBox(
+                        height: logoSize,
+                        child: Center(
+                          child: SizedBox(
+                            width: logoSize * 0.4,
+                            height: logoSize * 0.4,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => const SizedBox.shrink(),
                     ),
-                  ],
-                ),
+                  if (logoUrl != null && logoUrl.isNotEmpty) SizedBox(height: isVeryCompact ? 12 : 18),
+                  Text(
+                    l10n.welcomeSubtitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.textWhite,
+                      fontSize: subtitleSize,
+                      fontWeight: FontWeight.w400,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          offset: const Offset(0, 1),
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          // 4) Nom de l'entreprise en bas à gauche sur l'image
+          // 4) "Bienvenue au [nom de l'hôtel]" au centre en bas, bien en gras
           Align(
-            alignment: Alignment.bottomLeft,
+            alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: EdgeInsets.only(left: pad + 8, bottom: 16, right: pad + 8),
+              padding: EdgeInsets.only(left: pad + 8, top: 20, bottom: 16, right: pad + 8),
               child: Text(
-                enterpriseName.isNotEmpty ? enterpriseName : l10n.welcomeTitle,
+                'Bienvenue au ${enterpriseName.isNotEmpty ? enterpriseName : l10n.welcomeTitle}',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: nameOnBannerSize,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                   shadows: [
                     Shadow(
@@ -242,6 +275,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          // 4b) TerangaGuest en haut à gauche (même fond que les icônes)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 12,
+                    offset: const Offset(0, 2),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'TERAN',
+                      style: TextStyle(
+                        fontSize: isVeryCompact ? 14 : (isCompact ? 16 : 18),
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textWhite,
+                        letterSpacing: 1.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.8),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'GUEST',
+                      style: TextStyle(
+                        fontSize: isVeryCompact ? 14 : (isCompact ? 16 : 18),
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentGold,
+                        letterSpacing: 1.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.8),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -310,6 +409,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   IconButton(
                     onPressed: () {
                       HapticHelper.lightImpact();
+                      _showLanguageDialog(context);
+                    },
+                    padding: const EdgeInsets.all(8),
+                    iconSize: iconSize,
+                    icon: Icon(
+                      Icons.language,
+                      color: AppTheme.accentGold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      HapticHelper.lightImpact();
                       context.navigateTo(const ProfileScreen());
                     },
                     padding: const EdgeInsets.all(8),
@@ -331,6 +449,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    final localeProvider = context.read<LocaleProvider>();
+    final currentCode = localeProvider.languageCode;
+    const languages = [
+      ('fr', 'Français'),
+      ('en', 'English'),
+      ('ar', 'العربية'),
+      ('es', 'Español'),
+    ];
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+        ),
+        title: Text(
+          'Changer la langue',
+          style: const TextStyle(color: AppTheme.accentGold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: languages.map((e) {
+            final selected = currentCode == e.$1;
+            return ListTile(
+              title: Text(
+                e.$2,
+                style: TextStyle(
+                  color: selected ? AppTheme.accentGold : Colors.white,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              trailing: selected ? const Icon(Icons.check, color: AppTheme.accentGold) : null,
+              onTap: () async {
+                await localeProvider.setLocale(Locale(e.$1));
+                if (ctx.mounted) Navigator.of(ctx).pop();
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }

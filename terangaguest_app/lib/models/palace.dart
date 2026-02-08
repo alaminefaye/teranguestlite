@@ -27,6 +27,14 @@ class PalaceService {
     );
   }
 
+  /// True si le service concerne un véhicule (taxi ou location avec chauffeur).
+  bool get isVehicleService {
+    final lower = name.toLowerCase();
+    return lower.contains('voiture') ||
+        lower.contains('chauffeur') ||
+        lower.contains('location');
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

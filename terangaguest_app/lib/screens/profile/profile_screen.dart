@@ -8,7 +8,6 @@ import '../../providers/auth_provider.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../auth/login_screen.dart';
-import 'change_password_screen.dart';
 import 'settings_screen.dart';
 import '../../widgets/animated_button.dart';
 import '../orders/orders_list_screen.dart';
@@ -367,18 +366,6 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Changer mot de passe
-        _buildActionTile(
-          context: context,
-          icon: Icons.lock_outline,
-          title: AppLocalizations.of(context).changePassword,
-          onTap: () {
-            HapticHelper.lightImpact();
-            context.navigateTo(const ChangePasswordScreen());
-          },
-        ),
-        const SizedBox(height: 12),
 
         // À propos
         _buildActionTile(

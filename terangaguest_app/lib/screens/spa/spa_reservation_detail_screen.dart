@@ -10,10 +10,7 @@ import '../../providers/spa_provider.dart';
 class SpaReservationDetailScreen extends StatelessWidget {
   final SpaReservation reservation;
 
-  const SpaReservationDetailScreen({
-    super.key,
-    required this.reservation,
-  });
+  const SpaReservationDetailScreen({super.key, required this.reservation});
 
   static bool canCancel(SpaReservation r) {
     if (r.status != 'confirmed') return false;
@@ -27,7 +24,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
       hour,
       minute,
     );
-    return reservationDateTime.isAfter(DateTime.now().add(const Duration(hours: 24)));
+    return reservationDateTime.isAfter(
+      DateTime.now().add(const Duration(hours: 24)),
+    );
   }
 
   @override
@@ -50,7 +49,10 @@ class SpaReservationDetailScreen extends StatelessWidget {
               _buildHeader(context),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -67,11 +69,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                       ],
-                      _buildCancelSection(
-                        context,
-                        l10n,
-                        canCancelReservation,
-                      ),
+                      _buildCancelSection(context, l10n, canCancelReservation),
                     ],
                   ),
                 ),
@@ -144,10 +142,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
           const SizedBox(height: 10),
           _buildInfoRow(Icons.access_time, reservation.time),
           const SizedBox(height: 10),
-          _buildInfoRow(
-            Icons.payments_outlined,
-            reservation.formattedPrice,
-          ),
+          _buildInfoRow(Icons.payments_outlined, reservation.formattedPrice),
           const SizedBox(height: 10),
           _buildInfoRow(
             Icons.tag,
@@ -187,10 +182,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.white,
-            ),
+            style: const TextStyle(fontSize: 15, color: Colors.white),
           ),
         ),
       ],
@@ -225,10 +217,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.white70),
             ),
           ),
         ],
@@ -249,9 +238,13 @@ class SpaReservationDetailScreen extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () => _showCancelDialog(context, reservation),
-              icon: const Icon(Icons.cancel_outlined, size: 22, color: Colors.red),
+              icon: const Icon(
+                Icons.cancel_outlined,
+                size: 22,
+                color: Colors.red,
+              ),
               label: Text(
-                l10n.cancel + ' la réservation',
+                '${l10n.cancel} la réservation',
                 style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.w600,
@@ -274,7 +267,11 @@ class SpaReservationDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 20, color: Colors.orange.shade200),
+                Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: Colors.orange.shade200,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -293,13 +290,19 @@ class SpaReservationDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showCancelDialog(BuildContext context, SpaReservation reservation) async {
+  Future<void> _showCancelDialog(
+    BuildContext context,
+    SpaReservation reservation,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
-        title: Text(l10n.cancel, style: const TextStyle(color: AppTheme.accentGold)),
+        title: Text(
+          l10n.cancel,
+          style: const TextStyle(color: AppTheme.accentGold),
+        ),
         content: Text(
           l10n.cancelReservationConfirm,
           style: const TextStyle(color: Colors.white),
@@ -307,7 +310,10 @@ class SpaReservationDetailScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),

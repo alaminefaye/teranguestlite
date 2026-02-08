@@ -92,15 +92,41 @@ class PalaceServiceController extends Controller
     }
 
     /**
-     * Créer une demande de service palace
+     * Créer une demande de service palace.
+     * Pour "Location Voiture" : metadata peut contenir vehicle_request_type (taxi|rental),
+     * taxi: pickup_address, destination_address, distance_km, pickup_lat, pickup_lng, ...
+     * rental: number_of_seats, vehicle_type, rental_days, rental_duration_hours.
      */
     public function request(Request $request, $id)
     {
         $request->validate([
             'requested_for' => 'nullable|date_format:Y-m-d H:i',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:2000',
             'special_requirements' => 'nullable|string|max:500',
+            'metadata' => 'nullable|array',
+            'metadata.vehicle_request_type' => 'nullable|in:taxi,rental',
+            'metadata.pickup_address' => 'nullable|string|max:500',
+            'metadata.pickup_lat' => 'nullable|numeric',
+            'metadata.pickup_lng' => 'nullable|numeric',
+            'metadata.destination_address' => 'nullable|string|max:500',
+            'metadata.destination_lat' => 'nullable|numeric',
+            'metadata.destination_lng' => 'nullable|numeric',
+            'metadata.distance_km' => 'nullable|numeric|min:0',
+            'metadata.number_of_seats' => 'nullable|integer|min:1|max:20',
+            'metadata.vehicle_type' => 'nullable|string|max:100',
+            'metadata.rental_days' => 'nullable|integer|min:1|max:90',
+            'metadata.rental_duration_hours' => 'nullable|integer|min:1|max:720',
         ]);
+
+        $metadata = $request->input('metadata');
+        $hasDescription = !empty(trim($request->input('description', '')));
+        $hasVehicleMeta = is_array($metadata) && !empty($metadata['vehicle_request_type']);
+        if (!$hasDescription && !$hasVehicleMeta) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Indiquez soit les détails de la demande (description), soit le type véhicule (taxi ou location) avec les champs associés.',
+            ], 422);
+        }
 
         $service = PalaceService::find($id);
 
@@ -125,9 +151,18 @@ class PalaceServiceController extends Controller
         $user = $request->user();
         $roomId = null;
         if ($user->room_number) {
-            $room = Room::where('room_number', $user->room_number)->first();
+            $room = Room::where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
             $roomId = $room?->id;
         }
+
+        $metadata = $request->input('metadata');
+        $description = $request->description;
+        if (empty(trim($description ?? '')) && is_array($metadata)) {
+            $description = $this->buildDescriptionFromMetadata($metadata);
+        }
+        $description = $description ?: 'Demande sans précision';
 
         $palaceRequest = PalaceRequest::create([
             'user_id' => $user->id,
@@ -136,7 +171,8 @@ class PalaceServiceController extends Controller
             'room_id' => $roomId,
             'request_number' => $this->generateRequestNumber(),
             'requested_for' => $request->requested_for ?? now()->addHours(2)->format('Y-m-d H:i'),
-            'description' => $request->description,
+            'description' => $description,
+            'metadata' => $metadata,
             'estimated_price' => $estimatedPrice,
             'status' => 'pending',
         ]);
@@ -179,6 +215,7 @@ class PalaceServiceController extends Controller
                     'Prix sur demande',
                 'price_on_request' => $service->price_on_request,
                 'status' => $palaceRequest->status,
+                'metadata' => $palaceRequest->metadata,
             ],
         ], 201);
     }
@@ -211,6 +248,7 @@ class PalaceServiceController extends Controller
                         number_format($req->estimated_price, 0, '', ' ') . ' FCFA' : 
                         'Prix sur demande',
                     'status' => $req->status,
+                    'metadata' => $req->metadata,
                     'created_at' => $req->created_at->toISOString(),
                 ];
             }),
@@ -219,6 +257,44 @@ class PalaceServiceController extends Controller
                 'total' => $requests->total(),
             ],
         ], 200);
+    }
+
+    /**
+     * Construire un libellé lisible à partir des metadata (taxi ou location).
+     */
+    private function buildDescriptionFromMetadata(array $m): string
+    {
+        $type = $m['vehicle_request_type'] ?? null;
+        if ($type === 'taxi') {
+            $parts = ['Taxi'];
+            if (!empty($m['pickup_address'])) {
+                $parts[] = 'Prise en charge : ' . $m['pickup_address'];
+            }
+            if (!empty($m['destination_address'])) {
+                $parts[] = 'Destination : ' . $m['destination_address'];
+            }
+            if (isset($m['distance_km']) && $m['distance_km'] > 0) {
+                $parts[] = 'Distance : ' . round((float) $m['distance_km'], 1) . ' km';
+            }
+            return implode(' | ', $parts);
+        }
+        if ($type === 'rental') {
+            $parts = ['Location véhicule'];
+            if (!empty($m['number_of_seats'])) {
+                $parts[] = $m['number_of_seats'] . ' place(s)';
+            }
+            if (!empty($m['vehicle_type'])) {
+                $parts[] = $m['vehicle_type'];
+            }
+            if (!empty($m['rental_days'])) {
+                $parts[] = $m['rental_days'] . ' jour(s)';
+            }
+            if (!empty($m['rental_duration_hours'])) {
+                $parts[] = $m['rental_duration_hours'] . ' h';
+            }
+            return implode(' | ', $parts);
+        }
+        return 'Demande sans précision';
     }
 
     /**

@@ -15,15 +15,18 @@ class TabletSessionApi {
     String? roomNumber,
   }) async {
     if (roomId == null && (roomNumber == null || roomNumber.isEmpty)) {
-      throw Exception('Indiquez le numéro de chambre ou l\'identifiant de la chambre.');
+      throw Exception(
+        'Indiquez le numéro de chambre ou l\'identifiant de la chambre.',
+      );
     }
     try {
       final response = await _api.post(
         ApiConfig.tabletValidateCode,
         data: {
           'code': code.trim(),
-          if (roomId != null) 'room_id': roomId,
-          if (roomNumber != null && roomNumber.isNotEmpty) 'room_number': roomNumber,
+          'room_id': ?roomId,
+          if (roomNumber != null && roomNumber.isNotEmpty)
+            'room_number': roomNumber,
         },
       );
       final data = response.data as Map<String, dynamic>?;
@@ -40,10 +43,10 @@ class TabletSessionApi {
         message?.trim().isNotEmpty == true
             ? message!
             : (e.response?.statusCode == 401
-                ? 'Le code saisi est incorrect. Vérifiez le code à 6 chiffres reçu à l\'enregistrement.'
-                : e.response?.statusCode == 403
-                    ? 'Votre réservation est terminée ou n\'est pas encore active. Vérifiez vos dates de séjour avec la réception.'
-                    : 'Impossible de valider le code. Réessayez ou contactez la réception.'),
+                  ? 'Le code saisi est incorrect. Vérifiez le code à 6 chiffres reçu à l\'enregistrement.'
+                  : e.response?.statusCode == 403
+                  ? 'Votre réservation est terminée ou n\'est pas encore active. Vérifiez vos dates de séjour avec la réception.'
+                  : 'Impossible de valider le code. Réessayez ou contactez la réception.'),
       );
     }
   }
@@ -62,7 +65,10 @@ class TabletSessionApi {
       );
       final data = response.data as Map<String, dynamic>?;
       if (data == null || data['success'] != true || data['data'] == null) {
-        throw Exception(data?['message'] ?? 'Séjour invalide ou expiré. Entrez à nouveau votre code.');
+        throw Exception(
+          data?['message'] ??
+              'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+        );
       }
       return GuestSession.fromJson(data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -105,7 +111,8 @@ class TabletSessionApi {
     if (code != null && code >= 500) {
       return 'Le serveur est temporairement indisponible. Réessayez dans quelques instants.';
     }
-    if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout) {
       return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
     }
     return 'Impossible de valider la commande. Réessayez ou contactez la réception.';

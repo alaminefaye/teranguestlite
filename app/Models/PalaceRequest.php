@@ -9,9 +9,15 @@ class PalaceRequest extends Model
 {
     use EnterpriseScopeTrait;
 
-    protected $fillable = ['enterprise_id', 'user_id', 'palace_service_id', 'room_id', 'request_number', 'description', 'requested_for', 'estimated_price', 'status', 'confirmed_at', 'cancelled_at'];
-    
-    protected $casts = ['estimated_price' => 'decimal:2', 'requested_for' => 'datetime', 'confirmed_at' => 'datetime', 'cancelled_at' => 'datetime'];
+    protected $fillable = ['enterprise_id', 'user_id', 'palace_service_id', 'room_id', 'request_number', 'description', 'metadata', 'requested_for', 'estimated_price', 'status', 'confirmed_at', 'cancelled_at'];
+
+    protected $casts = [
+        'estimated_price' => 'decimal:2',
+        'requested_for' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'metadata' => 'array',
+    ];
 
     protected static function boot()
     {

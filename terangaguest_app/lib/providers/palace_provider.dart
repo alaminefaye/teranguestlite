@@ -38,12 +38,14 @@ class PalaceProvider with ChangeNotifier {
     required int serviceId,
     String? details,
     DateTime? scheduledTime,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
       final request = await _palaceApi.createPalaceRequest(
         serviceId: serviceId,
         details: details,
         scheduledTime: scheduledTime,
+        metadata: metadata,
       );
 
       // Rafraîchir les demandes
