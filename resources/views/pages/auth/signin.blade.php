@@ -151,9 +151,6 @@
                     <!-- ===== Common Grid Shape Start ===== -->
                     <x-common.common-grid-shape/>
                     <div class="flex max-w-xs flex-col items-center">
-                        <a href="/" class="mb-4 block">
-                            <img src="./images/logo/sennavette-auth-logo.jpeg" alt="Sen Navette" style="max-width: 200px; height: auto; object-fit: contain;" />
-                        </a>
                         <p class="text-center text-gray-400 dark:text-white/60">
                             Plateforme de transport digitalisé au Sénégal
                         </p>
