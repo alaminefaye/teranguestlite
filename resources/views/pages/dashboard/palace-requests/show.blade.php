@@ -55,8 +55,14 @@
                     @if(!empty($meta['destination_address']))<div><dt class="text-gray-500 dark:text-gray-400">Destination</dt><dd class="font-medium">{{ $meta['destination_address'] }}</dd></div>@endif
                     @if(isset($meta['distance_km']) && (float)$meta['distance_km'] > 0)<div><dt class="text-gray-500 dark:text-gray-400">Distance</dt><dd class="font-medium">{{ round((float)$meta['distance_km'], 1) }} km</dd></div>@endif
                 @else
-                    @if(!empty($meta['number_of_seats']))<div><dt class="text-gray-500 dark:text-gray-400">Nombre de places</dt><dd class="font-medium">{{ $meta['number_of_seats'] }}</dd></div>@endif
-                    @if(!empty($meta['vehicle_type']))<div><dt class="text-gray-500 dark:text-gray-400">Type de véhicule</dt><dd class="font-medium">{{ $meta['vehicle_type'] }}</dd></div>@endif
+                    @if(!empty($meta['vehicle_id']))
+                        @php $vehicle = \App\Models\Vehicle::withoutGlobalScope('enterprise')->where('id', $meta['vehicle_id'])->where('enterprise_id', $request->enterprise_id)->first(); @endphp
+                        @if($vehicle)<div><dt class="text-gray-500 dark:text-gray-400">Véhicule choisi</dt><dd class="font-medium">{{ $vehicle->name }} ({{ $vehicle->type_label }}, {{ $vehicle->number_of_seats }} pl.)</dd></div>@endif
+                    @endif
+                    @if(empty($meta['vehicle_id']))
+                        @if(!empty($meta['number_of_seats']))<div><dt class="text-gray-500 dark:text-gray-400">Nombre de places</dt><dd class="font-medium">{{ $meta['number_of_seats'] }}</dd></div>@endif
+                        @if(!empty($meta['vehicle_type']))<div><dt class="text-gray-500 dark:text-gray-400">Type de véhicule</dt><dd class="font-medium">{{ $meta['vehicle_type'] }}</dd></div>@endif
+                    @endif
                     @if(!empty($meta['rental_days']))<div><dt class="text-gray-500 dark:text-gray-400">Nombre de jours</dt><dd class="font-medium">{{ $meta['rental_days'] }}</dd></div>@endif
                     @if(!empty($meta['rental_duration_hours']))<div><dt class="text-gray-500 dark:text-gray-400">Durée (heures)</dt><dd class="font-medium">{{ $meta['rental_duration_hours'] }} h</dd></div>@endif
                 @endif

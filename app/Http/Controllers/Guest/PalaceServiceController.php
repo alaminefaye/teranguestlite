@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +50,7 @@ class PalaceServiceController extends Controller
             'metadata.distance_km' => 'nullable|numeric|min:0',
             'metadata.number_of_seats' => 'nullable|integer|min:1|max:20',
             'metadata.vehicle_type' => 'nullable|string|max:100',
+            'metadata.vehicle_id' => 'nullable|integer|exists:vehicles,id',
             'metadata.rental_days' => 'nullable|integer|min:1|max:90',
             'metadata.rental_duration_hours' => 'nullable|integer|min:1|max:720',
         ]);
@@ -62,13 +64,22 @@ class PalaceServiceController extends Controller
                 ->withErrors(['description' => 'Indiquez soit la description, soit le type véhicule (Taxi ou Location) avec les champs associés.']);
         }
 
+        $user = auth()->user();
+        // Véhicule : doit appartenir à l'établissement du client (chaque hôtel a ses propres données)
+        if (is_array($metadata) && isset($metadata['vehicle_id'])) {
+            if (!Vehicle::where('id', (int) $metadata['vehicle_id'])->where('enterprise_id', $user->enterprise_id)->exists()) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['metadata.vehicle_id' => 'Véhicule invalide ou non autorisé pour cet établissement.']);
+            }
+        }
+
         $description = $request->description ? trim($request->description) : null;
         if (empty($description) && is_array($metadata)) {
             $description = $this->buildDescriptionFromMetadata($metadata);
         }
         $description = $description ?: 'Demande sans précision';
 
-        $user = auth()->user();
         $room = Room::where('enterprise_id', $user->enterprise_id)
             ->where('room_number', $user->room_number)
             ->first();

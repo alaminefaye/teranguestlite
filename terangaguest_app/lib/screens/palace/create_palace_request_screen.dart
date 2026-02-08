@@ -5,7 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
+import '../../models/vehicle.dart';
 import '../../providers/palace_provider.dart';
+import '../../services/vehicle_api.dart';
 import '../../widgets/animated_button.dart';
 
 /// Type de demande véhicule : taxi ou location.
@@ -37,10 +39,14 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   bool _loadingLocation = false;
 
   // Location
-  final TextEditingController _seatsController = TextEditingController();
-  final TextEditingController _vehicleTypeController = TextEditingController();
   final TextEditingController _rentalDaysController = TextEditingController();
   final TextEditingController _rentalDurationController = TextEditingController();
+  final VehicleApi _vehicleApi = VehicleApi();
+  List<Vehicle> _vehicles = [];
+  bool _loadingVehicles = false;
+  Vehicle? _selectedVehicle;
+  String? _filterVehicleType;
+  int? _filterMinSeats;
 
   bool get _isVehicleService => widget.service.isVehicleService;
 
@@ -50,11 +56,23 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     _pickupController.dispose();
     _destinationController.dispose();
     _distanceController.dispose();
-    _seatsController.dispose();
-    _vehicleTypeController.dispose();
     _rentalDaysController.dispose();
     _rentalDurationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadVehicles() async {
+    if (!_isVehicleService || _vehicleType != VehicleRequestType.rental) return;
+    setState(() => _loadingVehicles = true);
+    try {
+      final list = await _vehicleApi.getVehicles(
+        vehicleType: _filterVehicleType,
+        minSeats: _filterMinSeats,
+      );
+      if (mounted) setState(() { _vehicles = list; _loadingVehicles = false; });
+    } catch (_) {
+      if (mounted) setState(() { _vehicles = []; _loadingVehicles = false; });
+    }
   }
 
   Future<void> _useMyLocation() async {
@@ -129,8 +147,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                 child: _vehicleChip(
                   label: 'Location',
                   selected: _vehicleType == VehicleRequestType.rental,
-                  onTap: () =>
-                      setState(() => _vehicleType = VehicleRequestType.rental),
+                  onTap: () {
+                    setState(() => _vehicleType = VehicleRequestType.rental);
+                    _loadVehicles();
+                  },
                 ),
               ),
             ],
@@ -279,6 +299,15 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     );
   }
 
+  static const List<MapEntry<String, String>> _vehicleTypeFilters = [
+    MapEntry('', 'Tous les types'),
+    MapEntry('berline', 'Berline'),
+    MapEntry('suv', 'SUV'),
+    MapEntry('minibus', 'Minibus'),
+    MapEntry('van', 'Van'),
+    MapEntry('other', 'Autre'),
+  ];
+
   Widget _buildRentalFields() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -291,19 +320,128 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _labeledField(
-            label: 'Nombre de places',
-            controller: _seatsController,
-            hint: 'Ex: 4',
-            keyboardType: TextInputType.number,
+          Text('Choisir un véhicule',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.accentGold)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _filterVehicleType ?? '',
+                    isExpanded: true,
+                    dropdownColor: AppTheme.primaryBlue,
+                    hint: Text('Type', style: TextStyle(color: AppTheme.textGray, fontSize: 14)),
+                    items: _vehicleTypeFilters
+                        .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value, style: const TextStyle(color: Colors.white, fontSize: 13))))
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _filterVehicleType = (v != null && v.isNotEmpty) ? v : null;
+                        _loadVehicles();
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int?>(
+                    value: _filterMinSeats,
+                    isExpanded: true,
+                    dropdownColor: AppTheme.primaryBlue,
+                    hint: Text('Places min.', style: TextStyle(color: AppTheme.textGray, fontSize: 14)),
+                    items: [
+                      const DropdownMenuItem<int?>(value: null, child: Text('Toutes', style: TextStyle(color: Colors.white, fontSize: 13))),
+                      ...List.generate(20, (i) => i + 1).map((s) => DropdownMenuItem<int?>(value: s, child: Text('$s place(s)', style: const TextStyle(color: Colors.white, fontSize: 13)))),
+                    ],
+                    onChanged: (v) {
+                      setState(() {
+                        _filterMinSeats = v;
+                        _loadVehicles();
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          _labeledField(
-            label: 'Type de véhicule',
-            controller: _vehicleTypeController,
-            hint: 'Ex: Berline, SUV, Minibus',
-          ),
-          const SizedBox(height: 12),
+          if (_loadingVehicles)
+            const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold))))
+          else if (_vehicles.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text('Aucun véhicule pour ces critères.', style: TextStyle(color: AppTheme.textGray, fontSize: 13)),
+            )
+          else
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _vehicles.length,
+                itemBuilder: (context, index) {
+                  final v = _vehicles[index];
+                  final selected = _selectedVehicle?.id == v.id;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: InkWell(
+                      onTap: () => setState(() => _selectedVehicle = v),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 120,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: selected ? AppTheme.accentGold.withValues(alpha: 0.2) : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: selected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: v.image != null && v.image!.isNotEmpty
+                                  ? Image.network(
+                                      v.image!,
+                                      height: 56,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return const SizedBox(
+                                          height: 56,
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (context, error, stackTrace) => const SizedBox(
+                                        height: 56,
+                                        child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 32)),
+                                      ),
+                                    )
+                                  : const SizedBox(height: 56, child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 32))),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(v.name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                            Text('${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.', style: TextStyle(color: AppTheme.textGray, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 16),
           _labeledField(
             label: 'Nombre de jours',
             controller: _rentalDaysController,
@@ -624,11 +762,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       return meta;
     }
     if (_vehicleType == VehicleRequestType.rental) {
-      final meta = <String, dynamic>{'vehicle_request_type': 'rental'};
-      final seats = int.tryParse(_seatsController.text.trim());
-      if (seats != null && seats > 0) meta['number_of_seats'] = seats;
-      final vt = _vehicleTypeController.text.trim();
-      if (vt.isNotEmpty) meta['vehicle_type'] = vt;
+      if (_selectedVehicle == null) {
+        _showSnack('Choisissez un véhicule dans la liste.');
+        return null;
+      }
+      final meta = <String, dynamic>{
+        'vehicle_request_type': 'rental',
+        'vehicle_id': _selectedVehicle!.id,
+        'vehicle_type': _selectedVehicle!.vehicleType,
+        'number_of_seats': _selectedVehicle!.numberOfSeats,
+      };
       final days = int.tryParse(_rentalDaysController.text.trim());
       if (days != null && days > 0) meta['rental_days'] = days;
       final hours = int.tryParse(_rentalDurationController.text.trim());

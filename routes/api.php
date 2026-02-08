@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SpaServiceController;
 use App\Http\Controllers\Api\ExcursionController;
 use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
+use App\Http\Controllers\Api\VehicleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -127,4 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/request', [PalaceServiceController::class, 'request']);
     });
     Route::get('/my-palace-requests', [PalaceServiceController::class, 'myRequests']);
+
+    // Véhicules (pour formulaire Location)
+    Route::get('/vehicles', [VehicleController::class, 'index']);
 });

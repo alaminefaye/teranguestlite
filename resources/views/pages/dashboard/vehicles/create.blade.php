@@ -1,0 +1,70 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <a href="{{ route('dashboard.vehicles.index') }}" class="hover:text-brand-500">Véhicules</a>
+        <span>/</span>
+        <span>Ajouter un véhicule</span>
+    </div>
+    <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Ajouter un véhicule</h1>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+    <form action="{{ route('dashboard.vehicles.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom <span class="text-error-500">*</span></label>
+                <input type="text" name="name" id="name" value="{{ old('name') }}" required placeholder="Ex: Berline Premium, SUV 7 places"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('name')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label for="vehicle_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type <span class="text-error-500">*</span></label>
+                <select name="vehicle_type" id="vehicle_type" required class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    @foreach(\App\Models\Vehicle::TYPES as $value => $label)
+                        <option value="{{ $value }}" {{ old('vehicle_type') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('vehicle_type')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label for="number_of_seats" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de places <span class="text-error-500">*</span></label>
+                <input type="number" name="number_of_seats" id="number_of_seats" value="{{ old('number_of_seats', 4) }}" min="1" max="20" required
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('number_of_seats')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label for="display_order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ordre d'affichage</label>
+                <input type="number" name="display_order" id="display_order" value="{{ old('display_order', 0) }}" min="0"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('display_order')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" name="is_available" id="is_available" value="1" {{ old('is_available', true) ? 'checked' : '' }}
+                    class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                <label for="is_available" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Disponible</label>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
+                <input type="file" name="image" id="image" accept="image/*"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommandé : 800×600 px ou carré, max 30 Mo.</p>
+                @error('image')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+        </div>
+
+        <div class="mt-8 flex items-center gap-4">
+            <button type="submit" class="inline-flex items-center px-6 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700">Créer</button>
+            <a href="{{ route('dashboard.vehicles.index') }}" class="inline-flex items-center px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Annuler</a>
+        </div>
+    </form>
+</div>
+@endsection

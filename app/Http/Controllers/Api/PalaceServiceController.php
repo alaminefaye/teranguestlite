@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
+use App\Models\Vehicle;
 
 class PalaceServiceController extends Controller
 {
@@ -114,6 +115,7 @@ class PalaceServiceController extends Controller
             'metadata.distance_km' => 'nullable|numeric|min:0',
             'metadata.number_of_seats' => 'nullable|integer|min:1|max:20',
             'metadata.vehicle_type' => 'nullable|string|max:100',
+            'metadata.vehicle_id' => 'nullable|integer|exists:vehicles,id',
             'metadata.rental_days' => 'nullable|integer|min:1|max:90',
             'metadata.rental_duration_hours' => 'nullable|integer|min:1|max:720',
         ]);
@@ -126,6 +128,19 @@ class PalaceServiceController extends Controller
                 'success' => false,
                 'message' => 'Indiquez soit les détails de la demande (description), soit le type véhicule (taxi ou location) avec les champs associés.',
             ], 422);
+        }
+
+        // Véhicule : doit appartenir à l'établissement du client (aucun mélange entre hôtels)
+        if (is_array($metadata) && isset($metadata['vehicle_id'])) {
+            $vehicleOk = Vehicle::where('id', (int) $metadata['vehicle_id'])
+                ->where('enterprise_id', $request->user()->enterprise_id)
+                ->exists();
+            if (!$vehicleOk) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Véhicule invalide ou non autorisé pour cet établissement.',
+                ], 422);
+            }
         }
 
         $service = PalaceService::find($id);

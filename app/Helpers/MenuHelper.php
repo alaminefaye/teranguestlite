@@ -137,6 +137,7 @@ class MenuHelper
                             ['name' => 'Spa & Bien-être', 'path' => '/dashboard/spa-services'],
                             ['name' => 'Blanchisserie', 'path' => '/dashboard/laundry-services'],
                             ['name' => 'Services Palace', 'path' => '/dashboard/palace-services'],
+                            ['name' => 'Véhicules (location)', 'path' => '/dashboard/vehicles'],
                             ['name' => 'Excursions', 'path' => '/dashboard/excursions'],
                         ],
                     ],
