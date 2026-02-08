@@ -49,6 +49,7 @@
                     <th class="px-4 py-3">Demande pour</th>
                     <th class="px-4 py-3 text-right">Prix</th>
                     <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -69,9 +70,12 @@
                                 {{ $req->status }}
                             </span>
                         </td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('dashboard.palace-requests.show', $req) }}" class="text-brand-600 dark:text-brand-400 hover:underline text-sm font-medium">Voir</a>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande</td></tr>
+                    <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande</td></tr>
                 @endforelse
             </tbody>
         </table>

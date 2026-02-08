@@ -32,4 +32,12 @@ class PalaceRequestsController extends Controller
 
         return view('pages.dashboard.palace-requests.index', compact('requests', 'stats'));
     }
+
+    public function show(PalaceRequest $palaceRequest): View
+    {
+        $palaceRequest->load(['palaceService', 'user', 'room']);
+        return view('pages.dashboard.palace-requests.show', [
+            'request' => $palaceRequest,
+        ]);
+    }
 }
