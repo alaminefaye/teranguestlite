@@ -16,9 +16,13 @@ import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase et notifications push (Android / iOS)
+  await NotificationService().init();
 
   // Initialiser le locale français pour les dates
   await initializeDateFormatting('fr_FR', null);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\Room;
+use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -260,6 +261,7 @@ class OrderController extends Controller
             'status' => 'confirmed',
             'confirmed_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande confirmée avec succès !');
     }
@@ -274,6 +276,7 @@ class OrderController extends Controller
             'status' => 'preparing',
             'preparing_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Préparation de la commande commencée !');
     }
@@ -288,6 +291,7 @@ class OrderController extends Controller
             'status' => 'ready',
             'ready_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande prête pour livraison !');
     }
@@ -302,6 +306,7 @@ class OrderController extends Controller
             'status' => 'delivering',
             'delivering_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande en cours de livraison !');
     }
@@ -316,6 +321,7 @@ class OrderController extends Controller
             'status' => 'delivered',
             'delivered_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande livrée avec succès !');
     }
@@ -330,7 +336,18 @@ class OrderController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+        $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande annulée.');
+    }
+
+    private function notifyOrderStatusToClient(Order $order): void
+    {
+        try {
+            $order->load('user', 'guest');
+            app(FirebaseNotificationService::class)->sendOrderStatusNotificationToClient($order);
+        } catch (\Exception $e) {
+            \Log::error('Firebase order status notification: ' . $e->getMessage());
+        }
     }
 }

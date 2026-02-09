@@ -32,6 +32,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('tablet')->group(function () {
     Route::post('/validate-code', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateCode']);
     Route::post('/validate-session', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateSession']);
+    Route::post('/register-fcm-token', [\App\Http\Controllers\Api\TabletSessionController::class, 'registerFcmToken']);
     Route::post('/checkout', [\App\Http\Controllers\Api\TabletSessionController::class, 'checkout']);
 });
 

@@ -123,13 +123,14 @@ class LaundryServiceController extends Controller
             'status' => 'pending',
         ]);
 
-        // Notification
+        // Notification au client (guest) uniquement
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendToUser(
-                $request->user(),
+            $firebaseService->sendToGuest(
+                $stay['guest_id'],
                 'Demande de blanchisserie enregistrée',
-                "Votre demande #{$laundryRequest->request_number} a été enregistrée"
+                "Votre demande #{$laundryRequest->request_number} a été enregistrée.",
+                ['type' => 'laundry_request', 'request_id' => (string) $laundryRequest->id, 'screen' => 'LaundryRequestDetails']
             );
         } catch (\Exception $e) {
             \Log::error('Firebase notification error: ' . $e->getMessage());

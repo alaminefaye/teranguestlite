@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -31,6 +32,7 @@ class AuthProvider with ChangeNotifier {
       if (user != null) {
         _user = user;
         _isAuthenticated = true;
+        NotificationService().registerWithBackendForUser();
       } else {
         _user = null;
         _isAuthenticated = false;
@@ -67,6 +69,9 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
+      // Enregistrer le token FCM pour recevoir les notifications (commandes, réservations)
+      NotificationService().registerWithBackendForUser();
+
       return true;
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -84,6 +89,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      await NotificationService().unregisterFromBackend();
       await _authService.logout();
     } catch (e) {
       debugPrint('⚠️ Logout error: $e');

@@ -67,6 +67,10 @@ dependencies:
   http: ^1.2.2
   weather: ^3.1.1
 
+  # Firebase Cloud Messaging (notifications push)
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

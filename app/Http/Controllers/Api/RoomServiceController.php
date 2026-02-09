@@ -224,11 +224,12 @@ class RoomServiceController extends Controller
 
         $order->load('orderItems.menuItem');
 
-        // Envoyer notification push
+        // Notification au client uniquement (user ou guest selon le cas)
         try {
             $firebaseService = app(FirebaseNotificationService::class);
-            $firebaseService->sendNewOrderNotification($user, $order);
-            
+            $order->load('user', 'guest');
+            $firebaseService->sendNewOrderNotificationToClient($order);
+
             // Notifier le staff
             $firebaseService->sendToStaff(
                 $user->enterprise_id,

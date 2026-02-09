@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\GuestFcmToken;
+use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FcmTokenController extends Controller
 {
     /**
-     * Enregistrer ou mettre à jour le FCM token de l'utilisateur
+     * Enregistrer ou mettre à jour le FCM token de l'utilisateur.
+     * Si l'utilisateur a un séjour actif (chambre), le token est aussi enregistré pour le guest
+     * afin que les notifications (commandes, réservations) lui parviennent sur cet appareil.
      */
     public function store(Request $request)
     {
@@ -18,18 +22,29 @@ class FcmTokenController extends Controller
         ]);
 
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Utilisateur non authentifié',
             ], 401);
         }
 
+        $token = trim($request->fcm_token);
         $user->update([
-            'fcm_token' => $request->fcm_token,
+            'fcm_token' => $token,
             'fcm_token_updated_at' => now(),
         ]);
+
+        // Lier ce token au guest si l'utilisateur a un séjour actif (client en chambre)
+        $stay = GuestReservationHelper::activeStayForUser($user);
+        if ($stay !== null && $user->enterprise_id && isset($stay['guest_id'])) {
+            try {
+                GuestFcmToken::register($user->enterprise_id, $stay['guest_id'], $token, 'mobile');
+            } catch (\Exception $e) {
+                \Log::warning('FCM: could not register token for guest: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -38,23 +53,29 @@ class FcmTokenController extends Controller
     }
 
     /**
-     * Supprimer le FCM token de l'utilisateur (lors de la déconnexion)
+     * Supprimer le FCM token de l'utilisateur (lors de la déconnexion).
+     * Retire aussi ce token de la table guest_fcm_tokens pour ne plus notifier cet appareil.
      */
     public function destroy(Request $request)
     {
         $user = Auth::user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Utilisateur non authentifié',
             ], 401);
         }
 
+        $previousToken = $user->fcm_token;
         $user->update([
             'fcm_token' => null,
             'fcm_token_updated_at' => now(),
         ]);
+
+        if ($previousToken) {
+            GuestFcmToken::where('fcm_token', $previousToken)->delete();
+        }
 
         return response()->json([
             'success' => true,

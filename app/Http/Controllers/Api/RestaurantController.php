@@ -111,6 +111,14 @@ class RestaurantController extends Controller
             'status' => 'confirmed',
         ]);
 
+        // Notification au client (guest) uniquement
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $firebaseService->sendReservationConfirmationToGuest($stay['guest_id'], $reservation, 'REST-' . $reservation->id);
+        } catch (\Exception $e) {
+            \Log::error('Firebase notification error: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Réservation confirmée',

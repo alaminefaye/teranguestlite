@@ -87,6 +87,29 @@ class TabletSessionApi {
     }
   }
 
+  /// Enregistre le token FCM de la tablette pour ce client (guest).
+  /// À appeler après validation du code pour recevoir les notifications (commandes, statuts) sur cette tablette.
+  Future<void> registerFcmToken({
+    required GuestSession session,
+    required String fcmToken,
+  }) async {
+    final token = fcmToken.trim();
+    if (token.isEmpty) return;
+    try {
+      await _api.post(
+        ApiConfig.tabletRegisterFcmToken,
+        data: {
+          'guest_id': session.guestId,
+          'room_id': session.roomId,
+          'reservation_id': session.reservationId,
+          'fcm_token': token,
+        },
+      );
+    } on DioException catch (_) {
+      // Ne pas bloquer l'usage : les notifications ne seront juste pas reçues sur cette tablette
+    }
+  }
+
   /// Message explicite pour les erreurs HTTP courantes (panier / checkout).
   static String _messageFromDio(DioException e) {
     final body = e.response?.data;

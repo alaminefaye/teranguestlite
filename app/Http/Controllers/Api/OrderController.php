@@ -236,10 +236,11 @@ class OrderController extends Controller
             ]);
         }
 
-        // Notification
+        // Notification au client uniquement
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendNewOrderNotification($request->user(), $newOrder);
+            $newOrder->load('user', 'guest');
+            $firebaseService->sendNewOrderNotificationToClient($newOrder);
         } catch (\Exception $e) {
             \Log::error('Firebase notification error: ' . $e->getMessage());
         }

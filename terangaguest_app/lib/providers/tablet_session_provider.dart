@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/guest_session.dart';
 import '../services/tablet_session_api.dart';
+import '../services/notification_service.dart';
 
 const _keySession = 'tablet_guest_session';
 const _keyRoomNumber = 'tablet_room_number';
@@ -65,6 +66,8 @@ class TabletSessionProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
       notifyListeners();
+      // Enregistrer le token FCM pour recevoir les notifications sur cette tablette
+      NotificationService().registerWithBackendForTabletSession(s);
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
