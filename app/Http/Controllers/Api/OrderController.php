@@ -38,12 +38,18 @@ class OrderController extends Controller
     }
 
     /**
-     * Liste des commandes : uniquement celles de l'utilisateur connecté (pas les autres clients).
+     * Liste des commandes : celles de l'utilisateur connecté (user_id) OU celles du guest de sa chambre (code client).
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Order::where('user_id', $user->id);
+        $guestIds = $this->guestIdsForUserRoom($user);
+        $query = Order::where(function ($q) use ($user, $guestIds) {
+            $q->where('user_id', $user->id);
+            if (! empty($guestIds)) {
+                $q->orWhereIn('guest_id', $guestIds);
+            }
+        });
 
         // Filtrer par statut
         if ($request->filled('status')) {
@@ -86,14 +92,20 @@ class OrderController extends Controller
     }
 
     /**
-     * Détails d'une commande (uniquement si elle appartient à l'utilisateur connecté)
+     * Détails d'une commande (si elle appartient à l'utilisateur connecté ou au guest de sa chambre)
      */
     public function show(Request $request, $id)
     {
         $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
         $order = Order::with('orderItems.menuItem')
             ->where('id', $id)
-            ->where('user_id', $user->id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (! empty($guestIds)) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
             ->first();
 
         if (!$order) {
@@ -144,14 +156,20 @@ class OrderController extends Controller
     }
 
     /**
-     * Recommander une commande (uniquement si elle appartient à l'utilisateur connecté)
+     * Recommander une commande (si elle appartient à l'utilisateur connecté ou au guest de sa chambre)
      */
     public function reorder(Request $request, $id)
     {
         $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
         $order = Order::with('orderItems')
             ->where('id', $id)
-            ->where('user_id', $user->id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (! empty($guestIds)) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
             ->first();
 
         if (!$order) {
@@ -241,14 +259,20 @@ class OrderController extends Controller
     }
 
     /**
-     * Annuler une commande (uniquement si statut = pending, confirmed ou preparing).
-     * Dès que la commande est "Prête" (ready), en livraison ou livrée, l'annulation n'est plus possible.
+     * Annuler une commande (si elle appartient à l'utilisateur ou au guest de sa chambre).
+     * Uniquement si statut = pending, confirmed ou preparing.
      */
     public function cancel(Request $request, $id)
     {
         $user = $request->user();
+        $guestIds = $this->guestIdsForUserRoom($user);
         $order = Order::where('id', $id)
-            ->where('user_id', $user->id)
+            ->where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (! empty($guestIds)) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            })
             ->first();
 
         if (! $order) {
