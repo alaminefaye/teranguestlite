@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LaundryService;
 use App\Models\LaundryRequest;
 use App\Models\Room;
+use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,7 @@ class LaundryServiceController extends Controller
     public function request(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'items' => 'required|array|min:1',
             'items.*.laundry_service_id' => 'required|exists:laundry_services,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -36,9 +38,12 @@ class LaundryServiceController extends Controller
         ]);
 
         $user = auth()->user();
-        $room = Room::where('enterprise_id', $user->enterprise_id)
-            ->where('room_number', $user->room_number)
-            ->first();
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
+        if (! $stay) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['client_code' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT]);
+        }
 
         $itemsData = [];
         $totalPrice = 0;
@@ -63,7 +68,8 @@ class LaundryServiceController extends Controller
         LaundryRequest::create([
             'enterprise_id' => $user->enterprise_id,
             'user_id' => $user->id,
-            'room_id' => $room->id ?? null,
+            'guest_id' => $stay['guest_id'],
+            'room_id' => $stay['room_id'],
             'items' => $itemsData,
             'total_price' => $totalPrice,
             'special_instructions' => $validated['special_instructions'] ?? null,

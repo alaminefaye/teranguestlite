@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SpaService;
 use App\Models\SpaReservation;
 use App\Models\Room;
+use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -37,21 +38,26 @@ class SpaServiceController extends Controller
     public function reserve(Request $request, SpaService $spaService): RedirectResponse
     {
         $validated = $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'reservation_date' => 'required|date|after_or_equal:today',
             'reservation_time' => 'required',
             'special_requests' => 'nullable|string|max:500',
         ]);
 
         $user = auth()->user();
-        $room = Room::where('enterprise_id', $user->enterprise_id)
-            ->where('room_number', $user->room_number)
-            ->first();
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
+        if (! $stay) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['client_code' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT]);
+        }
 
         SpaReservation::create([
             'enterprise_id' => $user->enterprise_id,
             'user_id' => $user->id,
+            'guest_id' => $stay['guest_id'],
             'spa_service_id' => $spaService->id,
-            'room_id' => $room->id ?? null,
+            'room_id' => $stay['room_id'],
             'reservation_date' => $validated['reservation_date'],
             'reservation_time' => $validated['reservation_time'],
             'special_requests' => $validated['special_requests'] ?? null,
