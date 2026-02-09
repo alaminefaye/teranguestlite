@@ -17,10 +17,7 @@ import 'cart_screen.dart';
 class ItemDetailScreen extends StatefulWidget {
   final MenuItem item;
 
-  const ItemDetailScreen({
-    super.key,
-    required this.item,
-  });
+  const ItemDetailScreen({super.key, required this.item});
 
   @override
   State<ItemDetailScreen> createState() => _ItemDetailScreenState();
@@ -90,9 +87,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
           label: AppLocalizations.of(context).viewCartCaps,
@@ -114,102 +109,112 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     final priceLabel = '${widget.item.price.toStringAsFixed(0)} FCFA';
     return Semantics(
-      label: '${AppLocalizations.of(context).description} ${widget.item.name}, $priceLabel',
+      label:
+          '${AppLocalizations.of(context).description} ${widget.item.name}, $priceLabel',
       child: Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            // Contenu scrollable
-            CustomScrollView(
-              slivers: [
-                // Image en haut
-                _buildImageHeader(),
+          child: Stack(
+            children: [
+              // Contenu scrollable
+              CustomScrollView(
+                slivers: [
+                  // Image en haut
+                  _buildImageHeader(),
 
-                // Détails
-                SliverToBoxAdapter(
-                  child: _buildDetails(),
-                ),
-              ],
-            ),
-
-            // Bouton retour
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryDark.withValues(alpha: 0.8),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.accentGold,
-                    width: 1.5,
-                  ),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ),
-
-            // Favori + Badge panier
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Consumer<FavoritesProvider>(
-                    builder: (context, fav, _) {
-                      final isFav = fav.isFavorite(FavoriteType.menuItem, widget.item.id);
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryDark.withValues(alpha: 0.8),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.accentGold, width: 1.5),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            isFav ? Icons.favorite : Icons.favorite_border,
-                            color: isFav ? Colors.red : AppTheme.accentGold,
-                          ),
-                          onPressed: () {
-                            HapticHelper.lightImpact();
-                            fav.toggle(FavoriteItem(
-                              type: FavoriteType.menuItem,
-                              id: widget.item.id,
-                              name: widget.item.name,
-                              imageUrl: widget.item.image,
-                            ));
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryDark.withValues(alpha: 0.8),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.accentGold, width: 1.5),
-                    ),
-                    child: const CartBadge(),
-                  ),
+                  // Détails
+                  SliverToBoxAdapter(child: _buildDetails()),
                 ],
               ),
-            ),
-          ],
+
+              // Bouton retour
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppTheme.accentGold,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
+
+              // Favori + Badge panier
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                right: 8,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Consumer<FavoritesProvider>(
+                      builder: (context, fav, _) {
+                        final isFav = fav.isFavorite(
+                          FavoriteType.menuItem,
+                          widget.item.id,
+                        );
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.accentGold,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              color: isFav ? Colors.red : AppTheme.accentGold,
+                            ),
+                            onPressed: () {
+                              HapticHelper.lightImpact();
+                              fav.toggle(
+                                FavoriteItem(
+                                  type: FavoriteType.menuItem,
+                                  id: widget.item.id,
+                                  name: widget.item.name,
+                                  imageUrl: widget.item.image,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppTheme.accentGold,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const CartBadge(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        bottomNavigationBar: _buildBottomBar(context),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
-    ),
     );
   }
 
@@ -241,7 +246,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   imageUrl: widget.item.image!,
                   fit: BoxFit.contain,
                   placeholder: (context, url) => _buildImagePlaceholder(),
-                  errorWidget: (context, url, error) => _buildImagePlaceholder(),
+                  errorWidget: (context, url, error) =>
+                      _buildImagePlaceholder(),
                 ),
               )
             : _buildImagePlaceholder(),
@@ -253,11 +259,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return Container(
       color: AppTheme.primaryBlue,
       child: const Center(
-        child: Icon(
-          Icons.restaurant,
-          size: 100,
-          color: AppTheme.accentGold,
-        ),
+        child: Icon(Icons.restaurant, size: 100, color: AppTheme.accentGold),
       ),
     );
   }
@@ -429,7 +431,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
             ),
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 100), // Espace pour scroll + bouton fixe
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom + 100,
+          ), // Espace pour scroll + bouton fixe
         ],
       ),
     );
@@ -461,7 +465,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ],
       ),
       child: AnimatedButton(
-        text: widget.item.isAvailable ? AppLocalizations.of(context).addToCart : AppLocalizations.of(context).unavailable,
+        text: widget.item.isAvailable
+            ? AppLocalizations.of(context).addToCart
+            : AppLocalizations.of(context).unavailable,
         icon: Icons.add_shopping_cart,
         onPressed: widget.item.isAvailable ? () => _addToCart(context) : null,
         width: double.infinity,

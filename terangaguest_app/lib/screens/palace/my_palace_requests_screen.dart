@@ -11,8 +11,7 @@ class MyPalaceRequestsScreen extends StatefulWidget {
   const MyPalaceRequestsScreen({super.key});
 
   @override
-  State<MyPalaceRequestsScreen> createState() =>
-      _MyPalaceRequestsScreenState();
+  State<MyPalaceRequestsScreen> createState() => _MyPalaceRequestsScreenState();
 }
 
 class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
@@ -43,8 +42,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -56,15 +57,18 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                           Text(
                             AppLocalizations.of(context).myRequests,
                             style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).palaceServices,
                             style: const TextStyle(
-                                fontSize: 13, color: AppTheme.textGray),
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -85,9 +89,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
         }
 
         if (provider.requests.isEmpty) {
@@ -103,15 +108,17 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
           color: AppTheme.accentGold,
           onRefresh: () => provider.fetchMyPalaceRequests(),
           child: Padding(
-              padding: LayoutHelper.horizontalPadding(context),
-              child: GridView.builder(
-                padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
-                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
-                ),
+            padding: LayoutHelper.horizontalPadding(context),
+            child: GridView.builder(
+              padding: EdgeInsets.symmetric(
+                vertical: LayoutHelper.gridSpacing(context),
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                mainAxisSpacing: LayoutHelper.gridSpacing(context),
+              ),
               itemCount: provider.requests.length,
               itemBuilder: (context, index) {
                 final request = provider.requests[index];
@@ -129,8 +136,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                         colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
                       ),
                       borderRadius: BorderRadius.circular(16),
-                      border:
-                          Border.all(color: AppTheme.accentGold, width: 1.5),
+                      border: Border.all(
+                        color: AppTheme.accentGold,
+                        width: 1.5,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.4),
@@ -155,13 +164,16 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(request.serviceName,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.accentGold),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                request.serviceName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.accentGold,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               const SizedBox(height: 8),
                               _buildStatusBadge(context, request.status),
                             ],
@@ -171,16 +183,22 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today,
-                                      size: 14, color: AppTheme.textGray),
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    size: 14,
+                                    color: AppTheme.textGray,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      DateFormat('dd/MM/yyyy HH:mm', 'fr_FR')
-                                          .format(request.createdAt),
+                                      DateFormat(
+                                        'dd/MM/yyyy HH:mm',
+                                        'fr_FR',
+                                      ).format(request.createdAt),
                                       style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textGray),
+                                        fontSize: 12,
+                                        color: AppTheme.textGray,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -189,17 +207,23 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                 const SizedBox(height: 6),
                                 Row(
                                   children: [
-                                    const Icon(Icons.schedule,
-                                        size: 14, color: AppTheme.accentGold),
+                                    const Icon(
+                                      Icons.schedule,
+                                      size: 14,
+                                      color: AppTheme.accentGold,
+                                    ),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
-                                        DateFormat('dd/MM HH:mm', 'fr_FR')
-                                            .format(request.scheduledTime!),
+                                        DateFormat(
+                                          'dd/MM HH:mm',
+                                          'fr_FR',
+                                        ).format(request.scheduledTime!),
                                         style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.accentGold,
-                                            fontWeight: FontWeight.bold),
+                                          fontSize: 12,
+                                          color: AppTheme.accentGold,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -230,11 +254,14 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColors['border']!, width: 1),
       ),
-      child: Text(_getStatusLabel(context, status),
-          style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: statusColors['text'])),
+      child: Text(
+        _getStatusLabel(context, status),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: statusColors['text'],
+        ),
+      ),
     );
   }
 

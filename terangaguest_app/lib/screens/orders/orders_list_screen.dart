@@ -81,9 +81,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               _buildFilters(),
 
               // Liste des commandes
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -145,7 +143,8 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         itemCount: _statusFilters(context).length,
         itemBuilder: (context, index) {
           final filter = _statusFilters(context)[index];
-          final isSelected = _selectedStatus == filter['value'] ||
+          final isSelected =
+              _selectedStatus == filter['value'] ||
               (_selectedStatus == null && filter['value'] == '');
 
           return Padding(
@@ -153,31 +152,47 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             child: GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedStatus = filter['value']!.isEmpty ? null : filter['value'];
+                  _selectedStatus = filter['value']!.isEmpty
+                      ? null
+                      : filter['value'];
                 });
                 context.read<OrdersProvider>().fetchOrders(
-                      status: _selectedStatus,
-                    );
+                  status: _selectedStatus,
+                );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? LinearGradient(
-                          colors: [AppTheme.accentGold, AppTheme.accentGold.withValues(alpha: 0.8)],
+                          colors: [
+                            AppTheme.accentGold,
+                            AppTheme.accentGold.withValues(alpha: 0.8),
+                          ],
                         )
                       : null,
-                  color: isSelected ? null : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                  color: isSelected
+                      ? null
+                      : AppTheme.primaryBlue.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: isSelected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3),
+                    color: isSelected
+                        ? AppTheme.accentGold
+                        : AppTheme.accentGold.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   filter['label']!,
                   style: TextStyle(
-                    color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected
+                        ? AppTheme.primaryDark
+                        : AppTheme.textGray,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     fontSize: 13,
                   ),
                 ),
@@ -214,7 +229,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             icon: Icons.shopping_bag_outlined,
             title: _selectedStatus == null
                 ? l10n.noOrder
-                : l10n.noOrderForStatus(_getStatusLabel(context, _selectedStatus!)),
+                : l10n.noOrderForStatus(
+                    _getStatusLabel(context, _selectedStatus!),
+                  ),
             subtitle: l10n.noOrderSubtitle,
           );
         }
@@ -224,7 +241,8 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           onRefresh: provider.refreshOrders,
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
                 provider.loadMoreOrders();
               }
               return false;
@@ -239,12 +257,15 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   crossAxisSpacing: LayoutHelper.gridSpacing(context),
                   mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
-                itemCount: provider.orders.length + (provider.hasMorePages ? 1 : 0),
+                itemCount:
+                    provider.orders.length + (provider.hasMorePages ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == provider.orders.length) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
+                        ),
                       ),
                     );
                   }

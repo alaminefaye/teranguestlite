@@ -47,8 +47,10 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -60,15 +62,18 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                           Text(
                             AppLocalizations.of(context).laundry,
                             style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).laundrySubtitle,
                             style: const TextStyle(
-                                fontSize: 13, color: AppTheme.textGray),
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -89,9 +94,10 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
         }
 
         if (provider.errorMessage != null) {
@@ -146,12 +152,14 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               AppTheme.primaryBlue,
-                              AppTheme.primaryDark
+                              AppTheme.primaryDark,
                             ],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: AppTheme.accentGold, width: 1.5),
+                            color: AppTheme.accentGold,
+                            width: 1.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.4),
@@ -174,22 +182,31 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                             children: [
                               Column(
                                 children: [
-                                  Icon(_iconForLaundryService(service),
-                                      size: 48, color: AppTheme.accentGold),
+                                  Icon(
+                                    _iconForLaundryService(service),
+                                    size: 48,
+                                    color: AppTheme.accentGold,
+                                  ),
                                   const SizedBox(height: 12),
-                                  Text(service.name,
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.accentGold),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis),
+                                  Text(
+                                    service.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.accentGold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                   const SizedBox(height: 8),
-                                  Text(service.formattedPrice,
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          color: AppTheme.textGray)),
+                                  Text(
+                                    service.formattedPrice,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppTheme.textGray,
+                                    ),
+                                  ),
                                 ],
                               ),
                               Row(
@@ -198,38 +215,48 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                   IconButton(
                                     onPressed: quantity > 0
                                         ? () => provider.updateQuantity(
-                                            service.id, quantity - 1)
+                                            service.id,
+                                            quantity - 1,
+                                          )
                                         : null,
                                     icon: const Icon(
-                                        Icons.remove_circle_outline),
+                                      Icons.remove_circle_outline,
+                                    ),
                                     color: AppTheme.accentGold,
                                     iconSize: 28,
                                   ),
                                   Container(
                                     width: 50,
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 8),
+                                      vertical: 8,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color:
-                                          AppTheme.accentGold.withValues(alpha: 0.2),
+                                      color: AppTheme.accentGold.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                          color: AppTheme.accentGold),
+                                        color: AppTheme.accentGold,
+                                      ),
                                     ),
-                                    child: Text('$quantity',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppTheme.accentGold)),
+                                    child: Text(
+                                      '$quantity',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.accentGold,
+                                      ),
+                                    ),
                                   ),
                                   IconButton(
                                     onPressed: quantity < 99
                                         ? () => provider.updateQuantity(
-                                            service.id, quantity + 1)
+                                            service.id,
+                                            quantity + 1,
+                                          )
                                         : null,
-                                    icon:
-                                        const Icon(Icons.add_circle_outline),
+                                    icon: const Icon(Icons.add_circle_outline),
                                     color: AppTheme.accentGold,
                                     iconSize: 28,
                                   ),
@@ -261,15 +288,23 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(AppLocalizations.of(context).articleCount(provider.getTotalItems()),
-                              style: const TextStyle(
-                                  fontSize: 14, color: AppTheme.textGray)),
                           Text(
-                              '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
-                              style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppTheme.accentGold)),
+                            AppLocalizations.of(
+                              context,
+                            ).articleCount(provider.getTotalItems()),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                          Text(
+                            '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
                         ],
                       ),
                       Row(
@@ -290,7 +325,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                             text: AppLocalizations.of(context).confirmRequest,
                             onPressed: () {
                               HapticHelper.confirm();
-                              context.navigateTo(const CreateLaundryRequestScreen());
+                              context.navigateTo(
+                                const CreateLaundryRequestScreen(),
+                              );
                             },
                             backgroundColor: AppTheme.accentGold,
                             textColor: AppTheme.primaryDark,
@@ -314,14 +351,21 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
     // Vêtements : icône nettoyage à sec / vêtement
     if (n.contains('chemise') || n.contains('shirt')) return Icons.dry_cleaning;
     if (n.contains('costume') || n.contains('suit')) return Icons.dry_cleaning;
-    if (n.contains('pantalon') || n.contains('pants') || n.contains('trousers')) return Icons.dry_cleaning;
+    if (n.contains('pantalon') || n.contains('pants') || n.contains('trousers'))
+      return Icons.dry_cleaning;
     if (n.contains('robe') || n.contains('dress')) return Icons.dry_cleaning;
     // Linge de maison
-    if (n.contains('draps') || n.contains('sheet') || n.contains('linge') && !n.contains('serviette')) return Icons.bed;
-    if (n.contains('serviette') || n.contains('towel')) return Icons.local_laundry_service;
+    if (n.contains('draps') ||
+        n.contains('sheet') ||
+        n.contains('linge') && !n.contains('serviette'))
+      return Icons.bed;
+    if (n.contains('serviette') || n.contains('towel'))
+      return Icons.local_laundry_service;
     // Services
-    if (n.contains('nettoyage') && (n.contains('sec') || n.contains('délicat'))) return Icons.dry_cleaning;
-    if (n.contains('repassage') || n.contains('iron')) return Icons.cleaning_services;
+    if (n.contains('nettoyage') && (n.contains('sec') || n.contains('délicat')))
+      return Icons.dry_cleaning;
+    if (n.contains('repassage') || n.contains('iron'))
+      return Icons.cleaning_services;
     return Icons.local_laundry_service;
   }
 }

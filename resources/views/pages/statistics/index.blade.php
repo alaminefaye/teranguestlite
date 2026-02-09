@@ -377,7 +377,7 @@
                 toolbar: { show: false },
                 fontFamily: 'Outfit, sans-serif',
             },
-            colors: ['#465fff'],
+            colors: ['#D4AF37'],
             stroke: {
                 curve: 'smooth',
                 width: 3,
@@ -415,7 +415,7 @@
 
         new ApexCharts(document.querySelector("#revenueChart"), {
             ...chartOptions,
-            colors: ['#465fff', '#9ca3af'],
+            colors: ['#D4AF37', '#9ca3af'],
             series: [
                 {
                     name: 'Période actuelle',
@@ -499,7 +499,7 @@
             },
             labels: paymentMethods.map(m => paymentLabels[m] || m),
             series: paymentRevenues,
-            colors: ['#465fff', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            colors: ['#D4AF37', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
             legend: {
                 position: 'bottom',
             },

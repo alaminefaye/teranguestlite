@@ -56,9 +56,7 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
             children: [
               _buildHeader(),
               _buildFilters(),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -117,7 +115,8 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
         itemCount: _typeFilters(context).length,
         itemBuilder: (context, index) {
           final filter = _typeFilters(context)[index];
-          final isSelected = _selectedType == filter['value'] ||
+          final isSelected =
+              _selectedType == filter['value'] ||
               (_selectedType == null && filter['value'] == '');
 
           return Padding(
@@ -125,31 +124,47 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
             child: GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedType = filter['value']!.isEmpty ? null : filter['value'];
+                  _selectedType = filter['value']!.isEmpty
+                      ? null
+                      : filter['value'];
                 });
                 context.read<RestaurantsProvider>().fetchRestaurants(
-                      type: _selectedType,
-                    );
+                  type: _selectedType,
+                );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? LinearGradient(
-                          colors: [AppTheme.accentGold, AppTheme.accentGold.withValues(alpha: 0.8)],
+                          colors: [
+                            AppTheme.accentGold,
+                            AppTheme.accentGold.withValues(alpha: 0.8),
+                          ],
                         )
                       : null,
-                  color: isSelected ? null : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                  color: isSelected
+                      ? null
+                      : AppTheme.primaryBlue.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: isSelected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3),
+                    color: isSelected
+                        ? AppTheme.accentGold
+                        : AppTheme.accentGold.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   filter['label']!,
                   style: TextStyle(
-                    color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected
+                        ? AppTheme.primaryDark
+                        : AppTheme.textGray,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     fontSize: 13,
                   ),
                 ),
@@ -186,7 +201,9 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
             icon: Icons.restaurant_outlined,
             title: _selectedType == null
                 ? l10n.noRestaurantAvailable
-                : l10n.noRestaurantForType(_getTypeLabel(context, _selectedType!)),
+                : l10n.noRestaurantForType(
+                    _getTypeLabel(context, _selectedType!),
+                  ),
             subtitle: l10n.noRestaurantSubtitle,
           );
         }
@@ -219,9 +236,9 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
                     restaurant: restaurant,
                     onTap: () {
                       HapticHelper.lightImpact();
-                      context.navigateTo(RestaurantDetailScreen(
-                        restaurantId: restaurant.id,
-                      ));
+                      context.navigateTo(
+                        RestaurantDetailScreen(restaurantId: restaurant.id),
+                      );
                     },
                   );
                 },

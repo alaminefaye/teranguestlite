@@ -14,25 +14,34 @@ import 'my_reservations_screen.dart';
 class ReserveRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;
 
-  const ReserveRestaurantScreen({
-    super.key,
-    required this.restaurant,
-  });
+  const ReserveRestaurantScreen({super.key, required this.restaurant});
 
   @override
-  State<ReserveRestaurantScreen> createState() => _ReserveRestaurantScreenState();
+  State<ReserveRestaurantScreen> createState() =>
+      _ReserveRestaurantScreenState();
 }
 
 class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   DateTime? _selectedDate;
   String? _selectedTime;
   int _guests = 2;
-  final TextEditingController _specialRequestsController = TextEditingController();
+  final TextEditingController _specialRequestsController =
+      TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
 
   final List<String> _availableTimes = [
-    '12:00', '12:30', '13:00', '13:30', '14:00',
-    '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '19:00',
+    '19:30',
+    '20:00',
+    '20:30',
+    '21:00',
+    '21:30',
+    '22:00',
   ];
 
   @override
@@ -59,7 +68,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -208,11 +220,16 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                 children: [
                   Text(
                     _selectedDate != null
-                        ? DateFormat('dd MMMM yyyy', 'fr_FR').format(_selectedDate!)
+                        ? DateFormat(
+                            'dd MMMM yyyy',
+                            'fr_FR',
+                          ).format(_selectedDate!)
                         : AppLocalizations.of(context).selectDate,
                     style: TextStyle(
                       fontSize: 15,
-                      color: _selectedDate != null ? Colors.white : AppTheme.textGray,
+                      color: _selectedDate != null
+                          ? Colors.white
+                          : AppTheme.textGray,
                     ),
                   ),
                   const Icon(
@@ -263,25 +280,39 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? LinearGradient(
-                            colors: [AppTheme.accentGold, AppTheme.accentGold.withValues(alpha: 0.8)],
+                            colors: [
+                              AppTheme.accentGold,
+                              AppTheme.accentGold.withValues(alpha: 0.8),
+                            ],
                           )
                         : null,
-                    color: isSelected ? null : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                    color: isSelected
+                        ? null
+                        : AppTheme.primaryBlue.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3),
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.accentGold.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     time,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? AppTheme.primaryDark
+                          : AppTheme.textGray,
                     ),
                   ),
                 ),
@@ -332,7 +363,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               ),
               const SizedBox(width: 24),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.accentGold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -395,16 +429,22 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).restaurantHintExample,
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -428,7 +468,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.accentGold.withValues(alpha: 0.2), AppTheme.primaryDark],
+          colors: [
+            AppTheme.accentGold.withValues(alpha: 0.2),
+            AppTheme.primaryDark,
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 2),
@@ -445,7 +488,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
             ),
           ),
           const Divider(height: 24, color: AppTheme.textGray),
-          _buildSummaryRow(AppLocalizations.of(context).restaurant, widget.restaurant.name),
+          _buildSummaryRow(
+            AppLocalizations.of(context).restaurant,
+            widget.restaurant.name,
+          ),
           const SizedBox(height: 12),
           _buildSummaryRow(
             AppLocalizations.of(context).date,
@@ -454,7 +500,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
           const SizedBox(height: 12),
           _buildSummaryRow(AppLocalizations.of(context).time, _selectedTime!),
           const SizedBox(height: 12),
-          _buildSummaryRow(AppLocalizations.of(context).guests, AppLocalizations.of(context).guestsCount(_guests)),
+          _buildSummaryRow(
+            AppLocalizations.of(context).guests,
+            AppLocalizations.of(context).guestsCount(_guests),
+          ),
         ],
       ),
     );
@@ -466,10 +515,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppTheme.textGray,
-          ),
+          style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
         ),
         Text(
           value,
@@ -516,14 +562,20 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.8),
+              ),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+                size: 22,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -535,7 +587,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   Widget _buildConfirmButton() {
     final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit = ((user?.canReserve == true) || hasCode) && _selectedDate != null && _selectedTime != null;
+    final canSubmit =
+        ((user?.canReserve == true) || hasCode) &&
+        _selectedDate != null &&
+        _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -564,15 +619,15 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
 
       final clientCode = _clientCodeController.text.trim();
       await context.read<RestaurantsProvider>().reserveTable(
-            restaurantId: widget.restaurant.id,
-            date: _selectedDate!,
-            time: _selectedTime!,
-            guests: _guests,
-            specialRequests: _specialRequestsController.text.isEmpty
-                ? null
-                : _specialRequestsController.text,
-            clientCode: clientCode.isNotEmpty ? clientCode : null,
-          );
+        restaurantId: widget.restaurant.id,
+        date: _selectedDate!,
+        time: _selectedTime!,
+        guests: _guests,
+        specialRequests: _specialRequestsController.text.isEmpty
+            ? null
+            : _specialRequestsController.text,
+        clientCode: clientCode.isNotEmpty ? clientCode : null,
+      );
 
       // Fermer le loader
       if (mounted) Navigator.pop(context);
@@ -619,7 +674,11 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.notifications_active, color: AppTheme.accentGold, size: 20),
+                      Icon(
+                        Icons.notifications_active,
+                        color: AppTheme.accentGold,
+                        size: 20,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -644,7 +703,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                 },
                 child: const Text(
                   'OK',
-                  style: TextStyle(color: AppTheme.textGray, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               AnimatedButton(

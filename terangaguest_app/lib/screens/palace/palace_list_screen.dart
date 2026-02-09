@@ -46,8 +46,10 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -59,15 +61,18 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                           Text(
                             AppLocalizations.of(context).palaceServices,
                             style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).palaceServicesSubtitle,
                             style: const TextStyle(
-                                fontSize: 13, color: AppTheme.textGray),
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -88,9 +93,10 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
         }
 
         if (provider.errorMessage != null) {
@@ -137,9 +143,9 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                     onTap: service.isAvailable
                         ? () {
                             HapticHelper.lightImpact();
-                            context.navigateTo(CreatePalaceRequestScreen(
-                              service: service,
-                            ));
+                            context.navigateTo(
+                              CreatePalaceRequestScreen(service: service),
+                            );
                           }
                         : null,
                     child: Transform(
@@ -155,12 +161,14 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               AppTheme.primaryBlue,
-                              AppTheme.primaryDark
+                              AppTheme.primaryDark,
                             ],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: AppTheme.accentGold, width: 1.5),
+                            color: AppTheme.accentGold,
+                            width: 1.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.4),
@@ -189,21 +197,27 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              Text(service.name,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.accentGold),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                service.name,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.accentGold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               if (service.category != null) ...[
                                 const SizedBox(height: 4),
-                                Text(service.category!,
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppTheme.textGray),
-                                    textAlign: TextAlign.center),
+                                Text(
+                                  service.category!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppTheme.textGray,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ],
                             ],
                           ),
@@ -260,14 +274,34 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
   static IconData _iconForPalaceService(PalaceService service) {
     final name = service.name.toLowerCase();
     final cat = (service.category ?? '').toLowerCase();
-    if (name.contains('baby') || name.contains('enfant') || name.contains('garderie')) return Icons.child_care;
-    if (name.contains('billetterie') || name.contains('spectacle') || name.contains('ticket')) return Icons.confirmation_number;
-    if (name.contains('voiture') || name.contains('chauffeur') || name.contains('location')) return Icons.directions_car;
-    if (name.contains('événement') || name.contains('event') || name.contains('organisation')) return Icons.event;
-    if (name.contains('pressing') || name.contains('repassage') || name.contains('laundry')) return Icons.local_laundry_service;
-    if (name.contains('majordome') || name.contains('butler')) return Icons.support_agent;
-    if (name.contains('transfert') || name.contains('aéroport') || name.contains('airport')) return Icons.flight_takeoff;
-    if (name.contains('conciergerie') || name.contains('vip')) return Icons.luggage;
+    if (name.contains('baby') ||
+        name.contains('enfant') ||
+        name.contains('garderie'))
+      return Icons.child_care;
+    if (name.contains('billetterie') ||
+        name.contains('spectacle') ||
+        name.contains('ticket'))
+      return Icons.confirmation_number;
+    if (name.contains('voiture') ||
+        name.contains('chauffeur') ||
+        name.contains('location'))
+      return Icons.directions_car;
+    if (name.contains('événement') ||
+        name.contains('event') ||
+        name.contains('organisation'))
+      return Icons.event;
+    if (name.contains('pressing') ||
+        name.contains('repassage') ||
+        name.contains('laundry'))
+      return Icons.local_laundry_service;
+    if (name.contains('majordome') || name.contains('butler'))
+      return Icons.support_agent;
+    if (name.contains('transfert') ||
+        name.contains('aéroport') ||
+        name.contains('airport'))
+      return Icons.flight_takeoff;
+    if (name.contains('conciergerie') || name.contains('vip'))
+      return Icons.luggage;
     if (cat == 'transport') return Icons.directions_car;
     if (cat == 'butler') return Icons.support_agent;
     if (cat == 'vip') return Icons.star;

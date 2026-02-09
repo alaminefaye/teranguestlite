@@ -10,10 +10,7 @@ import '../orders/orders_list_screen.dart';
 class OrderConfirmationScreen extends StatelessWidget {
   final Map<String, dynamic> orderData;
 
-  const OrderConfirmationScreen({
-    super.key,
-    required this.orderData,
-  });
+  const OrderConfirmationScreen({super.key, required this.orderData});
 
   @override
   Widget build(BuildContext context) {
@@ -93,22 +90,18 @@ class OrderConfirmationScreen extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.green.withValues(alpha: 0.2),
-        border: Border.all(
-          color: Colors.green,
-          width: 3,
-        ),
+        border: Border.all(color: Colors.green, width: 3),
       ),
-      child: const Icon(
-        Icons.check_circle,
-        size: 80,
-        color: Colors.green,
-      ),
+      child: const Icon(Icons.check_circle, size: 80, color: Colors.green),
     );
   }
 
   Widget _buildOrderDetails(BuildContext context) {
     final orderNumber = orderData['order_number'] ?? 'N/A';
-    final total = orderData['formatted_total'] ?? orderData['total_amount']?.toString() ?? '0';
+    final total =
+        orderData['formatted_total'] ??
+        orderData['total_amount']?.toString() ??
+        '0';
     final itemsCount = (orderData['items'] as List?)?.length ?? 0;
 
     return Container(
@@ -123,10 +116,7 @@ class OrderConfirmationScreen extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 1.5,
-        ),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -143,10 +133,7 @@ class OrderConfirmationScreen extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context).orderNumberLabel,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textGray,
-                ),
+                style: TextStyle(fontSize: 14, color: AppTheme.textGray),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -223,18 +210,11 @@ class OrderConfirmationScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: AppTheme.textGray,
-            ),
+            Icon(icon, size: 20, color: AppTheme.textGray),
             const SizedBox(width: 8),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppTheme.textGray,
-              ),
+              style: const TextStyle(fontSize: 15, color: AppTheme.textGray),
             ),
           ],
         ),
@@ -256,9 +236,7 @@ class OrderConfirmationScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.accentGold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
       ),
       child: const Row(
         children: [

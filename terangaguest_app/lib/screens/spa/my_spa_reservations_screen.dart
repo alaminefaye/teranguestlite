@@ -42,9 +42,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -117,7 +115,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
           child: Padding(
             padding: LayoutHelper.horizontalPadding(context),
             child: GridView.builder(
-              padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
+              padding: EdgeInsets.symmetric(
+                vertical: LayoutHelper.gridSpacing(context),
+              ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
                 childAspectRatio: LayoutHelper.listCellAspectRatio(context),
@@ -159,16 +159,10 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryBlue,
-              AppTheme.primaryDark,
-            ],
+            colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppTheme.accentGold,
-            width: 1.5,
-          ),
+          border: Border.all(color: AppTheme.accentGold, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.4),
@@ -220,8 +214,10 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          DateFormat('dd/MM/yyyy', 'fr_FR')
-                              .format(reservation.date),
+                          DateFormat(
+                            'dd/MM/yyyy',
+                            'fr_FR',
+                          ).format(reservation.date),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.textGray,
@@ -262,11 +258,19 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: () => _showCancelSpaDialog(context, reservation),
-                        icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+                        onPressed: () =>
+                            _showCancelSpaDialog(context, reservation),
+                        icon: const Icon(
+                          Icons.cancel_outlined,
+                          size: 18,
+                          color: Colors.red,
+                        ),
                         label: Text(
                           AppLocalizations.of(context).cancel,
-                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.red),
@@ -289,17 +293,31 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     final parts = r.time.split(':');
     final hour = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 0) : 0;
     final minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
-    final reservationDateTime = DateTime(r.date.year, r.date.month, r.date.day, hour, minute);
-    return reservationDateTime.isAfter(DateTime.now().add(const Duration(hours: 24)));
+    final reservationDateTime = DateTime(
+      r.date.year,
+      r.date.month,
+      r.date.day,
+      hour,
+      minute,
+    );
+    return reservationDateTime.isAfter(
+      DateTime.now().add(const Duration(hours: 24)),
+    );
   }
 
-  Future<void> _showCancelSpaDialog(BuildContext context, SpaReservation reservation) async {
+  Future<void> _showCancelSpaDialog(
+    BuildContext context,
+    SpaReservation reservation,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
-        title: Text(l10n.cancel, style: const TextStyle(color: AppTheme.accentGold)),
+        title: Text(
+          l10n.cancel,
+          style: const TextStyle(color: AppTheme.accentGold),
+        ),
         content: Text(
           l10n.cancelReservationConfirm,
           style: const TextStyle(color: Colors.white),
@@ -307,7 +325,10 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -321,13 +342,19 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
       await context.read<SpaProvider>().cancelSpaReservation(reservation.id);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.reservationCancelledMessage), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(l10n.reservationCancelledMessage),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorPrefix}$e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('${l10n.errorPrefix}$e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -341,10 +368,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
       decoration: BoxDecoration(
         color: statusColors['bg'],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColors['border']!,
-          width: 1,
-        ),
+        border: Border.all(color: statusColors['border']!, width: 1),
       ),
       child: Text(
         _getStatusLabel(context, status),

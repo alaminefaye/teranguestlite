@@ -99,9 +99,10 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
             child: Text(
               _excursion?.name ?? 'Excursion',
               style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -109,7 +110,10 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
           if (_excursion != null)
             Consumer<FavoritesProvider>(
               builder: (context, fav, _) {
-                final isFav = fav.isFavorite(FavoriteType.excursion, _excursion!.id);
+                final isFav = fav.isFavorite(
+                  FavoriteType.excursion,
+                  _excursion!.id,
+                );
                 return IconButton(
                   icon: Icon(
                     isFav ? Icons.favorite : Icons.favorite_border,
@@ -117,12 +121,14 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                   ),
                   onPressed: () {
                     HapticHelper.lightImpact();
-                    fav.toggle(FavoriteItem(
-                      type: FavoriteType.excursion,
-                      id: _excursion!.id,
-                      name: _excursion!.name,
-                      imageUrl: _excursion!.image,
-                    ));
+                    fav.toggle(
+                      FavoriteItem(
+                        type: FavoriteType.excursion,
+                        id: _excursion!.id,
+                        name: _excursion!.name,
+                        imageUrl: _excursion!.image,
+                      ),
+                    );
                   },
                 );
               },
@@ -135,8 +141,10 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
   Widget _buildContent() {
     if (_isLoading) {
       return const Center(
-          child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+        ),
+      );
     }
 
     if (_errorMessage != null) {
@@ -173,14 +181,22 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                       height: 300,
                       color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                       child: const Center(
-                        child: Icon(Icons.landscape, size: 80, color: AppTheme.accentGold),
+                        child: Icon(
+                          Icons.landscape,
+                          size: 80,
+                          color: AppTheme.accentGold,
+                        ),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       height: 300,
                       color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                       child: const Center(
-                        child: Icon(Icons.landscape, size: 80, color: AppTheme.accentGold),
+                        child: Icon(
+                          Icons.landscape,
+                          size: 80,
+                          color: AppTheme.accentGold,
+                        ),
                       ),
                     ),
                   )
@@ -188,7 +204,11 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                     height: 300,
                     color: AppTheme.primaryBlue.withValues(alpha: 0.3),
                     child: const Center(
-                      child: Icon(Icons.landscape, size: 80, color: AppTheme.accentGold),
+                      child: Icon(
+                        Icons.landscape,
+                        size: 80,
+                        color: AppTheme.accentGold,
+                      ),
                     ),
                   ),
           ),
@@ -196,8 +216,9 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient:
-                  LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+              gradient: LinearGradient(
+                colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+              ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.accentGold, width: 1.5),
             ),
@@ -209,27 +230,44 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.access_time,
-                            size: 20, color: AppTheme.accentGold),
+                        const Icon(
+                          Icons.access_time,
+                          size: 20,
+                          color: AppTheme.accentGold,
+                        ),
                         const SizedBox(width: 8),
-                        Text(_excursion!.formattedDuration,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
+                        Text(
+                          _excursion!.formattedDuration,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(AppLocalizations.of(context).adultPrice(_excursion!.formattedPriceAdult),
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.accentGold)),
-                        Text(AppLocalizations.of(context).childPrice(_excursion!.formattedPriceChild),
-                            style: const TextStyle(
-                                fontSize: 14, color: AppTheme.textGray)),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).adultPrice(_excursion!.formattedPriceAdult),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
+                        ),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).childPrice(_excursion!.formattedPriceChild),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.textGray,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -238,35 +276,53 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                   const SizedBox(height: 16),
                   const Divider(color: AppTheme.textGray, height: 1),
                   const SizedBox(height: 16),
-                  Text(_excursion!.description!,
-                      style: const TextStyle(
-                          fontSize: 14, color: Colors.white, height: 1.5)),
+                  Text(
+                    _excursion!.description!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      height: 1.5,
+                    ),
+                  ),
                 ],
                 if (_excursion!.inclusions != null &&
                     _excursion!.inclusions!.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Divider(color: AppTheme.textGray, height: 1),
                   const SizedBox(height: 16),
-                  Text(AppLocalizations.of(context).included,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold)),
+                  Text(
+                    AppLocalizations.of(context).included,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGold,
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  ...(_excursion!.inclusions!.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_circle,
-                                size: 16, color: AppTheme.accentGold),
-                            const SizedBox(width: 8),
-                            Expanded(
-                                child: Text(item,
-                                    style: const TextStyle(
-                                        fontSize: 14, color: Colors.white))),
-                          ],
-                        ),
-                      ))),
+                  ...(_excursion!.inclusions!.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: AppTheme.accentGold,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              item,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
                 ],
               ],
             ),
@@ -277,9 +333,9 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
             onPressed: _excursion!.isAvailable
                 ? () {
                     HapticHelper.confirm();
-                    context.navigateTo(BookExcursionScreen(
-                      excursion: _excursion!,
-                    ));
+                    context.navigateTo(
+                      BookExcursionScreen(excursion: _excursion!),
+                    );
                   }
                 : null,
             width: double.infinity,

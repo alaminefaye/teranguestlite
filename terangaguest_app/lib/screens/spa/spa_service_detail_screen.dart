@@ -17,10 +17,7 @@ import 'reserve_spa_screen.dart';
 class SpaServiceDetailScreen extends StatefulWidget {
   final int serviceId;
 
-  const SpaServiceDetailScreen({
-    super.key,
-    required this.serviceId,
-  });
+  const SpaServiceDetailScreen({super.key, required this.serviceId});
 
   @override
   State<SpaServiceDetailScreen> createState() => _SpaServiceDetailScreenState();
@@ -47,9 +44,9 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
     });
 
     try {
-      final service = await context
-          .read<SpaProvider>()
-          .fetchSpaServiceDetail(widget.serviceId);
+      final service = await context.read<SpaProvider>().fetchSpaServiceDetail(
+        widget.serviceId,
+      );
       setState(() {
         _service = service;
         _isLoading = false;
@@ -77,9 +74,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -136,12 +131,14 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
                   ),
                   onPressed: () {
                     HapticHelper.lightImpact();
-                    fav.toggle(FavoriteItem(
-                      type: FavoriteType.spa,
-                      id: _service!.id,
-                      name: _service!.name,
-                      imageUrl: _service!.image,
-                    ));
+                    fav.toggle(
+                      FavoriteItem(
+                        type: FavoriteType.spa,
+                        id: _service!.id,
+                        name: _service!.name,
+                        imageUrl: _service!.image,
+                      ),
+                    );
                   },
                 );
               },
@@ -214,11 +211,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
       width: double.infinity,
       color: AppTheme.primaryBlue.withValues(alpha: 0.3),
       child: const Center(
-        child: Icon(
-          Icons.spa,
-          size: 80,
-          color: AppTheme.accentGold,
-        ),
+        child: Icon(Icons.spa, size: 80, color: AppTheme.accentGold),
       ),
     );
   }
@@ -241,8 +234,11 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.access_time,
-                      size: 20, color: AppTheme.accentGold),
+                  const Icon(
+                    Icons.access_time,
+                    size: 20,
+                    color: AppTheme.accentGold,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     _service!.formattedDuration,
@@ -288,9 +284,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
       onPressed: _service!.isAvailable
           ? () {
               HapticHelper.confirm();
-              context.navigateTo(ReserveSpaScreen(
-                service: _service!,
-              ));
+              context.navigateTo(ReserveSpaScreen(service: _service!));
             }
           : null,
       width: double.infinity,

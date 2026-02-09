@@ -15,8 +15,7 @@ class MyExcursionBookingsScreen extends StatefulWidget {
       _MyExcursionBookingsScreenState();
 }
 
-class _MyExcursionBookingsScreenState
-    extends State<MyExcursionBookingsScreen> {
+class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
   @override
   void initState() {
     super.initState();
@@ -44,8 +43,10 @@ class _MyExcursionBookingsScreenState
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -57,15 +58,18 @@ class _MyExcursionBookingsScreenState
                           Text(
                             AppLocalizations.of(context).myExcursionsShort,
                             style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).reservationsConfirmed,
                             style: const TextStyle(
-                                fontSize: 13, color: AppTheme.textGray),
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -86,9 +90,10 @@ class _MyExcursionBookingsScreenState
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
         }
 
         if (provider.bookings.isEmpty) {
@@ -106,7 +111,9 @@ class _MyExcursionBookingsScreenState
           child: Padding(
             padding: LayoutHelper.horizontalPadding(context),
             child: GridView.builder(
-              padding: EdgeInsets.symmetric(vertical: LayoutHelper.gridSpacing(context)),
+              padding: EdgeInsets.symmetric(
+                vertical: LayoutHelper.gridSpacing(context),
+              ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
                 childAspectRatio: LayoutHelper.listCellAspectRatio(context),
@@ -130,8 +137,10 @@ class _MyExcursionBookingsScreenState
                         colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
                       ),
                       borderRadius: BorderRadius.circular(16),
-                      border:
-                          Border.all(color: AppTheme.accentGold, width: 1.5),
+                      border: Border.all(
+                        color: AppTheme.accentGold,
+                        width: 1.5,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.4),
@@ -156,13 +165,16 @@ class _MyExcursionBookingsScreenState
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(booking.excursionName,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.accentGold),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                booking.excursionName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.accentGold,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               const SizedBox(height: 8),
                               _buildStatusBadge(context, booking.status),
                             ],
@@ -172,16 +184,22 @@ class _MyExcursionBookingsScreenState
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today,
-                                      size: 14, color: AppTheme.textGray),
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    size: 14,
+                                    color: AppTheme.textGray,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      DateFormat('dd/MM/yyyy', 'fr_FR')
-                                          .format(booking.date),
+                                      DateFormat(
+                                        'dd/MM/yyyy',
+                                        'fr_FR',
+                                      ).format(booking.date),
                                       style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textGray),
+                                        fontSize: 12,
+                                        color: AppTheme.textGray,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -189,22 +207,30 @@ class _MyExcursionBookingsScreenState
                               const SizedBox(height: 6),
                               Row(
                                 children: [
-                                  const Icon(Icons.people,
-                                      size: 14, color: AppTheme.textGray),
+                                  const Icon(
+                                    Icons.people,
+                                    size: 14,
+                                    color: AppTheme.textGray,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     '${booking.totalParticipants} ${AppLocalizations.of(context).personsShort}',
                                     style: const TextStyle(
-                                        fontSize: 12, color: AppTheme.textGray),
+                                      fontSize: 12,
+                                      color: AppTheme.textGray,
+                                    ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 6),
-                              Text(booking.formattedTotalPrice,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.accentGold)),
+                              Text(
+                                booking.formattedTotalPrice,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.accentGold,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -230,11 +256,14 @@ class _MyExcursionBookingsScreenState
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColors['border']!, width: 1),
       ),
-      child: Text(_getStatusLabel(context, status),
-          style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: statusColors['text'])),
+      child: Text(
+        _getStatusLabel(context, status),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: statusColors['text'],
+        ),
+      ),
     );
   }
 

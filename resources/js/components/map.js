@@ -17,7 +17,7 @@ export const initMap = () => {
                 },
                 hover: {
                     fillOpacity: 1,
-                    fill: "#465fff",
+                    fill: "#D4AF37",
                 },
             },
             markers: [
@@ -38,12 +38,12 @@ export const initMap = () => {
             markerStyle: {
                 initial: {
                     strokeWidth: 1,
-                    fill: "#465fff",
+                    fill: "#D4AF37",
                     fillOpacity: 1,
                     r: 4,
                 },
                 hover: {
-                    fill: "#465fff",
+                    fill: "#D4AF37",
                     fillOpacity: 1,
                 },
                 selected: {},

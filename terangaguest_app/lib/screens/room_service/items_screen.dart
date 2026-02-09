@@ -16,10 +16,7 @@ import 'item_detail_screen.dart';
 class ItemsScreen extends StatefulWidget {
   final MenuCategory category;
 
-  const ItemsScreen({
-    super.key,
-    required this.category,
-  });
+  const ItemsScreen({super.key, required this.category});
 
   @override
   State<ItemsScreen> createState() => _ItemsScreenState();
@@ -28,7 +25,7 @@ class ItemsScreen extends StatefulWidget {
 class _ItemsScreenState extends State<ItemsScreen> {
   final RoomServiceApi _roomServiceApi = RoomServiceApi();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<MenuItem> _items = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -124,9 +121,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
               _buildSearchBar(),
 
               // Liste des articles
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -189,16 +184,16 @@ class _ItemsScreenState extends State<ItemsScreen> {
         decoration: BoxDecoration(
           color: AppTheme.primaryBlue.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppTheme.accentGold.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
         ),
         child: TextField(
           controller: _searchController,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context).search,
-            hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+            hintStyle: TextStyle(
+              color: AppTheme.textGray.withValues(alpha: 0.6),
+            ),
             prefixIcon: const Icon(Icons.search, color: AppTheme.accentGold),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -281,7 +276,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
               if (index == _items.length) {
                 return const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
                   ),
                 );
               }

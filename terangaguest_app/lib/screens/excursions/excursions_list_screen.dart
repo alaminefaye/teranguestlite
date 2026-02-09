@@ -71,14 +71,18 @@ class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
                 Text(
                   AppLocalizations.of(context).excursionsTitle,
                   style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   AppLocalizations.of(context).discoverRegion,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
                 ),
               ],
             ),
@@ -93,9 +97,10 @@ class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.accentGold)));
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          );
         }
 
         if (provider.errorMessage != null) {
@@ -142,9 +147,9 @@ class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
                     excursion: excursion,
                     onTap: () {
                       HapticHelper.lightImpact();
-                      context.navigateTo(ExcursionDetailScreen(
-                        excursionId: excursion.id,
-                      ));
+                      context.navigateTo(
+                        ExcursionDetailScreen(excursionId: excursion.id),
+                      );
                     },
                   );
                 },

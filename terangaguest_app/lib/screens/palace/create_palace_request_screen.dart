@@ -42,7 +42,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
   // Location
   final TextEditingController _rentalDaysController = TextEditingController();
-  final TextEditingController _rentalDurationController = TextEditingController();
+  final TextEditingController _rentalDurationController =
+      TextEditingController();
   final VehicleApi _vehicleApi = VehicleApi();
   List<Vehicle> _vehicles = [];
   bool _loadingVehicles = false;
@@ -87,9 +88,17 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         vehicleType: _filterVehicleType,
         minSeats: _filterMinSeats,
       );
-      if (mounted) setState(() { _vehicles = list; _loadingVehicles = false; });
+      if (mounted)
+        setState(() {
+          _vehicles = list;
+          _loadingVehicles = false;
+        });
     } catch (_) {
-      if (mounted) setState(() { _vehicles = []; _loadingVehicles = false; });
+      if (mounted)
+        setState(() {
+          _vehicles = [];
+          _loadingVehicles = false;
+        });
     }
   }
 
@@ -114,7 +123,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         setState(() {
           _pickupLat = pos.latitude;
           _pickupLng = pos.longitude;
-          _pickupController.text = 'Position actuelle (${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)})';
+          _pickupController.text =
+              'Position actuelle (${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)})';
           _loadingLocation = false;
         });
       }
@@ -137,18 +147,22 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-            colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Type de demande',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            'Type de demande',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -178,8 +192,11 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     );
   }
 
-  Widget _vehicleChip(
-      {required String label, required bool selected, required VoidCallback onTap}) {
+  Widget _vehicleChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -191,13 +208,19 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               : AppTheme.primaryBlue.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: selected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3)),
+            color: selected
+                ? AppTheme.accentGold
+                : AppTheme.accentGold.withValues(alpha: 0.3),
+          ),
         ),
         child: Center(
-          child: Text(label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: selected ? AppTheme.accentGold : AppTheme.textGray)),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: selected ? AppTheme.accentGold : AppTheme.textGray,
+            ),
+          ),
         ),
       ),
     );
@@ -208,18 +231,22 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-            colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Prise en charge',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            'Prise en charge',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -231,14 +258,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                   decoration: InputDecoration(
                     hintText: 'Adresse ou position',
                     hintStyle: TextStyle(
-                        color: AppTheme.textGray.withValues(alpha: 0.6),
-                        fontSize: 14),
+                      color: AppTheme.textGray.withValues(alpha: 0.6),
+                      fontSize: 14,
+                    ),
                     filled: true,
                     fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                          color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                        color: AppTheme.accentGold.withValues(alpha: 0.3),
+                      ),
                     ),
                   ),
                 ),
@@ -253,48 +282,65 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(AppTheme.accentGold)),
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppTheme.accentGold,
+                            ),
+                          ),
                         )
-                      : const Icon(Icons.my_location, color: AppTheme.accentGold),
-                  label: Text('Ma position',
-                      style: TextStyle(
+                      : const Icon(
+                          Icons.my_location,
                           color: AppTheme.accentGold,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600)),
+                        ),
+                  label: Text(
+                    'Ma position',
+                    style: TextStyle(
+                      color: AppTheme.accentGold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text('Destination',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            'Destination',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _destinationController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Adresse de destination',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                    color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Text('Distance (km, optionnel)',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            'Distance (km, optionnel)',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _distanceController,
@@ -302,13 +348,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Ex: 5.2',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                    color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
             ),
           ),
@@ -331,18 +380,22 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-            colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Choisir un véhicule',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            'Choisir un véhicule',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -352,13 +405,29 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                     value: _filterVehicleType ?? '',
                     isExpanded: true,
                     dropdownColor: AppTheme.primaryBlue,
-                    hint: Text('Type', style: TextStyle(color: AppTheme.textGray, fontSize: 14)),
+                    hint: Text(
+                      'Type',
+                      style: TextStyle(color: AppTheme.textGray, fontSize: 14),
+                    ),
                     items: _vehicleTypeFilters
-                        .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value, style: const TextStyle(color: Colors.white, fontSize: 13))))
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.key,
+                            child: Text(
+                              e.value,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setState(() {
-                        _filterVehicleType = (v != null && v.isNotEmpty) ? v : null;
+                        _filterVehicleType = (v != null && v.isNotEmpty)
+                            ? v
+                            : null;
                         _loadVehicles();
                       });
                     },
@@ -372,10 +441,30 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                     value: _filterMinSeats,
                     isExpanded: true,
                     dropdownColor: AppTheme.primaryBlue,
-                    hint: Text('Places min.', style: TextStyle(color: AppTheme.textGray, fontSize: 14)),
+                    hint: Text(
+                      'Places min.',
+                      style: TextStyle(color: AppTheme.textGray, fontSize: 14),
+                    ),
                     items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('Toutes', style: TextStyle(color: Colors.white, fontSize: 13))),
-                      ...List.generate(20, (i) => i + 1).map((s) => DropdownMenuItem<int?>(value: s, child: Text('$s place(s)', style: const TextStyle(color: Colors.white, fontSize: 13)))),
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text(
+                          'Toutes',
+                          style: TextStyle(color: Colors.white, fontSize: 13),
+                        ),
+                      ),
+                      ...List.generate(20, (i) => i + 1).map(
+                        (s) => DropdownMenuItem<int?>(
+                          value: s,
+                          child: Text(
+                            '$s place(s)',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                     onChanged: (v) {
                       setState(() {
@@ -390,11 +479,23 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           ),
           const SizedBox(height: 12),
           if (_loadingVehicles)
-            const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold))))
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppTheme.accentGold,
+                  ),
+                ),
+              ),
+            )
           else if (_vehicles.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text('Aucun véhicule pour ces critères.', style: TextStyle(color: AppTheme.textGray, fontSize: 13)),
+              child: Text(
+                'Aucun véhicule pour ces critères.',
+                style: TextStyle(color: AppTheme.textGray, fontSize: 13),
+              ),
             )
           else
             SizedBox(
@@ -414,9 +515,15 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                         width: 120,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: selected ? AppTheme.accentGold.withValues(alpha: 0.2) : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                          color: selected
+                              ? AppTheme.accentGold.withValues(alpha: 0.2)
+                              : AppTheme.primaryBlue.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: selected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: selected
+                                ? AppTheme.accentGold
+                                : AppTheme.accentGold.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -430,33 +537,81 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                                       height: 52,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return const SizedBox(
-                                          height: 52,
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stackTrace) => const SizedBox(
-                                        height: 52,
-                                        child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 28)),
-                                      ),
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const SizedBox(
+                                              height: 52,
+                                              child: Center(
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(AppTheme.accentGold),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const SizedBox(
+                                                height: 52,
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.directions_car,
+                                                    color: AppTheme.textGray,
+                                                    size: 28,
+                                                  ),
+                                                ),
+                                              ),
                                     )
-                                  : const SizedBox(height: 52, child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 28))),
+                                  : const SizedBox(
+                                      height: 52,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.directions_car,
+                                          color: AppTheme.textGray,
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
                             ),
                             const SizedBox(height: 6),
-                            Text(v.name, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                            Text(
+                              v.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             const SizedBox(height: 2),
-                            Text('${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.', style: TextStyle(color: AppTheme.textGray, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(
+                              '${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.',
+                              style: TextStyle(
+                                color: AppTheme.textGray,
+                                fontSize: 10,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             if (v.pricePerDay != null || v.priceHalfDay != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(v.displayPricePerDay, style: TextStyle(color: AppTheme.accentGold, fontSize: 10, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                child: Text(
+                                  v.displayPricePerDay,
+                                  style: TextStyle(
+                                    color: AppTheme.accentGold,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                           ],
                         ),
@@ -492,7 +647,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   Widget _buildRentalPriceEstimate() {
     final days = int.tryParse(_rentalDaysController.text.trim());
     final hours = int.tryParse(_rentalDurationController.text.trim());
-    final estimate = _selectedVehicle?.estimatePrice(rentalDays: days, rentalDurationHours: hours);
+    final estimate = _selectedVehicle?.estimatePrice(
+      rentalDays: days,
+      rentalDurationHours: hours,
+    );
     if (estimate == null) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -507,7 +665,11 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           const SizedBox(width: 10),
           Text(
             'Estimation : ${estimate.toInt()} FCFA',
-            style: TextStyle(color: AppTheme.accentGold, fontSize: 14, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -523,11 +685,14 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.accentGold)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.accentGold,
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
@@ -535,13 +700,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+            hintStyle: TextStyle(
+              color: AppTheme.textGray.withValues(alpha: 0.6),
+            ),
             filled: true,
             fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                  color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                color: AppTheme.accentGold.withValues(alpha: 0.3),
+              ),
             ),
           ),
         ),
@@ -568,8 +736,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -577,17 +747,24 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(AppLocalizations.of(context).demand,
-                              style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          Text(
+                            AppLocalizations.of(context).demand,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          Text(widget.service.name,
-                              style: const TextStyle(
-                                  fontSize: 13, color: AppTheme.textGray),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
+                          Text(
+                            widget.service.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),
@@ -596,8 +773,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     children: [
                       _buildCanReserveBanner(),
@@ -607,7 +786,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                         if (_vehicleType == VehicleRequestType.taxi) ...[
                           _buildTaxiFields(),
                           const SizedBox(height: 24),
-                        ] else if (_vehicleType == VehicleRequestType.rental) ...[
+                        ] else if (_vehicleType ==
+                            VehicleRequestType.rental) ...[
                           _buildRentalFields(),
                           const SizedBox(height: 24),
                         ],
@@ -632,19 +812,23 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).requestDetails,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).requestDetails,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: _detailsController,
@@ -652,18 +836,22 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             maxLines: 4,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).describeRequest,
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -680,19 +868,23 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).preferredTimeOptional,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).preferredTimeOptional,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           InkWell(
             onTap: () async {
@@ -753,16 +945,19 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.primaryBlue.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _scheduledTime != null
-                        ? DateFormat('dd/MM/yyyy HH:mm', 'fr_FR')
-                            .format(_scheduledTime!)
+                        ? DateFormat(
+                            'dd/MM/yyyy HH:mm',
+                            'fr_FR',
+                          ).format(_scheduledTime!)
                         : AppLocalizations.of(context).selectDateAndTime,
                     style: TextStyle(
                       fontSize: 15,
@@ -771,8 +966,11 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           : AppTheme.textGray,
                     ),
                   ),
-                  const Icon(Icons.schedule,
-                      color: AppTheme.accentGold, size: 20),
+                  const Icon(
+                    Icons.schedule,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
                 ],
               ),
             ),
@@ -814,14 +1012,20 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.8),
+              ),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+                size: 22,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -907,7 +1111,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         barrierDismissible: false,
         builder: (context) => const Center(
           child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold)),
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
         ),
       );
 
@@ -915,11 +1120,12 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
       final clientCode = _clientCodeController.text.trim();
       await context.read<PalaceProvider>().createPalaceRequest(
-          serviceId: widget.service.id,
-          details: description,
-          scheduledTime: _scheduledTime,
-          metadata: metadata,
-          clientCode: clientCode.isNotEmpty ? clientCode : null);
+        serviceId: widget.service.id,
+        details: description,
+        scheduledTime: _scheduledTime,
+        metadata: metadata,
+        clientCode: clientCode.isNotEmpty ? clientCode : null,
+      );
 
       if (mounted) Navigator.pop(context);
 
@@ -936,8 +1142,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 32),
                 const SizedBox(width: 12),
-                Text(AppLocalizations.of(context).requestSent,
-                    style: const TextStyle(color: Colors.white, fontSize: 18)),
+                Text(
+                  AppLocalizations.of(context).requestSent,
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
               ],
             ),
             content: Text(
@@ -951,10 +1159,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
-                child: Text(AppLocalizations.of(context).ok,
-                    style: TextStyle(
-                        color: AppTheme.accentGold,
-                        fontWeight: FontWeight.bold)),
+                child: Text(
+                  AppLocalizations.of(context).ok,
+                  style: TextStyle(
+                    color: AppTheme.accentGold,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -967,7 +1178,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
+            content: Text(
+              '${AppLocalizations.of(context).errorPrefix}$message',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

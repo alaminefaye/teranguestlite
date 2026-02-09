@@ -17,10 +17,7 @@ import 'reserve_restaurant_screen.dart';
 class RestaurantDetailScreen extends StatefulWidget {
   final int restaurantId;
 
-  const RestaurantDetailScreen({
-    super.key,
-    required this.restaurantId,
-  });
+  const RestaurantDetailScreen({super.key, required this.restaurantId});
 
   @override
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
@@ -77,9 +74,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -128,7 +123,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           if (_restaurant != null)
             Consumer<FavoritesProvider>(
               builder: (context, fav, _) {
-                final isFav = fav.isFavorite(FavoriteType.restaurant, _restaurant!.id);
+                final isFav = fav.isFavorite(
+                  FavoriteType.restaurant,
+                  _restaurant!.id,
+                );
                 return IconButton(
                   icon: Icon(
                     isFav ? Icons.favorite : Icons.favorite_border,
@@ -136,12 +134,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   ),
                   onPressed: () {
                     HapticHelper.lightImpact();
-                    fav.toggle(FavoriteItem(
-                      type: FavoriteType.restaurant,
-                      id: _restaurant!.id,
-                      name: _restaurant!.name,
-                      imageUrl: _restaurant!.image,
-                    ));
+                    fav.toggle(
+                      FavoriteItem(
+                        type: FavoriteType.restaurant,
+                        id: _restaurant!.id,
+                        name: _restaurant!.name,
+                        imageUrl: _restaurant!.image,
+                      ),
+                    );
                   },
                 );
               },
@@ -199,7 +199,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ],
 
           // Commodités
-          if (_restaurant!.amenities != null && _restaurant!.amenities!.isNotEmpty) ...[
+          if (_restaurant!.amenities != null &&
+              _restaurant!.amenities!.isNotEmpty) ...[
             _buildAmenities(),
             const SizedBox(height: 30),
           ],
@@ -233,11 +234,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       width: double.infinity,
       color: AppTheme.primaryBlue.withValues(alpha: 0.3),
       child: const Center(
-        child: Icon(
-          Icons.restaurant,
-          size: 80,
-          color: AppTheme.accentGold,
-        ),
+        child: Icon(Icons.restaurant, size: 80, color: AppTheme.accentGold),
       ),
     );
   }
@@ -260,7 +257,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             Row(
               children: [
                 if (_restaurant!.type != null) ...[
-                  const Icon(Icons.category, size: 16, color: AppTheme.accentGold),
+                  const Icon(
+                    Icons.category,
+                    size: 16,
+                    color: AppTheme.accentGold,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     _restaurant!.type!,
@@ -273,10 +274,17 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 if (_restaurant!.type != null && _restaurant!.cuisine != null)
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('•', style: TextStyle(color: AppTheme.textGray)),
+                    child: Text(
+                      '•',
+                      style: TextStyle(color: AppTheme.textGray),
+                    ),
                   ),
                 if (_restaurant!.cuisine != null) ...[
-                  const Icon(Icons.restaurant_menu, size: 16, color: AppTheme.accentGold),
+                  const Icon(
+                    Icons.restaurant_menu,
+                    size: 16,
+                    color: AppTheme.accentGold,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     _restaurant!.cuisine!,
@@ -406,7 +414,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             runSpacing: 10,
             children: _restaurant!.amenities!.map((amenity) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.accentGold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -425,10 +436,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     const SizedBox(width: 6),
                     Text(
                       amenity,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ],
                 ),
@@ -447,9 +455,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       onPressed: _restaurant!.isOpen
           ? () {
               HapticHelper.confirm();
-              context.navigateTo(ReserveRestaurantScreen(
-                restaurant: _restaurant!,
-              ));
+              context.navigateTo(
+                ReserveRestaurantScreen(restaurant: _restaurant!),
+              );
             }
           : null,
       width: double.infinity,

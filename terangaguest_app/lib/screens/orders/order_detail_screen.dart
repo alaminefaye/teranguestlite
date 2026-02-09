@@ -12,10 +12,7 @@ import '../../widgets/animated_button.dart';
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
 
-  const OrderDetailScreen({
-    super.key,
-    required this.orderId,
-  });
+  const OrderDetailScreen({super.key, required this.orderId});
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -89,12 +86,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     });
 
     try {
-      final order = await context.read<OrdersProvider>().fetchOrderDetail(widget.orderId);
+      final order = await context.read<OrdersProvider>().fetchOrderDetail(
+        widget.orderId,
+      );
       setState(() {
         _order = order;
         _isLoading = false;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) => _startEntranceAnimations());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _startEntranceAnimations(),
+      );
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -121,9 +122,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               _buildHeader(),
 
               // Contenu
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),
@@ -218,7 +217,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                     scale: Tween<double>(begin: 0.96, end: 1.0).animate(
                       CurvedAnimation(
                         parent: _entranceController,
-                        curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic),
+                        curve: const Interval(
+                          0.0,
+                          0.25,
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
                     ),
                     child: _buildOrderHeader(),
@@ -303,11 +306,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                DateFormat('dd/MM/yyyy à HH:mm', 'fr_FR').format(_order!.createdAt),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppTheme.textGray,
-                ),
+                DateFormat(
+                  'dd/MM/yyyy à HH:mm',
+                  'fr_FR',
+                ).format(_order!.createdAt),
+                style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
               ),
             ],
           ),
@@ -329,12 +332,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   Widget _buildTimeline() {
     final l10n = AppLocalizations.of(context);
     final statuses = [
-      {'key': 'pending', 'label': l10n.statusPending, 'icon': Icons.access_time},
-      {'key': 'confirmed', 'label': l10n.statusConfirmed, 'icon': Icons.check_circle},
-      {'key': 'preparing', 'label': l10n.statusPreparing, 'icon': Icons.restaurant},
-      {'key': 'ready', 'label': l10n.statusReady, 'icon': Icons.breakfast_dining},
-      {'key': 'delivering', 'label': l10n.statusDelivering, 'icon': Icons.delivery_dining},
-      {'key': 'delivered', 'label': l10n.statusDelivered, 'icon': Icons.done_all},
+      {
+        'key': 'pending',
+        'label': l10n.statusPending,
+        'icon': Icons.access_time,
+      },
+      {
+        'key': 'confirmed',
+        'label': l10n.statusConfirmed,
+        'icon': Icons.check_circle,
+      },
+      {
+        'key': 'preparing',
+        'label': l10n.statusPreparing,
+        'icon': Icons.restaurant,
+      },
+      {
+        'key': 'ready',
+        'label': l10n.statusReady,
+        'icon': Icons.breakfast_dining,
+      },
+      {
+        'key': 'delivering',
+        'label': l10n.statusDelivering,
+        'icon': Icons.delivery_dining,
+      },
+      {
+        'key': 'delivered',
+        'label': l10n.statusDelivered,
+        'icon': Icons.done_all,
+      },
     ];
 
     int currentIndex = statuses.indexWhere((s) => s['key'] == _order!.status);
@@ -383,10 +410,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                           final scale = isCurrent
                               ? 1.0 + 0.06 * _pulseController.value
                               : 1.0;
-                          return Transform.scale(
-                            scale: scale,
-                            child: child,
-                          );
+                          return Transform.scale(scale: scale, child: child);
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 400),
@@ -405,7 +429,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                             boxShadow: isCompleted
                                 ? [
                                     BoxShadow(
-                                      color: AppTheme.accentGold.withValues(alpha: 0.4),
+                                      color: AppTheme.accentGold.withValues(
+                                        alpha: 0.4,
+                                      ),
                                       blurRadius: isCurrent ? 12 : 6,
                                       spreadRadius: isCurrent ? 1 : 0,
                                     ),
@@ -427,8 +453,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                           duration: const Duration(milliseconds: 300),
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
-                            color: isCompleted ? Colors.white : AppTheme.textGray,
+                            fontWeight: isCompleted
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isCompleted
+                                ? Colors.white
+                                : AppTheme.textGray,
                           ),
                           child: Text(status['label'] as String),
                         ),
@@ -559,7 +589,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       ),
       child: Column(
         children: [
-          if (_order!.instructions != null && _order!.instructions!.isNotEmpty) ...[
+          if (_order!.instructions != null &&
+              _order!.instructions!.isNotEmpty) ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -674,10 +705,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       decoration: BoxDecoration(
         color: statusColors['bg'],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColors['border']!,
-          width: 1,
-        ),
+        border: Border.all(color: statusColors['border']!, width: 1),
       ),
       child: Text(
         _order!.statusLabel,
@@ -749,9 +777,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Annuler la commande'),
-        content: const Text(
-          'Voulez-vous vraiment annuler cette commande ?',
-        ),
+        content: const Text('Voulez-vous vraiment annuler cette commande ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

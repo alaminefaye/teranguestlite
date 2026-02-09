@@ -35,7 +35,7 @@ class AppTheme {
         secondary: accentGoldLight,
         surface: primaryBlue,
       ),
-      
+
       // Typographie
       textTheme: TextTheme(
         displayLarge: GoogleFonts.playfairDisplay(
@@ -58,16 +58,10 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: textWhite,
         ),
-        bodyLarge: GoogleFonts.montserrat(
-          fontSize: 16,
-          color: textGray,
-        ),
-        bodyMedium: GoogleFonts.montserrat(
-          fontSize: 14,
-          color: textGray,
-        ),
+        bodyLarge: GoogleFonts.montserrat(fontSize: 16, color: textGray),
+        bodyMedium: GoogleFonts.montserrat(fontSize: 14, color: textGray),
       ),
-      
+
       // App Bar
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
