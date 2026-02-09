@@ -102,11 +102,11 @@
 }
 
 .table-row-hover:hover {
-    background-color: rgba(59, 130, 246, 0.05);
+    background-color: rgba(212, 175, 55, 0.08);
 }
 
 .dark .table-row-hover:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(212, 175, 55, 0.12);
 }
 
 /* Input focus ring enhancement */
@@ -115,7 +115,7 @@ select:focus,
 textarea:focus {
     outline: none;
     ring-width: 3px;
-    ring-color: rgb(59 130 246 / 0.2);
+    ring-color: rgb(212 175 55 / 0.25);
     transition: ring-width 0.2s ease-in-out;
 }
 
@@ -248,7 +248,7 @@ html {
 
 /* Gradient text effect */
 .gradient-text {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #D4AF37 0%, #b8942e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

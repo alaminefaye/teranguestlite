@@ -48,47 +48,32 @@
   --color-white: #ffffff;
   --color-black: #101828;
 
-  /* Or / doré du logo #D4AF37 */
+  /* Or doré du logo TERANGUEST (#D4AF37) */
   --color-brand-25: #fdfbf5;
-  --color-brand-50: #fbf7eb;
-  --color-brand-100: #f5ecc8;
-  --color-brand-200: #ecd99a;
-  --color-brand-300: #e2c55f;
-  --color-brand-400: #d9b43d;
+  --color-brand-50: #faf6eb;
+  --color-brand-100: #f5edd6;
+  --color-brand-200: #ead9a8;
+  --color-brand-300: #e0c67a;
+  --color-brand-400: #d9b83d;
   --color-brand-500: #D4AF37;
   --color-brand-600: #b8942e;
-  --color-brand-700: #9a7a25;
+  --color-brand-700: #9c7a26;
   --color-brand-800: #7d611e;
-  --color-brand-900: #654e18;
+  --color-brand-900: #5c4816;
   --color-brand-950: #3d2f0e;
 
-  /* blue-light remplacé par or pour boutons/badges */
-  --color-blue-light-25: #fdfbf5;
-  --color-blue-light-50: #fbf7eb;
-  --color-blue-light-100: #f5ecc8;
-  --color-blue-light-200: #ecd99a;
-  --color-blue-light-300: #e2c55f;
-  --color-blue-light-400: #d9b43d;
-  --color-blue-light-500: #D4AF37;
-  --color-blue-light-600: #b8942e;
-  --color-blue-light-700: #9a7a25;
-  --color-blue-light-800: #7d611e;
-  --color-blue-light-900: #654e18;
-  --color-blue-light-950: #3d2f0e;
-
-  /* primary = or (boutons, cartes, liens) */
-  --color-primary-25: #fdfbf5;
-  --color-primary-50: #fbf7eb;
-  --color-primary-100: #f5ecc8;
-  --color-primary-200: #ecd99a;
-  --color-primary-300: #e2c55f;
-  --color-primary-400: #d9b43d;
-  --color-primary-500: #D4AF37;
-  --color-primary-600: #b8942e;
-  --color-primary-700: #9a7a25;
-  --color-primary-800: #7d611e;
-  --color-primary-900: #654e18;
-  --color-primary-950: #3d2f0e;
+  --color-blue-light-25: #f5fbff;
+  --color-blue-light-50: #f0f9ff;
+  --color-blue-light-100: #e0f2fe;
+  --color-blue-light-200: #b9e6fe;
+  --color-blue-light-300: #7cd4fd;
+  --color-blue-light-400: #36bffa;
+  --color-blue-light-500: #0ba5ec;
+  --color-blue-light-600: #0086c9;
+  --color-blue-light-700: #026aa2;
+  --color-blue-light-800: #065986;
+  --color-blue-light-900: #0b4a6f;
+  --color-blue-light-950: #062c41;
 
   --color-gray-25: #fcfcfd;
   --color-gray-50: #f9fafb;
