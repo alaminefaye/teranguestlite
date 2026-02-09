@@ -29,6 +29,18 @@ class FirebaseNotificationService
     }
 
     /**
+     * FCM exige que toutes les valeurs du payload "data" soient des chaînes.
+     */
+    private function ensureStringData(array $data): array
+    {
+        $out = [];
+        foreach ($data as $key => $value) {
+            $out[$key] = is_scalar($value) ? (string) $value : json_encode($value);
+        }
+        return $out;
+    }
+
+    /**
      * Envoyer une notification push au client (guest) : tous les appareils enregistrés pour ce guest
      * (tablette en chambre + app mobile si le client s'est connecté avec un compte lié à ce guest).
      */
@@ -50,7 +62,7 @@ class FirebaseNotificationService
         try {
             $message = CloudMessage::new()
                 ->withNotification(Notification::create($title, $body))
-                ->withData($data)
+                ->withData($this->ensureStringData($data))
                 ->withAndroidConfig(
                     AndroidConfig::fromArray([
                         'priority' => 'high',
@@ -91,10 +103,11 @@ class FirebaseNotificationService
             return false;
         }
 
+        $token = trim($user->fcm_token);
         try {
-            $message = CloudMessage::withTarget('token', $user->fcm_token)
+            $message = CloudMessage::withTarget('token', $token)
                 ->withNotification(Notification::create($title, $body))
-                ->withData($data)
+                ->withData($this->ensureStringData($data))
                 ->withAndroidConfig(
                     AndroidConfig::fromArray([
                         'priority' => 'high',
@@ -116,11 +129,13 @@ class FirebaseNotificationService
                 );
 
             $this->messaging->send($message);
-            
-            Log::info("Notification sent to user {$user->id}: {$title}");
+
+            Log::info("Notification sent to user {$user->id} (order status): {$title}");
             return true;
         } catch (\Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage());
+            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), [
+                'exception_class' => get_class($e),
+            ]);
             return false;
         }
     }
@@ -234,12 +249,26 @@ class FirebaseNotificationService
             'screen' => 'OrderDetails',
         ];
 
+        // Essayer d'abord par guest (tokens tablette + app enregistrés pour ce guest)
         if ($order->guest_id) {
-            return $this->sendToGuest($order->guest_id, $title, $body, $data);
+            $sent = $this->sendToGuest($order->guest_id, $title, $body, $data);
+            if ($sent) {
+                return true;
+            }
+            Log::info("Order status: no tokens for guest {$order->guest_id}, trying user fallback");
         }
-        if ($order->user_id && $order->user && $order->user->fcm_token) {
-            return $this->sendToUser($order->user, $title, $body, $data);
+
+        // Fallback : envoyer à l'utilisateur (user.fcm_token) si la commande a un user_id
+        if ($order->user_id && $order->user) {
+            $user = $order->user;
+            if (! empty(trim($user->fcm_token ?? ''))) {
+                return $this->sendToUser($user, $title, $body, $data);
+            }
+            Log::warning("Order status: user {$user->id} has no FCM token (order #{$order->order_number})");
+        } else {
+            Log::warning("Order status: order #{$order->order_number} has no guest_id and no user");
         }
+
         return false;
     }
 

@@ -41,9 +41,12 @@ class FcmTokenController extends Controller
         if ($stay !== null && $user->enterprise_id && isset($stay['guest_id'])) {
             try {
                 GuestFcmToken::register($user->enterprise_id, $stay['guest_id'], $token, 'mobile');
+                \Log::info("FCM: token registered for user {$user->id} and guest {$stay['guest_id']}");
             } catch (\Exception $e) {
                 \Log::warning('FCM: could not register token for guest: ' . $e->getMessage());
             }
+        } else {
+            \Log::info("FCM: user {$user->id} has no active stay, token stored on user only (guest_id not linked)");
         }
 
         return response()->json([
