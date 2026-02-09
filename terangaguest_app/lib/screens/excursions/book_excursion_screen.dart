@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/excursion.dart';
@@ -461,7 +462,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     );
   }
 
-  Future<void> _handleConfirmBooking() async {
+  Future<void> _handleConfirmBooking({bool isRetry = false}) async {
     if (_selectedDate == null) return;
 
     try {
@@ -575,16 +576,31 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     } catch (e) {
       if (mounted) Navigator.pop(context);
 
-      if (mounted) {
-        final message = e.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+      if (!mounted) return;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      final isInvalidCode = message.contains(ApiConstants.errorInvalidClientCode);
+
+      if (isInvalidCode && !isRetry) {
+        await context.read<TabletSessionProvider>().clearSession();
+        final newCode = await showGuestCodeDialog(context);
+        if (!mounted) return;
+        if (newCode != null) {
+          setState(() => _validatedClientCode = newCode);
+          await _handleConfirmBooking(isRetry: true);
+          return;
+        }
       }
+
+      final displayMessage = isInvalidCode && message.contains(':')
+          ? message.substring(message.indexOf(':') + 1).trim()
+          : message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppLocalizations.of(context).errorPrefix}$displayMessage'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 }

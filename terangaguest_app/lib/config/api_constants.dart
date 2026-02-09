@@ -64,4 +64,7 @@ class ApiConstants {
   static String palaceServiceDetail(int id) => '/palace-services/$id';
   static String palaceServiceRequest(int id) => '/palace-services/$id/request';
   static const String myPalaceRequests = '/my-palace-requests';
+
+  /// Préfixe d'exception quand le code client est invalide ou le séjour expiré (pour redemander le code).
+  static const String errorInvalidClientCode = 'INVALID_CLIENT_CODE';
 }

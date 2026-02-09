@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
@@ -543,7 +544,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
     );
   }
 
-  Future<void> _handleConfirmReservation() async {
+  Future<void> _handleConfirmReservation({bool isRetry = false}) async {
     if (_selectedDate == null || _selectedTime == null) return;
 
     try {
@@ -663,19 +664,33 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         );
       }
     } catch (e) {
-      // Fermer le loader
       if (mounted) Navigator.pop(context);
 
-      // Afficher erreur
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+      if (!mounted) return;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      final isInvalidCode = message.contains(ApiConstants.errorInvalidClientCode);
+
+      if (isInvalidCode && !isRetry) {
+        await context.read<TabletSessionProvider>().clearSession();
+        final newCode = await showGuestCodeDialog(context);
+        if (!mounted) return;
+        if (newCode != null) {
+          setState(() => _validatedClientCode = newCode);
+          await _handleConfirmReservation(isRetry: true);
+          return;
+        }
       }
+
+      final displayMessage = isInvalidCode && message.contains(':')
+          ? message.substring(message.indexOf(':') + 1).trim()
+          : message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppLocalizations.of(context).errorPrefix}$displayMessage'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 }

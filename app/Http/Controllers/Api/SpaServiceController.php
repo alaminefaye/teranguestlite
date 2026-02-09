@@ -122,6 +122,7 @@ class SpaServiceController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+                'error_code' => GuestReservationHelper::ERROR_CODE_INVALID_CLIENT,
             ], 403);
         }
 

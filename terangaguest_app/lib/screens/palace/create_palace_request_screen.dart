@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
 import '../../models/vehicle.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../services/vehicle_api.dart';
@@ -877,7 +877,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     return null;
   }
 
-  Future<void> _handleConfirmRequest() async {
+  Future<void> _handleConfirmRequest({bool isRetry = false}) async {
     final detailsText = _detailsController.text.trim();
     final hasDetails = detailsText.isNotEmpty;
     if (_isVehicleService && _vehicleType == null && !hasDetails) {
@@ -953,16 +953,25 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     } catch (e) {
       if (mounted) Navigator.pop(context);
 
-      if (mounted) {
-        final message = e.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+      if (!mounted) return;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      final isInvalidCode = message.contains(ApiConstants.errorInvalidClientCode);
+
+      if (isInvalidCode && !isRetry) {
+        await context.read<TabletSessionProvider>().clearSession();
+        final newCode = await showGuestCodeDialog(context);
+        if (!mounted) return;
+        if (newCode != null) {
+          setState(() => _validatedClientCode = newCode);
+          await _handleConfirmRequest(isRetry: true);
+          return;
+        }
       }
+
+      final displayMessage = isInvalidCode && message.contains(':')
+          ? message.substring(message.indexOf(':') + 1).trim()
+          : message;
+      _showSnack(displayMessage);
     }
   }
 }
