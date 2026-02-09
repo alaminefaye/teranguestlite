@@ -162,7 +162,7 @@ class PalaceServiceController extends Controller
         }
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
+        $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

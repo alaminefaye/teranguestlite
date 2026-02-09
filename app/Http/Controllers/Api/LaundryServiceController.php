@@ -97,7 +97,7 @@ class LaundryServiceController extends Controller
         $deliveryTime = \Carbon\Carbon::parse($pickupTime)->addHours($maxTurnaround)->format('Y-m-d H:i');
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
+        $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

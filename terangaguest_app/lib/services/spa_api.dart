@@ -88,6 +88,11 @@ class SpaApi {
     if (e.response?.statusCode == 400) {
       return 'Requête invalide. Vérifiez la date et l\'heure.';
     }
+    if (e.response?.statusCode == 403) {
+      return (data is Map && data['message'] != null && (data['message'] as String).isNotEmpty)
+          ? (data['message'] as String)
+          : 'Code client invalide ou séjour non actif. Vérifiez votre code.';
+    }
     if (e.response?.statusCode == 422) {
       final errors = data is Map ? data['errors'] : null;
       if (errors is Map && errors.isNotEmpty) {

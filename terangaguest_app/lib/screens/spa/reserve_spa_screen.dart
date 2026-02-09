@@ -438,8 +438,6 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
   }
 
   Widget _buildCanReserveBanner() {
-    final user = context.watch<AuthProvider>().user;
-    if (user?.canReserve == true) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -492,12 +490,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
   }
 
   Widget _buildConfirmButton() {
-    final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
     final canSubmit =
-        ((user?.canReserve == true) || hasCode) &&
-        _selectedDate != null &&
-        _selectedTime != null;
+        hasCode && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,

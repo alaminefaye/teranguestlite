@@ -984,8 +984,6 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   }
 
   Widget _buildCanReserveBanner() {
-    final user = context.watch<AuthProvider>().user;
-    if (user?.canReserve == true) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -1038,9 +1036,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   }
 
   Widget _buildConfirmButton() {
-    final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit = (user?.canReserve == true) || hasCode;
+    final canSubmit = hasCode;
     return AnimatedButton(
       text: 'Envoyer la demande',
       onPressed: canSubmit ? _handleConfirmRequest : null,

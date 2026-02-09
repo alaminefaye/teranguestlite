@@ -140,4 +140,20 @@ class GuestReservationHelper
         }
         return self::validateClientCodeForUser($user, $clientCode);
     }
+
+    /**
+     * Pour les réservations (spa, restaurant, etc.) : si un code client est saisi, il doit être valide.
+     * On n'utilise pas le séjour actif du compte connecté quand un code est fourni (évite d'accepter un code invalide).
+     * Si aucun code n'est fourni, on accepte le séjour actif du compte.
+     *
+     * @return array{room_id: int, guest_id: int|null}|null
+     */
+    public static function requireValidCodeOrActiveStay(User $user, ?string $clientCode): ?array
+    {
+        $code = $clientCode !== null ? trim($clientCode) : '';
+        if ($code !== '') {
+            return self::validateClientCodeForUser($user, $clientCode);
+        }
+        return self::requireActiveStayForUser($user);
+    }
 }

@@ -471,8 +471,6 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   }
 
   Widget _buildCanReserveBanner() {
-    final user = context.watch<AuthProvider>().user;
-    if (user?.canReserve == true) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -525,10 +523,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   }
 
   Widget _buildConfirmButton() {
-    final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canBook =
-        ((user?.canReserve == true) || hasCode) && _selectedDate != null;
+    final canBook = hasCode && _selectedDate != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
