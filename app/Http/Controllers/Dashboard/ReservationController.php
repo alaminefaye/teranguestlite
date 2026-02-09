@@ -241,7 +241,9 @@ class ReservationController extends Controller
     }
 
     /**
-     * Check-in action
+     * Check-in action.
+     * Régénère automatiquement le code client (tablette) pour ce séjour :
+     * l'ancien code ne fonctionne plus, le nouveau est affiché pour le remettre au client.
      */
     public function checkIn(Reservation $reservation)
     {
@@ -257,7 +259,21 @@ class ReservationController extends Controller
         // Mettre à jour le statut de la chambre
         $reservation->room->update(['status' => 'occupied']);
 
-        return back()->with('success', 'Check-in effectué avec succès !');
+        // Nouveau code tablette pour ce séjour (invalide l'ancien après un précédent check-out)
+        $newCode = null;
+        if ($reservation->guest_id) {
+            $guest = Guest::find($reservation->guest_id);
+            if ($guest) {
+                $newCode = $guest->regenerateAccessCode();
+            }
+        }
+
+        $message = 'Check-in effectué avec succès !';
+        if ($newCode !== null) {
+            $message .= ' Code tablette pour ce séjour : ' . $newCode . ' (à remettre au client.)';
+        }
+
+        return back()->with('success', $message);
     }
 
     /**

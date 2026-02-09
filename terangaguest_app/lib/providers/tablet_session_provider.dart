@@ -22,8 +22,28 @@ class TabletSessionProvider with ChangeNotifier {
   String? get error => _error;
 
   /// À appeler au démarrage (ex. initState d'un écran ou main).
+  /// Charge la session depuis le stockage sans revalidation.
   Future<void> load() async {
     await _loadFromStorage();
+    notifyListeners();
+  }
+
+  /// Charge la session depuis le stockage puis vérifie auprès du serveur
+  /// qu'elle est encore valide (séjour actif). Si le client a fait checkout
+  /// ou le séjour est terminé, la session est supprimée et l'utilisateur
+  /// devra ressaisir le code.
+  Future<void> loadAndValidate() async {
+    await _loadFromStorage();
+    if (_session != null) {
+      try {
+        final s = await _api.validateSession(_session!);
+        _session = s;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_keySession, jsonEncode(s.toJson()));
+      } catch (_) {
+        await clearSession();
+      }
+    }
     notifyListeners();
   }
 
@@ -38,6 +58,7 @@ class TabletSessionProvider with ChangeNotifier {
         );
       } catch (_) {
         await prefs.remove(_keySession);
+        _session = null;
       }
     }
   }

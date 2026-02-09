@@ -34,7 +34,7 @@ class _CartScreenState extends State<CartScreen> {
       final cart = context.read<CartProvider>();
       tabletSession.clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
       cart.clearError(); // Idem pour une erreur de checkout précédente
-      await tabletSession.load();
+      await tabletSession.loadAndValidate();
       // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
       if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
         final authUser = context.read<AuthProvider>().user;
