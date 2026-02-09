@@ -70,19 +70,22 @@
     }"
     @mouseenter="if (!$store.sidebar.isExpanded) $store.sidebar.setHovered(true)"
     @mouseleave="$store.sidebar.setHovered(false)">
-    <!-- Logo Section -->
+    <!-- Logo Section - Teranga Guest (même design que la page login) -->
     <div class="pt-6 pb-5 flex"
         :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
         'xl:justify-center' :
         'justify-start'">
         <a href="/" class="flex items-center">
-            <img x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                class="dark:hidden" src="/images/logo/logo.svg" alt="Temp" style="max-width: 180px; max-height: 40px; width: auto; height: auto; object-fit: contain;" />
-            <img x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Temp" style="max-width: 180px; max-height: 40px; width: auto; height: auto; object-fit: contain;" />
-            <img x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen"
-                src="/images/logo/logo-icon.svg" alt="Temp" style="max-width: 40px; max-height: 40px; width: auto; height: auto; object-fit: contain;" />
-
+            <!-- Logo étendu : TERAN + GUEST (style login) -->
+            <div x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
+                class="inline-flex items-center rounded-full px-4 py-2"
+                style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                <span class="text-lg font-bold tracking-wide text-white">TERAN</span><span class="text-lg font-bold tracking-wide" style="color: #D4AF37;">GUEST</span>
+            </div>
+            <!-- Logo réduit (sidebar collapsed) -->
+            <div x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen"
+                class="flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm"
+                style="background-color: #1E252D; border: 1.5px solid #D4AF37; color: #D4AF37;">TG</div>
         </a>
     </div>
 
