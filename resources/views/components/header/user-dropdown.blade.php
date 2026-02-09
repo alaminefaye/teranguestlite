@@ -13,8 +13,10 @@
         @click.prevent="toggleDropdown()"
         type="button"
     >
-        <span class="mr-3 overflow-hidden rounded-full h-11 w-11">
-            <img src="/images/user/owner.png" alt="User" />
+        <span class="mr-3 flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM12 20.5C10.1198 20.5 8.38223 19.8895 6.97461 18.8566V18.8455C6.97461 16.7744 8.65354 15.0955 10.7246 15.0955H13.2746C15.3457 15.0955 17.0246 16.7744 17.0246 18.8455V18.8566C15.6171 19.8898 13.8798 20.5 12 20.5ZM8.48126 9.26784C8.48126 7.32499 10.0563 5.75 12 5.75C13.9419 5.75 15.5169 7.32499 15.5169 9.26784C15.5169 11.2107 13.9419 12.7857 12 12.7857C10.0563 12.7857 8.48126 11.2107 8.48126 9.26784Z" />
+            </svg>
         </span>
 
        <span class="block mr-1 font-medium text-theme-sm">{{ Auth::check() ? Auth::user()->name : 'Invité' }}</span>
