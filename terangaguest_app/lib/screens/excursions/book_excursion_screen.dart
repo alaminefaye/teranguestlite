@@ -5,7 +5,6 @@ import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/excursion.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/excursions_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
@@ -462,8 +461,44 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     );
   }
 
+  /// Vérifie en local et auprès du serveur que le code client est valide (séjour actif) avant d'envoyer la réservation.
+  Future<bool> _ensureValidSessionBeforeConfirm(BuildContext context) async {
+    final tabletSession = context.read<TabletSessionProvider>();
+    if (!tabletSession.hasSession) {
+      final code = await showGuestCodeDialog(context);
+      if (code == null || !mounted) return false;
+      setState(() => _validatedClientCode = code);
+      return true;
+    }
+    bool sessionValid = false;
+    while (!sessionValid && mounted) {
+      try {
+        await tabletSession.validateCurrentSession();
+        sessionValid = true;
+      } catch (_) {
+        await tabletSession.clearSession();
+        if (!mounted) return false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        final code = await showGuestCodeDialog(context);
+        if (code == null || !mounted) return false;
+        setState(() => _validatedClientCode = code);
+      }
+    }
+    return mounted && tabletSession.hasSession;
+  }
+
   Future<void> _handleConfirmBooking({bool isRetry = false}) async {
     if (_selectedDate == null) return;
+
+    // Vérification locale + serveur : code valide et séjour actif avant d'envoyer la réservation
+    final canProceed = await _ensureValidSessionBeforeConfirm(context);
+    if (!canProceed) return;
 
     try {
       showDialog(

@@ -19,6 +19,7 @@ import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../favorites/my_favorites_screen.dart';
+import '../../widgets/guest_code_dialog.dart';
 
 /// Email et téléphone du support (modifiables par l'hôtel).
 const String _supportEmail = 'support@kingfahdpalace.com';
@@ -129,6 +130,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Informations utilisateur ou saisie code client
                   Consumer<TabletSessionProvider>(
                     builder: (context, tabletSession, _) {
+                      if (tabletSession.isLoading) {
+                        return _buildProfileLoading();
+                      }
                       if (tabletSession.hasSession) {
                         return _buildClientInfo(user, tabletSession.session!);
                       }
@@ -174,6 +178,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Indicateur de chargement pendant la vérification de la session (démarrage ou revalidation).
+  Widget _buildProfileLoading() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryBlue.withValues(alpha: 0.6),
+            AppTheme.primaryDark.withValues(alpha: 0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Vérification de la session...',
+            style: TextStyle(color: AppTheme.textGray, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -259,8 +301,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           TextButton.icon(
             onPressed: () async {
-              await Provider.of<TabletSessionProvider>(context, listen: false).clearSession();
+              final tabletSession = Provider.of<TabletSessionProvider>(context, listen: false);
+              await tabletSession.clearSession();
+              if (!mounted) return;
+              // Toujours vérifier le code auprès du serveur via le dialogue (pas de connexion sans vérification)
+              final code = await showGuestCodeDialog(context);
               if (mounted) setState(() {});
+              if (code != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Client connecté avec succès'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
             },
             icon: const Icon(Icons.person_off_outlined, size: 18, color: AppTheme.textGray),
             label: Text(
@@ -468,6 +522,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
           const SizedBox(height: 12),
           _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
+          const SizedBox(height: 16),
+          TextButton.icon(
+            onPressed: () async {
+              final code = await showGuestCodeDialog(context);
+              if (mounted && code != null) setState(() {});
+            },
+            icon: const Icon(Icons.link, size: 18, color: AppTheme.accentGold),
+            label: const Text(
+              'Associer un code client',
+              style: TextStyle(color: AppTheme.textGray, fontSize: 13),
+            ),
+          ),
         ],
       ),
     );

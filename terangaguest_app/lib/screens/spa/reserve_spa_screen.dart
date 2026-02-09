@@ -471,8 +471,44 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
     );
   }
 
+  /// Vérifie en local et auprès du serveur que le code client est valide (séjour actif) avant d'envoyer la réservation.
+  Future<bool> _ensureValidSessionBeforeConfirm(BuildContext context) async {
+    final tabletSession = context.read<TabletSessionProvider>();
+    if (!tabletSession.hasSession) {
+      final code = await showGuestCodeDialog(context);
+      if (code == null || !mounted) return false;
+      setState(() => _validatedClientCode = code);
+      return true;
+    }
+    bool sessionValid = false;
+    while (!sessionValid && mounted) {
+      try {
+        await tabletSession.validateCurrentSession();
+        sessionValid = true;
+      } catch (_) {
+        await tabletSession.clearSession();
+        if (!mounted) return false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        final code = await showGuestCodeDialog(context);
+        if (code == null || !mounted) return false;
+        setState(() => _validatedClientCode = code);
+      }
+    }
+    return mounted && tabletSession.hasSession;
+  }
+
   Future<void> _handleConfirmReservation({bool isRetry = false}) async {
     if (_selectedDate == null || _selectedTime == null) return;
+
+    // Vérification locale + serveur : code valide et séjour actif avant d'envoyer la réservation
+    final canProceed = await _ensureValidSessionBeforeConfirm(context);
+    if (!canProceed) return;
 
     try {
       showDialog(

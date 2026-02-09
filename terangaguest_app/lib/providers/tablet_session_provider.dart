@@ -34,18 +34,25 @@ class TabletSessionProvider with ChangeNotifier {
   /// ou le séjour est terminé, la session est supprimée et l'utilisateur
   /// devra ressaisir le code.
   Future<void> loadAndValidate() async {
-    await _loadFromStorage();
-    if (_session != null) {
-      try {
-        final s = await _api.validateSession(_session!);
-        _session = s;
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_keySession, jsonEncode(s.toJson()));
-      } catch (_) {
-        await clearSession();
-      }
-    }
+    _loading = true;
+    _error = null;
     notifyListeners();
+    try {
+      await _loadFromStorage();
+      if (_session != null) {
+        try {
+          final s = await _api.validateSession(_session!);
+          _session = s;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_keySession, jsonEncode(s.toJson()));
+        } catch (_) {
+          await clearSession();
+        }
+      }
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _loadFromStorage() async {
