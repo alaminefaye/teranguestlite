@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
-import '../config/api_constants.dart';
 import '../models/spa.dart';
 import 'api_service.dart';
 
@@ -75,11 +74,6 @@ class SpaApi {
       );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      final data = e.response?.data;
-      if (e.response?.statusCode == 403 && data is Map && data['error_code'] == 'invalid_client_code') {
-        final msg = data['message'] is String ? data['message'] as String : 'Code client invalide ou séjour expiré.';
-        throw Exception('${ApiConstants.errorInvalidClientCode}:$msg');
-      }
       final message = _messageFromDioException(e);
       throw Exception(message);
     }

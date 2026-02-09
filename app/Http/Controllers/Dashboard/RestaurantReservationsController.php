@@ -11,21 +11,14 @@ class RestaurantReservationsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = RestaurantReservation::with(['restaurant', 'user', 'guest', 'room']);
+        $query = RestaurantReservation::with(['restaurant', 'user']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('restaurant', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('guest', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%'))
-                    ->orWhereHas('room', fn ($q2) => $q2->where('room_number', 'like', '%' . $search . '%'));
-            });
+            $query->whereHas('restaurant', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
+                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
         if ($request->filled('date')) {
             $query->whereDate('reservation_date', $request->date);
@@ -40,11 +33,5 @@ class RestaurantReservationsController extends Controller
         ];
 
         return view('pages.dashboard.restaurant-reservations.index', compact('reservations', 'stats'));
-    }
-
-    public function show(RestaurantReservation $restaurantReservation): View
-    {
-        $restaurantReservation->load(['restaurant', 'user', 'guest', 'room']);
-        return view('pages.dashboard.restaurant-reservations.show', ['reservation' => $restaurantReservation]);
     }
 }

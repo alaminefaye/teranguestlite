@@ -34,7 +34,7 @@ class _CartScreenState extends State<CartScreen> {
       final cart = context.read<CartProvider>();
       tabletSession.clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
       cart.clearError(); // Idem pour une erreur de checkout précédente
-      await tabletSession.loadAndValidate();
+      await tabletSession.load();
       // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
       if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
         final authUser = context.read<AuthProvider>().user;
@@ -301,8 +301,7 @@ class _CartScreenState extends State<CartScreen> {
                           }
                           if (showRoomSetup) await ts.setRoomNumber(r);
                           try {
-                            final enterpriseId = ctx.read<AuthProvider>().user?.enterpriseId;
-                            await ts.validateCode(c, enterpriseId: enterpriseId);
+                            await ts.validateCode(c);
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop(true);
                           } catch (e) {

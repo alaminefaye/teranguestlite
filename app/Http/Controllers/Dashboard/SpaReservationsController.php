@@ -11,21 +11,14 @@ class SpaReservationsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = SpaReservation::with(['spaService', 'user', 'guest', 'room']);
+        $query = SpaReservation::with(['spaService', 'user']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('spaService', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('guest', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%'))
-                    ->orWhereHas('room', fn ($q2) => $q2->where('room_number', 'like', '%' . $search . '%'));
-            });
+            $query->whereHas('spaService', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
+                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
         if ($request->filled('date')) {
             $query->whereDate('reservation_date', $request->date);
@@ -40,11 +33,5 @@ class SpaReservationsController extends Controller
         ];
 
         return view('pages.dashboard.spa-reservations.index', compact('reservations', 'stats'));
-    }
-
-    public function show(SpaReservation $spaReservation): View
-    {
-        $spaReservation->load(['spaService', 'user', 'guest', 'room']);
-        return view('pages.dashboard.spa-reservations.show', ['reservation' => $spaReservation]);
     }
 }

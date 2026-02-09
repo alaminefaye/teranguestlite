@@ -11,22 +11,15 @@ class PalaceRequestsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = PalaceRequest::with(['palaceService', 'user', 'guest', 'room']);
+        $query = PalaceRequest::with(['palaceService', 'user']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('request_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('palaceService', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('guest', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%'))
-                    ->orWhereHas('room', fn ($q2) => $q2->where('room_number', 'like', '%' . $search . '%'));
-            });
+            $query->where('request_number', 'like', '%' . $request->search . '%')
+                ->orWhereHas('palaceService', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
+                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
 
         $requests = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -42,7 +35,7 @@ class PalaceRequestsController extends Controller
 
     public function show(PalaceRequest $palaceRequest): View
     {
-        $palaceRequest->load(['palaceService', 'user', 'guest', 'room']);
+        $palaceRequest->load(['palaceService', 'user', 'room']);
         return view('pages.dashboard.palace-requests.show', [
             'request' => $palaceRequest,
         ]);

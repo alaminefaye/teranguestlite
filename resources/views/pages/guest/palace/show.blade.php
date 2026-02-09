@@ -82,14 +82,6 @@
         @endif
 
         <div class="space-y-4">
-            <div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Code client</label>
-                <input type="text" name="client_code" value="{{ old('client_code') }}" maxlength="20" placeholder="Ex: 123456 (reçu à l'enregistrement)" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">À remplir si votre compte n'a pas de séjour actif lié à la chambre. Sinon laissez vide.</p>
-                @error('client_code')
-                    <p class="text-sm text-red-600 dark:text-red-400 mt-2">{{ $message }}</p>
-                @enderror
-            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description (optionnel si vous avez rempli Taxi/Location)</label>
                 <textarea name="description" rows="4" placeholder="Décrivez en détail votre demande..." class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3">{{ old('description') }}</textarea>

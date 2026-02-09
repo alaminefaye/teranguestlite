@@ -7,7 +7,6 @@ use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
 use App\Models\Vehicle;
-use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -40,7 +39,6 @@ class PalaceServiceController extends Controller
     public function request(Request $request, PalaceService $palaceService): RedirectResponse
     {
         $request->validate([
-            'client_code' => 'nullable|string|max:20',
             'description' => 'nullable|string|max:2000',
             'requested_for' => 'nullable|date|after_or_equal:today',
             'metadata' => 'nullable|array',
@@ -67,13 +65,6 @@ class PalaceServiceController extends Controller
         }
 
         $user = auth()->user();
-        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
-        if (! $stay) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['client_code' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT]);
-        }
-
         // Véhicule : doit appartenir à l'établissement du client (chaque hôtel a ses propres données)
         if (is_array($metadata) && isset($metadata['vehicle_id'])) {
             if (!Vehicle::where('id', (int) $metadata['vehicle_id'])->where('enterprise_id', $user->enterprise_id)->exists()) {
@@ -88,6 +79,10 @@ class PalaceServiceController extends Controller
             $description = $this->buildDescriptionFromMetadata($metadata);
         }
         $description = $description ?: 'Demande sans précision';
+
+        $room = Room::where('enterprise_id', $user->enterprise_id)
+            ->where('room_number', $user->room_number)
+            ->first();
 
         $requestedFor = $request->requested_for
             ? preg_replace('/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/', '$1 $2:00', $request->requested_for)
@@ -111,9 +106,8 @@ class PalaceServiceController extends Controller
         PalaceRequest::create([
             'enterprise_id' => $user->enterprise_id,
             'user_id' => $user->id,
-            'guest_id' => $stay['guest_id'],
             'palace_service_id' => $palaceService->id,
-            'room_id' => $stay['room_id'],
+            'room_id' => $room->id ?? null,
             'description' => $description,
             'metadata' => $metadata,
             'requested_for' => $requestedFor,

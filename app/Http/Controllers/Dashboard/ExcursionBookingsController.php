@@ -11,21 +11,14 @@ class ExcursionBookingsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = ExcursionBooking::with(['excursion', 'user', 'guest', 'room']);
+        $query = ExcursionBooking::with(['excursion', 'user']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('excursion', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('guest', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%'))
-                    ->orWhereHas('room', fn ($q2) => $q2->where('room_number', 'like', '%' . $search . '%'));
-            });
+            $query->whereHas('excursion', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
+                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
         if ($request->filled('date')) {
             $query->whereDate('booking_date', $request->date);
@@ -40,11 +33,5 @@ class ExcursionBookingsController extends Controller
         ];
 
         return view('pages.dashboard.excursion-bookings.index', compact('bookings', 'stats'));
-    }
-
-    public function show(ExcursionBooking $excursionBooking): View
-    {
-        $excursionBooking->load(['excursion', 'user', 'guest', 'room']);
-        return view('pages.dashboard.excursion-bookings.show', ['booking' => $excursionBooking]);
     }
 }

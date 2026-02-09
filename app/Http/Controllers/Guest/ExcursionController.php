@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Excursion;
 use App\Models\ExcursionBooking;
 use App\Models\Room;
-use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +37,6 @@ class ExcursionController extends Controller
     public function book(Request $request, Excursion $excursion): RedirectResponse
     {
         $validated = $request->validate([
-            'client_code' => 'nullable|string|max:20',
             'booking_date' => 'required|date|after_or_equal:today',
             'number_of_adults' => 'required|integer|min:1',
             'number_of_children' => 'nullable|integer|min:0',
@@ -46,12 +44,9 @@ class ExcursionController extends Controller
         ]);
 
         $user = auth()->user();
-        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
-        if (! $stay) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['client_code' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT]);
-        }
+        $room = Room::where('enterprise_id', $user->enterprise_id)
+            ->where('room_number', $user->room_number)
+            ->first();
 
         $adults = $validated['number_of_adults'];
         $children = $validated['number_of_children'] ?? 0;
@@ -60,9 +55,8 @@ class ExcursionController extends Controller
         ExcursionBooking::create([
             'enterprise_id' => $user->enterprise_id,
             'user_id' => $user->id,
-            'guest_id' => $stay['guest_id'],
             'excursion_id' => $excursion->id,
-            'room_id' => $stay['room_id'],
+            'room_id' => $room->id ?? null,
             'booking_date' => $validated['booking_date'],
             'number_of_adults' => $adults,
             'number_of_children' => $children,

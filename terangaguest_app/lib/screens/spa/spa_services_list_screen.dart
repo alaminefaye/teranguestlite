@@ -53,7 +53,9 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
             children: [
               _buildHeader(),
               _buildFilters(),
-              Expanded(child: _buildContent()),
+              Expanded(
+                child: _buildContent(),
+              ),
             ],
           ),
         ),
@@ -89,7 +91,10 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
                 SizedBox(height: 4),
                 Text(
                   'Détente et relaxation',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
                 ),
               ],
             ),
@@ -108,8 +113,7 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
         itemCount: _categoryFilters.length,
         itemBuilder: (context, index) {
           final filter = _categoryFilters[index];
-          final isSelected =
-              _selectedCategory == filter['value'] ||
+          final isSelected = _selectedCategory == filter['value'] ||
               (_selectedCategory == null && filter['value'] == '');
 
           return Padding(
@@ -117,25 +121,22 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
             child: GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedCategory = filter['value']!.isEmpty
-                      ? null
-                      : filter['value'];
+                  _selectedCategory =
+                      filter['value']!.isEmpty ? null : filter['value'];
                 });
                 context.read<SpaProvider>().fetchSpaServices(
-                  category: _selectedCategory,
-                );
+                      category: _selectedCategory,
+                    );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? LinearGradient(
                           colors: [
                             AppTheme.accentGold,
-                            AppTheme.accentGold.withValues(alpha: 0.8),
+                            AppTheme.accentGold.withValues(alpha: 0.8)
                           ],
                         )
                       : null,
@@ -152,12 +153,9 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
                 child: Text(
                   filter['label']!,
                   style: TextStyle(
-                    color: isSelected
-                        ? AppTheme.primaryDark
-                        : AppTheme.textGray,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 13,
                   ),
                 ),
@@ -227,9 +225,9 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
                     service: service,
                     onTap: () {
                       HapticHelper.lightImpact();
-                      context.navigateTo(
-                        SpaServiceDetailScreen(serviceId: service.id),
-                      );
+                      context.navigateTo(SpaServiceDetailScreen(
+                        serviceId: service.id,
+                      ));
                     },
                   );
                 },

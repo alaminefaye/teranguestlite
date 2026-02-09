@@ -37,9 +37,8 @@ Route::prefix('tablet')->group(function () {
 
 // ==========================================
 // ROUTES PROTÉGÉES (Authentification requise)
-// Toutes les données retournées sont limitées à l'entreprise de l'utilisateur connecté.
 // ==========================================
-Route::middleware(['auth:sanctum', 'enterprise'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     
     // ==========================================
     // AUTHENTIFICATION

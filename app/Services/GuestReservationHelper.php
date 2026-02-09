@@ -16,12 +16,7 @@ class GuestReservationHelper
     /**
      * Message d'erreur 403 quand pas de client valide
      */
-    public const MESSAGE_REQUIRE_VALID_CLIENT = 'Code client invalide ou séjour expiré. Veuillez ressaisir votre code client (reçu à l\'enregistrement) ou demander un nouveau code à la réception.';
-
-    /**
-     * Clé retournée dans la réponse API pour que l'app puisse redemander le code
-     */
-    public const ERROR_CODE_INVALID_CLIENT = 'invalid_client_code';
+    public const MESSAGE_REQUIRE_VALID_CLIENT = 'Réservation possible uniquement pour les clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.';
 
     /**
      * Pour l'utilisateur connecté (room_number + enterprise_id), retourne la chambre, la réservation active et le guest_id.

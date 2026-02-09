@@ -6,7 +6,6 @@ import '../services/tablet_session_api.dart';
 
 const _keySession = 'tablet_guest_session';
 const _keyRoomNumber = 'tablet_room_number';
-const _keyValidatedCode = 'tablet_validated_code';
 
 /// Gère la session client sur la tablette (code validé + chambre).
 class TabletSessionProvider with ChangeNotifier {
@@ -23,36 +22,9 @@ class TabletSessionProvider with ChangeNotifier {
   String? get error => _error;
 
   /// À appeler au démarrage (ex. initState d'un écran ou main).
-  /// Charge la session depuis le stockage sans revalidation.
   Future<void> load() async {
     await _loadFromStorage();
     notifyListeners();
-  }
-
-  /// Charge la session depuis le stockage puis vérifie auprès du serveur
-  /// qu'elle est encore valide (séjour actif). Si le client a fait checkout
-  /// ou le séjour est terminé, la session est supprimée et l'utilisateur
-  /// devra ressaisir le code.
-  Future<void> loadAndValidate() async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
-    try {
-      await _loadFromStorage();
-      if (_session != null) {
-        try {
-          final s = await _api.validateSession(_session!);
-          _session = s;
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_keySession, jsonEncode(s.toJson()));
-        } catch (_) {
-          await clearSession();
-        }
-      }
-    } finally {
-      _loading = false;
-      notifyListeners();
-    }
   }
 
   Future<void> _loadFromStorage() async {
@@ -66,7 +38,6 @@ class TabletSessionProvider with ChangeNotifier {
         );
       } catch (_) {
         await prefs.remove(_keySession);
-        _session = null;
       }
     }
   }
@@ -83,26 +54,18 @@ class TabletSessionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Valide le code et enregistre la session uniquement si le serveur répond succès.
-  /// En cas d'erreur (code invalide, séjour expiré), toute session existante est effacée.
-  /// [enterpriseId] optionnel : pour limiter la chambre à l'établissement de l'utilisateur connecté.
-  Future<void> validateCode(String code, {int? enterpriseId}) async {
+  /// Valide le code et enregistre la session si succès.
+  Future<void> validateCode(String code) async {
     _loading = true;
     _error = null;
     notifyListeners();
     try {
-      final s = await _api.validateCode(
-        code: code,
-        roomNumber: _roomNumber,
-        enterpriseId: enterpriseId,
-      );
+      final s = await _api.validateCode(code: code, roomNumber: _roomNumber);
       _session = s;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
-      await prefs.setString(_keyValidatedCode, code.trim());
       notifyListeners();
     } catch (e) {
-      await clearSession();
       _error = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       rethrow;
@@ -140,15 +103,7 @@ class TabletSessionProvider with ChangeNotifier {
     _error = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keySession);
-    await prefs.remove(_keyValidatedCode);
     notifyListeners();
-  }
-
-  /// Code client validé (stocké après une validation réussie). Utilisé pour les réservations.
-  /// Retourne null si aucun code stocké ou session effacée.
-  Future<String?> getValidatedClientCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyValidatedCode);
   }
 
   void clearError() {

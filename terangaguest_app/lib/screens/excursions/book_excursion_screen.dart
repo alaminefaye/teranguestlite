@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/excursion.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/excursions_provider.dart';
-import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
-import '../../widgets/guest_code_dialog.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'my_excursion_bookings_screen.dart';
@@ -30,33 +28,6 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
 
-  String? _validatedClientCode;
-  bool _clientCodeChecked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _requireClientCodeThenShowForm());
-  }
-
-  Future<void> _requireClientCodeThenShowForm() async {
-    final tabletSession = context.read<TabletSessionProvider>();
-    if (tabletSession.hasSession) {
-      if (mounted) setState(() => _clientCodeChecked = true);
-      return;
-    }
-    final code = await showGuestCodeDialog(context);
-    if (!mounted) return;
-    if (code == null) {
-      Navigator.of(context).pop();
-      return;
-    }
-    setState(() {
-      _validatedClientCode = code;
-      _clientCodeChecked = true;
-    });
-  }
-
   @override
   void dispose() {
     _specialRequestsController.dispose();
@@ -71,24 +42,6 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_clientCodeChecked) {
-      return Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
-            ),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
-            ),
-          ),
-        ),
-      );
-    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -137,6 +90,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildCanReserveBanner(),
                       _buildDateSelector(),
                       const SizedBox(height: 24),
                       _buildParticipantsSelector(),
@@ -448,8 +402,58 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     );
   }
 
+  Widget _buildCanReserveBanner() {
+    final user = context.watch<AuthProvider>().user;
+    if (user?.canReserve == true) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade900.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _clientCodeController,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Code client (ex: 123456)',
+              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.15),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.orange),
+              ),
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmButton() {
-    final canBook = _selectedDate != null;
+    final user = context.watch<AuthProvider>().user;
+    final hasCode = _clientCodeController.text.trim().isNotEmpty;
+    final canBook = ((user?.canReserve == true) || hasCode) && _selectedDate != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -461,44 +465,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     );
   }
 
-  /// Vérifie en local et auprès du serveur que le code client est valide (séjour actif) avant d'envoyer la réservation.
-  Future<bool> _ensureValidSessionBeforeConfirm(BuildContext context) async {
-    final tabletSession = context.read<TabletSessionProvider>();
-    if (!tabletSession.hasSession) {
-      final code = await showGuestCodeDialog(context);
-      if (code == null || !mounted) return false;
-      setState(() => _validatedClientCode = code);
-      return true;
-    }
-    bool sessionValid = false;
-    while (!sessionValid && mounted) {
-      try {
-        await tabletSession.validateCurrentSession();
-        sessionValid = true;
-      } catch (_) {
-        await tabletSession.clearSession();
-        if (!mounted) return false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        final code = await showGuestCodeDialog(context);
-        if (code == null || !mounted) return false;
-        setState(() => _validatedClientCode = code);
-      }
-    }
-    return mounted && tabletSession.hasSession;
-  }
-
-  Future<void> _handleConfirmBooking({bool isRetry = false}) async {
+  Future<void> _handleConfirmBooking() async {
     if (_selectedDate == null) return;
-
-    // Vérification locale + serveur : code valide et séjour actif avant d'envoyer la réservation
-    final canProceed = await _ensureValidSessionBeforeConfirm(context);
-    if (!canProceed) return;
 
     try {
       showDialog(
@@ -510,9 +478,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         ),
       );
 
-      final tabletSession = context.read<TabletSessionProvider>();
-      final storedCode = await tabletSession.getValidatedClientCode();
-      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
+      final clientCode = _clientCodeController.text.trim();
       await context.read<ExcursionsProvider>().bookExcursion(
             excursionId: widget.excursion.id,
             date: _selectedDate!,
@@ -613,31 +579,16 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     } catch (e) {
       if (mounted) Navigator.pop(context);
 
-      if (!mounted) return;
-      final message = e.toString().replaceFirst('Exception: ', '');
-      final isInvalidCode = message.contains(ApiConstants.errorInvalidClientCode);
-
-      if (isInvalidCode && !isRetry) {
-        await context.read<TabletSessionProvider>().clearSession();
-        final newCode = await showGuestCodeDialog(context);
-        if (!mounted) return;
-        if (newCode != null) {
-          setState(() => _validatedClientCode = newCode);
-          await _handleConfirmBooking(isRetry: true);
-          return;
-        }
+      if (mounted) {
+        final message = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
-
-      final displayMessage = isInvalidCode && message.contains(':')
-          ? message.substring(message.indexOf(':') + 1).trim()
-          : message;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${AppLocalizations.of(context).errorPrefix}$displayMessage'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
     }
   }
 }

@@ -8,13 +8,11 @@ class TabletSessionApi {
   final ApiService _api = ApiService();
 
   /// Valide le code client. Envoie [roomId] ou [roomNumber] pour lier à la chambre.
-  /// [enterpriseId] optionnel : pour limiter la chambre au bon établissement.
   /// En cas d'erreur (401/403), lance une Exception avec le message clair du serveur.
   Future<GuestSession> validateCode({
     required String code,
     int? roomId,
     String? roomNumber,
-    int? enterpriseId,
   }) async {
     if (roomId == null && (roomNumber == null || roomNumber.isEmpty)) {
       throw Exception(
@@ -26,10 +24,9 @@ class TabletSessionApi {
         ApiConfig.tabletValidateCode,
         data: {
           'code': code.trim(),
-          if (roomId != null) 'room_id': roomId,
+          'room_id': ?roomId,
           if (roomNumber != null && roomNumber.isNotEmpty)
             'room_number': roomNumber,
-          if (enterpriseId != null) 'enterprise_id': enterpriseId,
         },
       );
       final data = response.data as Map<String, dynamic>?;

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../config/api_constants.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/restaurants_provider.dart';
-import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
-import '../../widgets/guest_code_dialog.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'my_reservations_screen.dart';
@@ -32,37 +30,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   final TextEditingController _specialRequestsController = TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
 
-  String? _validatedClientCode;
-  bool _clientCodeChecked = false;
-
   final List<String> _availableTimes = [
     '12:00', '12:30', '13:00', '13:30', '14:00',
     '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00',
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _requireClientCodeThenShowForm());
-  }
-
-  Future<void> _requireClientCodeThenShowForm() async {
-    final tabletSession = context.read<TabletSessionProvider>();
-    if (tabletSession.hasSession) {
-      if (mounted) setState(() => _clientCodeChecked = true);
-      return;
-    }
-    final code = await showGuestCodeDialog(context);
-    if (!mounted) return;
-    if (code == null) {
-      Navigator.of(context).pop();
-      return;
-    }
-    setState(() {
-      _validatedClientCode = code;
-      _clientCodeChecked = true;
-    });
-  }
 
   @override
   void dispose() {
@@ -73,24 +44,6 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_clientCodeChecked) {
-      return Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
-            ),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
-            ),
-          ),
-        ),
-      );
-    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -110,6 +63,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildCanReserveBanner(),
                       // Sélection date
                       _buildDateSelector(),
 
@@ -530,8 +484,58 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
     );
   }
 
+  Widget _buildCanReserveBanner() {
+    final user = context.watch<AuthProvider>().user;
+    if (user?.canReserve == true) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade900.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _clientCodeController,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Code client (ex: 123456)',
+              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.15),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.orange),
+              ),
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmButton() {
-    final canSubmit = _selectedDate != null && _selectedTime != null;
+    final user = context.watch<AuthProvider>().user;
+    final hasCode = _clientCodeController.text.trim().isNotEmpty;
+    final canSubmit = ((user?.canReserve == true) || hasCode) && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -543,44 +547,8 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
     );
   }
 
-  /// Vérifie en local et auprès du serveur que le code client est valide (séjour actif) avant d'envoyer la réservation.
-  Future<bool> _ensureValidSessionBeforeConfirm(BuildContext context) async {
-    final tabletSession = context.read<TabletSessionProvider>();
-    if (!tabletSession.hasSession) {
-      final code = await showGuestCodeDialog(context);
-      if (code == null || !mounted) return false;
-      setState(() => _validatedClientCode = code);
-      return true;
-    }
-    bool sessionValid = false;
-    while (!sessionValid && mounted) {
-      try {
-        await tabletSession.validateCurrentSession();
-        sessionValid = true;
-      } catch (_) {
-        await tabletSession.clearSession();
-        if (!mounted) return false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        final code = await showGuestCodeDialog(context);
-        if (code == null || !mounted) return false;
-        setState(() => _validatedClientCode = code);
-      }
-    }
-    return mounted && tabletSession.hasSession;
-  }
-
-  Future<void> _handleConfirmReservation({bool isRetry = false}) async {
+  Future<void> _handleConfirmReservation() async {
     if (_selectedDate == null || _selectedTime == null) return;
-
-    // Vérification locale + serveur : code valide et séjour actif avant d'envoyer la réservation
-    final canProceed = await _ensureValidSessionBeforeConfirm(context);
-    if (!canProceed) return;
 
     try {
       // Afficher loader
@@ -594,9 +562,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         ),
       );
 
-      final tabletSession = context.read<TabletSessionProvider>();
-      final storedCode = await tabletSession.getValidatedClientCode();
-      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
+      final clientCode = _clientCodeController.text.trim();
       await context.read<RestaurantsProvider>().reserveTable(
             restaurantId: widget.restaurant.id,
             date: _selectedDate!,
@@ -701,33 +667,19 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         );
       }
     } catch (e) {
+      // Fermer le loader
       if (mounted) Navigator.pop(context);
 
-      if (!mounted) return;
-      final message = e.toString().replaceFirst('Exception: ', '');
-      final isInvalidCode = message.contains(ApiConstants.errorInvalidClientCode);
-
-      if (isInvalidCode && !isRetry) {
-        await context.read<TabletSessionProvider>().clearSession();
-        final newCode = await showGuestCodeDialog(context);
-        if (!mounted) return;
-        if (newCode != null) {
-          setState(() => _validatedClientCode = newCode);
-          await _handleConfirmReservation(isRetry: true);
-          return;
-        }
+      // Afficher erreur
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
-
-      final displayMessage = isInvalidCode && message.contains(':')
-          ? message.substring(message.indexOf(':') + 1).trim()
-          : message;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${AppLocalizations.of(context).errorPrefix}$displayMessage'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
     }
   }
 }

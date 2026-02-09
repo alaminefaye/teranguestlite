@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
-import 'secure_storage.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   late Dio _dio;
-  final SecureStorage _storage = SecureStorage();
 
   factory ApiService() {
     return _instance;
@@ -37,23 +35,19 @@ class ApiService {
       ),
     );
 
-    // Intercepteur : ajouter le token pour toutes les routes protégées (hors login et tablette sans auth).
-    // Garantit que le backend reçoit toujours l'utilisateur connecté et ne retourne que les données de son entreprise.
+    // Intercepteur pour ajouter le token automatiquement
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final path = options.path;
-          final isPublic = path == ApiConfig.login ||
-              path.startsWith('/tablet/');
-          if (!isPublic) {
-            final token = await _storage.getToken();
-            if (token != null && token.isNotEmpty) {
-              options.headers['Authorization'] = 'Bearer $token';
-            }
-          }
+          // Récupérer le token depuis le storage (à implémenter)
+          // final token = await getToken();
+          // if (token != null) {
+          //   options.headers['Authorization'] = 'Bearer $token';
+          // }
           return handler.next(options);
         },
         onError: (DioException error, handler) {
+          // Gérer les erreurs globalement
           debugPrint('❌ API Error: ${error.message}');
           return handler.next(error);
         },

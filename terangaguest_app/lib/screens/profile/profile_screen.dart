@@ -9,8 +9,6 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../auth/login_screen.dart';
 import 'settings_screen.dart';
-import '../../models/guest_session.dart';
-import '../../providers/tablet_session_provider.dart';
 import '../../widgets/animated_button.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/my_reservations_screen.dart';
@@ -19,35 +17,13 @@ import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../favorites/my_favorites_screen.dart';
-import '../../widgets/guest_code_dialog.dart';
 
 /// Email et téléphone du support (modifiables par l'hôtel).
 const String _supportEmail = 'support@kingfahdpalace.com';
 const String _supportPhone = '+221338699000';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _codeController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TabletSessionProvider>(context, listen: false).loadAndValidate();
-    });
-  }
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
 
   Future<void> _handleLogout(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -127,18 +103,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildHeader(context),
                   const SizedBox(height: 30),
 
-                  // Informations utilisateur ou saisie code client
-                  Consumer<TabletSessionProvider>(
-                    builder: (context, tabletSession, _) {
-                      if (tabletSession.isLoading) {
-                        return _buildProfileLoading();
-                      }
-                      if (tabletSession.hasSession) {
-                        return _buildClientInfo(user, tabletSession.session!);
-                      }
-                      return _buildCodeInputOrUserInfo(context, user, tabletSession);
-                    },
-                  ),
+                  // Informations utilisateur
+                  _buildUserInfo(user),
                   const SizedBox(height: 30),
 
                   // Actions
@@ -181,54 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// Indicateur de chargement pendant la vérification de la session (démarrage ou revalidation).
-  Widget _buildProfileLoading() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryBlue.withValues(alpha: 0.6),
-            AppTheme.primaryDark.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.accentGold, width: 1.5),
-      ),
-      child: const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Vérification de la session...',
-            style: TextStyle(color: AppTheme.textGray, fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Affiche les infos du client connecté (session tablette validée).
-  Widget _buildClientInfo(dynamic user, GuestSession session) {
-    final displayName = session.guestName.trim().isNotEmpty
-        ? session.guestName
-        : 'Client Chambre ${session.roomNumber}';
-    final initial = displayName.isNotEmpty ? displayName.substring(0, 1).toUpperCase() : 'C';
-    final email = (session.guestEmail?.trim().isNotEmpty == true)
-        ? session.guestEmail!
-        : user.email;
-
+  Widget _buildUserInfo(dynamic user) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -248,228 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.accentGold.withValues(alpha: 0.2),
-              border: Border.all(
-                color: AppTheme.accentGold,
-                width: 2,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                initial,
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            displayName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            email,
-            style: const TextStyle(
-              fontSize: 15,
-              color: AppTheme.textGray,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          const Divider(color: AppTheme.textGray, height: 32),
-          _buildInfoRow(Icons.bed, 'Chambre', session.roomNumber),
-          if (user.enterprise != null) ...[
-            const SizedBox(height: 12),
-            _buildInfoRow(Icons.business, 'Hôtel', user.enterprise?.name ?? ''),
-          ],
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: () async {
-              final tabletSession = Provider.of<TabletSessionProvider>(context, listen: false);
-              await tabletSession.clearSession();
-              if (!mounted) return;
-              // Toujours vérifier le code auprès du serveur via le dialogue (pas de connexion sans vérification)
-              final code = await showGuestCodeDialog(context);
-              if (mounted) setState(() {});
-              if (code != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Client connecté avec succès'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.person_off_outlined, size: 18, color: AppTheme.textGray),
-            label: Text(
-              'Changer de client',
-              style: TextStyle(color: AppTheme.textGray, fontSize: 13),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Si pas de session : champ code client. Une fois validé, la session s'affiche à la place.
-  Widget _buildCodeInputOrUserInfo(
-    BuildContext context,
-    dynamic user,
-    TabletSessionProvider tabletSession,
-  ) {
-    final hasRoom = user.roomNumber != null && (user.roomNumber ?? '').trim().isNotEmpty;
-
-    if (!hasRoom) {
-      return _buildUserInfoFallback(user);
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryBlue.withValues(alpha: 0.6),
-            AppTheme.primaryDark.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.person_outline, size: 48, color: AppTheme.accentGold),
-          const SizedBox(height: 16),
-          Text(
-            'Entrez votre code client',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Code reçu à l\'enregistrement (tablette en chambre)',
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppTheme.textGray,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _codeController,
-            style: const TextStyle(color: Colors.white, fontSize: 18),
-            textAlign: TextAlign.center,
-            decoration: InputDecoration(
-              hintText: 'Ex: 123456',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.1),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppTheme.accentGold),
-              ),
-            ),
-            onSubmitted: (_) => _validateCode(context, tabletSession),
-          ),
-          if (tabletSession.error != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              tabletSession.error!,
-              style: const TextStyle(color: Colors.red, fontSize: 13),
-              textAlign: TextAlign.center,
-            ),
-          ],
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: AnimatedButton(
-              text: 'Valider le code',
-              onPressed: tabletSession.isLoading
-                  ? null
-                  : () => _validateCode(context, tabletSession),
-              height: 48,
-              backgroundColor: AppTheme.accentGold,
-              textColor: AppTheme.primaryDark,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _validateCode(BuildContext context, TabletSessionProvider tabletSession) async {
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Saisissez votre code client'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-    final user = Provider.of<AuthProvider>(context, listen: false).user;
-    if (user?.roomNumber != null && user!.roomNumber!.trim().isNotEmpty) {
-      await tabletSession.setRoomNumber(user.roomNumber!.trim());
-    }
-    try {
-      final enterpriseId = user?.enterpriseId;
-      await tabletSession.validateCode(code, enterpriseId: enterpriseId);
-      if (mounted) {
-        _codeController.clear();
-        tabletSession.clearError();
-        setState(() {});
-      }
-    } catch (_) {
-      if (mounted) setState(() {});
-    }
-  }
-
-  /// Affichage par défaut (compte utilisateur) quand pas de chambre ou pas de session.
-  Widget _buildUserInfoFallback(dynamic user) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryBlue.withValues(alpha: 0.6),
-            AppTheme.primaryDark.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        children: [
+          // Avatar
           Container(
             width: 100,
             height: 100,
@@ -493,6 +191,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 20),
+
+          // Nom
           Text(
             user.name,
             style: const TextStyle(
@@ -503,6 +203,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
+
+          // Email
           Text(
             user.email,
             style: const TextStyle(
@@ -512,6 +214,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
+
+          // Infos supplémentaires
           if (user.roomNumber != null && (user.roomNumber ?? '').isNotEmpty) ...[
             const Divider(color: AppTheme.textGray, height: 32),
             _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber ?? ''),
@@ -522,18 +226,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
           const SizedBox(height: 12),
           _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: () async {
-              final code = await showGuestCodeDialog(context);
-              if (mounted && code != null) setState(() {});
-            },
-            icon: const Icon(Icons.link, size: 18, color: AppTheme.accentGold),
-            label: const Text(
-              'Associer un code client',
-              style: TextStyle(color: AppTheme.textGray, fontSize: 13),
-            ),
-          ),
         ],
       ),
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/tablet_session_provider.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'login_screen.dart';
 
@@ -63,9 +62,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Naviguer selon le statut
     if (authProvider.isAuthenticated) {
-      // Valider la session client stockée au démarrage (évite d'afficher un code non vérifié après redémarrage)
-      await Provider.of<TabletSessionProvider>(context, listen: false).loadAndValidate();
-      if (!mounted) return;
       // Utilisateur connecté → Dashboard
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
