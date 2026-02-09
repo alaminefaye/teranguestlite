@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Excursion;
 use App\Models\ExcursionBooking;
 use App\Models\Room;
+use App\Services\GuestReservationHelper;
 
 class ExcursionController extends Controller
 {
@@ -150,15 +151,20 @@ class ExcursionController extends Controller
         $totalPrice = ($adults * $excursion->price_adult) + ($children * $excursion->price_child);
 
         $user = $request->user();
-        $roomId = $user->room_number
-            ? Room::where('room_number', $user->room_number)->first()?->id
-            : null;
+        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        if (! $stay) {
+            return response()->json([
+                'success' => false,
+                'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+            ], 403);
+        }
 
         $booking = ExcursionBooking::create([
             'user_id' => $user->id,
+            'guest_id' => $stay['guest_id'],
             'excursion_id' => (int) $id,
             'enterprise_id' => $user->enterprise_id,
-            'room_id' => $roomId,
+            'room_id' => $stay['room_id'],
             'booking_date' => $request->date,
             'number_of_adults' => $adults,
             'number_of_children' => $children,

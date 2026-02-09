@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Services\GuestReservationHelper;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -52,6 +53,7 @@ class AuthController extends Controller
                     'department' => $user->department,
                     'room_number' => $user->room_number,
                     'must_change_password' => $user->must_change_password ?? false,
+                    'can_reserve' => GuestReservationHelper::activeStayForUser($user) !== null,
                 ],
                 'token' => $token,
                 'token_type' => 'Bearer',
@@ -101,6 +103,7 @@ class AuthController extends Controller
                 'department' => $user->department,
                 'room_number' => $user->room_number,
                 'must_change_password' => $user->must_change_password ?? false,
+                'can_reserve' => GuestReservationHelper::activeStayForUser($user) !== null,
                 'created_at' => $user->created_at->toISOString(),
             ],
         ], 200);

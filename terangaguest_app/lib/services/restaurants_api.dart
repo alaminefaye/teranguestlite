@@ -73,8 +73,18 @@ class RestaurantsApi {
       );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
-      rethrow;
+      final message = _messageFromDio(e);
+      throw Exception(message);
     }
+  }
+
+  static String _messageFromDio(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      final msg = data['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+    }
+    return e.message ?? 'Erreur lors de la réservation.';
   }
 
   /// Récupère les réservations de l'utilisateur

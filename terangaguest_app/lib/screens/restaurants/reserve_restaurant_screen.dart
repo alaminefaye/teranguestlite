@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/restaurants_provider.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
@@ -60,6 +61,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildCanReserveBanner(),
                       // Sélection date
                       _buildDateSelector(),
 
@@ -480,12 +482,39 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
     );
   }
 
+  Widget _buildCanReserveBanner() {
+    final user = context.watch<AuthProvider>().user;
+    if (user?.canReserve == true) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade900.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.',
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmButton() {
-    final canReserve = _selectedDate != null && _selectedTime != null;
+    final user = context.watch<AuthProvider>().user;
+    final canSubmit = (user?.canReserve == true) && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
-      onPressed: canReserve ? _handleConfirmReservation : null,
+      onPressed: canSubmit ? _handleConfirmReservation : null,
       width: double.infinity,
       height: 56,
       backgroundColor: AppTheme.accentGold,

@@ -10,6 +10,8 @@ class User {
   final String? fcmToken;
   final Enterprise? enterprise;
   final DateTime? createdAt;
+  /// True si l'utilisateur a un séjour actif (réservation de chambre) et peut faire des réservations (spa, restaurant, etc.)
+  final bool canReserve;
 
   User({
     required this.id,
@@ -23,6 +25,7 @@ class User {
     this.fcmToken,
     this.enterprise,
     this.createdAt,
+    this.canReserve = false,
   });
 
   // Factory constructor pour créer une instance depuis JSON
@@ -43,6 +46,7 @@ class User {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
+      canReserve: json['can_reserve'] as bool? ?? false,
     );
   }
 
@@ -75,6 +79,7 @@ class User {
       'fcm_token': fcmToken,
       'enterprise': enterprise?.toJson(),
       'created_at': createdAt?.toIso8601String(),
+      'can_reserve': canReserve,
     };
   }
 
@@ -91,6 +96,7 @@ class User {
     String? fcmToken,
     Enterprise? enterprise,
     DateTime? createdAt,
+    bool? canReserve,
   }) {
     return User(
       id: id ?? this.id,
@@ -104,6 +110,7 @@ class User {
       fcmToken: fcmToken ?? this.fcmToken,
       enterprise: enterprise ?? this.enterprise,
       createdAt: createdAt ?? this.createdAt,
+      canReserve: canReserve ?? this.canReserve,
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/laundry_provider.dart';
 import '../../widgets/animated_button.dart';
 
@@ -78,6 +79,7 @@ class _CreateLaundryRequestScreenState
                       const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                   child: Column(
                     children: [
+                      _buildCanReserveBanner(),
                       _buildItemsSummary(),
                       const SizedBox(height: 24),
                       _buildSpecialInstructions(),
@@ -210,12 +212,40 @@ class _CreateLaundryRequestScreenState
     );
   }
 
+  Widget _buildCanReserveBanner() {
+    final user = context.watch<AuthProvider>().user;
+    if (user?.canReserve == true) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade900.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.',
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmButton() {
     return Consumer<LaundryProvider>(
       builder: (context, provider, child) {
+        final user = context.watch<AuthProvider>().user;
+        final canSubmit = user?.canReserve == true;
         return AnimatedButton(
           text: AppLocalizations.of(context).confirmRequest,
-          onPressed: _handleConfirmRequest,
+          onPressed: canSubmit ? _handleConfirmRequest : null,
           width: double.infinity,
           height: 56,
           backgroundColor: AppTheme.accentGold,

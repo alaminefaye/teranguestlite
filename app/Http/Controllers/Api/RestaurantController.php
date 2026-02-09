@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Restaurant;
 use App\Models\RestaurantReservation;
 use App\Models\Room;
+use App\Services\GuestReservationHelper;
 
 class RestaurantController extends Controller
 {
@@ -85,15 +86,20 @@ class RestaurantController extends Controller
         }
 
         $user = $request->user();
-        $roomId = $user->room_number
-            ? Room::where('room_number', $user->room_number)->first()?->id
-            : null;
+        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        if (! $stay) {
+            return response()->json([
+                'success' => false,
+                'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+            ], 403);
+        }
 
         $reservation = RestaurantReservation::create([
             'user_id' => $user->id,
+            'guest_id' => $stay['guest_id'],
             'restaurant_id' => $id,
             'enterprise_id' => $user->enterprise_id,
-            'room_id' => $roomId,
+            'room_id' => $stay['room_id'],
             'reservation_date' => $request->date,
             'reservation_time' => $request->time,
             'number_of_guests' => $request->guests,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SpaService;
 use App\Models\SpaReservation;
+use App\Services\GuestReservationHelper;
 
 class SpaServiceController extends Controller
 {
@@ -114,11 +115,21 @@ class SpaServiceController extends Controller
             ], 400);
         }
 
+        $user = $request->user();
+        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        if (! $stay) {
+            return response()->json([
+                'success' => false,
+                'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+            ], 403);
+        }
+
         $reservation = SpaReservation::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
+            'guest_id' => $stay['guest_id'],
             'spa_service_id' => $id,
-            'enterprise_id' => $request->user()->enterprise_id,
-            'room_id' => null,
+            'enterprise_id' => $user->enterprise_id,
+            'room_id' => $stay['room_id'],
             'reservation_date' => $request->date,
             'reservation_time' => $request->time,
             'special_requests' => $request->special_requests,

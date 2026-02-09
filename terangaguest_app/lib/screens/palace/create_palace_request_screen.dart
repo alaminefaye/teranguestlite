@@ -6,6 +6,7 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
 import '../../models/vehicle.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
 import '../../services/vehicle_api.dart';
 import '../../widgets/animated_button.dart';
@@ -393,7 +394,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             )
           else
             SizedBox(
-              height: 140,
+              height: 158,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: _vehicles.length,
@@ -414,6 +415,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           border: Border.all(color: selected ? AppTheme.accentGold : AppTheme.accentGold.withValues(alpha: 0.3)),
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ClipRRect(
@@ -421,13 +423,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                               child: v.image != null && v.image!.isNotEmpty
                                   ? Image.network(
                                       v.image!,
-                                      height: 56,
+                                      height: 52,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
                                       loadingBuilder: (context, child, loadingProgress) {
                                         if (loadingProgress == null) return child;
                                         return const SizedBox(
-                                          height: 56,
+                                          height: 52,
                                           child: Center(
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
@@ -437,19 +439,20 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                                         );
                                       },
                                       errorBuilder: (context, error, stackTrace) => const SizedBox(
-                                        height: 56,
-                                        child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 32)),
+                                        height: 52,
+                                        child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 28)),
                                       ),
                                     )
-                                  : const SizedBox(height: 56, child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 32))),
+                                  : const SizedBox(height: 52, child: Center(child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 28))),
                             ),
                             const SizedBox(height: 6),
-                            Text(v.name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
-                            Text('${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.', style: TextStyle(color: AppTheme.textGray, fontSize: 10)),
+                            Text(v.name, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 2),
+                            Text('${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.', style: TextStyle(color: AppTheme.textGray, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
                             if (v.pricePerDay != null || v.priceHalfDay != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(v.displayPricePerDay, style: TextStyle(color: AppTheme.accentGold, fontSize: 10, fontWeight: FontWeight.w600)),
+                                child: Text(v.displayPricePerDay, style: TextStyle(color: AppTheme.accentGold, fontSize: 10, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ),
                           ],
                         ),
@@ -593,6 +596,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                       const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                   child: Column(
                     children: [
+                      _buildCanReserveBanner(),
                       if (_isVehicleService) ...[
                         _buildVehicleTypeChoice(),
                         const SizedBox(height: 20),
@@ -774,10 +778,38 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     );
   }
 
+  Widget _buildCanReserveBanner() {
+    final user = context.watch<AuthProvider>().user;
+    if (user?.canReserve == true) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade900.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.',
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmButton() {
+    final user = context.watch<AuthProvider>().user;
+    final canSubmit = user?.canReserve == true;
     return AnimatedButton(
       text: 'Envoyer la demande',
-      onPressed: _handleConfirmRequest,
+      onPressed: canSubmit ? _handleConfirmRequest : null,
       width: double.infinity,
       height: 56,
       backgroundColor: AppTheme.accentGold,

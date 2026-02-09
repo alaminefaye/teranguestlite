@@ -8,6 +8,7 @@ use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
 use App\Models\Vehicle;
+use App\Services\GuestReservationHelper;
 
 class PalaceServiceController extends Controller
 {
@@ -160,6 +161,15 @@ class PalaceServiceController extends Controller
         }
 
         $user = $request->user();
+        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        if (! $stay) {
+            return response()->json([
+                'success' => false,
+                'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+            ], 403);
+        }
+        $roomId = $stay['room_id'];
+        $guestId = $stay['guest_id'];
         $metadata = $request->input('metadata');
 
         // Prix : si demande location avec véhicule choisi, calculer selon véhicule (journée / demi-journée)
@@ -178,15 +188,6 @@ class PalaceServiceController extends Controller
             }
         }
 
-        // room_id = id de la chambre dans la table rooms (pas le numéro 101, 102…)
-        $roomId = null;
-        if ($user->room_number) {
-            $room = Room::where('enterprise_id', $user->enterprise_id)
-                ->where('room_number', $user->room_number)
-                ->first();
-            $roomId = $room?->id;
-        }
-
         $description = $request->description;
         if (empty(trim($description ?? '')) && is_array($metadata)) {
             $description = $this->buildDescriptionFromMetadata($metadata);
@@ -195,6 +196,7 @@ class PalaceServiceController extends Controller
 
         $palaceRequest = PalaceRequest::create([
             'user_id' => $user->id,
+            'guest_id' => $guestId,
             'palace_service_id' => (int) $id,
             'enterprise_id' => $user->enterprise_id,
             'room_id' => $roomId,
