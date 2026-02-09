@@ -47,9 +47,8 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   }
 
   Future<void> _requireClientCodeThenShowForm() async {
-    final user = context.read<AuthProvider>().user;
     final tabletSession = context.read<TabletSessionProvider>();
-    if (user?.canReserve == true || tabletSession.hasSession) {
+    if (tabletSession.hasSession) {
       if (mounted) setState(() => _clientCodeChecked = true);
       return;
     }

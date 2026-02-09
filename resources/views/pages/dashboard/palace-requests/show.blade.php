@@ -12,7 +12,6 @@
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Résumé</h2>
         <dl class="space-y-3 text-sm">
             <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Service</dt><dd class="font-medium">{{ $request->palaceService?->name ?? '—' }}</dd></div>
-            <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Client</dt><dd class="font-medium">{{ $request->user?->name ?? '—' }}</dd></div>
             @if($request->room)
             <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Chambre</dt><dd class="font-medium">{{ $request->room->room_number ?? '—' }}</dd></div>
             @endif
@@ -33,9 +32,24 @@
         </dl>
     </div>
 
-    <!-- Description + Détails véhicule (metadata) -->
+    <!-- Client (invité) lié au code -->
     <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Détails de la demande</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Client</h2>
+        @if($request->guest)
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Nom</dt><dd class="font-medium">{{ $request->guest->name }}</dd></div>
+            @if($request->guest->email)<div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Email</dt><dd>{{ $request->guest->email }}</dd></div>@endif
+            @if($request->guest->phone)<div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Téléphone</dt><dd>{{ $request->guest->phone }}</dd></div>@endif
+            @if($request->room)<div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Chambre</dt><dd class="font-medium">{{ $request->room->room_number }}</dd></div>@endif
+        </dl>
+        @else
+        <p class="text-gray-500 dark:text-gray-400 text-sm">@if($request->room)Client Chambre {{ $request->room->room_number }}@else{{ $request->user?->name ?? '—' }}@endif</p>
+        @endif
+    </div>
+</div>
+
+<div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Détails de la demande</h2>
         <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-4">{{ $request->description ?: '—' }}</p>
 
         @php $meta = $request->metadata; @endphp
@@ -69,6 +83,5 @@
             </dl>
         </div>
         @endif
-    </div>
 </div>
 @endsection

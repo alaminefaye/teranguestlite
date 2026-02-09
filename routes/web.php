@@ -81,9 +81,13 @@ Route::middleware(['auth'])->group(function () {
 
         // Réservations & demandes (spa, excursions, restaurants, blanchisserie, palace)
         Route::get('spa-reservations', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'index'])->name('spa-reservations.index');
+        Route::get('spa-reservations/{spaReservation}', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'show'])->name('spa-reservations.show');
         Route::get('excursion-bookings', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'index'])->name('excursion-bookings.index');
+        Route::get('excursion-bookings/{excursionBooking}', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'show'])->name('excursion-bookings.show');
         Route::get('restaurant-reservations', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'index'])->name('restaurant-reservations.index');
+        Route::get('restaurant-reservations/{restaurantReservation}', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'show'])->name('restaurant-reservations.show');
         Route::get('laundry-requests', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'index'])->name('laundry-requests.index');
+        Route::get('laundry-requests/{laundryRequest}', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'show'])->name('laundry-requests.show');
         Route::get('palace-requests', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'index'])->name('palace-requests.index');
         Route::get('palace-requests/{palaceRequest}', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'show'])->name('palace-requests.show');
 

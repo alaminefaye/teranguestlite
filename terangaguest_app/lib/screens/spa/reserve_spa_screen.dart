@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/spa.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/spa_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
@@ -49,9 +48,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
   }
 
   Future<void> _requireClientCodeThenShowForm() async {
-    final user = context.read<AuthProvider>().user;
     final tabletSession = context.read<TabletSessionProvider>();
-    if (user?.canReserve == true || tabletSession.hasSession) {
+    // Toujours exiger le code client (session) pour réserver : on ne s'appuie pas sur canReserve.
+    if (tabletSession.hasSession) {
       if (mounted) setState(() => _clientCodeChecked = true);
       return;
     }

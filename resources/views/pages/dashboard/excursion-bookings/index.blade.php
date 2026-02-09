@@ -46,6 +46,7 @@
                     <th class="px-4 py-3">Participants</th>
                     <th class="px-4 py-3 text-right">Total</th>
                     <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -53,15 +54,26 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td class="px-4 py-3">{{ $b->booking_date?->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 font-medium">{{ $b->excursion?->name ?? '—' }}</td>
-                        <td class="px-4 py-3">{{ $b->user?->name ?? '—' }}</td>
+                        <td class="px-4 py-3">
+                            @if($b->guest)
+                                <span class="font-medium">{{ $b->guest->name }}</span>
+                                @if($b->room)<span class="text-gray-500 dark:text-gray-400 text-xs block">Chambre {{ $b->room->room_number }}</span>@endif
+                                @if($b->guest->phone)<span class="text-gray-500 dark:text-gray-400 text-xs block">{{ $b->guest->phone }}</span>@endif
+                            @else
+                                @if($b->room)Client Chambre {{ $b->room->room_number }}@else{{ $b->user?->name ?? '—' }}@endif
+                            @endif
+                        </td>
                         <td class="px-4 py-3">{{ ($b->number_of_adults ?? 0) + ($b->number_of_children ?? 0) }}</td>
                         <td class="px-4 py-3 text-right">{{ $b->formatted_total_price }}</td>
                         <td class="px-4 py-3">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium @if($b->status === 'confirmed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400 @elseif($b->status === 'cancelled') bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400 @else bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400 @endif">{{ $b->status }}</span>
                         </td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('dashboard.excursion-bookings.show', $b) }}" class="text-brand-600 dark:text-brand-400 hover:underline text-sm font-medium">Voir</a>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune réservation d'excursion</td></tr>
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune réservation d'excursion</td></tr>
                 @endforelse
             </tbody>
         </table>

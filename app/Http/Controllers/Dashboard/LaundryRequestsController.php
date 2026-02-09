@@ -11,14 +11,21 @@ class LaundryRequestsController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = LaundryRequest::with(['user', 'room']);
+        $query = LaundryRequest::with(['user', 'room', 'guest']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('search')) {
-            $query->where('request_number', 'like', '%' . $request->search . '%')
-                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('request_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%'))
+                    ->orWhereHas('guest', fn ($q2) => $q2->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('phone', 'like', '%' . $search . '%'))
+                    ->orWhereHas('room', fn ($q2) => $q2->where('room_number', 'like', '%' . $search . '%'));
+            });
         }
 
         $requests = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -30,5 +37,11 @@ class LaundryRequestsController extends Controller
         ];
 
         return view('pages.dashboard.laundry-requests.index', compact('requests', 'stats'));
+    }
+
+    public function show(LaundryRequest $laundryRequest): View
+    {
+        $laundryRequest->load(['user', 'room', 'guest']);
+        return view('pages.dashboard.laundry-requests.show', ['request' => $laundryRequest]);
     }
 }

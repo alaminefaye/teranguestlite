@@ -58,7 +58,15 @@
                         <td class="px-4 py-3 font-mono font-medium">{{ $req->request_number }}</td>
                         <td class="px-4 py-3">{{ $req->created_at?->format('d/m/Y H:i') }}</td>
                         <td class="px-4 py-3 font-medium">{{ $req->palaceService?->name ?? '—' }}</td>
-                        <td class="px-4 py-3">{{ $req->user?->name ?? '—' }}</td>
+                        <td class="px-4 py-3">
+                            @if($req->guest)
+                                <span class="font-medium">{{ $req->guest->name }}</span>
+                                @if($req->room)<span class="text-gray-500 dark:text-gray-400 text-xs block">Chambre {{ $req->room->room_number }}</span>@endif
+                                @if($req->guest->phone)<span class="text-gray-500 dark:text-gray-400 text-xs block">{{ $req->guest->phone }}</span>@endif
+                            @else
+                                @if($req->room)Client Chambre {{ $req->room->room_number }}@else{{ $req->user?->name ?? '—' }}@endif
+                            @endif
+                        </td>
                         <td class="px-4 py-3">{{ $req->requested_for?->format('d/m/Y H:i') ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">{{ $req->formatted_estimated_price }}</td>
                         <td class="px-4 py-3">

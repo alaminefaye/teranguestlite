@@ -45,6 +45,7 @@
                     <th class="px-4 py-3">Chambre</th>
                     <th class="px-4 py-3 text-right">Total</th>
                     <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -52,15 +53,25 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td class="px-4 py-3 font-mono font-medium">{{ $req->request_number }}</td>
                         <td class="px-4 py-3">{{ $req->created_at?->format('d/m/Y H:i') }}</td>
-                        <td class="px-4 py-3">{{ $req->user?->name ?? '—' }}</td>
+                        <td class="px-4 py-3">
+                            @if($req->guest)
+                                <span class="font-medium">{{ $req->guest->name }}</span>
+                                @if($req->guest->phone)<span class="text-gray-500 dark:text-gray-400 text-xs block">{{ $req->guest->phone }}</span>@endif
+                            @else
+                                @if($req->room)Client Chambre {{ $req->room->room_number }}@else{{ $req->user?->name ?? '—' }}@endif
+                            @endif
+                        </td>
                         <td class="px-4 py-3">{{ $req->room?->room_number ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">{{ $req->formatted_total_price }}</td>
                         <td class="px-4 py-3">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium @if($req->status === 'pending') bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400 @elseif($req->status === 'completed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400 @else bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400 @endif">{{ $req->status }}</span>
                         </td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('dashboard.laundry-requests.show', $req) }}" class="text-brand-600 dark:text-brand-400 hover:underline text-sm font-medium">Voir</a>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande blanchisserie</td></tr>
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande blanchisserie</td></tr>
                 @endforelse
             </tbody>
         </table>
