@@ -383,7 +383,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await tabletSession.setRoomNumber(user.roomNumber!.trim());
     }
     try {
-      await tabletSession.validateCode(code);
+      final enterpriseId = user?.enterpriseId;
+      await tabletSession.validateCode(code, enterpriseId: enterpriseId);
       if (mounted) {
         _codeController.clear();
         tabletSession.clearError();

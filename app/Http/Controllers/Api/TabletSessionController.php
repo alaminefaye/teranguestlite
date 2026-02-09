@@ -28,17 +28,24 @@ class TabletSessionController extends Controller
             'code' => 'required|string|max:20',
             'room_id' => 'nullable|exists:rooms,id',
             'room_number' => 'nullable|string|max:20',
+            'enterprise_id' => 'nullable|integer|exists:enterprises,id',
         ]);
 
         $code = trim($request->input('code'));
         $room = null;
 
         if ($request->filled('room_id')) {
-            $room = Room::find($request->room_id);
+            $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
+            if ($request->filled('enterprise_id') && $room && $room->enterprise_id != $request->enterprise_id) {
+                $room = null;
+            }
         } elseif ($request->filled('room_number')) {
-            $room = Room::withoutGlobalScope('enterprise')
-                ->where('room_number', $request->room_number)
-                ->first();
+            $query = Room::withoutGlobalScope('enterprise')
+                ->where('room_number', $request->room_number);
+            if ($request->filled('enterprise_id')) {
+                $query->where('enterprise_id', $request->enterprise_id);
+            }
+            $room = $query->first();
         }
 
         if (!$room) {

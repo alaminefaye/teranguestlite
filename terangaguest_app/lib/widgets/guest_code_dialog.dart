@@ -148,7 +148,8 @@ Future<String?> showGuestCodeDialog(BuildContext context) async {
                         }
                         if (showRoomSetup) await ts.setRoomNumber(r);
                         try {
-                          await ts.validateCode(c);
+                          final enterpriseId = Provider.of<AuthProvider>(ctx, listen: false).user?.enterpriseId;
+                          await ts.validateCode(c, enterpriseId: enterpriseId);
                           if (!ctx.mounted) return;
                           Navigator.of(ctx).pop(c);
                         } catch (e) {

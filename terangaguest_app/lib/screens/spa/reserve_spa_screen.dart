@@ -485,7 +485,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
         ),
       );
 
-      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
+      final tabletSession = context.read<TabletSessionProvider>();
+      final storedCode = await tabletSession.getValidatedClientCode();
+      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
       await context.read<SpaProvider>().reserveSpaService(
             serviceId: widget.service.id,
             date: _selectedDate!,

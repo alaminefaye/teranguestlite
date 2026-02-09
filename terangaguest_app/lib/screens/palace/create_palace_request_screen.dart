@@ -903,7 +903,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
       final description = detailsText.isEmpty ? null : detailsText;
 
-      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
+      final tabletSession = context.read<TabletSessionProvider>();
+      final storedCode = await tabletSession.getValidatedClientCode();
+      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
       await context.read<PalaceProvider>().createPalaceRequest(
           serviceId: widget.service.id,
           details: description,

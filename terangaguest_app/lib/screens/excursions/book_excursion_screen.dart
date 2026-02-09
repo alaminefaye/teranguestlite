@@ -475,7 +475,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         ),
       );
 
-      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
+      final tabletSession = context.read<TabletSessionProvider>();
+      final storedCode = await tabletSession.getValidatedClientCode();
+      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
       await context.read<ExcursionsProvider>().bookExcursion(
             excursionId: widget.excursion.id,
             date: _selectedDate!,

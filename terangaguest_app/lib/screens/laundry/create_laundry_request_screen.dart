@@ -286,7 +286,9 @@ class _CreateLaundryRequestScreenState
         ),
       );
 
-      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
+      final tabletSession = context.read<TabletSessionProvider>();
+      final storedCode = await tabletSession.getValidatedClientCode();
+      final clientCode = _validatedClientCode ?? storedCode ?? _clientCodeController.text.trim();
       await context.read<LaundryProvider>().createLaundryRequest(
           specialInstructions: _instructionsController.text.isEmpty
               ? null

@@ -6,6 +6,7 @@ import '../services/tablet_session_api.dart';
 
 const _keySession = 'tablet_guest_session';
 const _keyRoomNumber = 'tablet_room_number';
+const _keyValidatedCode = 'tablet_validated_code';
 
 /// Gère la session client sur la tablette (code validé + chambre).
 class TabletSessionProvider with ChangeNotifier {
@@ -75,8 +76,10 @@ class TabletSessionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Valide le code et enregistre la session si succès.
-  Future<void> validateCode(String code) async {
+  /// Valide le code et enregistre la session uniquement si le serveur répond succès.
+  /// En cas d'erreur (code invalide, séjour expiré), toute session existante est effacée.
+  /// [enterpriseId] optionnel : pour limiter la chambre à l'établissement de l'utilisateur connecté.
+  Future<void> validateCode(String code, {int? enterpriseId}) async {
     _loading = true;
     _error = null;
     notifyListeners();
@@ -84,12 +87,15 @@ class TabletSessionProvider with ChangeNotifier {
       final s = await _api.validateCode(
         code: code,
         roomNumber: _roomNumber,
+        enterpriseId: enterpriseId,
       );
       _session = s;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
+      await prefs.setString(_keyValidatedCode, code.trim());
       notifyListeners();
     } catch (e) {
+      await clearSession();
       _error = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       rethrow;
@@ -127,7 +133,15 @@ class TabletSessionProvider with ChangeNotifier {
     _error = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keySession);
+    await prefs.remove(_keyValidatedCode);
     notifyListeners();
+  }
+
+  /// Code client validé (stocké après une validation réussie). Utilisé pour les réservations.
+  /// Retourne null si aucun code stocké ou session effacée.
+  Future<String?> getValidatedClientCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyValidatedCode);
   }
 
   void clearError() {

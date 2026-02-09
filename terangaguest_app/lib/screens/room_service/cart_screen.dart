@@ -301,7 +301,8 @@ class _CartScreenState extends State<CartScreen> {
                           }
                           if (showRoomSetup) await ts.setRoomNumber(r);
                           try {
-                            await ts.validateCode(c);
+                            final enterpriseId = ctx.read<AuthProvider>().user?.enterpriseId;
+                            await ts.validateCode(c, enterpriseId: enterpriseId);
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop(true);
                           } catch (e) {
