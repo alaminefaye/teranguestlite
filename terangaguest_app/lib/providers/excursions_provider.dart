@@ -49,6 +49,7 @@ class ExcursionsProvider with ChangeNotifier {
     required int adultsCount,
     required int childrenCount,
     String? specialRequests,
+    String? clientCode,
   }) async {
     try {
       final booking = await _excursionsApi.bookExcursion(
@@ -57,6 +58,7 @@ class ExcursionsProvider with ChangeNotifier {
         adultsCount: adultsCount,
         childrenCount: childrenCount,
         specialRequests: specialRequests,
+        clientCode: clientCode,
       );
 
       // Rafraîchir les bookings

@@ -94,6 +94,7 @@ class SpaServiceController extends Controller
     public function reserve(Request $request, $id)
     {
         $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i',
             'special_requests' => 'nullable|string|max:500',
@@ -116,7 +117,7 @@ class SpaServiceController extends Controller
         }
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

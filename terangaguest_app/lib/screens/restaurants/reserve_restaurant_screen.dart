@@ -28,6 +28,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   String? _selectedTime;
   int _guests = 2;
   final TextEditingController _specialRequestsController = TextEditingController();
+  final TextEditingController _clientCodeController = TextEditingController();
 
   final List<String> _availableTimes = [
     '12:00', '12:30', '13:00', '13:30', '14:00',
@@ -37,6 +38,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   @override
   void dispose() {
     _specialRequestsController.dispose();
+    _clientCodeController.dispose();
     super.dispose();
   }
 
@@ -493,15 +495,37 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.orange, width: 1.5),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, color: Colors.orange, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.',
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _clientCodeController,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Code client (ex: 123456)',
+              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.15),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.orange),
+              ),
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
             ),
+            onChanged: (_) => setState(() {}),
           ),
         ],
       ),
@@ -510,7 +534,8 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
 
   Widget _buildConfirmButton() {
     final user = context.watch<AuthProvider>().user;
-    final canSubmit = (user?.canReserve == true) && _selectedDate != null && _selectedTime != null;
+    final hasCode = _clientCodeController.text.trim().isNotEmpty;
+    final canSubmit = ((user?.canReserve == true) || hasCode) && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -537,7 +562,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         ),
       );
 
-      // Appeler l'API
+      final clientCode = _clientCodeController.text.trim();
       await context.read<RestaurantsProvider>().reserveTable(
             restaurantId: widget.restaurant.id,
             date: _selectedDate!,
@@ -546,6 +571,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
             specialRequests: _specialRequestsController.text.isEmpty
                 ? null
                 : _specialRequestsController.text,
+            clientCode: clientCode.isNotEmpty ? clientCode : null,
           );
 
       // Fermer le loader

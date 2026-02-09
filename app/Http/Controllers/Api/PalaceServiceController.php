@@ -102,6 +102,7 @@ class PalaceServiceController extends Controller
     public function request(Request $request, $id)
     {
         $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'requested_for' => 'nullable|date_format:Y-m-d H:i',
             'description' => 'nullable|string|max:2000',
             'special_requirements' => 'nullable|string|max:500',
@@ -161,7 +162,7 @@ class PalaceServiceController extends Controller
         }
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

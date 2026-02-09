@@ -45,17 +45,19 @@ class ExcursionsApi {
     required int adultsCount,
     required int childrenCount,
     String? specialRequests,
+    String? clientCode,
   }) async {
     try {
+      final data = <String, dynamic>{
+        'date': date.toIso8601String().split('T')[0],
+        'adults': adultsCount,
+        'children': childrenCount,
+        if (specialRequests != null && specialRequests.isNotEmpty) 'special_requests': specialRequests,
+        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+      };
       final response = await _apiService.post(
         '${ApiConfig.excursions}/$excursionId/book',
-        data: {
-          'date': date.toIso8601String().split('T')[0],
-          'adults': adultsCount,
-          'children': childrenCount,
-          if (specialRequests != null && specialRequests.isNotEmpty)
-            'special_requests': specialRequests,
-        },
+        data: data,
       );
 
       return ExcursionBooking.fromJson(

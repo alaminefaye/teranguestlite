@@ -106,6 +106,7 @@ class ExcursionController extends Controller
     public function book(Request $request, $id)
     {
         $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'date' => 'required|date|after_or_equal:today',
             'adults' => 'required|integer|min:1',
             'children' => 'nullable|integer|min:0',
@@ -151,7 +152,7 @@ class ExcursionController extends Controller
         $totalPrice = ($adults * $excursion->price_adult) + ($children * $excursion->price_child);
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

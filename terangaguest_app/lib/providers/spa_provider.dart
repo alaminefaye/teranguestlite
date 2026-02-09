@@ -51,6 +51,7 @@ class SpaProvider with ChangeNotifier {
     required DateTime date,
     required String time,
     String? specialRequests,
+    String? clientCode,
   }) async {
     try {
       final reservation = await _spaApi.reserveSpaService(
@@ -58,6 +59,7 @@ class SpaProvider with ChangeNotifier {
         date: date,
         time: time,
         specialRequests: specialRequests,
+        clientCode: clientCode,
       );
 
       // Rafraîchir les réservations

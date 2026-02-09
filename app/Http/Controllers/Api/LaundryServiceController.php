@@ -54,6 +54,7 @@ class LaundryServiceController extends Controller
     public function request(Request $request)
     {
         $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'items' => 'required|array|min:1',
             'items.*.laundry_service_id' => 'required|exists:laundry_services,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -96,7 +97,7 @@ class LaundryServiceController extends Controller
         $deliveryTime = \Carbon\Carbon::parse($pickupTime)->addHours($maxTurnaround)->format('Y-m-d H:i');
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

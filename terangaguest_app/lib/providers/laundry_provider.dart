@@ -69,6 +69,7 @@ class LaundryProvider with ChangeNotifier {
   /// Créer une demande de blanchisserie
   Future<LaundryRequest> createLaundryRequest({
     String? specialInstructions,
+    String? clientCode,
   }) async {
     if (_selectedItems.isEmpty) {
       throw 'Veuillez sélectionner au moins un article';
@@ -85,6 +86,7 @@ class LaundryProvider with ChangeNotifier {
       final request = await _laundryApi.createLaundryRequest(
         items: items,
         specialInstructions: specialInstructions,
+        clientCode: clientCode,
       );
 
       // Rafraîchir les demandes

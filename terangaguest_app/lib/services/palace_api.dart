@@ -28,6 +28,7 @@ class PalaceApi {
     String? details,
     DateTime? scheduledTime,
     Map<String, dynamic>? metadata,
+    String? clientCode,
   }) async {
     try {
       final description = (details?.trim() ?? '').isEmpty
@@ -38,8 +39,9 @@ class PalaceApi {
           : null;
 
       final data = <String, dynamic>{
+        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
         if (description != null && description.isNotEmpty) 'description': description,
-        'requested_for': ?requestedFor,
+        if (requestedFor != null) 'requested_for': requestedFor,
         if (metadata != null && metadata.isNotEmpty) 'metadata': metadata,
       };
 

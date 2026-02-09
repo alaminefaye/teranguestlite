@@ -25,8 +25,8 @@ class User {
     this.fcmToken,
     this.enterprise,
     this.createdAt,
-    this.canReserve = false,
-  });
+    bool? canReserve,
+  }) : canReserve = canReserve ?? false;
 
   // Factory constructor pour créer une instance depuis JSON
   factory User.fromJson(Map<String, dynamic> json) {
@@ -46,7 +46,7 @@ class User {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
-      canReserve: json['can_reserve'] as bool? ?? false,
+      canReserve: json['can_reserve'] == true,
     );
   }
 

@@ -26,6 +26,7 @@ class LaundryApi {
   Future<LaundryRequest> createLaundryRequest({
     required List<Map<String, int>> items,
     String? specialInstructions,
+    String? clientCode,
   }) async {
     try {
       final payloadItems = items.map((e) => {
@@ -33,13 +34,14 @@ class LaundryApi {
         'quantity': e['quantity']!,
       }).toList();
 
+      final data = <String, dynamic>{
+        'items': payloadItems,
+        if (specialInstructions != null && specialInstructions.isNotEmpty) 'special_instructions': specialInstructions,
+        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+      };
       final response = await _apiService.post(
         ApiConfig.laundryRequest,
-        data: {
-          'items': payloadItems,
-          if (specialInstructions != null && specialInstructions.isNotEmpty)
-            'special_instructions': specialInstructions,
-        },
+        data: data,
       );
 
       return LaundryRequest.fromJson(

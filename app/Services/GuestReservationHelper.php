@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
@@ -74,5 +75,69 @@ class GuestReservationHelper
             'room_id' => $ctx['room_id'],
             'guest_id' => $ctx['guest_id'],
         ];
+    }
+
+    /**
+     * Valide le code client pour l'utilisateur (chambre liée à son room_number).
+     * Retourne room_id et guest_id si le code est valide et qu'un séjour actif existe pour cette chambre.
+     *
+     * @return array{room_id: int, guest_id: int}|null
+     */
+    public static function validateClientCodeForUser(User $user, ?string $code): ?array
+    {
+        $code = $code ? trim($code) : '';
+        if ($code === '' || ! $user->room_number || ! $user->enterprise_id) {
+            return null;
+        }
+
+        $room = Room::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $user->enterprise_id)
+            ->where('room_number', $user->room_number)
+            ->first();
+
+        if (! $room) {
+            return null;
+        }
+
+        $guest = Guest::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $user->enterprise_id)
+            ->where('access_code', $code)
+            ->first();
+
+        if (! $guest) {
+            return null;
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('guest_id', $guest->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->first();
+
+        if (! $reservation) {
+            return null;
+        }
+
+        return [
+            'room_id' => $room->id,
+            'guest_id' => $guest->id,
+        ];
+    }
+
+    /**
+     * Retourne le contexte client (room_id, guest_id) : soit séjour actif de l'utilisateur,
+     * soit validation par code client. Si aucun des deux, retourne null.
+     *
+     * @return array{room_id: int, guest_id: int|null}|null
+     */
+    public static function requireActiveStayOrClientCode(User $user, ?string $clientCode): ?array
+    {
+        $stay = self::requireActiveStayForUser($user);
+        if ($stay !== null) {
+            return $stay;
+        }
+        return self::validateClientCodeForUser($user, $clientCode);
     }
 }

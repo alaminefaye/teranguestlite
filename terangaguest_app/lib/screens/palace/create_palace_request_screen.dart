@@ -26,6 +26,7 @@ class CreatePalaceRequestScreen extends StatefulWidget {
 
 class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   final TextEditingController _detailsController = TextEditingController();
+  final TextEditingController _clientCodeController = TextEditingController();
   DateTime? _scheduledTime;
 
   // Véhicule : type choisi (null si service non véhicule ou pas encore choisi)
@@ -56,6 +57,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     super.initState();
     _rentalDaysController.addListener(_onRentalFieldsChanged);
     _rentalDurationController.addListener(_onRentalFieldsChanged);
+    _clientCodeController.addListener(_onRentalFieldsChanged);
   }
 
   void _onRentalFieldsChanged() {
@@ -66,7 +68,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   void dispose() {
     _rentalDaysController.removeListener(_onRentalFieldsChanged);
     _rentalDurationController.removeListener(_onRentalFieldsChanged);
+    _clientCodeController.removeListener(_onRentalFieldsChanged);
     _detailsController.dispose();
+    _clientCodeController.dispose();
     _pickupController.dispose();
     _destinationController.dispose();
     _distanceController.dispose();
@@ -789,15 +793,37 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.orange, width: 1.5),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, color: Colors.orange, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.',
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _clientCodeController,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Code client (ex: 123456)',
+              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.15),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.orange),
+              ),
+              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
             ),
+            onChanged: (_) => setState(() {}),
           ),
         ],
       ),
@@ -806,7 +832,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
   Widget _buildConfirmButton() {
     final user = context.watch<AuthProvider>().user;
-    final canSubmit = user?.canReserve == true;
+    final hasCode = _clientCodeController.text.trim().isNotEmpty;
+    final canSubmit = (user?.canReserve == true) || hasCode;
     return AnimatedButton(
       text: 'Envoyer la demande',
       onPressed: canSubmit ? _handleConfirmRequest : null,
@@ -886,11 +913,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
       final description = detailsText.isEmpty ? null : detailsText;
 
+      final clientCode = _clientCodeController.text.trim();
       await context.read<PalaceProvider>().createPalaceRequest(
           serviceId: widget.service.id,
           details: description,
           scheduledTime: _scheduledTime,
-          metadata: metadata);
+          metadata: metadata,
+          clientCode: clientCode.isNotEmpty ? clientCode : null);
 
       if (mounted) Navigator.pop(context);
 

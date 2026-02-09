@@ -52,6 +52,7 @@ class RestaurantsProvider with ChangeNotifier {
     required String time,
     required int guests,
     String? specialRequests,
+    String? clientCode,
   }) async {
     try {
       final reservation = await _restaurantsApi.reserveTable(
@@ -60,6 +61,7 @@ class RestaurantsProvider with ChangeNotifier {
         time: time,
         guests: guests,
         specialRequests: specialRequests,
+        clientCode: clientCode,
       );
 
       // Rafraîchir les réservations

@@ -74,6 +74,7 @@ class RestaurantController extends Controller
     public function reserve(Request $request, $id)
     {
         $request->validate([
+            'client_code' => 'nullable|string|max:20',
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i',
             'guests' => 'required|integer|min:1|max:20',
@@ -86,7 +87,7 @@ class RestaurantController extends Controller
         }
 
         $user = $request->user();
-        $stay = GuestReservationHelper::requireActiveStayForUser($user);
+        $stay = GuestReservationHelper::requireActiveStayOrClientCode($user, $request->input('client_code'));
         if (! $stay) {
             return response()->json([
                 'success' => false,

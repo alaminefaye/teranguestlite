@@ -39,6 +39,7 @@ class PalaceProvider with ChangeNotifier {
     String? details,
     DateTime? scheduledTime,
     Map<String, dynamic>? metadata,
+    String? clientCode,
   }) async {
     try {
       final request = await _palaceApi.createPalaceRequest(
@@ -46,6 +47,7 @@ class PalaceProvider with ChangeNotifier {
         details: details,
         scheduledTime: scheduledTime,
         metadata: metadata,
+        clientCode: clientCode,
       );
 
       // Rafraîchir les demandes
