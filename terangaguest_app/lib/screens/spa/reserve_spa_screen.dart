@@ -14,10 +14,7 @@ import 'my_spa_reservations_screen.dart';
 class ReserveSpaScreen extends StatefulWidget {
   final SpaService service;
 
-  const ReserveSpaScreen({
-    super.key,
-    required this.service,
-  });
+  const ReserveSpaScreen({super.key, required this.service});
 
   @override
   State<ReserveSpaScreen> createState() => _ReserveSpaScreenState();
@@ -31,8 +28,15 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
   final TextEditingController _clientCodeController = TextEditingController();
 
   final List<String> _availableTimes = [
-    '09:00', '10:00', '11:00', '12:00',
-    '14:00', '15:00', '16:00', '17:00', '18:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
   ];
 
   @override
@@ -59,8 +63,10 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
               _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -188,8 +194,10 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                 children: [
                   Text(
                     _selectedDate != null
-                        ? DateFormat('dd MMMM yyyy', 'fr_FR')
-                            .format(_selectedDate!)
+                        ? DateFormat(
+                            'dd MMMM yyyy',
+                            'fr_FR',
+                          ).format(_selectedDate!)
                         : AppLocalizations.of(context).selectDate,
                     style: TextStyle(
                       fontSize: 15,
@@ -246,14 +254,16 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                   });
                 },
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? LinearGradient(
                             colors: [
                               AppTheme.accentGold,
-                              AppTheme.accentGold.withValues(alpha: 0.8)
+                              AppTheme.accentGold.withValues(alpha: 0.8),
                             ],
                           )
                         : null,
@@ -271,9 +281,12 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                     time,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? AppTheme.primaryDark : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? AppTheme.primaryDark
+                          : AppTheme.textGray,
                     ),
                   ),
                 ),
@@ -313,18 +326,22 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).spaHintExample,
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -350,7 +367,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
         gradient: LinearGradient(
           colors: [
             AppTheme.accentGold.withValues(alpha: 0.2),
-            AppTheme.primaryDark
+            AppTheme.primaryDark,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -368,9 +385,15 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             ),
           ),
           const Divider(height: 24, color: AppTheme.textGray),
-          _buildSummaryRow(AppLocalizations.of(context).service, widget.service.name),
+          _buildSummaryRow(
+            AppLocalizations.of(context).service,
+            widget.service.name,
+          ),
           const SizedBox(height: 12),
-          _buildSummaryRow(AppLocalizations.of(context).duration, widget.service.formattedDuration),
+          _buildSummaryRow(
+            AppLocalizations.of(context).duration,
+            widget.service.formattedDuration,
+          ),
           const SizedBox(height: 12),
           _buildSummaryRow(
             AppLocalizations.of(context).date,
@@ -391,10 +414,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppTheme.textGray,
-          ),
+          style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
         ),
         Text(
           value,
@@ -441,14 +461,20 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.8),
+              ),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+                size: 22,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -460,7 +486,10 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
   Widget _buildConfirmButton() {
     final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit = ((user?.canReserve == true) || hasCode) && _selectedDate != null && _selectedTime != null;
+    final canSubmit =
+        ((user?.canReserve == true) || hasCode) &&
+        _selectedDate != null &&
+        _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -488,14 +517,14 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
 
       final clientCode = _clientCodeController.text.trim();
       await context.read<SpaProvider>().reserveSpaService(
-            serviceId: widget.service.id,
-            date: _selectedDate!,
-            time: _selectedTime!,
-            specialRequests: _specialRequestsController.text.isEmpty
-                ? null
-                : _specialRequestsController.text,
-            clientCode: clientCode.isNotEmpty ? clientCode : null,
-          );
+        serviceId: widget.service.id,
+        date: _selectedDate!,
+        time: _selectedTime!,
+        specialRequests: _specialRequestsController.text.isEmpty
+            ? null
+            : _specialRequestsController.text,
+        clientCode: clientCode.isNotEmpty ? clientCode : null,
+      );
 
       if (mounted) Navigator.pop(context);
 
@@ -523,7 +552,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context).spaReservationConfirmedMessage(widget.service.name),
+                  AppLocalizations.of(
+                    context,
+                  ).spaReservationConfirmedMessage(widget.service.name),
                   style: const TextStyle(color: AppTheme.textGray),
                 ),
                 const SizedBox(height: 16),
@@ -538,7 +569,11 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.notifications_active, color: AppTheme.accentGold, size: 20),
+                      const Icon(
+                        Icons.notifications_active,
+                        color: AppTheme.accentGold,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -563,7 +598,10 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                 },
                 child: Text(
                   AppLocalizations.of(context).ok,
-                  style: const TextStyle(color: AppTheme.textGray, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               AnimatedButton(
@@ -592,7 +630,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
         final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
+            content: Text(
+              '${AppLocalizations.of(context).errorPrefix}$message',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

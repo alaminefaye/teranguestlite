@@ -32,13 +32,15 @@ class _CartScreenState extends State<CartScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final tabletSession = context.read<TabletSessionProvider>();
       final cart = context.read<CartProvider>();
-      tabletSession.clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
+      tabletSession
+          .clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
       cart.clearError(); // Idem pour une erreur de checkout précédente
       await tabletSession.load();
       // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
       if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
         final authUser = context.read<AuthProvider>().user;
-        if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
+        if (authUser?.roomNumber != null &&
+            authUser!.roomNumber!.trim().isNotEmpty) {
           await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
         }
       }
@@ -53,7 +55,10 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> _checkout(BuildContext context) async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final tabletSession = Provider.of<TabletSessionProvider>(context, listen: false);
+    final tabletSession = Provider.of<TabletSessionProvider>(
+      context,
+      listen: false,
+    );
 
     if (cartProvider.isEmpty) {
       HapticHelper.error();
@@ -74,7 +79,8 @@ class _CartScreenState extends State<CartScreen> {
     // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
     if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
       final authUser = context.read<AuthProvider>().user;
-      if (authUser?.roomNumber != null && authUser!.roomNumber!.trim().isNotEmpty) {
+      if (authUser?.roomNumber != null &&
+          authUser!.roomNumber!.trim().isNotEmpty) {
         await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
       }
     }
@@ -96,7 +102,9 @@ class _CartScreenState extends State<CartScreen> {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Séjour invalide ou expiré. Entrez à nouveau votre code.'),
+            content: const Text(
+              'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
           ),
@@ -109,8 +117,14 @@ class _CartScreenState extends State<CartScreen> {
     if (!context.mounted || !tabletSession.hasSession) return;
 
     // Confirmation identité + moyen de paiement.
-    final confirmResult = await _showConfirmIdentityDialog(context, tabletSession.session!);
-    if (!confirmResult.confirmed || confirmResult.paymentMethod == null || !context.mounted) return;
+    final confirmResult = await _showConfirmIdentityDialog(
+      context,
+      tabletSession.session!,
+    );
+    if (!confirmResult.confirmed ||
+        confirmResult.paymentMethod == null ||
+        !context.mounted)
+      return;
 
     HapticHelper.confirm();
     setState(() => _isProcessing = true);
@@ -149,12 +163,15 @@ class _CartScreenState extends State<CartScreen> {
 
   /// Retourne un message d'erreur compréhensible pour l'utilisateur (sans détail technique).
   String _userFriendlyErrorMessage(dynamic e) {
-    final str = e.toString()
+    final str = e
+        .toString()
         .replaceFirst('Exception: ', '')
         .replaceFirst('DioException [bad response]: ', '')
         .trim();
     // Si le message est déjà court et lisible, le garder
-    if (str.length <= 200 && !str.contains('status code') && !str.contains('validateStatus')) {
+    if (str.length <= 200 &&
+        !str.contains('status code') &&
+        !str.contains('validateStatus')) {
       return str;
     }
     // Sinon message générique pour éviter d'afficher la stack technique
@@ -167,10 +184,13 @@ class _CartScreenState extends State<CartScreen> {
     BuildContext context,
     TabletSessionProvider tabletSession,
   ) async {
-    tabletSession.clearError(); // Dialogue ouvert sans message d'erreur précédent
+    tabletSession
+        .clearError(); // Dialogue ouvert sans message d'erreur précédent
     String? code;
     final codeController = TextEditingController();
-    final roomController = TextEditingController(text: tabletSession.roomNumber);
+    final roomController = TextEditingController(
+      text: tabletSession.roomNumber,
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -223,15 +243,24 @@ class _CartScreenState extends State<CartScreen> {
                       const SizedBox(height: 12),
                     ] else ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: AppTheme.accentGold.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.bed, color: AppTheme.accentGold, size: 20),
+                            const Icon(
+                              Icons.bed,
+                              color: AppTheme.accentGold,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Text(
                               'Chambre : ${ts.roomNumber ?? "—"}',
@@ -258,20 +287,31 @@ class _CartScreenState extends State<CartScreen> {
                       keyboardType: TextInputType.number,
                       obscureText: false,
                       maxLength: 6,
-                      style: const TextStyle(color: Colors.white, letterSpacing: 8),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        letterSpacing: 8,
+                      ),
                       onChanged: (v) => code = v.trim(),
                     ),
                     if (error != null) ...[
                       const SizedBox(height: 8),
-                      Text(error, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                      Text(
+                        error,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
                     ],
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: loading ? null : () => Navigator.of(ctx).pop(false),
-                  child: const Text('Annuler', style: TextStyle(color: Colors.white70)),
+                  onPressed: loading
+                      ? null
+                      : () => Navigator.of(ctx).pop(false),
+                  child: const Text(
+                    'Annuler',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ),
                 FilledButton(
                   onPressed: loading
@@ -293,7 +333,9 @@ class _CartScreenState extends State<CartScreen> {
                           if (r.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
                               const SnackBar(
-                                content: Text('Définissez le numéro de chambre de cette tablette.'),
+                                content: Text(
+                                  'Définissez le numéro de chambre de cette tablette.',
+                                ),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -305,7 +347,10 @@ class _CartScreenState extends State<CartScreen> {
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop(true);
                           } catch (e) {
-                            final message = e.toString().replaceFirst('Exception: ', '');
+                            final message = e.toString().replaceFirst(
+                              'Exception: ',
+                              '',
+                            );
                             if (ctx.mounted) {
                               ScaffoldMessenger.of(ctx).showSnackBar(
                                 SnackBar(
@@ -317,12 +362,17 @@ class _CartScreenState extends State<CartScreen> {
                             }
                           }
                         },
-                  style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.accentGold,
+                  ),
                   child: loading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Valider'),
                 ),
@@ -345,7 +395,10 @@ class _CartScreenState extends State<CartScreen> {
   ];
 
   /// Affiche les infos client (nom, chambre, tél) + choix du moyen de paiement avant envoi.
-  Future<({bool confirmed, String? paymentMethod})> _showConfirmIdentityDialog(BuildContext context, GuestSession session) async {
+  Future<({bool confirmed, String? paymentMethod})> _showConfirmIdentityDialog(
+    BuildContext context,
+    GuestSession session,
+  ) async {
     String? selectedPayment = 'room_bill';
     final result = await showDialog<({bool confirmed, String? paymentMethod})>(
       context: context,
@@ -372,46 +425,81 @@ class _CartScreenState extends State<CartScreen> {
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 16),
-                  _buildIdentityRow(Icons.person_outline, 'Nom', session.guestName),
+                  _buildIdentityRow(
+                    Icons.person_outline,
+                    'Nom',
+                    session.guestName,
+                  ),
                   const SizedBox(height: 10),
                   _buildIdentityRow(Icons.bed, 'Chambre', session.roomNumber),
                   const SizedBox(height: 10),
                   _buildIdentityRow(
                     Icons.phone_outlined,
                     'Téléphone',
-                    (session.guestPhone ?? '').isNotEmpty ? (session.guestPhone ?? '') : '—',
+                    (session.guestPhone ?? '').isNotEmpty
+                        ? (session.guestPhone ?? '')
+                        : '—',
                   ),
                   if ((session.guestEmail ?? '').isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    _buildIdentityRow(Icons.email_outlined, 'Email', session.guestEmail ?? ''),
+                    _buildIdentityRow(
+                      Icons.email_outlined,
+                      'Email',
+                      session.guestEmail ?? '',
+                    ),
                   ],
                   const SizedBox(height: 20),
                   const Text(
                     'Moyen de paiement',
-                    style: TextStyle(color: AppTheme.accentGold, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: AppTheme.accentGold,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  ..._paymentMethods.map((e) => RadioListTile<String>(
-                    value: e.$1,
-                    groupValue: selectedPayment,
-                    onChanged: (v) => setState(() => selectedPayment = v),
-                    title: Text(e.$2, style: const TextStyle(color: Colors.white, fontSize: 15)),
-                    activeColor: AppTheme.accentGold,
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                  )),
+                  ..._paymentMethods.map(
+                    (e) => RadioListTile<String>(
+                      value: e.$1,
+                      groupValue: selectedPayment,
+                      onChanged: (v) => setState(() => selectedPayment = v),
+                      title: Text(
+                        e.$2,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                      activeColor: AppTheme.accentGold,
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 ],
               ),
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop((confirmed: false, paymentMethod: null as String?)),
-                child: Text('Annuler', style: TextStyle(color: AppTheme.textGray)),
+                onPressed: () => Navigator.of(
+                  ctx,
+                ).pop((confirmed: false, paymentMethod: null as String?)),
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(color: AppTheme.textGray),
+                ),
               ),
               FilledButton(
-                onPressed: () => Navigator.of(ctx).pop((confirmed: true, paymentMethod: selectedPayment)),
-                style: FilledButton.styleFrom(backgroundColor: AppTheme.accentGold, foregroundColor: AppTheme.primaryDark),
-                child: const Text('Confirmer la commande', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () => Navigator.of(
+                  ctx,
+                ).pop((confirmed: true, paymentMethod: selectedPayment)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.accentGold,
+                  foregroundColor: AppTheme.primaryDark,
+                ),
+                child: const Text(
+                  'Confirmer la commande',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           );
@@ -432,7 +520,13 @@ class _CartScreenState extends State<CartScreen> {
             text: TextSpan(
               style: const TextStyle(color: Colors.white, fontSize: 15),
               children: [
-                TextSpan(text: '$label : ', style: TextStyle(color: AppTheme.textGray, fontWeight: FontWeight.w500)),
+                TextSpan(
+                  text: '$label : ',
+                  style: TextStyle(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 TextSpan(text: value),
               ],
             ),
@@ -564,7 +658,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartItems(
-      BuildContext context, CartProvider cart, AppLocalizations l10n) {
+    BuildContext context,
+    CartProvider cart,
+    AppLocalizations l10n,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -635,9 +732,7 @@ class _CartScreenState extends State<CartScreen> {
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,7 +743,8 @@ class _CartScreenState extends State<CartScreen> {
               // Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: (cartItem.menuItem.image != null &&
+                child:
+                    (cartItem.menuItem.image != null &&
                         cartItem.menuItem.image!.isNotEmpty)
                     ? CachedNetworkImage(
                         imageUrl: cartItem.menuItem.image!,
@@ -656,7 +752,8 @@ class _CartScreenState extends State<CartScreen> {
                         height: 80,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => _buildItemPlaceholder(),
-                        errorWidget: (context, url, error) => _buildItemPlaceholder(),
+                        errorWidget: (context, url, error) =>
+                            _buildItemPlaceholder(),
                       )
                     : _buildItemPlaceholder(),
               ),
@@ -782,16 +879,15 @@ class _CartScreenState extends State<CartScreen> {
         color: AppTheme.primaryBlue,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(
-        Icons.restaurant,
-        color: AppTheme.accentGold,
-        size: 32,
-      ),
+      child: const Icon(Icons.restaurant, color: AppTheme.accentGold, size: 32),
     );
   }
 
   Widget _buildBottomBar(
-      BuildContext context, CartProvider cart, AppLocalizations l10n) {
+    BuildContext context,
+    CartProvider cart,
+    AppLocalizations l10n,
+  ) {
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -828,10 +924,7 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   const Text(
                     'Total',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppTheme.textGray,
-                    ),
+                    style: TextStyle(fontSize: 14, color: AppTheme.textGray),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -846,10 +939,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
               Text(
                 '${cart.totalItemsQuantity} article${cart.totalItemsQuantity > 1 ? 's' : ''}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textGray,
-                ),
+                style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
               ),
             ],
           ),
@@ -870,22 +960,19 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _showClearCartDialog(
-      BuildContext context, CartProvider cart, AppLocalizations l10n) {
+    BuildContext context,
+    CartProvider cart,
+    AppLocalizations l10n,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppTheme.accentGold,
-            width: 1,
-          ),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
         ),
-        title: Text(
-          l10n.clear,
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(l10n.clear, style: const TextStyle(color: Colors.white)),
         content: Text(
           l10n.clearCartConfirm,
           style: const TextStyle(color: AppTheme.textGray),

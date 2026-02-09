@@ -16,8 +16,7 @@ class CreateLaundryRequestScreen extends StatefulWidget {
 
 class _CreateLaundryRequestScreenState
     extends State<CreateLaundryRequestScreen> {
-  final TextEditingController _instructionsController =
-      TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
 
   @override
@@ -46,8 +45,10 @@ class _CreateLaundryRequestScreenState
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -59,15 +60,18 @@ class _CreateLaundryRequestScreenState
                           Text(
                             AppLocalizations.of(context).confirmRequest,
                             style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).laundry,
                             style: const TextStyle(
-                                fontSize: 13, color: AppTheme.textGray),
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -77,8 +81,10 @@ class _CreateLaundryRequestScreenState
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     children: [
                       _buildCanReserveBanner(),
@@ -105,22 +111,27 @@ class _CreateLaundryRequestScreenState
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-                colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+              colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+            ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppTheme.accentGold, width: 1.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppLocalizations.of(context).selectedItems,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentGold)),
+              Text(
+                AppLocalizations.of(context).selectedItems,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.accentGold,
+                ),
+              ),
               const SizedBox(height: 16),
               ...provider.selectedItems.entries.map((entry) {
-                final service = provider.services
-                    .firstWhere((s) => s.id == entry.key);
+                final service = provider.services.firstWhere(
+                  (s) => s.id == entry.key,
+                );
                 final quantity = entry.value;
                 final subtotal = service.pricePerItem * quantity;
 
@@ -130,15 +141,22 @@ class _CreateLaundryRequestScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text('${service.name} × $quantity',
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.white)),
-                      ),
-                      Text('${subtotal.toStringAsFixed(0)} FCFA',
+                        child: Text(
+                          '${service.name} × $quantity',
                           style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.accentGold)),
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${subtotal.toStringAsFixed(0)} FCFA',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.accentGold,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -147,16 +165,22 @@ class _CreateLaundryRequestScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(AppLocalizations.of(context).total,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                  Text('${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.accentGold)),
+                  Text(
+                    AppLocalizations.of(context).total,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.accentGold,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -170,19 +194,23 @@ class _CreateLaundryRequestScreenState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).specialInstructionsOptional,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).specialInstructionsOptional,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: _instructionsController,
@@ -190,18 +218,22 @@ class _CreateLaundryRequestScreenState
             maxLines: 3,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).laundryInstructionsExample,
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -246,14 +278,20 @@ class _CreateLaundryRequestScreenState
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.8),
+              ),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+                size: 22,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -287,16 +325,18 @@ class _CreateLaundryRequestScreenState
         barrierDismissible: false,
         builder: (context) => const Center(
           child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold)),
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
         ),
       );
 
       final clientCode = _clientCodeController.text.trim();
       await context.read<LaundryProvider>().createLaundryRequest(
-          specialInstructions: _instructionsController.text.isEmpty
-              ? null
-              : _instructionsController.text,
-          clientCode: clientCode.isNotEmpty ? clientCode : null);
+        specialInstructions: _instructionsController.text.isEmpty
+            ? null
+            : _instructionsController.text,
+        clientCode: clientCode.isNotEmpty ? clientCode : null,
+      );
 
       if (mounted) Navigator.pop(context);
 
@@ -313,8 +353,10 @@ class _CreateLaundryRequestScreenState
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 32),
                 const SizedBox(width: 12),
-                Text(AppLocalizations.of(context).requestSent,
-                    style: const TextStyle(color: Colors.white, fontSize: 18)),
+                Text(
+                  AppLocalizations.of(context).requestSent,
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
               ],
             ),
             content: Text(
@@ -328,10 +370,13 @@ class _CreateLaundryRequestScreenState
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
-                child: Text(AppLocalizations.of(context).ok,
-                    style: TextStyle(
-                        color: AppTheme.accentGold,
-                        fontWeight: FontWeight.bold)),
+                child: Text(
+                  AppLocalizations.of(context).ok,
+                  style: TextStyle(
+                    color: AppTheme.accentGold,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -344,7 +389,9 @@ class _CreateLaundryRequestScreenState
         final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
+            content: Text(
+              '${AppLocalizations.of(context).errorPrefix}$message',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

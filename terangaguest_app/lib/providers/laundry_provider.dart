@@ -77,10 +77,7 @@ class LaundryProvider with ChangeNotifier {
 
     try {
       final items = _selectedItems.entries
-          .map((entry) => {
-                'service_id': entry.key,
-                'quantity': entry.value,
-              })
+          .map((entry) => {'service_id': entry.key, 'quantity': entry.value})
           .toList();
 
       final request = await _laundryApi.createLaundryRequest(

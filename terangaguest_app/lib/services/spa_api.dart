@@ -13,9 +13,7 @@ class SpaApi {
     int page = 1,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-      };
+      final queryParams = <String, dynamic>{'page': page};
 
       if (category != null && category.isNotEmpty) {
         queryParams['category'] = category;
@@ -61,8 +59,10 @@ class SpaApi {
       final data = <String, dynamic>{
         'date': date.toIso8601String().split('T')[0],
         'time': time,
-        if (specialRequests != null && specialRequests.isNotEmpty) 'special_requests': specialRequests,
-        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+        if (specialRequests != null && specialRequests.isNotEmpty)
+          'special_requests': specialRequests,
+        if (clientCode != null && clientCode.trim().isNotEmpty)
+          'client_code': clientCode.trim(),
       };
       final response = await _apiService.post(
         '${ApiConfig.spaServices}/$serviceId/reserve',
@@ -94,7 +94,8 @@ class SpaApi {
         final first = errors.values.first;
         if (first is List && first.isNotEmpty) return first.first as String;
       }
-      if (data is Map && data['message'] != null) return data['message'] as String;
+      if (data is Map && data['message'] != null)
+        return data['message'] as String;
       return 'Vérifiez les informations saisies (date, heure).';
     }
     return e.message ?? 'Erreur lors de la réservation.';
@@ -103,9 +104,7 @@ class SpaApi {
   /// Récupère les réservations spa de l'utilisateur
   Future<List<SpaReservation>> getMySpaReservations() async {
     try {
-      final response = await _apiService.get(
-        ApiConfig.mySpaReservations,
-      );
+      final response = await _apiService.get(ApiConfig.mySpaReservations);
 
       return (response.data['data'] as List)
           .map((json) => SpaReservation.fromJson(json as Map<String, dynamic>))

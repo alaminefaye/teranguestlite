@@ -34,13 +34,13 @@ class GuestSession {
   }
 
   Map<String, dynamic> toJson() => {
-        'guest_id': guestId,
-        'guest_name': guestName,
-        'guest_phone': guestPhone,
-        'guest_email': guestEmail,
-        'room_id': roomId,
-        'room_number': roomNumber,
-        'reservation_id': reservationId,
-        'reservation_number': reservationNumber,
-      };
+    'guest_id': guestId,
+    'guest_name': guestName,
+    'guest_phone': guestPhone,
+    'guest_email': guestEmail,
+    'room_id': roomId,
+    'room_number': roomNumber,
+    'reservation_id': reservationId,
+    'reservation_number': reservationNumber,
+  };
 }

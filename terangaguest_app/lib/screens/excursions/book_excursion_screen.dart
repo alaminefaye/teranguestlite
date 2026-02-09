@@ -59,8 +59,10 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -72,11 +74,14 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(AppLocalizations.of(context).reserve,
-                              style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          Text(
+                            AppLocalizations.of(context).reserve,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -86,7 +91,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 60, vertical: 20),
+                    horizontal: 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -115,19 +122,23 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).date,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).date,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           InkWell(
             onTap: () async {
@@ -161,16 +172,19 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.primaryBlue.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _selectedDate != null
-                        ? DateFormat('dd MMMM yyyy', 'fr_FR')
-                            .format(_selectedDate!)
+                        ? DateFormat(
+                            'dd MMMM yyyy',
+                            'fr_FR',
+                          ).format(_selectedDate!)
                         : AppLocalizations.of(context).selectDate,
                     style: TextStyle(
                       fontSize: 15,
@@ -179,8 +193,11 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                           : AppTheme.textGray,
                     ),
                   ),
-                  const Icon(Icons.calendar_today,
-                      color: AppTheme.accentGold, size: 20),
+                  const Icon(
+                    Icons.calendar_today,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
                 ],
               ),
             ),
@@ -194,28 +211,33 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).participants,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).participants,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: Column(
                   children: [
-                    Text(AppLocalizations.of(context).adults,
-                        style:
-                            TextStyle(fontSize: 14, color: AppTheme.textGray)),
+                    Text(
+                      AppLocalizations.of(context).adults,
+                      style: TextStyle(fontSize: 14, color: AppTheme.textGray),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -229,17 +251,22 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.accentGold.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppTheme.accentGold),
                           ),
-                          child: Text('$_adultsCount',
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold)),
+                          child: Text(
+                            '$_adultsCount',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
                         ),
                         IconButton(
                           onPressed: _adultsCount < 20
@@ -256,9 +283,10 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    Text(AppLocalizations.of(context).children,
-                        style:
-                            TextStyle(fontSize: 14, color: AppTheme.textGray)),
+                    Text(
+                      AppLocalizations.of(context).children,
+                      style: TextStyle(fontSize: 14, color: AppTheme.textGray),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -272,17 +300,22 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.accentGold.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppTheme.accentGold),
                           ),
-                          child: Text('$_childrenCount',
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold)),
+                          child: Text(
+                            '$_childrenCount',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
                         ),
                         IconButton(
                           onPressed: _childrenCount < 20
@@ -307,38 +340,48 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient:
-            LinearGradient(colors: [AppTheme.primaryBlue, AppTheme.primaryDark]),
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).specialRequestsOptional,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            AppLocalizations.of(context).specialRequestsOptional,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: _specialRequestsController,
             style: const TextStyle(color: Colors.white),
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context).allergiesPreferencesExample,
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.6)),
+              hintText: AppLocalizations.of(
+                context,
+              ).allergiesPreferencesExample,
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.6),
+              ),
               filled: true,
               fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -358,7 +401,10 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.accentGold.withValues(alpha: 0.2), AppTheme.primaryDark],
+          colors: [
+            AppTheme.accentGold.withValues(alpha: 0.2),
+            AppTheme.primaryDark,
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentGold, width: 2),
@@ -366,23 +412,30 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.summary,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold)),
+          Text(
+            l10n.summary,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
           const Divider(height: 24, color: AppTheme.textGray),
           _buildSummaryRow(l10n.excursion, widget.excursion.name),
           const SizedBox(height: 12),
-          _buildSummaryRow(l10n.date,
-              DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(_selectedDate!)),
+          _buildSummaryRow(
+            l10n.date,
+            DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(_selectedDate!),
+          ),
           const SizedBox(height: 12),
           _buildSummaryRow(l10n.adults, '$_adultsCount'),
           const SizedBox(height: 12),
           _buildSummaryRow(l10n.children, '$_childrenCount'),
           const Divider(height: 24, color: AppTheme.textGray),
           _buildSummaryRow(
-              l10n.total, '${_totalPrice.toStringAsFixed(0)} FCFA'),
+            l10n.total,
+            '${_totalPrice.toStringAsFixed(0)} FCFA',
+          ),
         ],
       ),
     );
@@ -392,12 +445,19 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 14, color: AppTheme.textGray)),
-        Text(value,
-            style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-            textAlign: TextAlign.right),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.right,
+        ),
       ],
     );
   }
@@ -434,14 +494,20 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+              hintStyle: TextStyle(
+                color: AppTheme.textGray.withValues(alpha: 0.8),
+              ),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+                size: 22,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -453,7 +519,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   Widget _buildConfirmButton() {
     final user = context.watch<AuthProvider>().user;
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canBook = ((user?.canReserve == true) || hasCode) && _selectedDate != null;
+    final canBook =
+        ((user?.canReserve == true) || hasCode) && _selectedDate != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -474,21 +541,22 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         barrierDismissible: false,
         builder: (context) => const Center(
           child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold)),
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
         ),
       );
 
       final clientCode = _clientCodeController.text.trim();
       await context.read<ExcursionsProvider>().bookExcursion(
-            excursionId: widget.excursion.id,
-            date: _selectedDate!,
-            adultsCount: _adultsCount,
-            childrenCount: _childrenCount,
-            specialRequests: _specialRequestsController.text.isEmpty
-                ? null
-                : _specialRequestsController.text,
-            clientCode: clientCode.isNotEmpty ? clientCode : null,
-          );
+        excursionId: widget.excursion.id,
+        date: _selectedDate!,
+        adultsCount: _adultsCount,
+        childrenCount: _childrenCount,
+        specialRequests: _specialRequestsController.text.isEmpty
+            ? null
+            : _specialRequestsController.text,
+        clientCode: clientCode.isNotEmpty ? clientCode : null,
+      );
 
       if (mounted) Navigator.pop(context);
 
@@ -505,8 +573,10 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 32),
                 const SizedBox(width: 12),
-                Text(AppLocalizations.of(context).reservationConfirmed,
-                    style: const TextStyle(color: Colors.white, fontSize: 18)),
+                Text(
+                  AppLocalizations.of(context).reservationConfirmed,
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
               ],
             ),
             content: Column(
@@ -514,7 +584,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context).excursionConfirmedMessage(_adultsCount + _childrenCount),
+                  AppLocalizations.of(
+                    context,
+                  ).excursionConfirmedMessage(_adultsCount + _childrenCount),
                   style: const TextStyle(color: AppTheme.textGray),
                 ),
                 const SizedBox(height: 16),
@@ -529,7 +601,11 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.notifications_active, color: AppTheme.accentGold, size: 20),
+                      const Icon(
+                        Icons.notifications_active,
+                        color: AppTheme.accentGold,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -552,10 +628,13 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
-                child: Text(AppLocalizations.of(context).ok,
-                    style: TextStyle(
-                        color: AppTheme.textGray,
-                        fontWeight: FontWeight.w600)),
+                child: Text(
+                  AppLocalizations.of(context).ok,
+                  style: TextStyle(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               AnimatedButton(
                 text: AppLocalizations.of(context).myExcursionsShort,
@@ -583,7 +662,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
+            content: Text(
+              '${AppLocalizations.of(context).errorPrefix}$message',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
