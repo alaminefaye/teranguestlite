@@ -88,14 +88,16 @@ class TabletSessionController extends Controller
                 'room_number' => $room->room_number,
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number,
+                'validated_at' => now()->toIso8601String(),
             ],
         ], 200);
     }
 
     /**
      * Vérifie que la session (guest + room + réservation) est encore valide.
+     * Si le code client a été régénéré (guest.updated_at > validated_at), rejette la session.
      * POST /api/tablet/validate-session
-     * Body: { "guest_id": 1, "room_id": 1, "reservation_id": 1 }
+     * Body: { "guest_id": 1, "room_id": 1, "reservation_id": 1, "validated_at": "2025-02-09T12:00:00.000000Z" }
      */
     public function validateSession(Request $request): JsonResponse
     {
@@ -103,6 +105,7 @@ class TabletSessionController extends Controller
             'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
             'reservation_id' => 'required|exists:reservations,id',
+            'validated_at' => 'nullable|string|date',
         ]);
 
         $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
@@ -112,6 +115,22 @@ class TabletSessionController extends Controller
                 'success' => false,
                 'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
             ], 403);
+        }
+
+        // Si le client a été modifié (ex: code régénéré) après la validation, rejeter la session
+        $validatedAt = $request->input('validated_at');
+        if ($validatedAt !== null && $validatedAt !== '') {
+            try {
+                $validatedAtCarbon = \Carbon\Carbon::parse($validatedAt);
+                if ($guest->updated_at->gt($validatedAtCarbon)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Code client régénéré ou modifié. Entrez à nouveau votre code.',
+                    ], 403);
+                }
+            } catch (\Exception $e) {
+                // Si la date est invalide, on continue la vérification normale
+            }
         }
 
         $reservation = Reservation::withoutGlobalScope('enterprise')
@@ -141,6 +160,7 @@ class TabletSessionController extends Controller
                 'room_number' => $room->room_number,
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number,
+                'validated_at' => $request->input('validated_at'),
             ],
         ], 200);
     }

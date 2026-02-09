@@ -20,6 +20,14 @@ class _CreateLaundryRequestScreenState
   final TextEditingController _clientCodeController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().loadUser();
+    });
+  }
+
+  @override
   void dispose() {
     _instructionsController.dispose();
     _clientCodeController.dispose();
@@ -319,6 +327,29 @@ class _CreateLaundryRequestScreenState
   }
 
   Future<void> _handleConfirmRequest() async {
+    final auth = context.read<AuthProvider>();
+    final clientCode = _clientCodeController.text.trim();
+    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+
+    if (relyingOnCanReserve) {
+      await auth.loadUser();
+      if (!context.mounted) return;
+      if (auth.user?.canReserve != true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Votre séjour n\'est plus actif. Entrez votre code client pour effectuer la demande.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     try {
       showDialog(
         context: context,
@@ -330,7 +361,6 @@ class _CreateLaundryRequestScreenState
         ),
       );
 
-      final clientCode = _clientCodeController.text.trim();
       await context.read<LaundryProvider>().createLaundryRequest(
         specialInstructions: _instructionsController.text.isEmpty
             ? null

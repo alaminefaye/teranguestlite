@@ -45,6 +45,14 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().loadUser();
+    });
+  }
+
+  @override
   void dispose() {
     _specialRequestsController.dispose();
     _clientCodeController.dispose();
@@ -605,6 +613,29 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   Future<void> _handleConfirmReservation() async {
     if (_selectedDate == null || _selectedTime == null) return;
 
+    final auth = context.read<AuthProvider>();
+    final clientCode = _clientCodeController.text.trim();
+    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+
+    if (relyingOnCanReserve) {
+      await auth.loadUser();
+      if (!context.mounted) return;
+      if (auth.user?.canReserve != true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     try {
       // Afficher loader
       showDialog(
@@ -617,7 +648,6 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
         ),
       );
 
-      final clientCode = _clientCodeController.text.trim();
       await context.read<RestaurantsProvider>().reserveTable(
         restaurantId: widget.restaurant.id,
         date: _selectedDate!,

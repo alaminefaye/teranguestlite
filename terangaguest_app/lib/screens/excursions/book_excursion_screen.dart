@@ -29,6 +29,14 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   final TextEditingController _clientCodeController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().loadUser();
+    });
+  }
+
+  @override
   void dispose() {
     _specialRequestsController.dispose();
     _clientCodeController.dispose();
@@ -535,6 +543,29 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   Future<void> _handleConfirmBooking() async {
     if (_selectedDate == null) return;
 
+    final auth = context.read<AuthProvider>();
+    final clientCode = _clientCodeController.text.trim();
+    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+
+    if (relyingOnCanReserve) {
+      await auth.loadUser();
+      if (!context.mounted) return;
+      if (auth.user?.canReserve != true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     try {
       showDialog(
         context: context,
@@ -546,7 +577,6 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         ),
       );
 
-      final clientCode = _clientCodeController.text.trim();
       await context.read<ExcursionsProvider>().bookExcursion(
         excursionId: widget.excursion.id,
         date: _selectedDate!,

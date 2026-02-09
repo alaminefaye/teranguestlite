@@ -1,4 +1,5 @@
 /// Session client (tablette en chambre) après validation du code.
+/// [validatedAt] sert à vérifier côté serveur que le code n'a pas été régénéré depuis.
 class GuestSession {
   final int guestId;
   final String guestName;
@@ -8,6 +9,8 @@ class GuestSession {
   final String roomNumber;
   final int reservationId;
   final String reservationNumber;
+  /// Date/heure de validation du code (ISO8601). Envoyée à validate-session pour rejet si code régénéré.
+  final String? validatedAt;
 
   const GuestSession({
     required this.guestId,
@@ -18,6 +21,7 @@ class GuestSession {
     required this.roomNumber,
     required this.reservationId,
     required this.reservationNumber,
+    this.validatedAt,
   });
 
   factory GuestSession.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,7 @@ class GuestSession {
       roomNumber: json['room_number'] as String? ?? '',
       reservationId: json['reservation_id'] as int,
       reservationNumber: json['reservation_number'] as String? ?? '',
+      validatedAt: json['validated_at'] as String?,
     );
   }
 
@@ -42,5 +47,6 @@ class GuestSession {
     'room_number': roomNumber,
     'reservation_id': reservationId,
     'reservation_number': reservationNumber,
+    if (validatedAt != null) 'validated_at': validatedAt,
   };
 }

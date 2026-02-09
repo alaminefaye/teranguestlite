@@ -59,6 +59,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     _rentalDaysController.addListener(_onRentalFieldsChanged);
     _rentalDurationController.addListener(_onRentalFieldsChanged);
     _clientCodeController.addListener(_onRentalFieldsChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().loadUser();
+    });
   }
 
   void _onRentalFieldsChanged() {
@@ -1105,6 +1108,29 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       return;
     }
 
+    final auth = context.read<AuthProvider>();
+    final clientCode = _clientCodeController.text.trim();
+    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+
+    if (relyingOnCanReserve) {
+      await auth.loadUser();
+      if (!context.mounted) return;
+      if (auth.user?.canReserve != true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Votre séjour n\'est plus actif. Entrez votre code client pour effectuer la demande.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     try {
       showDialog(
         context: context,
@@ -1118,7 +1144,6 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
       final description = detailsText.isEmpty ? null : detailsText;
 
-      final clientCode = _clientCodeController.text.trim();
       await context.read<PalaceProvider>().createPalaceRequest(
         serviceId: widget.service.id,
         details: description,

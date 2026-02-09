@@ -24,7 +24,7 @@ class TabletSessionApi {
         ApiConfig.tabletValidateCode,
         data: {
           'code': code.trim(),
-          'room_id': ?roomId,
+          if (roomId != null) 'room_id': roomId,
           if (roomNumber != null && roomNumber.isNotEmpty)
             'room_number': roomNumber,
         },
@@ -52,6 +52,7 @@ class TabletSessionApi {
   }
 
   /// Vérifie que la session (séjour) est encore valide avant d'afficher la confirmation de commande.
+  /// Envoie [validatedAt] pour que le serveur rejette si le code a été régénéré depuis.
   /// Lance une Exception si la session a expiré ou est invalide (403).
   Future<GuestSession> validateSession(GuestSession session) async {
     try {
@@ -61,6 +62,8 @@ class TabletSessionApi {
           'guest_id': session.guestId,
           'room_id': session.roomId,
           'reservation_id': session.reservationId,
+          if (session.validatedAt != null && session.validatedAt!.isNotEmpty)
+            'validated_at': session.validatedAt,
         },
       );
       final data = response.data as Map<String, dynamic>?;
