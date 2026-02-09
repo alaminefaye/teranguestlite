@@ -164,9 +164,12 @@ class PalaceServiceController extends Controller
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
         if (! $stay) {
+            $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
+                ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
+                : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
             return response()->json([
                 'success' => false,
-                'message' => GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT,
+                'message' => $message,
             ], 403);
         }
         $roomId = $stay['room_id'];

@@ -14,9 +14,14 @@ use App\Models\User;
 class GuestReservationHelper
 {
     /**
-     * Message d'erreur 403 quand pas de client valide
+     * Message d'erreur 403 quand pas de client valide (aucun code saisi ou pas de séjour actif du compte).
      */
     public const MESSAGE_REQUIRE_VALID_CLIENT = 'Réservation possible uniquement pour les clients avec un séjour valide. Entrez votre code client ou connectez-vous avec le compte de la chambre.';
+
+    /**
+     * Message d'erreur 403 quand un code a été saisi mais il est invalide ou le séjour lié à ce code est expiré.
+     */
+    public const MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED = 'Code client invalide ou expiré. Vérifiez le code à 6 chiffres reçu à l\'enregistrement ou contactez la réception.';
 
     /**
      * Pour l'utilisateur connecté (room_number + enterprise_id), retourne la chambre, la réservation active et le guest_id.
