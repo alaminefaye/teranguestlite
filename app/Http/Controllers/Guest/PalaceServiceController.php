@@ -88,6 +88,21 @@ class PalaceServiceController extends Controller
             ? preg_replace('/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/', '$1 $2:00', $request->requested_for)
             : null;
 
+        $estimatedPrice = $palaceService->price_on_request ? null : $palaceService->price;
+        if (is_array($metadata) && !empty($metadata['vehicle_id']) && ($metadata['vehicle_request_type'] ?? '') === 'rental') {
+            $vehicle = Vehicle::where('id', (int) $metadata['vehicle_id'])
+                ->where('enterprise_id', $user->enterprise_id)
+                ->first();
+            if ($vehicle) {
+                $rentalDays = isset($metadata['rental_days']) ? (int) $metadata['rental_days'] : null;
+                $rentalHours = isset($metadata['rental_duration_hours']) ? (int) $metadata['rental_duration_hours'] : null;
+                $computed = $vehicle->computePriceForRental($rentalDays, $rentalHours);
+                if ($computed !== null) {
+                    $estimatedPrice = $computed;
+                }
+            }
+        }
+
         PalaceRequest::create([
             'enterprise_id' => $user->enterprise_id,
             'user_id' => $user->id,
@@ -96,7 +111,7 @@ class PalaceServiceController extends Controller
             'description' => $description,
             'metadata' => $metadata,
             'requested_for' => $requestedFor,
-            'estimated_price' => $palaceService->price_on_request ? null : $palaceService->price,
+            'estimated_price' => $estimatedPrice,
             'status' => 'pending',
         ]);
 

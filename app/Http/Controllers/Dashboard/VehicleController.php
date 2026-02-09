@@ -51,9 +51,13 @@ class VehicleController extends Controller
             'image' => 'nullable|image|max:30720',
             'display_order' => 'nullable|integer|min:0',
             'is_available' => 'nullable|boolean',
+            'price_per_day' => 'nullable|numeric|min:0',
+            'price_half_day' => 'nullable|numeric|min:0',
         ]);
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
         $validated['is_available'] = $request->boolean('is_available', true);
+        $validated['price_per_day'] = $request->filled('price_per_day') ? (float) $request->price_per_day : null;
+        $validated['price_half_day'] = $request->filled('price_half_day') ? (float) $request->price_half_day : null;
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('vehicles', 'public');
@@ -84,8 +88,12 @@ class VehicleController extends Controller
             'image' => 'nullable|image|max:30720',
             'display_order' => 'nullable|integer|min:0',
             'is_available' => 'nullable|boolean',
+            'price_per_day' => 'nullable|numeric|min:0',
+            'price_half_day' => 'nullable|numeric|min:0',
         ]);
         $validated['is_available'] = $request->boolean('is_available', true);
+        $validated['price_per_day'] = $request->filled('price_per_day') ? (float) $request->price_per_day : null;
+        $validated['price_half_day'] = $request->filled('price_half_day') ? (float) $request->price_half_day : null;
 
         if ($request->hasFile('image')) {
             if ($vehicle->image) {

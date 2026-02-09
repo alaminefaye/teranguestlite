@@ -18,6 +18,8 @@
                 <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Type</dt><dd class="font-medium">{{ $vehicle->type_label }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Nombre de places</dt><dd class="font-medium">{{ $vehicle->number_of_seats }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Disponible</dt><dd class="font-medium">{{ $vehicle->is_available ? 'Oui' : 'Non' }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Prix journée</dt><dd class="font-medium">{{ $vehicle->formatted_price_per_day }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Prix demi-journée</dt><dd class="font-medium">{{ $vehicle->formatted_price_half_day }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Ordre d'affichage</dt><dd>{{ $vehicle->display_order }}</dd></div>
             </dl>
             <div class="mt-6 flex items-center gap-2">

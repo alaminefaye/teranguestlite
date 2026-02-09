@@ -51,7 +51,20 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   bool get _isVehicleService => widget.service.isVehicleService;
 
   @override
+  void initState() {
+    super.initState();
+    _rentalDaysController.addListener(_onRentalFieldsChanged);
+    _rentalDurationController.addListener(_onRentalFieldsChanged);
+  }
+
+  void _onRentalFieldsChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _rentalDaysController.removeListener(_onRentalFieldsChanged);
+    _rentalDurationController.removeListener(_onRentalFieldsChanged);
     _detailsController.dispose();
     _pickupController.dispose();
     _destinationController.dispose();
@@ -433,6 +446,11 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                             const SizedBox(height: 6),
                             Text(v.name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
                             Text('${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.', style: TextStyle(color: AppTheme.textGray, fontSize: 10)),
+                            if (v.pricePerDay != null || v.priceHalfDay != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(v.displayPricePerDay, style: TextStyle(color: AppTheme.accentGold, fontSize: 10, fontWeight: FontWeight.w600)),
+                              ),
                           ],
                         ),
                       ),
@@ -452,8 +470,37 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           _labeledField(
             label: 'Durée (heures)',
             controller: _rentalDurationController,
-            hint: 'Ex: 8',
+            hint: 'Ex: 8 (demi-journée si ≤ 5 h)',
             keyboardType: TextInputType.number,
+          ),
+          if (_selectedVehicle != null) ...[
+            const SizedBox(height: 12),
+            _buildRentalPriceEstimate(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRentalPriceEstimate() {
+    final days = int.tryParse(_rentalDaysController.text.trim());
+    final hours = int.tryParse(_rentalDurationController.text.trim());
+    final estimate = _selectedVehicle?.estimatePrice(rentalDays: days, rentalDurationHours: hours);
+    if (estimate == null) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.accentGold.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.receipt_long, color: AppTheme.accentGold, size: 20),
+          const SizedBox(width: 10),
+          Text(
+            'Estimation : ${estimate.toInt()} FCFA',
+            style: TextStyle(color: AppTheme.accentGold, fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),

@@ -54,7 +54,8 @@
                         <div class="h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 text-gray-400 dark:text-gray-500 text-xs">Pas d'image</div>
                     @endif
                     <h3 class="font-semibold text-gray-800 dark:text-white/90">{{ $vehicle->name }}</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ $vehicle->type_label }} · {{ $vehicle->number_of_seats }} place(s)</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ $vehicle->type_label }} · {{ $vehicle->number_of_seats }} pl.</p>
+                    <p class="text-xs text-brand-600 dark:text-brand-400 mt-1">{{ $vehicle->formatted_price_per_day }} / {{ $vehicle->formatted_price_half_day }} (demi-j.)</p>
                     @if(!$vehicle->is_available)
                         <span class="inline-flex text-xs font-medium text-warning-600 dark:text-warning-400">Indisponible</span>
                     @endif

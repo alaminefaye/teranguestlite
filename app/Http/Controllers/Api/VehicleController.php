@@ -32,6 +32,10 @@ class VehicleController extends Controller
             'vehicle_type_label' => $v->type_label,
             'number_of_seats' => $v->number_of_seats,
             'image' => $v->image ? url('storage/' . $v->image) : null,
+            'price_per_day' => $v->price_per_day !== null ? (float) $v->price_per_day : null,
+            'price_half_day' => $v->price_half_day !== null ? (float) $v->price_half_day : null,
+            'formatted_price_per_day' => $v->formatted_price_per_day,
+            'formatted_price_half_day' => $v->formatted_price_half_day,
         ]);
 
         return response()->json([

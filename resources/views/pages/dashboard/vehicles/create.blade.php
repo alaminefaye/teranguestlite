@@ -52,6 +52,21 @@
                 <label for="is_available" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Disponible</label>
             </div>
 
+            <div>
+                <label for="price_per_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix journée (FCFA)</label>
+                <input type="number" name="price_per_day" id="price_per_day" value="{{ old('price_per_day') }}" min="0" step="1" placeholder="Sur demande si vide"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Laisser vide pour « Sur demande »</p>
+                @error('price_per_day')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label for="price_half_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix demi-journée (FCFA)</label>
+                <input type="number" name="price_half_day" id="price_half_day" value="{{ old('price_half_day') }}" min="0" step="1" placeholder="Sur demande si vide"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Laisser vide pour « Sur demande »</p>
+                @error('price_half_day')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
+
             <div class="md:col-span-2">
                 <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
                 <input type="file" name="image" id="image" accept="image/*"

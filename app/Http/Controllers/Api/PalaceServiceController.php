@@ -159,11 +159,26 @@ class PalaceServiceController extends Controller
             ], 400);
         }
 
-        // Déterminer le prix
+        $user = $request->user();
+        $metadata = $request->input('metadata');
+
+        // Prix : si demande location avec véhicule choisi, calculer selon véhicule (journée / demi-journée)
         $estimatedPrice = $service->price_on_request ? null : $service->price;
+        if (is_array($metadata) && !empty($metadata['vehicle_id']) && ($metadata['vehicle_request_type'] ?? '') === 'rental') {
+            $vehicle = Vehicle::where('id', (int) $metadata['vehicle_id'])
+                ->where('enterprise_id', $user->enterprise_id)
+                ->first();
+            if ($vehicle) {
+                $rentalDays = isset($metadata['rental_days']) ? (int) $metadata['rental_days'] : null;
+                $rentalHours = isset($metadata['rental_duration_hours']) ? (int) $metadata['rental_duration_hours'] : null;
+                $computed = $vehicle->computePriceForRental($rentalDays, $rentalHours);
+                if ($computed !== null) {
+                    $estimatedPrice = $computed;
+                }
+            }
+        }
 
         // room_id = id de la chambre dans la table rooms (pas le numéro 101, 102…)
-        $user = $request->user();
         $roomId = null;
         if ($user->room_number) {
             $room = Room::where('enterprise_id', $user->enterprise_id)
@@ -172,7 +187,6 @@ class PalaceServiceController extends Controller
             $roomId = $room?->id;
         }
 
-        $metadata = $request->input('metadata');
         $description = $request->description;
         if (empty(trim($description ?? '')) && is_array($metadata)) {
             $description = $this->buildDescriptionFromMetadata($metadata);
