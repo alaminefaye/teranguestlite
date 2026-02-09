@@ -6,7 +6,9 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../models/excursion.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/excursions_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
+import '../../widgets/guest_code_dialog.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'my_excursion_bookings_screen.dart';
@@ -28,6 +30,34 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
 
+  String? _validatedClientCode;
+  bool _clientCodeChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _requireClientCodeThenShowForm());
+  }
+
+  Future<void> _requireClientCodeThenShowForm() async {
+    final user = context.read<AuthProvider>().user;
+    final tabletSession = context.read<TabletSessionProvider>();
+    if (user?.canReserve == true || tabletSession.hasSession) {
+      if (mounted) setState(() => _clientCodeChecked = true);
+      return;
+    }
+    final code = await showGuestCodeDialog(context);
+    if (!mounted) return;
+    if (code == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() {
+      _validatedClientCode = code;
+      _clientCodeChecked = true;
+    });
+  }
+
   @override
   void dispose() {
     _specialRequestsController.dispose();
@@ -42,6 +72,24 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_clientCodeChecked) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -90,7 +138,6 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildCanReserveBanner(),
                       _buildDateSelector(),
                       const SizedBox(height: 24),
                       _buildParticipantsSelector(),
@@ -402,58 +449,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
     );
   }
 
-  Widget _buildCanReserveBanner() {
-    final user = context.watch<AuthProvider>().user;
-    if (user?.canReserve == true) return const SizedBox.shrink();
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade900.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _clientCodeController,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.15),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.orange),
-              ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildConfirmButton() {
-    final user = context.watch<AuthProvider>().user;
-    final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canBook = ((user?.canReserve == true) || hasCode) && _selectedDate != null;
+    final canBook = _selectedDate != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -478,7 +475,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         ),
       );
 
-      final clientCode = _clientCodeController.text.trim();
+      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
       await context.read<ExcursionsProvider>().bookExcursion(
             excursionId: widget.excursion.id,
             date: _selectedDate!,

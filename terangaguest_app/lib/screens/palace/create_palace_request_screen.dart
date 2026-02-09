@@ -8,7 +8,9 @@ import '../../models/palace.dart';
 import '../../models/vehicle.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../services/vehicle_api.dart';
+import '../../widgets/guest_code_dialog.dart';
 import '../../widgets/animated_button.dart';
 
 /// Type de demande véhicule : taxi ou location.
@@ -28,6 +30,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
   final TextEditingController _detailsController = TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
   DateTime? _scheduledTime;
+
+  String? _validatedClientCode;
+  bool _clientCodeChecked = false;
 
   // Véhicule : type choisi (null si service non véhicule ou pas encore choisi)
   VehicleRequestType? _vehicleType;
@@ -58,6 +63,26 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     _rentalDaysController.addListener(_onRentalFieldsChanged);
     _rentalDurationController.addListener(_onRentalFieldsChanged);
     _clientCodeController.addListener(_onRentalFieldsChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _requireClientCodeThenShowForm());
+  }
+
+  Future<void> _requireClientCodeThenShowForm() async {
+    final user = context.read<AuthProvider>().user;
+    final tabletSession = context.read<TabletSessionProvider>();
+    if (user?.canReserve == true || tabletSession.hasSession) {
+      if (mounted) setState(() => _clientCodeChecked = true);
+      return;
+    }
+    final code = await showGuestCodeDialog(context);
+    if (!mounted) return;
+    if (code == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() {
+      _validatedClientCode = code;
+      _clientCodeChecked = true;
+    });
   }
 
   void _onRentalFieldsChanged() {
@@ -551,6 +576,24 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_clientCodeChecked) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -600,7 +643,6 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                       const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                   child: Column(
                     children: [
-                      _buildCanReserveBanner(),
                       if (_isVehicleService) ...[
                         _buildVehicleTypeChoice(),
                         const SizedBox(height: 20),
@@ -782,61 +824,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     );
   }
 
-  Widget _buildCanReserveBanner() {
-    final user = context.watch<AuthProvider>().user;
-    if (user?.canReserve == true) return const SizedBox.shrink();
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade900.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _clientCodeController,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
-              hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.15),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.orange),
-              ),
-              prefixIcon: const Icon(Icons.person_outline, color: Colors.orange, size: 22),
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildConfirmButton() {
-    final user = context.watch<AuthProvider>().user;
-    final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit = (user?.canReserve == true) || hasCode;
     return AnimatedButton(
       text: 'Envoyer la demande',
-      onPressed: canSubmit ? _handleConfirmRequest : null,
+      onPressed: _handleConfirmRequest,
       width: double.infinity,
       height: 56,
       backgroundColor: AppTheme.accentGold,
@@ -913,7 +904,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
       final description = detailsText.isEmpty ? null : detailsText;
 
-      final clientCode = _clientCodeController.text.trim();
+      final clientCode = _validatedClientCode ?? _clientCodeController.text.trim();
       await context.read<PalaceProvider>().createPalaceRequest(
           serviceId: widget.service.id,
           details: description,
