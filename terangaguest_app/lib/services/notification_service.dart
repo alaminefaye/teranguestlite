@@ -18,10 +18,20 @@ import 'tablet_session_api.dart';
 ///   si séjour actif (app). Le backend n'envoie qu'aux tokens liés à ce client.
 /// - À faire : après login → registerWithBackendForUser() ; après validation code tablette →
 ///   registerWithBackendForTabletSession() ; au logout → unregisterFromBackend().
+/// Préfixe pour filtrer les logs FCM dans la console (ex: "FCM" dans le debug).
+const String _kFcmLogTag = '[FCM]';
+
+/// Affiche un extrait du token pour debug (début...fin) sans exposer le token complet.
+String _tokenPreview(String? token) {
+  if (token == null || token.isEmpty) return '(vide)';
+  if (token.length <= 16) return '${token.substring(0, token.length > 8 ? 8 : token.length)}...';
+  return '${token.substring(0, 8)}...${token.substring(token.length - 8)}';
+}
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint('Background message: ${message.messageId}');
+  debugPrint('$_kFcmLogTag Background message: ${message.messageId}');
 }
 
 class NotificationService {
@@ -36,17 +46,27 @@ class NotificationService {
 
   String? get currentFcmToken => _currentFcmToken;
 
+  /// Affiche dans la console l'état actuel du token (pour debug).
+  void debugPrintState() {
+    debugPrint('$_kFcmLogTag --- State ---');
+    debugPrint('$_kFcmLogTag token: ${_tokenPreview(_currentFcmToken)}');
+    debugPrint('$_kFcmLogTag ---');
+  }
+
   /// Initialise Firebase et les notifications (permissions + token + handlers).
   /// À appeler au démarrage de l'app (main.dart).
   Future<void> init() async {
+    debugPrint('$_kFcmLogTag init() start');
     try {
       await Firebase.initializeApp();
+      debugPrint('$_kFcmLogTag Firebase.initializeApp() OK');
     } catch (e) {
-      debugPrint('Firebase already initialized or error: $e');
+      debugPrint('$_kFcmLogTag Firebase already initialized or error: $e');
     }
 
     // Gestion des messages en arrière-plan / terminé
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    debugPrint('$_kFcmLogTag Background message handler registered');
 
     // Présentation en premier plan (iOS)
     if (Platform.isIOS) {
@@ -55,26 +75,34 @@ class NotificationService {
         badge: true,
         sound: true,
       );
+      debugPrint('$_kFcmLogTag iOS foreground presentation options set');
     }
 
     // Demander les permissions (iOS + Android 13+)
-    await requestPermission();
+    final permitted = await requestPermission();
+    debugPrint('$_kFcmLogTag Permission granted: $permitted');
 
     // Récupérer le token
     await _refreshToken();
+    debugPrint('$_kFcmLogTag init() token after refresh: ${_tokenPreview(_currentFcmToken)}');
 
     // Écouter le rafraîchissement du token
-    _messaging.onTokenRefresh.listen((_) => _refreshToken());
+    _messaging.onTokenRefresh.listen((_) {
+      _refreshToken();
+      debugPrint('$_kFcmLogTag onTokenRefresh: new token ${_tokenPreview(_currentFcmToken)}');
+    });
 
     // Messages en premier plan
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-    // Clic sur une notification (app en arrière-plan ou fermée)
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
 
     // Notification qui a ouvert l'app (app fermée)
     final initial = await _messaging.getInitialMessage();
-    if (initial != null) _handleNotificationTap(initial);
+    if (initial != null) {
+      debugPrint('$_kFcmLogTag App opened from notification (cold start): ${initial.messageId}');
+      _handleNotificationTap(initial);
+    }
+    debugPrint('$_kFcmLogTag init() done');
   }
 
   /// Demande la permission de notification (iOS et Android 13+).
@@ -87,9 +115,7 @@ class NotificationService {
     );
     final granted = settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional;
-    if (!granted) {
-      debugPrint('Notification permission not granted: ${settings.authorizationStatus}');
-    }
+    debugPrint('$_kFcmLogTag requestPermission: ${settings.authorizationStatus} -> granted=$granted');
     return granted;
   }
 
@@ -98,58 +124,69 @@ class NotificationService {
       final token = await _messaging.getToken();
       if (token != null && token.isNotEmpty) {
         _currentFcmToken = token;
-        debugPrint('FCM token refreshed');
+        debugPrint('$_kFcmLogTag Token refreshed: ${_tokenPreview(token)}');
+      } else {
+        debugPrint('$_kFcmLogTag getToken returned null or empty');
       }
     } catch (e) {
-      debugPrint('FCM getToken error: $e');
+      debugPrint('$_kFcmLogTag getToken error: $e');
     }
   }
 
   /// Enregistre le token FCM côté backend pour l'utilisateur connecté.
   /// À appeler après un login réussi (AuthProvider).
   Future<void> registerWithBackendForUser() async {
+    debugPrint('$_kFcmLogTag registerWithBackendForUser() called');
     final token = _currentFcmToken ?? await _messaging.getToken();
-    if (token == null || token.isEmpty) return;
+    if (token == null || token.isEmpty) {
+      debugPrint('$_kFcmLogTag registerWithBackendForUser: no token, skip');
+      return;
+    }
     try {
       await _api.post(
         ApiConfig.fcmToken,
         data: {'fcm_token': token},
       );
-      debugPrint('FCM token registered for user');
+      debugPrint('$_kFcmLogTag registerWithBackendForUser: OK (token ${_tokenPreview(token)})');
     } catch (e) {
-      debugPrint('FCM register for user error: $e');
+      debugPrint('$_kFcmLogTag registerWithBackendForUser: ERROR $e');
     }
   }
 
   /// Enregistre le token FCM pour la session tablette (guest).
   /// À appeler après validation du code client (TabletSessionProvider).
   Future<void> registerWithBackendForTabletSession(GuestSession session) async {
+    debugPrint('$_kFcmLogTag registerWithBackendForTabletSession(guestId=${session.guestId}) called');
     final token = _currentFcmToken ?? await _messaging.getToken();
-    if (token == null || token.isEmpty) return;
+    if (token == null || token.isEmpty) {
+      debugPrint('$_kFcmLogTag registerWithBackendForTabletSession: no token, skip');
+      return;
+    }
     try {
       await TabletSessionApi().registerFcmToken(session: session, fcmToken: token);
-      debugPrint('FCM token registered for tablet guest');
+      debugPrint('$_kFcmLogTag registerWithBackendForTabletSession: OK guestId=${session.guestId} token ${_tokenPreview(token)}');
     } catch (e) {
-      debugPrint('FCM register for tablet error: $e');
+      debugPrint('$_kFcmLogTag registerWithBackendForTabletSession: ERROR $e');
     }
   }
 
   /// Supprime le token côté backend (à appeler au logout).
   Future<void> unregisterFromBackend() async {
+    debugPrint('$_kFcmLogTag unregisterFromBackend() called');
     try {
       await _api.delete(ApiConfig.fcmToken);
+      debugPrint('$_kFcmLogTag unregisterFromBackend: OK');
     } catch (e) {
-      debugPrint('FCM unregister error: $e');
+      debugPrint('$_kFcmLogTag unregisterFromBackend: ERROR $e');
     }
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
-    debugPrint('Foreground: ${message.notification?.title}');
-    // Optionnel : afficher une snackbar ou in-app notification
+    debugPrint('$_kFcmLogTag Foreground message: title=${message.notification?.title} body=${message.notification?.body} data=${message.data}');
   }
 
   void _handleNotificationTap(RemoteMessage message) {
-    debugPrint('Notification tap: ${message.data}');
+    debugPrint('$_kFcmLogTag Notification tap: data=${message.data}');
     final type = message.data['type'];
     final screen = message.data['screen'];
     final orderId = message.data['order_id'];

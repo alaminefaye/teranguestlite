@@ -344,8 +344,18 @@ class OrderController extends Controller
     private function notifyOrderStatusToClient(Order $order): void
     {
         try {
-            $order->load('user', 'guest');
-            app(FirebaseNotificationService::class)->sendOrderStatusNotificationToClient($order);
+            $order->refresh();
+            $order->load(['user', 'guest']);
+            $sent = app(FirebaseNotificationService::class)->sendOrderStatusNotificationToClient($order);
+            if (! $sent) {
+                \Log::warning('Order status notification not sent', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'guest_id' => $order->guest_id,
+                    'user_id' => $order->user_id,
+                    'status' => $order->status,
+                ]);
+            }
         } catch (\Exception $e) {
             \Log::error('Firebase order status notification: ' . $e->getMessage());
         }
