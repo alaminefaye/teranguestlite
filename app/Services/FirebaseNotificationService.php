@@ -94,11 +94,19 @@ class FirebaseNotificationService
                 $invalid = $report->invalidTokens();
                 $unknownSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $unknown);
                 $invalidSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $invalid);
+                $failureReasons = [];
+                foreach ($report->failures()->getItems() as $item) {
+                    $err = $item->error();
+                    $suffix = $item->target()->type() === 'token' && strlen($item->target()->value()) >= 8
+                        ? '...' . substr($item->target()->value(), -8) : '(token)';
+                    $failureReasons[$suffix] = $err ? $err->getMessage() : 'unknown';
+                }
                 Log::warning("FCM multicast had failures for guest {$guestId}", [
                     'successes' => $report->successes()->count(),
                     'failures' => $report->failures()->count(),
                     'unknown_tokens' => $unknownSuffixes,
                     'invalid_tokens' => $invalidSuffixes,
+                    'failure_reasons' => $failureReasons,
                 ]);
             }
 
