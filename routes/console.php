@@ -3,7 +3,6 @@
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use Throwable;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -56,7 +55,7 @@ Artisan::command('firebase:test-token', function () {
         } else {
             $this->warn('Token vide ou sans access_token: ' . json_encode(array_keys($token ?? [])));
         }
-    } catch (Throwable $e) {
+    } catch (\Throwable $e) {
         $this->error('ÉCHEC — Impossible d\'obtenir un token OAuth2.');
         $this->line('');
         $this->line('Message: ' . $e->getMessage());
