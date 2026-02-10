@@ -107,7 +107,8 @@ class FirebaseNotificationService
             return false;
         }
         try {
-            $message = CloudMessage::withTarget('token', $token)
+            $message = CloudMessage::new()
+                ->withToken($token)
                 ->withNotification(Notification::create($title, $body))
                 ->withData($this->ensureStringData($data))
                 ->withAndroidConfig(
@@ -153,7 +154,8 @@ class FirebaseNotificationService
 
         $token = trim($user->fcm_token);
         try {
-            $message = CloudMessage::withTarget('token', $token)
+            $message = CloudMessage::new()
+                ->withToken($token)
                 ->withNotification(Notification::create($title, $body))
                 ->withData($this->ensureStringData($data))
                 ->withAndroidConfig(

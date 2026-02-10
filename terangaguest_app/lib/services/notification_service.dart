@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/api_config.dart';
 import '../models/guest_session.dart';
@@ -27,6 +28,9 @@ const String _kNotificationChannelId = 'terangaguest_orders';
 /// Préfixe pour filtrer les logs FCM dans la console (ex: "FCM" dans le debug).
 const String _kFcmLogTag = '[FCM]';
 
+const String _kNotificationHistoryKey = 'fcm_notification_history';
+const int _kNotificationHistoryMax = 100;
+
 /// Élément d'historique pour la page Notifications.
 class AppNotificationItem {
   AppNotificationItem({
@@ -39,6 +43,23 @@ class AppNotificationItem {
   final String body;
   final Map<String, String> data;
   final DateTime createdAt;
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'body': body,
+        'data': data,
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  static AppNotificationItem fromJson(Map<String, dynamic> json) {
+    final dataMap = json['data'];
+    return AppNotificationItem(
+      title: json['title'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+      data: dataMap is Map ? (dataMap).map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')) : {},
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
 }
 
 /// Affiche un extrait du token pour debug (début...fin) sans exposer le token complet.
@@ -52,6 +73,25 @@ String _tokenPreview(String? token) {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('$_kFcmLogTag Background message: ${message.messageId}');
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final title = message.notification?.title ?? 'Notification';
+    final body = message.notification?.body ?? '';
+    final data = Map<String, String>.from(message.data);
+    final item = {
+      'title': title,
+      'body': body,
+      'data': data,
+      'createdAt': DateTime.now().toIso8601String(),
+    };
+    final String? jsonList = prefs.getString(_kNotificationHistoryKey);
+    final List<dynamic> list = jsonList != null ? (jsonDecode(jsonList) as List<dynamic>) : [];
+    list.insert(0, item);
+    while (list.length > _kNotificationHistoryMax) list.removeLast();
+    await prefs.setString(_kNotificationHistoryKey, jsonEncode(list));
+  } catch (e) {
+    debugPrint('$_kFcmLogTag Background save history: $e');
+  }
 }
 
 class NotificationService {
@@ -98,7 +138,7 @@ class NotificationService {
     }
   }
 
-  /// Ajoute une entrée à l'historique (appelé à la réception ou au tap).
+  /// Ajoute une entrée à l'historique (appelé à la réception ou au tap) et persiste.
   void addNotificationToHistory({required String title, required String body, Map<String, String>? data}) {
     final list = List<AppNotificationItem>.from(notificationHistory.value);
     list.insert(0, AppNotificationItem(
@@ -107,8 +147,36 @@ class NotificationService {
       data: data ?? {},
       createdAt: DateTime.now(),
     ));
-    if (list.length > 100) list.removeRange(100, list.length);
+    if (list.length > _kNotificationHistoryMax) list.removeRange(_kNotificationHistoryMax, list.length);
     notificationHistory.value = list;
+    _saveHistoryToStorage();
+  }
+
+  Future<void> _loadHistoryFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = prefs.getString(_kNotificationHistoryKey);
+      if (jsonList == null || jsonList.isEmpty) return;
+      final decoded = jsonDecode(jsonList) as List<dynamic>?;
+      if (decoded == null) return;
+      final list = decoded
+          .map((e) => e is Map ? AppNotificationItem.fromJson(Map<String, dynamic>.from(e)) : null)
+          .whereType<AppNotificationItem>()
+          .toList();
+      if (list.isNotEmpty) notificationHistory.value = list;
+    } catch (e) {
+      debugPrint('$_kFcmLogTag Load history: $e');
+    }
+  }
+
+  Future<void> _saveHistoryToStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = notificationHistory.value.map((e) => e.toJson()).toList();
+      await prefs.setString(_kNotificationHistoryKey, jsonEncode(list));
+    } catch (e) {
+      debugPrint('$_kFcmLogTag Save history: $e');
+    }
   }
 
   /// Déclenche une notification locale de test (vérifier canal et permissions).
@@ -180,6 +248,10 @@ class NotificationService {
       debugPrint('$_kFcmLogTag App opened from notification (cold start): ${initial.messageId}');
       _handleNotificationTap(initial);
     }
+
+    // Charger l'historique persisté (notifications reçues en arrière-plan ou lors de sessions précédentes)
+    await _loadHistoryFromStorage();
+
     debugPrint('$_kFcmLogTag init() done');
   }
 
