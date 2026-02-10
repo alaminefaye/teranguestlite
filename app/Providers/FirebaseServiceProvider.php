@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging;
@@ -19,11 +20,22 @@ class FirebaseServiceProvider extends ServiceProvider
             if (! is_file($credentialsPath) || ! is_readable($credentialsPath)) {
                 throw new \Exception(
                     "Firebase credentials must be a readable JSON file. Got: {$credentialsPath}. " .
-                    "Set FIREBASE_CREDENTIALS to the file path (e.g. teranguest-74262-844fbd9b5264.json or storage/app/firebase/credentials.json)."
+                    "Set FIREBASE_CREDENTIALS to the file path (e.g. storage/app/firebase/teranguest-74262-844fbd9b5264.json)."
                 );
             }
 
-            return (new Factory)->withServiceAccount($credentialsPath);
+            $json = file_get_contents($credentialsPath);
+            $credentials = json_decode($json, true);
+            if (! is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
+                throw new \Exception("Firebase credentials file is invalid or incomplete: {$credentialsPath}");
+            }
+
+            Log::info('Firebase initialized with credentials', [
+                'path' => $credentialsPath,
+                'project_id' => $credentials['project_id'] ?? null,
+            ]);
+
+            return (new Factory)->withServiceAccount($credentials);
         });
 
         $this->app->singleton('firebase.messaging', function ($app) {
