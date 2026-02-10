@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\MenuItem;
+use App\Models\Reservation;
 use App\Models\Room;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
@@ -92,6 +93,14 @@ class OrderController extends Controller
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
+
+        // Lier au guest si la chambre a un séjour en cours (pour les notifications push client)
+        $reservation = Reservation::where('enterprise_id', $validated['enterprise_id'])
+            ->currentStay($validated['room_id'])
+            ->first();
+        if ($reservation && $reservation->guest_id) {
+            $validated['guest_id'] = $reservation->guest_id;
+        }
 
         // Calculer les totaux
         $subtotal = 0;

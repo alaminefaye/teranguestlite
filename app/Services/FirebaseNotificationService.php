@@ -252,13 +252,25 @@ class FirebaseNotificationService
             'screen' => 'OrderDetails',
         ];
 
+        // Commande sans guest_id (ex. créée depuis le dashboard) : résoudre le guest via la chambre (séjour en cours)
+        $guestId = $order->guest_id;
+        if ($guestId === null && $order->room_id) {
+            $reservation = Reservation::where('enterprise_id', $order->enterprise_id)
+                ->currentStay($order->room_id)
+                ->first();
+            if ($reservation && $reservation->guest_id) {
+                $guestId = $reservation->guest_id;
+                Log::info("Order status: resolved guest {$guestId} from room {$order->room_id} for order #{$order->order_number}");
+            }
+        }
+
         // Essayer d'abord par guest (tokens tablette + app enregistrés pour ce guest)
-        if ($order->guest_id) {
-            $sent = $this->sendToGuest($order->guest_id, $title, $body, $data);
+        if ($guestId) {
+            $sent = $this->sendToGuest($guestId, $title, $body, $data);
             if ($sent) {
                 return true;
             }
-            Log::info("Order status: no tokens for guest {$order->guest_id}, trying user fallback");
+            Log::info("Order status: no tokens for guest {$guestId}, trying user fallback");
         }
 
         // Fallback 1 : envoyer à l'utilisateur (user.fcm_token) si la commande a un user_id
@@ -270,10 +282,10 @@ class FirebaseNotificationService
             Log::warning("Order status: user {$user->id} has no FCM token (order #{$order->order_number})");
         }
 
-        // Fallback 2 : commande avec guest_id mais sans user_id (ex. commande dashboard) → user lié au guest via résa active
-        if ($order->guest_id) {
+        // Fallback 2 : commande avec guest mais sans user_id (ex. commande dashboard) → user lié au guest via résa active
+        if ($guestId) {
             $reservation = Reservation::where('enterprise_id', $order->enterprise_id)
-                ->where('guest_id', $order->guest_id)
+                ->where('guest_id', $guestId)
                 ->whereNotNull('user_id')
                 ->whereIn('status', ['confirmed', 'checked_in'])
                 ->where('check_in', '<=', now())
@@ -284,7 +296,7 @@ class FirebaseNotificationService
                 if ($user && ! empty(trim($user->fcm_token ?? ''))) {
                     $sent = $this->sendToUser($user, $title, $body, $data);
                     if ($sent) {
-                        Log::info("Order status: sent to user {$user->id} via guest {$order->guest_id} reservation (order #{$order->order_number})");
+                        Log::info("Order status: sent to user {$user->id} via guest {$guestId} reservation (order #{$order->order_number})");
                         return true;
                     }
                 }

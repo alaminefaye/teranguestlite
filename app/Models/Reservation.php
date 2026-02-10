@@ -160,6 +160,20 @@ class Reservation extends Model
     }
 
     /**
+     * Scope : séjour en cours (dates + statut confirmed ou checked_in)
+     */
+    public function scopeCurrentStay($query, ?int $roomId = null)
+    {
+        $query->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now());
+        if ($roomId !== null) {
+            $query->where('room_id', $roomId);
+        }
+        return $query;
+    }
+
+    /**
      * Vérifie si le séjour est valide (now entre check_in et check_out)
      */
     public function isStayValid(): bool
