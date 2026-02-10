@@ -24,18 +24,22 @@ class FirebaseServiceProvider extends ServiceProvider
                 );
             }
 
-            $json = file_get_contents($credentialsPath);
-            $credentials = json_decode($json, true);
-            if (! is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
-                throw new \Exception("Firebase credentials file is invalid or incomplete: {$credentialsPath}");
+            // Utiliser le chemin absolu pour éviter tout souci de répertoire de travail (hébergeur, PHP-FPM)
+            $absolutePath = realpath($credentialsPath);
+            if ($absolutePath === false) {
+                throw new \Exception("Firebase credentials path could not be resolved: {$credentialsPath}");
             }
 
+            // Certains composants Google (auth, token) lisent cette variable d'environnement
+            putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $absolutePath);
+            $_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = $absolutePath;
+
             Log::info('Firebase initialized with credentials', [
-                'path' => $credentialsPath,
-                'project_id' => $credentials['project_id'] ?? null,
+                'path' => $absolutePath,
+                'project_id' => config('services.firebase.project_id'),
             ]);
 
-            return (new Factory)->withServiceAccount($credentials);
+            return (new Factory)->withServiceAccount($absolutePath);
         });
 
         $this->app->singleton('firebase.messaging', function ($app) {
