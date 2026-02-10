@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // FCM TOKEN MANAGEMENT
     // ==========================================
     Route::post('/fcm-token', [FcmTokenController::class, 'store']);
+    Route::post('/fcm-token/test', [FcmTokenController::class, 'test']);
     Route::delete('/fcm-token', [FcmTokenController::class, 'destroy']);
     
     // ==========================================

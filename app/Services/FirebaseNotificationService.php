@@ -87,10 +87,56 @@ class FirebaseNotificationService
 
             $this->messaging->sendMulticast($message, $tokens);
             GuestFcmToken::where('guest_id', $guestId)->update(['last_used_at' => now()]);
-            Log::info("Notification sent to guest {$guestId} (" . count($tokens) . " device(s)): {$title}");
+            $suffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $tokens);
+            Log::info("Notification sent to guest {$guestId} (" . count($tokens) . " device(s)): {$title}", ['token_suffixes' => $suffixes]);
             return true;
         } catch (\Exception $e) {
             Log::error("Failed to send notification to guest {$guestId}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Envoyer une notification push à un token FCM précis (ex. test depuis l'app).
+     */
+    public function sendToToken(string $token, string $title, string $body, array $data = []): bool
+    {
+        $token = trim($token);
+        if ($token === '') {
+            Log::warning('FCM sendToToken: empty token');
+            return false;
+        }
+        try {
+            $message = CloudMessage::withTarget('token', $token)
+                ->withNotification(Notification::create($title, $body))
+                ->withData($this->ensureStringData($data))
+                ->withAndroidConfig(
+                    AndroidConfig::fromArray([
+                        'priority' => 'high',
+                        'notification' => [
+                            'sound' => 'default',
+                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            'channel_id' => 'terangaguest_orders',
+                        ],
+                    ])
+                )
+                ->withApnsConfig(
+                    ApnsConfig::fromArray([
+                        'payload' => [
+                            'aps' => [
+                                'sound' => 'default',
+                                'badge' => 1,
+                            ],
+                        ],
+                    ])
+                );
+            $this->messaging->send($message);
+            $suffix = strlen($token) >= 8 ? substr($token, -8) : '(short)';
+            Log::info("FCM test notification sent to token ...{$suffix}: {$title}");
+            return true;
+        } catch (\Exception $e) {
+            $suffix = strlen($token) >= 8 ? substr($token, -8) : '(short)';
+            Log::error("FCM sendToToken failed ...{$suffix}: " . $e->getMessage());
             return false;
         }
     }

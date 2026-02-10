@@ -63,6 +63,7 @@ class ApiConfig {
   
   // FCM Token
   static const String fcmToken = '/fcm-token';
+  static const String fcmTokenTest = '/fcm-token/test';
   
   // Tablette en chambre - code client (sans auth)
   static const String tabletValidateCode = '/tablet/validate-code';

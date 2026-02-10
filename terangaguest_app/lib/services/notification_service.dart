@@ -71,6 +71,33 @@ class NotificationService {
 
   String? get currentFcmToken => _currentFcmToken;
 
+  /// Derniers caractères du token (pour comparer avec les logs serveur).
+  String? get tokenSuffix {
+    final t = _currentFcmToken;
+    if (t == null || t.isEmpty) return null;
+    return t.length >= 8 ? t.substring(t.length - 8) : t;
+  }
+
+  /// Demande au serveur d'envoyer une notification de test vers ce token (même appareil).
+  /// Retourne (success, message).
+  Future<({bool success, String message})> requestServerTest() async {
+    final token = _currentFcmToken ?? await _messaging.getToken();
+    if (token == null || token.isEmpty) {
+      return (success: false, message: 'Aucun token FCM');
+    }
+    try {
+      final response = await _api.post(
+        ApiConfig.fcmTokenTest,
+        data: {'fcm_token': token},
+      );
+      final ok = response.data['success'] == true;
+      final msg = response.data['message'] as String? ?? (ok ? 'Envoyé' : 'Échec');
+      return (success: ok, message: msg);
+    } catch (e) {
+      return (success: false, message: e.toString());
+    }
+  }
+
   /// Ajoute une entrée à l'historique (appelé à la réception ou au tap).
   void addNotificationToHistory({required String title, required String body, Map<String, String>? data}) {
     final list = List<AppNotificationItem>.from(notificationHistory.value);

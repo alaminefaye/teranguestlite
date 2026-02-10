@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\GuestFcmToken;
+use App\Services\FirebaseNotificationService;
 use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,39 @@ class FcmTokenController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'FCM token supprimé avec succès',
+        ]);
+    }
+
+    /**
+     * Envoyer une notification de test depuis le serveur vers le token fourni.
+     * Permet de vérifier si le téléphone reçoit bien les push (même token = même appareil).
+     */
+    public function test(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
+        }
+
+        $token = trim($request->fcm_token);
+        $suffix = strlen($token) >= 8 ? substr($token, -8) : '(short)';
+        \Log::info("FCM test requested by user {$user->id}, token suffix ...{$suffix}");
+
+        $sent = app(FirebaseNotificationService::class)->sendToToken(
+            $token,
+            'Test serveur',
+            'Si vous voyez ceci, les notifications push fonctionnent depuis le serveur.',
+            ['type' => 'test', 'screen' => 'Notifications']
+        );
+
+        return response()->json([
+            'success' => $sent,
+            'message' => $sent ? 'Notification de test envoyée' : 'Échec envoi (voir logs)',
+            'token_suffix' => $suffix,
         ]);
     }
 }

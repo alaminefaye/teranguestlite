@@ -7,8 +7,15 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../orders/order_detail_screen.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  bool _serverTestLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,74 @@ class NotificationsScreen extends StatelessWidget {
           child: Column(
             children: [
               _buildHeader(context, l10n, ns),
+              _buildServerTestSection(context, ns),
               Expanded(child: _buildContent(context, ns)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServerTestSection(BuildContext context, NotificationService ns) {
+    final suffix = ns.tokenSuffix;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Vérifier la réception push',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.accentGold,
+                ),
+              ),
+              if (suffix != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Token (fin): ...$suffix — à comparer avec laravel.log',
+                  style: TextStyle(fontSize: 11, color: AppTheme.textGray, fontFamily: 'monospace'),
+                ),
+              ],
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _serverTestLoading ? null : () async {
+                    HapticHelper.lightImpact();
+                    setState(() => _serverTestLoading = true);
+                    final result = await ns.requestServerTest();
+                    if (!mounted) return;
+                    setState(() => _serverTestLoading = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result.success
+                            ? 'Notification envoyée par le serveur — vérifiez votre téléphone'
+                            : result.message),
+                        backgroundColor: result.success ? AppTheme.accentGold : Colors.red.shade700,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  },
+                  icon: _serverTestLoading
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.accentGold))
+                      : const Icon(Icons.send, size: 18, color: AppTheme.primaryDark),
+                  label: Text(
+                    _serverTestLoading ? 'Envoi...' : 'Test depuis le serveur',
+                    style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.w600),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentGold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
