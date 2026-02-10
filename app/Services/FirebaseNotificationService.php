@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\GuestFcmToken;
+use App\Models\Reservation;
 use App\Models\User;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -258,16 +259,40 @@ class FirebaseNotificationService
             Log::info("Order status: no tokens for guest {$order->guest_id}, trying user fallback");
         }
 
-        // Fallback : envoyer à l'utilisateur (user.fcm_token) si la commande a un user_id
+        // Fallback 1 : envoyer à l'utilisateur (user.fcm_token) si la commande a un user_id
         if ($order->user_id && $order->user) {
             $user = $order->user;
             if (! empty(trim($user->fcm_token ?? ''))) {
                 return $this->sendToUser($user, $title, $body, $data);
             }
             Log::warning("Order status: user {$user->id} has no FCM token (order #{$order->order_number})");
-        } else {
-            Log::warning("Order status: order #{$order->order_number} has no guest_id and no user");
         }
+
+        // Fallback 2 : commande avec guest_id mais sans user_id (ex. commande dashboard) → user lié au guest via résa active
+        if ($order->guest_id) {
+            $reservation = Reservation::where('enterprise_id', $order->enterprise_id)
+                ->where('guest_id', $order->guest_id)
+                ->whereNotNull('user_id')
+                ->whereIn('status', ['confirmed', 'checked_in'])
+                ->where('check_in', '<=', now())
+                ->where('check_out', '>=', now())
+                ->first();
+            if ($reservation && $reservation->user_id) {
+                $user = User::find($reservation->user_id);
+                if ($user && ! empty(trim($user->fcm_token ?? ''))) {
+                    $sent = $this->sendToUser($user, $title, $body, $data);
+                    if ($sent) {
+                        Log::info("Order status: sent to user {$user->id} via guest {$order->guest_id} reservation (order #{$order->order_number})");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        Log::warning("Order status: notification could not be sent for order #{$order->order_number}", [
+            'guest_id' => $order->guest_id,
+            'user_id' => $order->user_id,
+        ]);
 
         return false;
     }
