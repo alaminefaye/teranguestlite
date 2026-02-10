@@ -18,6 +18,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/app/firebase/oauth_cache
 /vendor
 Homestead.json
 Homestead.yaml

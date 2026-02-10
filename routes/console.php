@@ -70,3 +70,25 @@ Artisan::command('firebase:test-token', function () {
         $this->line('  https://oauth2.googleapis.com  et  https://fcm.googleapis.com');
     }
 })->purpose('Tester si le serveur peut obtenir un token OAuth2 pour Firebase');
+
+Artisan::command('firebase:warm-token', function () {
+    $this->info('Préchauffage du cache OAuth2 (partagé avec le processus web)...');
+
+    try {
+        $messaging = app('firebase.messaging');
+        // Déclenche une requête authentifiée vers FCM → le token est récupéré et mis en cache fichier.
+        $messaging->validateRegistrationTokens('warm');
+    } catch (\Throwable $e) {
+        // On attend une erreur "invalid token" ; l’important est que le token ait été mis en cache.
+        if (str_contains($e->getMessage(), 'invalid') || str_contains($e->getMessage(), 'Invalid')) {
+            $this->info('OK — Cache OAuth2 rempli (erreur de validation attendue pour le token de test).');
+            $this->line('Planifiez cette commande toutes les 50 min (cron) pour que le web utilise toujours un token valide.');
+            return;
+        }
+        $this->warn('Cache peut-être rempli ; erreur: ' . $e->getMessage());
+        return;
+    }
+
+    $this->info('OK — Cache OAuth2 rempli.');
+    $this->line('Planifiez cette commande toutes les 50 min (cron) pour que le web utilise toujours un token valide.');
+})->purpose('Remplir le cache OAuth2 (CLI) pour que le processus web n’ait pas à appeler oauth2.googleapis.com');

@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
+use Google\Auth\Cache\FileSystemCacheItemPool;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\Messaging;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -39,7 +39,17 @@ class FirebaseServiceProvider extends ServiceProvider
                 'project_id' => config('services.firebase.project_id'),
             ]);
 
-            return (new Factory)->withServiceAccount($absolutePath);
+            // Cache fichier partagé CLI / PHP-FPM : le cron (firebase:warm-token) remplit le cache,
+            // le processus web lit le token sans appeler oauth2.googleapis.com (utile si sortie HTTPS bloquée).
+            $oauthCachePath = storage_path('app/firebase/oauth_cache');
+            if (! is_dir($oauthCachePath)) {
+                @mkdir($oauthCachePath, 0755, true);
+            }
+            $authTokenCache = new FileSystemCacheItemPool($oauthCachePath);
+
+            return (new Factory)
+                ->withServiceAccount($absolutePath)
+                ->withAuthTokenCache($authTokenCache);
         });
 
         $this->app->singleton('firebase.messaging', function ($app) {
