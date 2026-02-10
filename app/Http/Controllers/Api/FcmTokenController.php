@@ -37,17 +37,17 @@ class FcmTokenController extends Controller
             'fcm_token_updated_at' => now(),
         ]);
 
-        // Lier ce token au guest si l'utilisateur a un séjour actif (client en chambre)
-        $stay = GuestReservationHelper::activeStayForUser($user);
-        if ($stay !== null && $user->enterprise_id && isset($stay['guest_id'])) {
+        // Lier ce token au guest si l'utilisateur a un séjour en cours (chambre ou résa liée au compte)
+        $guestId = GuestReservationHelper::guestIdForUser($user);
+        if ($guestId !== null && $user->enterprise_id) {
             try {
-                GuestFcmToken::register($user->enterprise_id, $stay['guest_id'], $token, 'mobile');
-                \Log::info("FCM: token registered for user {$user->id} and guest {$stay['guest_id']}");
+                GuestFcmToken::register($user->enterprise_id, $guestId, $token, 'mobile');
+                \Log::info("FCM: token registered for user {$user->id} and guest {$guestId}");
             } catch (\Exception $e) {
                 \Log::warning('FCM: could not register token for guest: ' . $e->getMessage());
             }
         } else {
-            \Log::info("FCM: user {$user->id} has no active stay, token stored on user only (guest_id not linked)");
+            \Log::info("FCM: user {$user->id} has no active stay (room or reservation), token stored on user only (guest_id not linked)");
         }
 
         return response()->json([

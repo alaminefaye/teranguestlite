@@ -76,11 +76,16 @@ class ReservationController extends Controller
     {
         $rooms = Room::available()->orderBy('room_number')->get();
         $guests = Guest::orderBy('name')->get();
+        $guestUsers = User::where('enterprise_id', auth()->user()->enterprise_id)
+            ->where('role', 'guest')
+            ->orderBy('name')
+            ->get();
 
         return view('pages.dashboard.reservations.create', [
             'title' => 'Créer une réservation',
             'rooms' => $rooms,
             'guests' => $guests,
+            'guestUsers' => $guestUsers,
         ]);
     }
 
@@ -92,6 +97,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
+            'user_id' => 'nullable|exists:users,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'guests_count' => 'required|integer|min:1|max:10',
@@ -101,6 +107,9 @@ class ReservationController extends Controller
         ]);
 
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
+        if (empty($validated['user_id'])) {
+            $validated['user_id'] = null;
+        }
         $checkIn = \Carbon\Carbon::parse($validated['check_in']);
         $checkOut = \Carbon\Carbon::parse($validated['check_out']);
 
@@ -182,12 +191,17 @@ class ReservationController extends Controller
     {
         $rooms = Room::orderBy('room_number')->get();
         $guests = Guest::orderBy('name')->get();
+        $guestUsers = User::where('enterprise_id', auth()->user()->enterprise_id)
+            ->where('role', 'guest')
+            ->orderBy('name')
+            ->get();
 
         return view('pages.dashboard.reservations.edit', [
             'title' => 'Modifier réservation ' . $reservation->reservation_number,
             'reservation' => $reservation,
             'rooms' => $rooms,
             'guests' => $guests,
+            'guestUsers' => $guestUsers,
         ]);
     }
 
@@ -199,6 +213,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
+            'user_id' => 'nullable|exists:users,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'guests_count' => 'required|integer|min:1|max:10',
@@ -206,6 +221,9 @@ class ReservationController extends Controller
             'notes' => 'nullable|string',
             'status' => 'required|in:pending,confirmed,checked_in,checked_out,cancelled',
         ]);
+        if (empty($validated['user_id'])) {
+            $validated['user_id'] = null;
+        }
 
         $checkIn = \Carbon\Carbon::parse($validated['check_in']);
         $checkOut = \Carbon\Carbon::parse($validated['check_out']);

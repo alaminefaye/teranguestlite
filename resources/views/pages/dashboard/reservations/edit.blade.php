@@ -67,6 +67,26 @@
                 @enderror
             </div>
 
+            <!-- Compte client (optionnel) -->
+            <div class="md:col-span-2">
+                <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Compte client (optionnel)
+                </label>
+                <select name="user_id" id="user_id"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    <option value="">Aucun</option>
+                    @foreach($guestUsers as $u)
+                        <option value="{{ $u->id }}" {{ old('user_id', $reservation->user_id) == $u->id ? 'selected' : '' }}>
+                            {{ $u->name }} — {{ $u->email }} @if($u->room_number)(chambre {{ $u->room_number }})@endif
+                        </option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lie la réservation au compte app pour les notifications push.</p>
+                @error('user_id')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Check-in / check-out (date et heure) -->
             <div>
                 <label for="check_in" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
