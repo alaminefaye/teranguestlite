@@ -85,10 +85,24 @@ class FirebaseNotificationService
                     ])
                 );
 
-            $this->messaging->sendMulticast($message, $tokens);
-            GuestFcmToken::where('guest_id', $guestId)->update(['last_used_at' => now()]);
+            $report = $this->messaging->sendMulticast($message, $tokens);
             $suffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $tokens);
             Log::info("Notification sent to guest {$guestId} (" . count($tokens) . " device(s)): {$title}", ['token_suffixes' => $suffixes]);
+
+            if ($report->hasFailures()) {
+                $unknown = $report->unknownTokens();
+                $invalid = $report->invalidTokens();
+                $unknownSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $unknown);
+                $invalidSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $invalid);
+                Log::warning("FCM multicast had failures for guest {$guestId}", [
+                    'successes' => $report->successes()->count(),
+                    'failures' => $report->failures()->count(),
+                    'unknown_tokens' => $unknownSuffixes,
+                    'invalid_tokens' => $invalidSuffixes,
+                ]);
+            }
+
+            GuestFcmToken::where('guest_id', $guestId)->update(['last_used_at' => now()]);
             return true;
         } catch (\Exception $e) {
             Log::error("Failed to send notification to guest {$guestId}: " . $e->getMessage());
