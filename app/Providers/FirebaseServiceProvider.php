@@ -14,7 +14,7 @@ class FirebaseServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton('firebase', function ($app) {
-            $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+            $credentialsPath = $this->resolveCredentialsPath(config('services.firebase.credentials'));
 
             if (! is_file($credentialsPath) || ! is_readable($credentialsPath)) {
                 throw new \Exception(
