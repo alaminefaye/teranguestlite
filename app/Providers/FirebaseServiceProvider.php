@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
-use Google\Auth\Cache\FileSystemCacheItemPool;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Http\HttpClientOptions;
+use Psr\Http\Message\RequestInterface;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -24,13 +26,11 @@ class FirebaseServiceProvider extends ServiceProvider
                 );
             }
 
-            // Utiliser le chemin absolu pour éviter tout souci de répertoire de travail (hébergeur, PHP-FPM)
             $absolutePath = realpath($credentialsPath);
             if ($absolutePath === false) {
                 throw new \Exception("Firebase credentials path could not be resolved: {$credentialsPath}");
             }
 
-            // Certains composants Google (auth, token) lisent cette variable d'environnement
             putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $absolutePath);
             $_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = $absolutePath;
 
@@ -39,17 +39,57 @@ class FirebaseServiceProvider extends ServiceProvider
                 'project_id' => config('services.firebase.project_id'),
             ]);
 
-            // Cache fichier partagé CLI / PHP-FPM : le cron (firebase:warm-token) remplit le cache,
-            // le processus web lit le token sans appeler oauth2.googleapis.com (utile si sortie HTTPS bloquée).
-            $oauthCachePath = storage_path('app/firebase/oauth_cache');
-            if (! is_dir($oauthCachePath)) {
-                @mkdir($oauthCachePath, 0755, true);
-            }
-            $authTokenCache = new FileSystemCacheItemPool($oauthCachePath);
+            // On ajoute nous-mêmes le token OAuth2 à chaque requête FCM (comme en CLI).
+            // 1) Fichier en cache si valide, 2) sinon appel Google, puis on met en cache pour la suite.
+            $credentialsPathForMiddleware = $absolutePath;
+            $bearerMiddleware = function (callable $handler) use ($credentialsPathForMiddleware) {
+                return function (RequestInterface $request, array $options) use ($handler, $credentialsPathForMiddleware) {
+                    if ($request->hasHeader('Authorization')) {
+                        return $handler($request, $options);
+                    }
+                    $token = null;
+                    $file = storage_path('app/firebase/access_token.json');
+                    if (is_file($file) && is_readable($file)) {
+                        $data = @json_decode((string) file_get_contents($file), true);
+                        if ($data && ! empty($data['access_token']) && isset($data['expires_at']) && (int) $data['expires_at'] > time() + 60) {
+                            $token = $data['access_token'];
+                        }
+                    }
+                    if (! $token) {
+                        try {
+                            $creds = new ServiceAccountCredentials(
+                                ['https://www.googleapis.com/auth/firebase.messaging'],
+                                $credentialsPathForMiddleware
+                            );
+                            $auth = $creds->fetchAuthToken();
+                            if (! empty($auth['access_token'])) {
+                                $token = $auth['access_token'];
+                                $expiresIn = (int) ($auth['expires_in'] ?? 3600);
+                                $dir = \dirname($file);
+                                if (! is_dir($dir)) {
+                                    @mkdir($dir, 0755, true);
+                                }
+                                @file_put_contents($file, json_encode([
+                                    'access_token' => $token,
+                                    'expires_at' => time() + $expiresIn - 60,
+                                ], JSON_UNESCAPED_SLASHES));
+                            }
+                        } catch (\Throwable $e) {
+                            Log::warning('Firebase: could not get OAuth token', ['message' => $e->getMessage()]);
+                        }
+                    }
+                    if ($token) {
+                        $request = $request->withHeader('Authorization', 'Bearer ' . $token);
+                    }
+                    return $handler($request, $options);
+                };
+            };
+
+            $httpOptions = HttpClientOptions::default()->withGuzzleMiddleware($bearerMiddleware, 'firebase_bearer');
 
             return (new Factory)
                 ->withServiceAccount($absolutePath)
-                ->withAuthTokenCache($authTokenCache);
+                ->withHttpClientOptions($httpOptions);
         });
 
         $this->app->singleton('firebase.messaging', function ($app) {

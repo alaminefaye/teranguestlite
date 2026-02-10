@@ -83,12 +83,37 @@ Artisan::command('firebase:warm-token', function () {
         if (str_contains($e->getMessage(), 'invalid') || str_contains($e->getMessage(), 'Invalid')) {
             $this->info('OK — Cache OAuth2 rempli (erreur de validation attendue pour le token de test).');
             $this->line('Planifiez cette commande toutes les 50 min (cron) pour que le web utilise toujours un token valide.');
-            return;
+        } else {
+            $this->warn('Cache peut-être rempli ; erreur: ' . $e->getMessage());
         }
-        $this->warn('Cache peut-être rempli ; erreur: ' . $e->getMessage());
-        return;
     }
 
-    $this->info('OK — Cache OAuth2 rempli.');
+    // Secours pour le web : fichier token que PHP-FPM lit pour Authorization
+    $envValue = config('services.firebase.credentials');
+    $path = $envValue ? (str_starts_with($envValue, '/') ? $envValue : base_path($envValue)) : base_path('firebase-credentials.json');
+    $absolutePath = is_file($path) ? realpath($path) : $path;
+    try {
+        $credentials = new ServiceAccountCredentials(
+            ['https://www.googleapis.com/auth/firebase.messaging'],
+            $absolutePath
+        );
+        $token = $credentials->fetchAuthToken();
+        if (! empty($token['access_token'])) {
+            $expiresIn = (int) ($token['expires_in'] ?? 3600);
+            $expiresAt = time() + $expiresIn - 60;
+            $dir = storage_path('app/firebase');
+            if (! is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $file = $dir . '/access_token.json';
+            file_put_contents($file, json_encode([
+                'access_token' => $token['access_token'],
+                'expires_at' => $expiresAt,
+            ], JSON_UNESCAPED_SLASHES));
+            $this->info('OK — Token écrit dans ' . $file . ' (lu par le web pour FCM).');
+        }
+    } catch (\Throwable $e) {
+        $this->warn('Impossible d\'écrire le fichier token : ' . $e->getMessage());
+    }
     $this->line('Planifiez cette commande toutes les 50 min (cron) pour que le web utilise toujours un token valide.');
 })->purpose('Remplir le cache OAuth2 (CLI) pour que le processus web n’ait pas à appeler oauth2.googleapis.com');
