@@ -1,13 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../config/api_config.dart';
 import '../models/guest_session.dart';
 import 'api_service.dart';
 import 'tablet_session_api.dart';
+
+/// Canal Android utilisé aussi dans AndroidManifest (com.google.firebase.messaging.default_notification_channel_id).
+/// Créé avec priorité haute pour que les notifications s'affichent avec son et heads-up.
+const String _kNotificationChannelId = 'terangaguest_orders';
 
 /// Gère les notifications push FCM : permissions, token, enregistrement backend, réception.
 ///
@@ -20,6 +26,20 @@ import 'tablet_session_api.dart';
 ///   registerWithBackendForTabletSession() ; au logout → unregisterFromBackend().
 /// Préfixe pour filtrer les logs FCM dans la console (ex: "FCM" dans le debug).
 const String _kFcmLogTag = '[FCM]';
+
+/// Élément d'historique pour la page Notifications.
+class AppNotificationItem {
+  AppNotificationItem({
+    required this.title,
+    required this.body,
+    required this.data,
+    required this.createdAt,
+  });
+  final String title;
+  final String body;
+  final Map<String, String> data;
+  final DateTime createdAt;
+}
 
 /// Affiche un extrait du token pour debug (début...fin) sans exposer le token complet.
 String _tokenPreview(String? token) {
@@ -42,9 +62,37 @@ class NotificationService {
 
   final ApiService _api = ApiService();
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
   String? _currentFcmToken;
+  int _notificationId = 0;
+
+  /// Historique des notifications reçues (pour la page Notifications).
+  final ValueNotifier<List<AppNotificationItem>> notificationHistory = ValueNotifier(<AppNotificationItem>[]);
 
   String? get currentFcmToken => _currentFcmToken;
+
+  /// Ajoute une entrée à l'historique (appelé à la réception ou au tap).
+  void addNotificationToHistory({required String title, required String body, Map<String, String>? data}) {
+    final list = List<AppNotificationItem>.from(notificationHistory.value);
+    list.insert(0, AppNotificationItem(
+      title: title,
+      body: body,
+      data: data ?? {},
+      createdAt: DateTime.now(),
+    ));
+    if (list.length > 100) list.removeRange(100, list.length);
+    notificationHistory.value = list;
+  }
+
+  /// Déclenche une notification locale de test (vérifier canal et permissions).
+  Future<void> showTestNotification() async {
+    await _showLocalNotification(
+      title: 'Test',
+      body: 'Si vous voyez ceci, les notifications fonctionnent.',
+      payload: null,
+    );
+    addNotificationToHistory(title: 'Test', body: 'Si vous voyez ceci, les notifications fonctionnent.');
+  }
 
   /// Affiche dans la console l'état actuel du token (pour debug).
   void debugPrintState() {
@@ -67,6 +115,9 @@ class NotificationService {
     // Gestion des messages en arrière-plan / terminé
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     debugPrint('$_kFcmLogTag Background message handler registered');
+
+    // Notifications locales : affichage en premier plan + canal Android priorité haute
+    await _initLocalNotifications();
 
     // Présentation en premier plan (iOS)
     if (Platform.isIOS) {
@@ -103,6 +154,47 @@ class NotificationService {
       _handleNotificationTap(initial);
     }
     debugPrint('$_kFcmLogTag init() done');
+  }
+
+  Future<void> _initLocalNotifications() async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const ios = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+    const settings = InitializationSettings(android: android, iOS: ios);
+    await _localNotifications.initialize(
+      settings,
+      onDidReceiveNotificationResponse: _onLocalNotificationTap,
+    );
+    // Canal Android : priorité haute pour son + heads-up (aligné sur AndroidManifest)
+    if (Platform.isAndroid) {
+      final channel = AndroidNotificationChannel(
+        _kNotificationChannelId,
+        'Commandes et réservations',
+        description: 'Notifications de commandes et réservations',
+        importance: Importance.high,
+        playSound: true,
+      );
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+      debugPrint('$_kFcmLogTag Android notification channel created: $_kNotificationChannelId');
+    }
+  }
+
+  void _onLocalNotificationTap(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+    try {
+      final data = Map<String, String>.from(jsonDecode(payload) as Map<dynamic, dynamic>);
+      debugPrint('$_kFcmLogTag Notification tap (local): $data');
+      final screen = data['screen'];
+      final orderId = data['order_id'];
+      if (screen != null) debugPrint('Navigate to: $screen id: $orderId');
+      // TODO: navigation via GlobalKey ou route si besoin
+    } catch (_) {}
   }
 
   /// Demande la permission de notification (iOS et Android 13+).
@@ -183,15 +275,38 @@ class NotificationService {
 
   void _handleForegroundMessage(RemoteMessage message) {
     debugPrint('$_kFcmLogTag Foreground message: title=${message.notification?.title} body=${message.notification?.body} data=${message.data}');
+    final title = message.notification?.title ?? 'Notification';
+    final body = message.notification?.body ?? '';
+    final data = Map<String, String>.from(message.data);
+    final payload = data.isNotEmpty ? jsonEncode(data) : null;
+    _showLocalNotification(title: title, body: body, payload: payload);
+    addNotificationToHistory(title: title, body: body, data: data);
+  }
+
+  Future<void> _showLocalNotification({required String title, required String body, String? payload}) async {
+    final id = _notificationId++;
+    const android = AndroidNotificationDetails(
+      _kNotificationChannelId,
+      'Commandes et réservations',
+      channelDescription: 'Notifications de commandes et réservations',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+    );
+    const ios = DarwinNotificationDetails(presentAlert: true, presentSound: true);
+    const details = NotificationDetails(android: android, iOS: ios);
+    await _localNotifications.show(id, title, body, details, payload: payload);
   }
 
   void _handleNotificationTap(RemoteMessage message) {
     debugPrint('$_kFcmLogTag Notification tap: data=${message.data}');
-    final type = message.data['type'];
-    final screen = message.data['screen'];
-    final orderId = message.data['order_id'];
-    // La navigation peut être gérée via un GlobalKey<NavigatorState> ou un route observer
-    // selon votre architecture. Ici on se contente du log.
+    final title = message.notification?.title ?? 'Notification';
+    final body = message.notification?.body ?? '';
+    final data = Map<String, String>.from(message.data);
+    addNotificationToHistory(title: title, body: body, data: data);
+    final type = data['type'];
+    final screen = data['screen'];
+    final orderId = data['order_id'];
     if (screen != null) debugPrint('Navigate to: $screen id: $orderId type: $type');
   }
 }

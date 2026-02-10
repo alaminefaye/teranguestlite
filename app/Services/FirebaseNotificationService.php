@@ -70,6 +70,7 @@ class FirebaseNotificationService
                         'notification' => [
                             'sound' => 'default',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            'channel_id' => 'terangaguest_orders',
                         ],
                     ])
                 )
@@ -115,6 +116,7 @@ class FirebaseNotificationService
                         'notification' => [
                             'sound' => 'default',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            'channel_id' => 'terangaguest_orders',
                         ],
                     ])
                 )
