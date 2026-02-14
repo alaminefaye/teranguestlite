@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
 
@@ -16,15 +17,28 @@ class FirebaseServiceProvider extends ServiceProvider
             $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
 
             if (! $credentialsPath || ! is_readable($credentialsPath)) {
-                throw new \Exception("Firebase credentials file not found or not readable: " . (env('FIREBASE_CREDENTIALS') ?? 'FIREBASE_CREDENTIALS not set'));
+                $msg = 'Firebase credentials file not found or not readable. FIREBASE_CREDENTIALS=' . (env('FIREBASE_CREDENTIALS') ?? 'null') . ', base_path=' . base_path();
+                Log::error($msg);
+                throw new \Exception($msg);
             }
 
-            // So that Google Auth libraries use the same credentials
-            putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $credentialsPath);
+            // Toujours utiliser un chemin absolu pour que le SDK et les libs Google trouvent le fichier
+            $absolutePath = realpath($credentialsPath) ?: $credentialsPath;
+            putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $absolutePath);
+            putenv('FIREBASE_CREDENTIALS=' . $absolutePath);
 
-            $factory = (new Factory)->withServiceAccount($credentialsPath);
+            $contents = file_get_contents($absolutePath);
+            $decoded = json_decode($contents, true);
+            if (json_last_error() !== JSON_ERROR_NONE || empty($decoded['private_key']) || empty($decoded['client_email'])) {
+                Log::error('Firebase credentials file is invalid JSON or missing private_key/client_email.');
+                throw new \Exception('Firebase credentials file is invalid. Check that it is the JSON from Firebase Console > Service accounts > Generate new key.');
+            }
 
-            $projectId = env('FIREBASE_PROJECT_ID');
+            Log::info('Firebase credentials loaded', ['path' => $absolutePath, 'project_id' => $decoded['project_id'] ?? 'n/a']);
+
+            $factory = (new Factory)->withServiceAccount($absolutePath);
+
+            $projectId = env('FIREBASE_PROJECT_ID') ?: ($decoded['project_id'] ?? null);
             if ($projectId) {
                 $factory = $factory->withProjectId($projectId);
             }
@@ -46,18 +60,19 @@ class FirebaseServiceProvider extends ServiceProvider
             return null;
         }
 
+        $path = trim($path);
         if (realpath($path) !== false) {
             return realpath($path);
         }
 
         $fromBase = base_path($path);
         if (is_readable($fromBase)) {
-            return realpath($fromBase);
+            return realpath($fromBase) ?: $fromBase;
         }
 
         $fromStorage = storage_path('app/firebase/' . basename($path));
         if (is_readable($fromStorage)) {
-            return realpath($fromStorage);
+            return realpath($fromStorage) ?: $fromStorage;
         }
 
         return $fromBase;

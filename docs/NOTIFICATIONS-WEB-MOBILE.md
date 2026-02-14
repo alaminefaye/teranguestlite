@@ -87,11 +87,16 @@ firebase_messaging: ^15.1.6
 | **Endpoint FCM** | `lib/config/api_config.dart` | `static const String fcmToken = '/fcm-token';` (relatif à `baseUrl`) |
 | **Base URL API** | `lib/config/api_config.dart` | `baseUrl` (ex. `https://teranguest.../api`) |
 
-### 4. Flux d’utilisation
+### 4. Flux d’utilisation (où le token est récupéré et enregistré)
 
 - **Au démarrage** : `main.dart` → `Firebase.initializeApp()`.
-- **Après login / init auth** : `AuthProvider` appelle `_fcmService.registerTokenIfNeeded()` (récupère le token FCM, envoie `POST /api/fcm-token` avec le token).
+- **Après login ou au démarrage si déjà connecté** : `AuthProvider` appelle `_fcmService.registerTokenIfNeeded()` :
+  - demande la permission notification (iOS),
+  - récupère le token FCM du device,
+  - envoie `POST /api/fcm-token` avec ce token (authentification Bearer = utilisateur connecté).
 - **À la déconnexion** : `AuthProvider.logout()` appelle `_fcmService.unregisterToken()` (`DELETE /api/fcm-token`).
+
+Donc le token est enregistré **uniquement pour l’utilisateur actuellement connecté**. Pour recevoir les notifications d’une chambre, la tablette doit être **connectée avec le compte « Client Chambre XXX »** (accès tablette) au moins une fois, afin que le token soit associé à ce compte en base.
 
 ### 5. Réception des notifications (état actuel)
 
@@ -120,9 +125,39 @@ firebase_messaging: ^15.1.6
 
 ---
 
+## Tester les credentials Firebase (backend)
+
+En cas d’erreur « Request is missing required authentication credential », vérifier que le fichier credentials est bien chargé :
+
+```bash
+php artisan fcm:test
+```
+
+Si tout est OK, vous verrez « Credentials chargés avec succès ». Pour envoyer une notification test à un utilisateur (ex. user_id 6) :
+
+```bash
+php artisan fcm:test --user=6
+```
+
+Vérifier aussi dans `storage/logs/laravel.log` la ligne « Firebase credentials loaded » avec le chemin du fichier. Si cette ligne n’apparaît pas lors d’un envoi, vider le cache : `php artisan config:clear` puis réessayer.
+
+---
+
 ## Debug : pas de notification push reçue sur l’app
 
 Quand le web change le statut d’une commande (confirmée, en préparation, etc.) et que l’app ne reçoit pas de notification :
+
+### 0. Erreur « Request is missing required authentication credential »
+
+Côté **backend** (credentials non pris en compte) :
+
+1. **Tester le chargement** : `php artisan fcm:test`. Si ça échoue, le fichier credentials n’est pas trouvé ou est invalide.
+2. **Vérifier le chemin** : dans `storage/logs/laravel.log`, chercher « Firebase credentials loaded » (le chemin absolu du fichier doit être correct).
+3. **Emplacement du fichier** : le fichier doit être soit à la **racine du projet**, soit dans **`storage/app/firebase/`**. Le nom dans `.env` doit correspondre (ex. `FIREBASE_CREDENTIALS=teranguest-74262-bad96dcbc8cd.json`).
+4. **En production** : s’assurer que le fichier JSON est bien déployé sur le serveur (il n’est pas dans Git) et que le chemin est le bon.
+5. **Cache** : exécuter `php artisan config:clear` puis réessayer.
+
+Côté **mobile** : le token est récupéré et envoyé au backend **uniquement après connexion** (login ou au démarrage si déjà connecté). Voir la section « Flux d’utilisation » ci‑dessus.
 
 ### 1. Vérifier le token FCM pour la chambre (backend)
 
