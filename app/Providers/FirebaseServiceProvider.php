@@ -36,7 +36,9 @@ class FirebaseServiceProvider extends ServiceProvider
 
             Log::info('Firebase credentials loaded', ['path' => $absolutePath, 'project_id' => $decoded['project_id'] ?? 'n/a']);
 
-            $factory = (new Factory)->withServiceAccount($absolutePath);
+            // Passer les credentials en tableau pour éviter les problèmes de lecture du fichier
+            // par le SDK (chemin, permissions, open_basedir sur le serveur)
+            $factory = (new Factory)->withServiceAccount($decoded);
 
             $projectId = env('FIREBASE_PROJECT_ID') ?: ($decoded['project_id'] ?? null);
             if ($projectId) {
