@@ -170,6 +170,63 @@ Puis sur le web, passer une commande à l’étape suivante (ex. « Passer à Pr
 
 ---
 
+## Déploiement sur le serveur (Firebase credentials)
+
+Le fichier de credentials Firebase **ne doit pas** être dans Git (il est dans `.gitignore`). Sur le serveur, faire une des deux options suivantes.
+
+### Option A : Fichier à la racine du projet (recommandé)
+
+1. **Sur le serveur**, dans le dossier du projet (même niveau que `composer.json`, `.env`) :
+   - Envoyer le fichier `teranguest-74262-bad96dcbc8cd.json` (SFTP, SCP, ou créer le fichier et coller le contenu).
+   - Exemple : `/var/www/terangaguest/teranguest-74262-bad96dcbc8cd.json`
+
+2. **Dans le `.env` du serveur** (créer ou modifier) :
+   ```env
+   FIREBASE_CREDENTIALS=teranguest-74262-bad96dcbc8cd.json
+   FIREBASE_PROJECT_ID=terangaguest
+   ```
+
+3. Vérifier les droits : le serveur web (ex. `www-data`) doit pouvoir lire le fichier :
+   ```bash
+   chmod 640 teranguest-74262-bad96dcbc8cd.json
+   chown www-data:www-data teranguest-74262-bad96dcbc8cd.json
+   ```
+
+### Option B : Fichier dans `storage/app/firebase/`
+
+1. **Sur le serveur** :
+   ```bash
+   mkdir -p storage/app/firebase
+   ```
+   Puis placer le JSON dans `storage/app/firebase/teranguest-74262-bad96dcbc8cd.json`.
+
+2. **Dans le `.env` du serveur** :
+   ```env
+   FIREBASE_CREDENTIALS=teranguest-74262-bad96dcbc8cd.json
+   FIREBASE_PROJECT_ID=terangaguest
+   ```
+   Le provider cherche aussi dans `storage/app/firebase/` si le fichier n’est pas à la racine.
+
+3. **Droits** :
+   ```bash
+   chmod 640 storage/app/firebase/teranguest-74262-bad96dcbc8cd.json
+   chown -R www-data:www-data storage/app/firebase
+   ```
+
+### Chemin absolu (optionnel)
+
+Si tu préfères un chemin absolu dans `.env` (selon l’OS du serveur) :
+
+- Linux : `FIREBASE_CREDENTIALS=/var/www/terangaguest/teranguest-74262-bad96dcbc8cd.json`
+- Le provider utilise `realpath()` : un chemin absolu valide est pris tel quel.
+
+### À ne pas faire
+
+- Ne **pas** committer le fichier JSON dans Git (déjà ignoré via `teranguest-*.json`).
+- Ne **pas** le mettre dans `public/` (accessible par URL = fuite de clé).
+
+---
+
 ## Documentation complémentaire
 
 - **Configuration Firebase détaillée** : `docs/FIREBASE-CONFIGURATION.md`

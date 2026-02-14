@@ -367,9 +367,22 @@ public function update(Request $request, Order $order)
 
 ```env
 # Firebase Configuration
+# Chemin vers le fichier JSON du compte de service (depuis Firebase Console > Paramètres du projet > Comptes de service > Générer une nouvelle clé privée)
 FIREBASE_CREDENTIALS=storage/app/firebase/credentials.json
 FIREBASE_PROJECT_ID=terangaguest
 ```
+
+### Erreur « Request is missing required authentication credential »
+
+Si les logs affichent cette erreur :
+
+1. **Fichier credentials** : Le JSON doit être celui téléchargé depuis **Firebase Console** > **Paramètres du projet** > **Comptes de service** > **Générer une nouvelle clé privée**. Il doit contenir au minimum `project_id`, `client_email`, `private_key`.
+
+2. **Emplacement** : Soit mettre le fichier à la racine du projet (ex. `teranguest-xxx.json`) et mettre `FIREBASE_CREDENTIALS=teranguest-xxx.json`, soit le placer dans `storage/app/firebase/` et utiliser le même nom dans `.env`.
+
+3. **API activée** : Dans **Google Cloud Console** (même projet que Firebase) > **APIs & Services** > **Enabled APIs**, activer **« Firebase Cloud Messaging API »** (ou **Cloud Messaging API**).
+
+4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir de `FIREBASE_CREDENTIALS` pour que les librairies Google utilisent le bon fichier.
 
 ---
 

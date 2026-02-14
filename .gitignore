@@ -21,4 +21,8 @@
 /vendor
 Homestead.json
 Homestead.yaml
+
+# Firebase credentials (ne jamais committer la clé privée)
+teranguest-*.json
+storage/app/firebase/*.json
 Thumbs.db
