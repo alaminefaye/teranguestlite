@@ -174,21 +174,21 @@ class FirebaseNotificationService
                 Log::error('Cannot send notification: failed to obtain OAuth2 access token');
                 return false;
             }
-    
+        
             if (!$this->projectId) {
                 Log::error('Cannot send notification: FIREBASE_PROJECT_ID not configured');
                 return false;
             }
     
             $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
-
+    
             // Build message payload - data must be a map (object), not a list
             $messageData = $this->convertDataValuesToString($data);
             // Ensure data is never empty - add a default field if needed
             if (empty($messageData)) {
                 $messageData = ['type' => 'notification'];
             }
-    
+        
             $messagePayload = [
                 'message' => [
                     'token' => $fcmToken,
@@ -215,27 +215,109 @@ class FirebaseNotificationService
                 ],
             ];
     
+            // Try cURL first (bypasses Laravel HTTP client proxy issues)
+            $result = $this->sendViaCurl($url, $messagePayload, $accessToken);
+            if ($result) {
+                return true;
+            }
+    
+            // Fallback to Laravel HTTP client
+            return $this->sendViaLaravelHttp($url, $messagePayload, $accessToken, $fcmToken);
+        } catch (\Exception $e) {
+            Log::error("Exception in sendViaHttpApi: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Send notification using raw cURL (bypasses proxy issues with Laravel HTTP client)
+     */
+    protected function sendViaCurl(string $url, array $payload, string $accessToken): bool
+    {
+        if (!function_exists('curl_init')) {
+            Log::warning('cURL not available, skipping cURL method');
+            return false;
+        }
+    
+        $ch = curl_init();
+            
+        $jsonPayload = json_encode($payload);
+            
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $jsonPayload,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $accessToken,
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($jsonPayload),
+            ],
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            // Disable proxy for this request
+            CURLOPT_PROXY => null,
+            CURLOPT_HTTPPROXYTUNNEL => false,
+            // Follow redirects
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+        ]);
+    
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+    
+        if ($curlError) {
+            Log::error("cURL error: " . $curlError);
+            return false;
+        }
+    
+        if ($httpCode === 200) {
+            Log::info("Notification sent successfully via cURL");
+            return true;
+        } else {
+            $responseData = json_decode($response, true);
+            Log::error("FCM cURL error (HTTP {$httpCode}): " . ($responseData ? json_encode($responseData) : $response));
+                
+            // If auth error, clear token cache
+            if ($httpCode === 401) {
+                Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
+            }
+                
+            return false;
+        }
+    }
+    
+    /**
+     * Send notification using Laravel HTTP client (fallback)
+     */
+    protected function sendViaLaravelHttp(string $url, array $payload, string $accessToken, string $fcmToken): bool
+    {
+        try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type' => 'application/json',
-            ])->post($url, $messagePayload);
-    
+            ])->post($url, $payload);
+        
             if ($response->successful()) {
                 Log::info("Notification sent via HTTP API to token: " . substr($fcmToken, 0, 20) . "...");
                 return true;
             } else {
                 $errorBody = $response->json() ?? ['error' => $response->body()];
                 Log::error("FCM HTTP API error: " . json_encode($errorBody));
-                    
+                        
                 // If it's an auth error, clear the cache to force token refresh
                 if ($response->status() === 401) {
                     Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
                 }
-                    
+                        
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error("Exception in sendViaHttpApi: " . $e->getMessage());
+            Log::error("Exception in sendViaLaravelHttp: " . $e->getMessage());
             return false;
         }
     }
