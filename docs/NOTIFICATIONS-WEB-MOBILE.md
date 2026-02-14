@@ -142,7 +142,7 @@ firebase_messaging: ^15.1.6
 | Élément | Fichier | Détail |
 |--------|---------|--------|
 | **Endpoint FCM** | `lib/config/api_config.dart` | `static const String fcmToken = '/fcm-token';` (relatif à `baseUrl`) |
-| **Base URL API** | `lib/config/api_config.dart` | `baseUrl` (ex. `https://teranguest.../api`) |
+| **Base URL API** | `lib/config/api_config.dart` | `baseUrl` (ex. `https://teranguest.com/api`) |
 
 ### 4. Flux d’utilisation (où le token est récupéré et enregistré)
 

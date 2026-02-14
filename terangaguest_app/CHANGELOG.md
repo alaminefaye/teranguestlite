@@ -976,7 +976,7 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ### 🌐 Changed
 
 - **Configuration Production** : Connexion à l'API de production
-  - URL: https://teranguest.universaltechnologiesafrica.com/api
+  - URL: https://teranguest.com/api
   - HTTPS activé
   - Accessible de partout
 

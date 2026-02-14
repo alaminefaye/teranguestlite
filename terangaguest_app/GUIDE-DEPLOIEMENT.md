@@ -45,7 +45,7 @@ version: 2.0.1+2
 **`lib/config/api_config.dart`**
 ```dart
 // ✅ Vérifier que l'URL production est activée
-static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+static const String baseUrl = 'https://teranguest.com/api';
 
 // ❌ Désactiver l'URL de développement
 // static const String baseUrl = 'http://localhost:8000/api';

@@ -176,7 +176,7 @@ flutter run
 Fichier : `lib/config/api_config.dart`
 
 ```dart
-static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+static const String baseUrl = 'https://teranguest.com/api';
 ```
 
 ### Thème

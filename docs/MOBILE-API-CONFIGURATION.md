@@ -10,7 +10,7 @@
 L'application mobile est maintenant connectée à l'**API de production** :
 
 ```
-https://teranguest.universaltechnologiesafrica.com/api
+https://teranguest.com/api
 ```
 
 ---
@@ -26,7 +26,7 @@ https://teranguest.universaltechnologiesafrica.com/api
 class ApiConfig {
   // Base URL de l'API
   // Production
-  static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+  static const String baseUrl = 'https://teranguest.com/api';
   
   // Développement (localhost)
   // static const String baseUrl = 'http://localhost:8000/api';
@@ -44,14 +44,14 @@ class ApiConfig {
 ### Pour utiliser la Production (Actuel)
 
 ```dart
-static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+static const String baseUrl = 'https://teranguest.com/api';
 // static const String baseUrl = 'http://localhost:8000/api';
 ```
 
 ### Pour utiliser le Développement Local
 
 ```dart
-// static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+// static const String baseUrl = 'https://teranguest.com/api';
 static const String baseUrl = 'http://localhost:8000/api';
 ```
 
@@ -95,14 +95,14 @@ Password: passer123
 
 ### URL Complète
 
-**Base :** `https://teranguest.universaltechnologiesafrica.com/api`
+**Base :** `https://teranguest.com/api`
 
 **Exemples :**
 ```
-POST   https://teranguest.universaltechnologiesafrica.com/api/auth/login
-GET    https://teranguest.universaltechnologiesafrica.com/api/user
-GET    https://teranguest.universaltechnologiesafrica.com/api/room-service/categories
-POST   https://teranguest.universaltechnologiesafrica.com/api/room-service/checkout
+POST   https://teranguest.com/api/auth/login
+GET    https://teranguest.com/api/user
+GET    https://teranguest.com/api/room-service/categories
+POST   https://teranguest.com/api/room-service/checkout
 ```
 
 ---
@@ -113,10 +113,10 @@ POST   https://teranguest.universaltechnologiesafrica.com/api/room-service/check
 
 ```bash
 # Test de connexion à l'API
-curl https://teranguest.universaltechnologiesafrica.com/api/room-service/categories
+curl https://teranguest.com/api/room-service/categories
 
 # Test de login
-curl -X POST https://teranguest.universaltechnologiesafrica.com/api/auth/login \
+curl -X POST https://teranguest.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"guest@teranga.com","password":"passer123"}'
 ```
@@ -198,7 +198,7 @@ open terangaguest_app/lib/config/api_config.dart
 
 **Vérifier que l'URL de production est active :**
 ```dart
-static const String baseUrl = 'https://teranguest.universaltechnologiesafrica.com/api';
+static const String baseUrl = 'https://teranguest.com/api';
 ```
 
 ### Étape 2 : Clean & Rebuild
@@ -260,7 +260,7 @@ Password: passer123
 
 | Aspect | Développement Local | **Production** |
 |--------|---------------------|----------------|
-| URL | localhost:8000 | teranguest.universaltechnologiesafrica.com |
+| URL | localhost:8000 | teranguest.com |
 | HTTPS | ❌ HTTP | ✅ HTTPS |
 | Accessibilité | Même réseau | Partout dans le monde |
 | Données | Seeders | Vraies données |

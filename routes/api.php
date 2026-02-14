@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FcmTokenController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoomServiceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\RestaurantController;
@@ -131,4 +132,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Véhicules (pour formulaire Location)
     Route::get('/vehicles', [VehicleController::class, 'index']);
+    
+    // ==========================================
+    // NOTIFICATIONS (In-App Polling Fallback)
+    // ==========================================
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread', [NotificationController::class, 'unread']);
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/cleanup', [NotificationController::class, 'cleanup']);
+    });
 });

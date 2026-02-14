@@ -159,8 +159,32 @@ class FirebaseNotificationService
             return true;
         }
     
-        // Fallback to SDK method
+        // If FCM fails due to hosting restrictions, store for in-app polling
+        Log::warning("FCM failed, storing notification for in-app polling for user {$user->id}");
+        $this->storeForInAppPolling($user, $title, $body, $data);
+    
+        // Fallback to SDK method (will likely also fail but try anyway)
         return $this->sendViaSdk($user, $title, $body, $data);
+    }
+
+    /**
+     * Store notification in database for in-app polling (fallback when FCM is blocked)
+     */
+    protected function storeForInAppPolling(User $user, string $title, string $body, array $data = []): void
+    {
+        try {
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'title' => $title,
+                'body' => $body,
+                'data' => $data,
+                'type' => $data['type'] ?? 'general',
+                'is_read' => false,
+            ]);
+            Log::info("Notification stored for in-app polling for user {$user->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to store notification for polling: " . $e->getMessage());
+        }
     }
     
     /**

@@ -1,7 +1,7 @@
 # 🚀 DÉMARRAGE RAPIDE - TERANGUEST MOBILE
 
 **Version :** 1.1.0  
-**API :** Production (https://teranguest.universaltechnologiesafrica.com)
+**API :** Production (https://teranguest.com)
 
 ---
 
@@ -91,7 +91,7 @@ q   → Quitter
 
 ## 🌐 API DE PRODUCTION
 
-**URL :** https://teranguest.universaltechnologiesafrica.com
+**URL :** https://teranguest.com
 
 **Avantages :**
 - ✅ Pas besoin de backend local

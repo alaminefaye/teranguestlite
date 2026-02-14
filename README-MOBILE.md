@@ -55,7 +55,7 @@ flutter run
 
 ## 🌐 API PRODUCTION
 
-**URL :** https://teranguest.universaltechnologiesafrica.com/api
+**URL :** https://teranguest.com/api
 
 **Avantages :**
 - ✅ Accessible partout

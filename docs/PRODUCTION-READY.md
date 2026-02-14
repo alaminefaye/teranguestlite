@@ -17,7 +17,7 @@ L'application mobile TerangueST est maintenant **connectée à l'API de producti
 ### URL API
 
 ```
-https://teranguest.universaltechnologiesafrica.com/api
+https://teranguest.com/api
 ```
 
 **Protocole :** HTTPS ✅  
@@ -260,7 +260,7 @@ flutter run
 
 ## 📞 SUPPORT
 
-**API Status :** https://teranguest.universaltechnologiesafrica.com  
+**API Status :** https://teranguest.com  
 **Documentation :** `/docs/MOBILE-API-CONFIGURATION.md`  
 **Tests :** `/docs/GUIDE-TEST-MOBILE-APP.md`
 
