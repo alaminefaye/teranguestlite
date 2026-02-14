@@ -181,6 +181,13 @@ class FirebaseNotificationService
             }
     
             $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
+
+            // Build message payload - data must be a map (object), not a list
+            $messageData = $this->convertDataValuesToString($data);
+            // Ensure data is never empty - add a default field if needed
+            if (empty($messageData)) {
+                $messageData = ['type' => 'notification'];
+            }
     
             $messagePayload = [
                 'message' => [
@@ -189,7 +196,7 @@ class FirebaseNotificationService
                         'title' => $title,
                         'body' => $body,
                     ],
-                    'data' => $this->convertDataValuesToString($data),
+                    'data' => $messageData,
                     'android' => [
                         'priority' => 'high',
                         'notification' => [
