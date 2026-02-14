@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Auth\Middleware\AuthTokenMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -57,8 +56,9 @@ class FirebaseServiceProvider extends ServiceProvider
             return $factory;
         });
 
-        // Client Messaging dédié : credentials sans cache + auth explicite pour éviter
-        // "Request is missing required authentication credential" (Pool Guzzle / middleware).
+        // Client Messaging dédié : on récupère un token OAuth2 au chargement et on l'ajoute
+        // à chaque requête (avec rafraîchissement si expiré) pour éviter "Request is missing
+        // required authentication credential" sur certains hébergements.
         $this->app->singleton('firebase.messaging', function ($app) {
             $factory = $app->make('firebase');
             $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
@@ -77,12 +77,43 @@ class FirebaseServiceProvider extends ServiceProvider
 
             $credentials = new ServiceAccountCredentials(Factory::API_CLIENT_SCOPES, $decoded);
             $authTokenHandler = HttpHandlerFactory::build(new Client());
+
+            try {
+                $tokenData = $credentials->fetchAuthToken($authTokenHandler);
+                $accessToken = $tokenData['access_token'] ?? null;
+                if (! $accessToken) {
+                    Log::warning('Firebase: fetchAuthToken did not return access_token, using default messaging client');
+                    return $factory->createMessaging();
+                }
+                $expiresIn = (int) ($tokenData['expires_in'] ?? 3600);
+                $tokenState = [
+                    'token' => $accessToken,
+                    'expires_at' => time() + $expiresIn - 300, // rafraîchir 5 min avant
+                ];
+                Log::info('Firebase: OAuth2 access token obtained for FCM', ['expires_in' => $expiresIn]);
+            } catch (\Throwable $e) {
+                Log::warning('Firebase: could not obtain OAuth2 token for FCM: ' . $e->getMessage(), ['exception' => $e]);
+                return $factory->createMessaging();
+            }
+
             $handler = HandlerStack::create();
-            $handler->push(new AuthTokenMiddleware($credentials, $authTokenHandler));
-            $messagingHttpClient = new Client([
-                'handler' => $handler,
-                'auth' => 'google_auth',
-            ]);
+            $handler->push(function (callable $next) use ($credentials, $authTokenHandler, &$tokenState) {
+                return function ($request, array $options) use ($next, $credentials, $authTokenHandler, &$tokenState) {
+                    if (time() >= $tokenState['expires_at']) {
+                        try {
+                            $tokenData = $credentials->fetchAuthToken($authTokenHandler);
+                            $tokenState['token'] = $tokenData['access_token'] ?? $tokenState['token'];
+                            $tokenState['expires_at'] = time() + (int) ($tokenData['expires_in'] ?? 3600) - 300;
+                        } catch (\Throwable $e) {
+                            Log::warning('Firebase: token refresh failed: ' . $e->getMessage());
+                        }
+                    }
+                    $request = $request->withHeader('Authorization', 'Bearer ' . $tokenState['token']);
+                    return $next($request, $options);
+                };
+            });
+
+            $messagingHttpClient = new Client(['handler' => $handler]);
 
             $httpFactory = new HttpFactory();
             $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
