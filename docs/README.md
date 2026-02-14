@@ -6,6 +6,9 @@ Bienvenue dans la documentation complète du projet **Teranga Guest** - Système
 
 ## 📂 STRUCTURE DE LA DOCUMENTATION
 
+### 📁 [archive/](./archive/)
+Anciens récapitulatifs et notes de session déplacés depuis la racine du projet (pour garder la racine propre). Référence uniquement.
+
 ### 📁 [sessions/](./sessions/)
 Récapitulatifs détaillés de chaque session de développement.
 

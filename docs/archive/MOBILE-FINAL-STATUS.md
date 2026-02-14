@@ -2,7 +2,7 @@
 
 **Date :** 3 Février 2026  
 **Version :** 1.1.0  
-**API :** 🌐 Production (https://teranguest.universaltechnologiesafrica.com)
+**API :** 🌐 Production (https://teranguest.com)
 
 ---
 
@@ -111,7 +111,7 @@ terangaguest_app/
 
 **URL actuelle :**
 ```
-https://teranguest.universaltechnologiesafrica.com/api
+https://teranguest.com/api
 ```
 
 **Avantages :**
