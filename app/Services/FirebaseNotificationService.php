@@ -30,7 +30,8 @@ class FirebaseNotificationService
         }
 
         try {
-            $message = CloudMessage::withTarget('token', $user->fcm_token)
+            $message = CloudMessage::new()
+                ->withToken($user->fcm_token)
                 ->withNotification(Notification::create($title, $body))
                 ->withData($data)
                 ->withAndroidConfig(
