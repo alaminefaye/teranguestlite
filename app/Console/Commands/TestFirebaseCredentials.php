@@ -5,11 +5,14 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class TestFirebaseCredentials extends Command
 {
     protected $signature = 'fcm:test
                             {--user= : User ID with fcm_token to send a test notification}
+                            {--token : Tester uniquement la génération du token OAuth2}
                             {--curl : Affiche une commande curl pour tester FCM depuis ce serveur (avec --user=ID pour le device token)}
                             {--curl-oneline : Même que --curl mais sur une seule ligne (copier-coller direct)}';
 
@@ -19,23 +22,53 @@ class TestFirebaseCredentials extends Command
     {
         $this->info('Vérification Firebase...');
 
-        try {
-            app('firebase');
-            $this->info('Credentials chargés avec succès.');
-        } catch (\Throwable $e) {
-            $this->error('Erreur chargement credentials: ' . $e->getMessage());
+        // Test OAuth2 token generation first
+        if ($this->option('token')) {
+            return $this->testOAuthTokenGeneration();
+        }
+
+        // Check credentials file
+        $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+        if (!$credentialsPath || !file_exists($credentialsPath)) {
+            $this->error('Fichier de credentials Firebase non trouvé.');
+            $this->line('Chemin recherché: ' . env('FIREBASE_CREDENTIALS'));
             $this->line('Vérifiez FIREBASE_CREDENTIALS dans .env et que le fichier existe (racine ou storage/app/firebase/).');
             return 1;
         }
+        $this->info('Credentials trouvés: ' . $credentialsPath);
+
+        // Verify JSON content
+        $contents = file_get_contents($credentialsPath);
+        $decoded = json_decode($contents, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error('Le fichier credentials n\'est pas un JSON valide.');
+            return 1;
+        }
+        if (empty($decoded['project_id']) || empty($decoded['client_email']) || empty($decoded['private_key'])) {
+            $this->error('Le fichier credentials est incomplet (manque project_id, client_email ou private_key).');
+            return 1;
+        }
+        $this->info('Project ID: ' . $decoded['project_id']);
+        $this->info('Client Email: ' . $decoded['client_email']);
+
+        // Test OAuth2 token generation
+        $this->info('Test de génération du token OAuth2...');
+        $service = app(FirebaseNotificationService::class);
+        
+        // Use reflection to call protected method
+        $reflection = new \ReflectionMethod($service, 'getAccessToken');
+        $reflection->setAccessible(true);
+        $accessToken = $reflection->invoke($service);
+        
+        if (!$accessToken) {
+            $this->error('Échec de la génération du token OAuth2.');
+            $this->line('Vérifiez les logs pour plus de détails: tail -f storage/logs/laravel.log');
+            return 1;
+        }
+        $this->info('Token OAuth2 généré avec succès!');
 
         if ($this->option('curl') || $this->option('curl-oneline')) {
-            try {
-                app('firebase.messaging');
-            } catch (\Throwable $e) {
-                $this->error('Impossible de charger le client FCM: ' . $e->getMessage());
-                return 1;
-            }
-            return $this->outputCurlCommand($this->option('curl-oneline'));
+            return $this->outputCurlCommand($decoded['project_id'], $accessToken, $this->option('curl-oneline'));
         }
 
         $userId = $this->option('user');
@@ -46,40 +79,132 @@ class TestFirebaseCredentials extends Command
                 return 1;
             }
             $this->info("Envoi d'une notification test à l'utilisateur {$user->id} ({$user->name})...");
+            $this->info("FCM Token: " . substr($user->fcm_token, 0, 30) . "...");
+            
             try {
-                $sent = app(FirebaseNotificationService::class)->sendToUser(
+                $sent = $service->sendToUser(
                     $user,
                     'Test TerangaGuest',
                     'Si vous voyez ce message, les notifications push sont opérationnelles.'
                 );
                 if ($sent) {
-                    $this->info('Notification envoyée avec succès.');
+                    $this->info('Notification envoyée avec succès!');
                 } else {
-                    $this->warn('Envoi a échoué (voir storage/logs/laravel.log).');
+                    $this->warn('Envoi a échoué (voir storage/logs/laravel.log pour les détails).');
                 }
             } catch (\Throwable $e) {
                 $this->error('Erreur envoi: ' . $e->getMessage());
                 return 1;
             }
         } else {
-            $this->line('Pour envoyer une notification test : php artisan fcm:test --user=6');
-            $this->line('Pour afficher une commande curl de test : php artisan fcm:test --curl --user=6');
+            $this->line('');
+            $this->line('Commandes disponibles:');
+            $this->line('  php artisan fcm:test --token        # Tester uniquement la génération du token OAuth2');
+            $this->line('  php artisan fcm:test --user=6       # Envoyer une notification test à l\'utilisateur 6');
+            $this->line('  php artisan fcm:test --curl --user=6 # Afficher une commande curl de test');
         }
 
         return 0;
     }
 
     /**
+     * Test OAuth2 token generation
+     */
+    private function testOAuthTokenGeneration(): int
+    {
+        $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+        if (!$credentialsPath || !file_exists($credentialsPath)) {
+            $this->error('Fichier de credentials non trouvé.');
+            return 1;
+        }
+
+        $credentials = json_decode(file_get_contents($credentialsPath), true);
+        $clientEmail = $credentials['client_email'];
+        $privateKey = $credentials['private_key'];
+        $tokenUri = $credentials['token_uri'] ?? 'https://oauth2.googleapis.com/token';
+
+        $this->info('Génération du JWT...');
+
+        // Create JWT
+        $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
+        $now = time();
+        $claimSet = json_encode([
+            'iss' => $clientEmail,
+            'scope' => 'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/firebase.messaging',
+            'aud' => $tokenUri,
+            'iat' => $now,
+            'exp' => $now + 3600,
+        ]);
+
+        $base64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+        $base64ClaimSet = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($claimSet));
+        $signatureInput = $base64Header . '.' . $base64ClaimSet;
+
+        if (!openssl_sign($signatureInput, $signature, $privateKey, 'SHA256')) {
+            $this->error('Échec de la signature du JWT. Vérifiez que la clé privée est valide.');
+            return 1;
+        }
+
+        $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+        $jwt = $signatureInput . '.' . $base64Signature;
+
+        $this->info('JWT généré avec succès.');
+        $this->info('Échange du JWT contre un access token...');
+
+        // Exchange JWT for access token
+        $response = Http::asForm()->post($tokenUri, [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwt,
+        ]);
+
+        if ($response->successful()) {
+            $tokenData = $response->json();
+            $this->info('Token OAuth2 obtenu avec succès!');
+            $this->info('Token (premiers 50 caractères): ' . substr($tokenData['access_token'], 0, 50) . '...');
+            $this->info('Expires in: ' . $tokenData['expires_in'] . ' secondes');
+            $this->info('Token type: ' . $tokenData['token_type']);
+            return 0;
+        } else {
+            $this->error('Échec de l\'obtention du token OAuth2.');
+            $this->error('Status: ' . $response->status());
+            $this->error('Response: ' . $response->body());
+            return 1;
+        }
+    }
+
+    /**
+     * Resolve the credentials file path
+     */
+    private function resolveCredentialsPath(?string $path): ?string
+    {
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        $path = trim($path);
+        if (realpath($path) !== false) {
+            return realpath($path);
+        }
+
+        $fromBase = base_path($path);
+        if (is_readable($fromBase)) {
+            return realpath($fromBase) ?: $fromBase;
+        }
+
+        $fromStorage = storage_path('app/firebase/' . basename($path));
+        if (is_readable($fromStorage)) {
+            return realpath($fromStorage) ?: $fromStorage;
+        }
+
+        return $fromBase;
+    }
+
+    /**
      * Affiche une commande curl prête à l'emploi pour tester FCM depuis ce serveur.
      * Si curl renvoie 200 → le proxy ne touche pas à Authorization vers Google ; sinon (401) → proxy ou règle ciblant googleapis.com.
      */
-    private function outputCurlCommand(bool $oneline = false): int
+    private function outputCurlCommand(string $projectId, string $accessToken, bool $oneline = false): int
     {
-        if (! app()->bound('firebase.fcm.get_token')) {
-            $this->warn('Token FCM direct non disponible (fallback SDK utilisé). Impossible d\'afficher la commande curl.');
-            return 0;
-        }
-
         $userId = $this->option('user');
         $deviceToken = null;
         if ($userId) {
@@ -92,8 +217,6 @@ class TestFirebaseCredentials extends Command
             $deviceToken = '<COLLER_ICI_LE_FCM_TOKEN_DEVICE>';
         }
 
-        $accessToken = app('firebase.fcm.get_token');
-        $projectId = app('firebase.fcm.project_id');
         $url = 'https://fcm.googleapis.com/v1/projects/' . $projectId . '/messages:send';
         $body = json_encode([
             'message' => [
