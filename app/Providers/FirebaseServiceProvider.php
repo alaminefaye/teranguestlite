@@ -2,9 +2,19 @@
 
 namespace App\Providers;
 
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Middleware\AuthTokenMiddleware;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Kreait\Firebase\Exception\MessagingApiExceptionConverter;
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\ApiClient as MessagingApiClient;
+use Kreait\Firebase\Messaging\AppInstanceApiClient;
+use Kreait\Firebase\Messaging\RequestFactory as MessagingRequestFactory;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -37,7 +47,6 @@ class FirebaseServiceProvider extends ServiceProvider
             Log::info('Firebase credentials loaded', ['path' => $absolutePath, 'project_id' => $decoded['project_id'] ?? 'n/a']);
 
             // Passer les credentials en tableau pour éviter les problèmes de lecture du fichier
-            // par le SDK (chemin, permissions, open_basedir sur le serveur)
             $factory = (new Factory)->withServiceAccount($decoded);
 
             $projectId = env('FIREBASE_PROJECT_ID') ?: ($decoded['project_id'] ?? null);
@@ -48,8 +57,47 @@ class FirebaseServiceProvider extends ServiceProvider
             return $factory;
         });
 
+        // Client Messaging dédié : credentials sans cache + auth explicite pour éviter
+        // "Request is missing required authentication credential" (Pool Guzzle / middleware).
         $this->app->singleton('firebase.messaging', function ($app) {
-            return $app->make('firebase')->createMessaging();
+            $factory = $app->make('firebase');
+            $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+            if (! $credentialsPath || ! is_readable($credentialsPath)) {
+                return $factory->createMessaging();
+            }
+            $contents = file_get_contents($credentialsPath);
+            $decoded = json_decode($contents, true);
+            if (json_last_error() !== JSON_ERROR_NONE || empty($decoded['private_key']) || empty($decoded['client_email'])) {
+                return $factory->createMessaging();
+            }
+            $projectId = env('FIREBASE_PROJECT_ID') ?: ($decoded['project_id'] ?? null) ?? ($decoded['project_id'] ?? null);
+            if (! $projectId) {
+                return $factory->createMessaging();
+            }
+
+            $credentials = new ServiceAccountCredentials(Factory::API_CLIENT_SCOPES, $decoded);
+            $authTokenHandler = HttpHandlerFactory::build(new Client());
+            $handler = HandlerStack::create();
+            $handler->push(new AuthTokenMiddleware($credentials, $authTokenHandler));
+            $messagingHttpClient = new Client([
+                'handler' => $handler,
+                'auth' => 'google_auth',
+            ]);
+
+            $httpFactory = new HttpFactory();
+            $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
+            $clock = new \Beste\Clock\SystemClock();
+            $errorHandler = new MessagingApiExceptionConverter($clock);
+            $messagingApiClient = new MessagingApiClient($messagingHttpClient, $projectId, $requestFactory);
+            $appInstanceApiClient = new AppInstanceApiClient(
+                $factory->createApiClient([
+                    'base_uri' => 'https://iid.googleapis.com',
+                    'headers' => ['access_token_auth' => 'true'],
+                ]),
+                $errorHandler,
+            );
+
+            return new \Kreait\Firebase\Messaging($messagingApiClient, $appInstanceApiClient, $errorHandler);
         });
     }
 

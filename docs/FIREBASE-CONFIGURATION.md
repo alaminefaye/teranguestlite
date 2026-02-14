@@ -384,6 +384,8 @@ Si les logs affichent cette erreur :
 
 4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir de `FIREBASE_CREDENTIALS` pour que les librairies Google utilisent le bon fichier.
 
+**Contournement serveur** : L’application utilise un client FCM dédié dans `FirebaseServiceProvider` (credentials sans cache + auth explicite `google_auth`) pour éviter ce problème sur certains hébergements où le client par défaut du SDK n’attache pas correctement le token OAuth2 aux requêtes. Si l’erreur persiste, vérifier que le serveur peut joindre `https://oauth2.googleapis.com` (pas de blocage sortant / pare-feu).
+
 ### Erreur « Permission cloudmessaging.messages.create denied »
 
 Si les logs affichent :  
