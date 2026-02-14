@@ -10,7 +10,8 @@ class TestFirebaseCredentials extends Command
 {
     protected $signature = 'fcm:test
                             {--user= : User ID with fcm_token to send a test notification}
-                            {--curl : Affiche une commande curl pour tester FCM depuis ce serveur (avec --user=ID pour le device token)}';
+                            {--curl : Affiche une commande curl pour tester FCM depuis ce serveur (avec --user=ID pour le device token)}
+                            {--curl-oneline : Même que --curl mais sur une seule ligne (copier-coller direct)}';
 
     protected $description = 'Vérifie le chargement des credentials Firebase et optionnellement envoie une notification test';
 
@@ -27,14 +28,14 @@ class TestFirebaseCredentials extends Command
             return 1;
         }
 
-        if ($this->option('curl')) {
+        if ($this->option('curl') || $this->option('curl-oneline')) {
             try {
                 app('firebase.messaging');
             } catch (\Throwable $e) {
                 $this->error('Impossible de charger le client FCM: ' . $e->getMessage());
                 return 1;
             }
-            return $this->outputCurlCommand();
+            return $this->outputCurlCommand($this->option('curl-oneline'));
         }
 
         $userId = $this->option('user');
@@ -72,7 +73,7 @@ class TestFirebaseCredentials extends Command
      * Affiche une commande curl prête à l'emploi pour tester FCM depuis ce serveur.
      * Si curl renvoie 200 → le proxy ne touche pas à Authorization vers Google ; sinon (401) → proxy ou règle ciblant googleapis.com.
      */
-    private function outputCurlCommand(): int
+    private function outputCurlCommand(bool $oneline = false): int
     {
         if (! app()->bound('firebase.fcm.get_token')) {
             $this->warn('Token FCM direct non disponible (fallback SDK utilisé). Impossible d\'afficher la commande curl.');
@@ -100,6 +101,15 @@ class TestFirebaseCredentials extends Command
                 'notification' => ['title' => 'Test curl', 'body' => 'Si vous voyez ceci, FCM fonctionne depuis ce serveur.'],
             ],
         ]);
+
+        $curlOne = 'curl -s -w "\nHTTP_CODE:%{http_code}" -X POST "' . $url . '" -H "Authorization: Bearer ' . $accessToken . '" -H "Content-Type: application/json" -d \'' . $body . '\'';
+
+        if ($oneline) {
+            $this->line('');
+            $this->line($curlOne);
+            $this->line('');
+            return 0;
+        }
 
         $this->line('');
         $this->info('Commande curl à exécuter sur CE serveur (test direct vers FCM) :');
