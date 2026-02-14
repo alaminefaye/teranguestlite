@@ -24,21 +24,30 @@ class GuestReservationHelper
     public const MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED = 'Code client invalide ou expiré. Vérifiez le code à 6 chiffres reçu à l\'enregistrement ou contactez la réception.';
 
     /**
-     * Pour l'utilisateur connecté (room_number + enterprise_id), retourne la chambre, la réservation active et le guest_id.
+     * Pour l'utilisateur connecté (chambre liée via room_id ou room_number), retourne la chambre, la réservation active et le guest_id.
      * Retourne null si l'utilisateur n'a pas de chambre ou aucun séjour actif (check_in <= now <= check_out, status confirmed/checked_in).
      *
      * @return array{room: Room, reservation: Reservation, room_id: int, guest_id: int|null}|null
      */
     public static function activeStayForUser(User $user): ?array
     {
-        if (! $user->room_number || ! $user->enterprise_id) {
+        if (! $user->enterprise_id) {
             return null;
         }
 
-        $room = Room::withoutGlobalScope('enterprise')
-            ->where('enterprise_id', $user->enterprise_id)
-            ->where('room_number', $user->room_number)
-            ->first();
+        $room = null;
+        if ($user->room_id) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('id', $user->room_id)
+                ->first();
+        }
+        if (! $room && $user->room_number) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+        }
 
         if (! $room) {
             return null;
@@ -62,6 +71,22 @@ class GuestReservationHelper
             'room_id' => $room->id,
             'guest_id' => $reservation->guest_id,
         ];
+    }
+
+    /**
+     * Pour une chambre donnée, retourne le guest_id de la réservation active (séjour en cours), ou null.
+     */
+    public static function activeGuestIdForRoom(int $roomId): ?int
+    {
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('room_id', $roomId)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->orderByDesc('check_in')
+            ->first();
+
+        return $reservation?->guest_id;
     }
 
     /**
@@ -91,14 +116,23 @@ class GuestReservationHelper
     public static function validateClientCodeForUser(User $user, ?string $code): ?array
     {
         $code = $code ? trim($code) : '';
-        if ($code === '' || ! $user->room_number || ! $user->enterprise_id) {
+        if ($code === '' || ! $user->enterprise_id) {
             return null;
         }
 
-        $room = Room::withoutGlobalScope('enterprise')
-            ->where('enterprise_id', $user->enterprise_id)
-            ->where('room_number', $user->room_number)
-            ->first();
+        $room = null;
+        if ($user->room_id) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('id', $user->room_id)
+                ->first();
+        }
+        if (! $room && $user->room_number) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+        }
 
         if (! $room) {
             return null;

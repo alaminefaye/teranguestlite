@@ -9,6 +9,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Room;
 use App\Services\FirebaseNotificationService;
+use App\Services\GuestReservationHelper;
 
 class RoomServiceController extends Controller
 {
@@ -194,18 +195,22 @@ class RoomServiceController extends Controller
         $deliveryFee = 0;
         $total = $subtotal + $tax + $deliveryFee;
 
-        // Résoudre room_id à partir du numéro de chambre de l'utilisateur
-        $roomId = null;
-        if ($user->room_number) {
+        // Réservation active dans la chambre : rattacher la commande au client (Guest) présent
+        $stay = GuestReservationHelper::activeStayForUser($user);
+        $roomId = $stay !== null ? $stay['room_id'] : null;
+        $guestId = $stay !== null ? $stay['guest_id'] : null;
+
+        if (! $roomId && $user->room_number) {
             $room = Room::where('enterprise_id', $user->enterprise_id)
                 ->where('room_number', $user->room_number)
                 ->first();
             $roomId = $room?->id;
         }
 
-        // Créer la commande (colonnes réelles de la table orders)
+        // Créer la commande : guest_id = client de la réservation active, room_id = chambre
         $order = Order::create([
             'user_id' => $user->id,
+            'guest_id' => $guestId,
             'enterprise_id' => $user->enterprise_id,
             'room_id' => $roomId,
             'order_number' => $this->generateOrderNumber(),

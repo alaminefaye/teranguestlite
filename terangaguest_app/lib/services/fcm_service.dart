@@ -9,18 +9,25 @@ class FcmService {
   final ApiService _api = ApiService();
 
   /// Récupère le token FCM et l'envoie au backend (à appeler après connexion).
+  /// La tablette doit être connectée avec le compte "Client Chambre XXX" pour recevoir les notifications de la chambre.
   Future<void> registerTokenIfNeeded() async {
     try {
-      await requestPermission();
+      final granted = await requestPermission();
+      if (!granted) {
+        debugPrint('FCM: permission non accordée — les notifications push ne seront pas reçues.');
+      }
       final token = await FirebaseMessaging.instance.getToken();
-      if (token == null || token.isEmpty) return;
+      if (token == null || token.isEmpty) {
+        debugPrint('FCM: token vide (vérifier GoogleService-Info.plist / google-services.json et les permissions).');
+        return;
+      }
       await _api.post(
         ApiConfig.fcmToken,
         data: {'fcm_token': token},
       );
-      debugPrint('FCM token enregistré');
+      debugPrint('FCM: token enregistré côté serveur (notifications activées pour ce compte).');
     } on DioException catch (e) {
-      debugPrint('FCM register error: $e');
+      debugPrint('FCM register error: ${e.response?.statusCode} ${e.response?.data}');
     } catch (e) {
       debugPrint('FCM token error: $e');
     }
@@ -30,6 +37,7 @@ class FcmService {
   Future<void> unregisterToken() async {
     try {
       await _api.delete(ApiConfig.fcmToken);
+      debugPrint('FCM: token supprimé côté serveur.');
     } catch (e) {
       debugPrint('FCM unregister error: $e');
     }

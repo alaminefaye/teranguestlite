@@ -111,34 +111,55 @@ class FirebaseNotificationService
     }
 
     /**
-     * Récupère le User (tablette / compte chambre) qui doit recevoir les notifications pour cette chambre.
-     * Un User avec room_number = room.room_number et enterprise_id = room.enterprise_id, avec un FCM token.
+     * Récupère le User (compte tablette / chambre, role=guest) qui doit recevoir les notifications pour cette chambre.
+     * Priorité : User avec room_id = chambre (lié formellement), sinon room_number.
      */
     public function getUserForRoom(int $roomId): ?User
     {
         $room = Room::withoutGlobalScope('enterprise')->find($roomId);
         if (! $room) {
+            Log::warning("getUserForRoom: room_id {$roomId} not found");
             return null;
         }
 
-        return User::where('enterprise_id', $room->enterprise_id)
-            ->where('room_number', $room->room_number)
+        $user = User::where('enterprise_id', $room->enterprise_id)
+            ->where('role', 'guest')
+            ->where('room_id', $room->id)
             ->whereNotNull('fcm_token')
             ->where('fcm_token', '!=', '')
             ->first();
+
+        if (! $user) {
+            $user = User::where('enterprise_id', $room->enterprise_id)
+                ->where('role', 'guest')
+                ->where('room_number', $room->room_number)
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
+                ->first();
+        }
+
+        if (! $user) {
+            Log::warning("getUserForRoom: no guest user with FCM token for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account at least once to register the token.");
+        }
+
+        return $user;
     }
 
     /**
-     * Envoyer une notification au client de la chambre (User lié à cette chambre).
+     * Envoyer une notification au client de la chambre (User tablette lié à cette chambre).
      */
     public function sendToClientOfRoom(int $roomId, string $title, string $body, array $data = []): bool
     {
         $user = $this->getUserForRoom($roomId);
         if (! $user) {
-            Log::warning("No user with FCM token found for room_id {$roomId}");
+            Log::warning("sendToClientOfRoom: no recipient for room_id={$roomId}. Connect the tablet with the room account (Client Chambre XXX) and ensure notifications are allowed.");
             return false;
         }
-        return $this->sendToUser($user, $title, $body, $data);
+        $sent = $this->sendToUser($user, $title, $body, $data);
+        if ($sent) {
+            Log::info("sendToClientOfRoom: notification sent to user_id={$user->id} (room_id={$roomId}): {$title}");
+        }
+        return $sent;
     }
 
     /**

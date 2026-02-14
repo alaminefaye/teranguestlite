@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\Room;
 use App\Services\FirebaseNotificationService;
+use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -27,11 +28,14 @@ class OrderController extends Controller
             $query->where('type', $request->type);
         }
 
-        // Recherche par numéro de commande ou nom client
+        // Recherche par numéro de commande, nom user (tablette) ou nom client (Guest)
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('order_number', 'like', '%' . $request->search . '%')
                   ->orWhereHas('user', function($subQ) use ($request) {
+                      $subQ->where('name', 'like', '%' . $request->search . '%');
+                  })
+                  ->orWhereHas('guest', function($subQ) use ($request) {
                       $subQ->where('name', 'like', '%' . $request->search . '%');
                   });
             });
@@ -92,6 +96,12 @@ class OrderController extends Controller
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
+
+        // Rattacher au client (Guest) s'il y a une réservation active dans cette chambre
+        $guestId = GuestReservationHelper::activeGuestIdForRoom((int) $validated['room_id']);
+        if ($guestId !== null) {
+            $validated['guest_id'] = $guestId;
+        }
 
         // Calculer les totaux
         $subtotal = 0;
@@ -350,11 +360,16 @@ class OrderController extends Controller
     private function notifyOrderStatusToClient(Order $order): void
     {
         try {
-            if ($order->room_id) {
-                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+            if (empty($order->room_id)) {
+                \Log::info("Order #{$order->order_number}: no room_id, push notification skipped.");
+                return;
+            }
+            $sent = app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+            if (! $sent) {
+                \Log::warning("Order #{$order->order_number} (room_id={$order->room_id}): push notification could not be sent. Check that the tablet for this room is logged in with the room account and has a valid FCM token.");
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error (order status): ' . $e->getMessage());
+            \Log::error('Firebase notification error (order status): ' . $e->getMessage(), ['order_id' => $order->id]);
         }
     }
 }

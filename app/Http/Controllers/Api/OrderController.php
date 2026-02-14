@@ -13,16 +13,22 @@ class OrderController extends Controller
 {
     /**
      * IDs des guests dont l'utilisateur (tablette en chambre) peut voir les commandes :
-     * réservation active dans la chambre de l'utilisateur (room_number).
+     * réservation active dans la chambre liée à l'utilisateur (room_id ou room_number).
      */
     private function guestIdsForUserRoom(\App\Models\User $user): array
     {
-        if (! $user->room_number || ! $user->enterprise_id) {
+        if (! $user->enterprise_id) {
             return [];
         }
-        $room = Room::where('enterprise_id', $user->enterprise_id)
-            ->where('room_number', $user->room_number)
-            ->first();
+        $room = null;
+        if ($user->room_id) {
+            $room = Room::where('enterprise_id', $user->enterprise_id)->where('id', $user->room_id)->first();
+        }
+        if (! $room && $user->room_number) {
+            $room = Room::where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+        }
         if (! $room) {
             return [];
         }
