@@ -86,7 +86,7 @@ class FirebaseServiceProvider extends ServiceProvider
 
             $httpFactory = new HttpFactory();
             $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
-            $clock = new \Beste\Clock\SystemClock();
+            $clock = \Beste\Clock\SystemClock::create();
             $errorHandler = new MessagingApiExceptionConverter($clock);
             $messagingApiClient = new MessagingApiClient($messagingHttpClient, $projectId, $requestFactory);
             $appInstanceApiClient = new AppInstanceApiClient(
