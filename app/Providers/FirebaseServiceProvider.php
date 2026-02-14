@@ -5,7 +5,6 @@ namespace App\Providers;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
@@ -13,9 +12,7 @@ use Kreait\Firebase\Exception\MessagingApiExceptionConverter;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\ApiClient as MessagingApiClient;
 use Kreait\Firebase\Messaging\AppInstanceApiClient;
-use Kreait\Firebase\Messaging\Message;
 use Kreait\Firebase\Messaging\RequestFactory as MessagingRequestFactory;
-use Psr\Http\Message\RequestInterface;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -99,34 +96,14 @@ class FirebaseServiceProvider extends ServiceProvider
             }
 
             $httpFactory = new HttpFactory();
-            $innerRequestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
+            $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
 
-            // Wrapper qui ajoute Authorization sur chaque requête (évite le middleware Guzzle/Pool).
-            $requestFactory = new class($innerRequestFactory, $credentials, $authTokenHandler, $tokenState) implements \Kreait\Firebase\Messaging\RequestFactoryInterface {
-                public function __construct(
-                    private MessagingRequestFactory $inner,
-                    private ServiceAccountCredentials $credentials,
-                    private $authTokenHandler,
-                    private array &$tokenState,
-                ) {}
-
-                public function createRequest(Message $message, string $projectId, bool $validateOnly): RequestInterface
-                {
-                    if (time() >= $this->tokenState['expires_at']) {
-                        try {
-                            $tokenData = $this->credentials->fetchAuthToken($this->authTokenHandler);
-                            $this->tokenState['token'] = $tokenData['access_token'] ?? $this->tokenState['token'];
-                            $this->tokenState['expires_at'] = time() + (int) ($tokenData['expires_in'] ?? 3600) - 300;
-                        } catch (\Throwable $e) {
-                            Log::warning('Firebase: token refresh failed: ' . $e->getMessage());
-                        }
-                    }
-                    $request = $this->inner->createRequest($message, $projectId, $validateOnly);
-                    return $request->withHeader('Authorization', 'Bearer ' . $this->tokenState['token']);
-                }
-            };
-
-            $messagingHttpClient = new Client();
+            // Headers par défaut sur le client : chaque requête (y compris via Pool) reçoit le token.
+            $messagingHttpClient = new Client([
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $tokenState['token'],
+                ],
+            ]);
             $clock = \Beste\Clock\SystemClock::create();
             $errorHandler = new MessagingApiExceptionConverter($clock);
             $messagingApiClient = new MessagingApiClient($messagingHttpClient, $projectId, $requestFactory);
