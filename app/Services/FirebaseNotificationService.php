@@ -254,7 +254,8 @@ class FirebaseNotificationService
     }
     
     /**
-     * Send notification using raw cURL (bypasses proxy issues with Laravel HTTP client)
+     * Send notification using raw cURL (bypasses proxy issues with Laravel HTTP client).
+     * Uses options to avoid proxy stripping Authorization and to resend auth on redirects.
      */
     protected function sendViaCurl(string $url, array $payload, string $accessToken): bool
     {
@@ -262,57 +263,68 @@ class FirebaseNotificationService
             Log::warning('cURL not available, skipping cURL method');
             return false;
         }
-    
+
         $ch = curl_init();
-            
         $jsonPayload = json_encode($payload);
-            
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($jsonPayload),
+        ];
+
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $jsonPayload,
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer ' . $accessToken,
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($jsonPayload),
-            ],
+            CURLOPT_HTTPHEADER => $headers,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_CONNECTTIMEOUT => 10,
-            // Disable proxy for this request
-            CURLOPT_PROXY => null,
+            // Force no proxy (shared hosting often uses HTTP_PROXY which strips Authorization)
+            CURLOPT_PROXY => '',
+            CURLOPT_NOPROXY => '*',
             CURLOPT_HTTPPROXYTUNNEL => false,
-            // Follow redirects
+            // Resend Authorization when following redirects (otherwise 401 after redirect)
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 3,
+            CURLOPT_UNRESTRICTED_AUTH => true,
         ]);
-    
+
+        // Prefer HTTP/2 if available (some proxies only alter HTTP/1.1)
+        if (defined('CURL_VERSION_HTTP2') && (curl_version()['features'] & CURL_VERSION_HTTP2)) {
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+        }
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
         curl_close($ch);
-    
+
         if ($curlError) {
             Log::error("cURL error: " . $curlError);
             return false;
         }
-    
+
         if ($httpCode === 200) {
             Log::info("Notification sent successfully via cURL");
             return true;
-        } else {
-            $responseData = json_decode($response, true);
-            Log::error("FCM cURL error (HTTP {$httpCode}): " . ($responseData ? json_encode($responseData) : $response));
-                
-            // If auth error, clear token cache
-            if ($httpCode === 401) {
-                Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
-            }
-                
-            return false;
         }
+
+        $responseData = json_decode($response, true);
+        Log::error("FCM cURL error (HTTP {$httpCode}): " . ($responseData ? json_encode($responseData) : $response));
+
+        if ($httpCode === 401) {
+            Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
+            Log::warning(
+                'FCM 401: the server obtained an OAuth2 token but FCM rejected it. '
+                . 'Often the host proxy/firewall strips the Authorization header to fcm.googleapis.com. '
+                . 'Contact your host (e.g. O2Switch) or use a VPS where the header is not modified.'
+            );
+        }
+
+        return false;
     }
     
     /**
