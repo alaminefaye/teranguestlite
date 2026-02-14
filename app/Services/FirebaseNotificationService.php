@@ -9,7 +9,6 @@ use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\AndroidConfig;
 use Kreait\Firebase\Messaging\ApnsConfig;
 use Illuminate\Support\Facades\Log;
-use Kreait\Firebase\Messaging\Message;
 
 class FirebaseNotificationService
 {
@@ -56,11 +55,7 @@ class FirebaseNotificationService
                 );
 
             // Envoi direct avec token en header (contourne Guzzle/Pool si le header est perdu sur l’hébergement)
-            if (app()->bound('firebase.fcm.get_token')) {
-                $this->sendFcmDirect($message);
-            } else {
-                $this->messaging->send($message);
-            }
+            $this->messaging->send($message);
 
             Log::info("Notification sent to user {$user->id}: {$title}");
             return true;
@@ -304,34 +299,5 @@ class FirebaseNotificationService
         }
 
         return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);
-    }
-
-    /**
-     * Envoi direct à l’API FCM avec le token OAuth2 en header (une seule requête Guzzle).
-     * Utilisé quand le client Kreait/Pool ne transmet pas le header sur certains hébergements.
-     */
-    private function sendFcmDirect(Message $message): void
-    {
-        $token = app('firebase.fcm.get_token');
-        $projectId = app('firebase.fcm.project_id');
-        $url = 'https://fcm.googleapis.com/v1/projects/' . $projectId . '/messages:send';
-
-        $client = new \GuzzleHttp\Client();
-        $response = $client->post($url, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => ['message' => $message->jsonSerialize()],
-            'http_errors' => false,
-        ]);
-
-        if ($response->getStatusCode() >= 400) {
-            $body = (string) $response->getBody();
-            $hint = ($response->getStatusCode() === 401 && str_contains($body, 'THIRD_PARTY_AUTH_ERROR'))
-                ? ' (Fréquent sur hébergement partagé : un proxy peut supprimer le header Authorization. Contacter l’hébergeur pour autoriser/transmettre ce header vers fcm.googleapis.com, ou envoyer les notifications depuis un serveur sans proxy.)'
-                : '';
-            throw new \RuntimeException('FCM API error ' . $response->getStatusCode() . ': ' . $body . $hint);
-        }
     }
 }

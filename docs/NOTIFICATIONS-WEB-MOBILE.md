@@ -4,6 +4,63 @@ Ce document recense **tous les dossiers, fichiers et paramétrages** liés aux n
 
 ---
 
+## Processus – Envoi et réception des notifications
+
+### 1. Configuration initiale (une fois)
+
+| Étape | Où | Action |
+|-------|-----|--------|
+| 1.1 | Firebase Console | Télécharger le JSON du compte de service (Paramètres projet > Comptes de service > Générer une clé). |
+| 1.2 | Serveur Laravel | Placer le fichier à la racine ou dans `storage/app/firebase/` (ex. `teranguest-74262-xxx.json`). |
+| 1.3 | `.env` | Définir `FIREBASE_CREDENTIALS=...` et `FIREBASE_PROJECT_ID=...`. |
+| 1.4 | Google Cloud | Activer l’API « Firebase Cloud Messaging API (V1) » pour le projet. |
+| 1.5 | Dashboard Laravel | Créer les **accès tablettes** (utilisateurs « Client Chambre XXX ») et les lier aux chambres. |
+
+### 2. Côté mobile – Enregistrement du token FCM
+
+| Moment | Ce qui se passe |
+|--------|------------------|
+| **Au démarrage** | L’app initialise Firebase (`Firebase.initializeApp()`). |
+| **Après connexion** (ou au lancement si déjà connecté) | L’app demande la permission notifications (iOS), récupère le **token FCM** du device, envoie `POST /api/fcm-token` avec ce token (auth Sanctum). Le backend enregistre `fcm_token` sur l’utilisateur connecté. |
+| **À la déconnexion** | L’app envoie `DELETE /api/fcm-token` ; le backend met `fcm_token` à `null`. |
+
+**Important** : Pour qu’une **chambre** reçoive les notifications, la tablette doit être **connectée au moins une fois** avec le compte « Client Chambre XXX » de cette chambre, afin que le token soit associé à ce compte en base.
+
+### 3. Côté backend – Quand les notifications sont envoyées
+
+| Événement | Où c’est déclenché | Qui reçoit |
+|-----------|---------------------|------------|
+| **Changement de statut de commande** (confirmée, en préparation, prête, etc.) | Dashboard > Commandes : clic sur le statut | Client de la chambre liée à la commande |
+| **Nouvelle commande** (depuis tablette ou room service) | TabletSessionController, RoomServiceController | Client de la chambre |
+| **Confirmation réservation restaurant** | RestaurantController | Client de la chambre |
+| **Confirmation réservation spa** | SpaServiceController | Client de la chambre |
+| **Confirmation excursion** | ExcursionController | Client de la chambre |
+| **Demande blanchisserie** | LaundryServiceController | Client de la chambre |
+| **Demande palace** | PalaceServiceController | Client de la chambre |
+
+Le backend détermine le destinataire via **`getUserForRoom(room_id)`** : utilisateur **guest** avec `room_id` (ou `room_number`) correspondant et `fcm_token` non vide.
+
+### 4. Commandes de test (backend)
+
+```bash
+php artisan fcm:test                    # Vérifier credentials
+php artisan fcm:test --user=6           # Envoyer une notif test à l’user 6
+php artisan fcm:check-room              # Chambres avec token FCM
+php artisan fcm:check-room 101          # Vérifier la chambre 101
+php artisan fcm:test --curl-oneline --user=6   # Commande curl (diagnostic proxy)
+```
+
+### 5. Limitation hébergement (proxy / 401)
+
+Sur certains hébergements, un **proxy** supprime le header `Authorization` pour les requêtes vers `fcm.googleapis.com` → **401 THIRD_PARTY_AUTH_ERROR**.
+
+- **Vérifier** : lancer la commande curl générée par `php artisan fcm:test --curl-oneline --user=6` sur le serveur. Si **HTTP_CODE:401**, le blocage est entre le serveur et Google.
+- **Solutions** : demander à l’hébergeur de transmettre le header `Authorization` vers `fcm.googleapis.com`, ou envoyer les notifications depuis un **autre serveur** (VPS) avec le même code et credentials.
+
+Détail : `docs/FIREBASE-CONFIGURATION.md` (section « Erreur 401 THIRD_PARTY_AUTH_ERROR »).
+
+---
+
 ## Côté Web (Laravel)
 
 ### 1. Fichiers et dossiers
