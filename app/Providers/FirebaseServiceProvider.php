@@ -95,15 +95,26 @@ class FirebaseServiceProvider extends ServiceProvider
                 return $factory->createMessaging();
             }
 
+            // Envoi direct FCM : on expose token + project_id pour que le service envoie
+            // la requête lui-même (un seul POST avec Authorization en header), contournant
+            // le client Guzzle/Pool qui peut ne pas envoyer le header sur certains hébergements.
+            $this->app->instance('firebase.fcm.project_id', $projectId);
+            $this->app->bind('firebase.fcm.get_token', function () use (&$tokenState, $credentials, $authTokenHandler) {
+                if (time() >= $tokenState['expires_at']) {
+                    try {
+                        $tokenData = $credentials->fetchAuthToken($authTokenHandler);
+                        $tokenState['token'] = $tokenData['access_token'] ?? $tokenState['token'];
+                        $tokenState['expires_at'] = time() + (int) ($tokenData['expires_in'] ?? 3600) - 300;
+                    } catch (\Throwable $e) {
+                        Log::warning('Firebase: token refresh failed: ' . $e->getMessage());
+                    }
+                }
+                return $tokenState['token'];
+            });
+
             $httpFactory = new HttpFactory();
             $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
-
-            // Headers par défaut sur le client : chaque requête (y compris via Pool) reçoit le token.
-            $messagingHttpClient = new Client([
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $tokenState['token'],
-                ],
-            ]);
+            $messagingHttpClient = new Client();
             $clock = \Beste\Clock\SystemClock::create();
             $errorHandler = new MessagingApiExceptionConverter($clock);
             $messagingApiClient = new MessagingApiClient($messagingHttpClient, $projectId, $requestFactory);
