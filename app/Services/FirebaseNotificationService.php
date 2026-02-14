@@ -328,7 +328,10 @@ class FirebaseNotificationService
 
         if ($response->getStatusCode() >= 400) {
             $body = (string) $response->getBody();
-            throw new \RuntimeException('FCM API error ' . $response->getStatusCode() . ': ' . $body);
+            $hint = ($response->getStatusCode() === 401 && str_contains($body, 'THIRD_PARTY_AUTH_ERROR'))
+                ? ' (Fréquent sur hébergement partagé : un proxy peut supprimer le header Authorization. Contacter l’hébergeur pour autoriser/transmettre ce header vers fcm.googleapis.com, ou envoyer les notifications depuis un serveur sans proxy.)'
+                : '';
+            throw new \RuntimeException('FCM API error ' . $response->getStatusCode() . ': ' . $body . $hint);
         }
     }
 }

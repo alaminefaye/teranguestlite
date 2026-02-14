@@ -384,7 +384,20 @@ Si les logs affichent cette erreur :
 
 4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir de `FIREBASE_CREDENTIALS` pour que les librairies Google utilisent le bon fichier.
 
-**Contournement serveur** : L’application utilise un client FCM dédié dans `FirebaseServiceProvider` (credentials sans cache + auth explicite `google_auth`) pour éviter ce problème sur certains hébergements où le client par défaut du SDK n’attache pas correctement le token OAuth2 aux requêtes. Si l’erreur persiste, vérifier que le serveur peut joindre `https://oauth2.googleapis.com` (pas de blocage sortant / pare-feu).
+**Contournement serveur** : L’application utilise un client FCM dédié et un envoi direct avec token OAuth2 en header. Si l’erreur persiste, vérifier que le serveur peut joindre `https://oauth2.googleapis.com` (pas de blocage sortant / pare-feu).
+
+### Erreur 401 « THIRD_PARTY_AUTH_ERROR » (token obtenu mais requête refusée)
+
+Si les logs montrent **« Firebase: OAuth2 access token obtained for FCM »** puis **« FCM API error 401 »** avec **`THIRD_PARTY_AUTH_ERROR`** :
+
+- Le token est bien obtenu côté application, mais **FCM reçoit la requête sans (ou avec un) credential valide**.
+- Sur **hébergement partagé** (ex. mutualisé), un **proxy sortant** peut **supprimer le header `Authorization`** avant que la requête n’atteigne `fcm.googleapis.com`. C’est une cause très fréquente de ce 401.
+
+**À faire :**
+
+1. **Contacter l’hébergeur** et demander que le header **`Authorization`** soit **conservé et transmis** pour les requêtes HTTPS sortantes vers **`fcm.googleapis.com`** (ou plus large : `*.googleapis.com`). Beaucoup de proxies suppriment ce header par défaut pour des raisons de sécurité.
+2. Si l’hébergeur ne peut pas le faire : **envoyer les notifications depuis un autre serveur** (VPS, autre hébergement) qui n’utilise pas de proxy strippant les headers, en gardant le même code et les mêmes credentials.
+3. Vérifier qu’aucune règle (pare-feu, WAF, « security ») ne supprime ou modifie les headers d’authentification pour les domaines Google.
 
 ### Erreur « Permission cloudmessaging.messages.create denied »
 
