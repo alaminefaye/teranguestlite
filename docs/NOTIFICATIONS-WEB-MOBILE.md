@@ -13,7 +13,7 @@ Ce document recense **tous les dossiers, fichiers et paramétrages** liés aux n
 | **Service d’envoi** | `app/Services/FirebaseNotificationService.php` |
 | **Contrôleur API FCM** | `app/Http/Controllers/Api/FcmTokenController.php` |
 | **Provider Firebase** | `app/Providers/FirebaseServiceProvider.php` |
-| **Credentials Firebase** | `storage/app/firebase/credentials.json` (ou chemin défini dans `.env`) |
+| **Credentials Firebase** | Racine du projet **ou** `storage/app/firebase/` (nom du fichier dans `.env`) |
 | **Migration FCM (users)** | `database/migrations/2026_02_02_163904_add_fcm_token_to_users_table.php` |
 
 ### 2. Paramétrage (config / env)

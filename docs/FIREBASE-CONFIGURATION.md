@@ -384,6 +384,36 @@ Si les logs affichent cette erreur :
 
 4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir de `FIREBASE_CREDENTIALS` pour que les librairies Google utilisent le bon fichier.
 
+### Erreur « Permission cloudmessaging.messages.create denied »
+
+Si les logs affichent :  
+`Permission 'cloudmessaging.messages.create' denied on resource '//cloudresourcemanager.googleapis.com/projects/...'`  
+
+le compte de service n’a pas le droit d’envoyer des messages FCM. À faire :
+
+1. **Vérifier le project ID**  
+   Ouvrir le fichier JSON des credentials et noter la valeur de **`project_id`** (ex. `teranguest-74262`).  
+   Dans le `.env`, mettre **exactement** ce même projet :
+   ```env
+   FIREBASE_PROJECT_ID=teranguest-74262
+   ```
+   (Ne pas utiliser un autre nom de projet, ex. `terangaguest` si le JSON dit `teranguest-74262`.)
+
+2. **Activer l’API FCM**  
+   - Aller sur [Google Cloud Console](https://console.cloud.google.com/) et sélectionner le **même projet** que `project_id` du JSON.  
+   - **APIs & Services** > **Bibliothèque** (ou **Enabled APIs**).  
+   - Rechercher **« Firebase Cloud Messaging API »** (ou **Cloud Messaging API**).  
+   - L’**activer** pour ce projet.
+
+3. **Donner le rôle au compte de service**  
+   - Dans Google Cloud Console (toujours le même projet) : **IAM & Admin** > **IAM**.  
+   - Trouver le compte de service (ex. `firebase-adminsdk-xxxxx@teranguest-74262.iam.gserviceaccount.com`, ou le `client_email` du JSON).  
+   - **Modifier** (crayon) > **Ajouter un autre rôle**.  
+   - Ajouter **« Firebase Cloud Messaging API Admin »** (ou **Firebase Admin**).  
+   - Enregistrer.
+
+Après ces changements, réessayer l’envoi de notification (ex. passer une commande à « Prête »).
+
 ---
 
 ## 📁 STRUCTURE DES FICHIERS
