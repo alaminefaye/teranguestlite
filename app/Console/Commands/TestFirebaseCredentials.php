@@ -28,6 +28,12 @@ class TestFirebaseCredentials extends Command
         }
 
         if ($this->option('curl')) {
+            try {
+                app('firebase.messaging');
+            } catch (\Throwable $e) {
+                $this->error('Impossible de charger le client FCM: ' . $e->getMessage());
+                return 1;
+            }
             return $this->outputCurlCommand();
         }
 
