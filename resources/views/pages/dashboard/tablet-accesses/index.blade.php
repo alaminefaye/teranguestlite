@@ -24,6 +24,11 @@
         {{ session('error') }}
     </div>
 @endif
+@if(session('info'))
+    <div class="mb-6 rounded-lg bg-blue-light-50 p-4 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400">
+        {{ session('info') }}
+    </div>
+@endif
 
 <div class="mb-6">
     <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 inline-block">
@@ -62,7 +67,13 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $user->email }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->room_number ?? '—' }}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
+                                @if($user->room)
+                                    <a href="{{ route('dashboard.rooms.show', $user->room) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400">{{ $user->room->room_number }}</a>
+                                @else
+                                    {{ $user->room_number ?? '—' }}
+                                @endif
+                            </td>
                             <td class="px-6 py-4">
                                 <a href="{{ route('dashboard.tablet-accesses.edit', $user->id) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 mr-3 text-sm font-medium">Modifier</a>
                                 <form action="{{ route('dashboard.tablet-accesses.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer cet accès tablette ?');">

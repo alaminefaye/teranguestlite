@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\MenuItem;
-use App\Models\Reservation;
 use App\Models\Room;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
@@ -93,14 +92,6 @@ class OrderController extends Controller
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
-
-        // Lier au guest si la chambre a un séjour en cours (pour les notifications push client)
-        $reservation = Reservation::where('enterprise_id', $validated['enterprise_id'])
-            ->currentStay($validated['room_id'])
-            ->first();
-        if ($reservation && $reservation->guest_id) {
-            $validated['guest_id'] = $reservation->guest_id;
-        }
 
         // Calculer les totaux
         $subtotal = 0;
@@ -270,6 +261,7 @@ class OrderController extends Controller
             'status' => 'confirmed',
             'confirmed_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande confirmée avec succès !');
@@ -285,6 +277,7 @@ class OrderController extends Controller
             'status' => 'preparing',
             'preparing_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Préparation de la commande commencée !');
@@ -300,6 +293,7 @@ class OrderController extends Controller
             'status' => 'ready',
             'ready_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande prête pour livraison !');
@@ -315,6 +309,7 @@ class OrderController extends Controller
             'status' => 'delivering',
             'delivering_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande en cours de livraison !');
@@ -330,6 +325,7 @@ class OrderController extends Controller
             'status' => 'delivered',
             'delivered_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande livrée avec succès !');
@@ -345,6 +341,7 @@ class OrderController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande annulée.');
@@ -353,20 +350,11 @@ class OrderController extends Controller
     private function notifyOrderStatusToClient(Order $order): void
     {
         try {
-            $order->refresh();
-            $order->load(['user', 'guest']);
-            $sent = app(FirebaseNotificationService::class)->sendOrderStatusNotificationToClient($order);
-            if (! $sent) {
-                \Log::warning('Order status notification not sent', [
-                    'order_id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'guest_id' => $order->guest_id,
-                    'user_id' => $order->user_id,
-                    'status' => $order->status,
-                ]);
+            if ($order->room_id) {
+                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase order status notification: ' . $e->getMessage());
+            \Log::error('Firebase notification error (order status): ' . $e->getMessage());
         }
     }
 }

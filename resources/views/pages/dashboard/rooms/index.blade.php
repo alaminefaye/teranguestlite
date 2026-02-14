@@ -135,6 +135,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Capacité</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Prix/nuit</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Accès tablette</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Actions</th>
                     </tr>
                 </thead>
@@ -158,6 +159,13 @@
                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$room->status] ?? 'bg-gray-50 text-gray-600' }}">
                                     {{ $room->status_name }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                @if($room->tabletAccessUser)
+                                    <a href="{{ route('dashboard.tablet-accesses.edit', $room->tabletAccessUser->id) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-medium">Gérer l'accès</a>
+                                @else
+                                    <a href="{{ route('dashboard.tablet-accesses.create') }}?room_id={{ $room->id }}" class="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400">Relier un accès</a>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <x-action-buttons 

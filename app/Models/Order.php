@@ -27,12 +27,8 @@ class Order extends Model
         'payment_method',
         'delivery_notes',
         'confirmed_at',
-        'preparing_at',
         'prepared_at',
-        'ready_at',
-        'delivering_at',
         'delivered_at',
-        'cancelled_at',
         'settled_at',
     ];
 
@@ -42,12 +38,8 @@ class Order extends Model
         'delivery_fee' => 'decimal:2',
         'total' => 'decimal:2',
         'confirmed_at' => 'datetime',
-        'preparing_at' => 'datetime',
         'prepared_at' => 'datetime',
-        'ready_at' => 'datetime',
-        'delivering_at' => 'datetime',
         'delivered_at' => 'datetime',
-        'cancelled_at' => 'datetime',
         'settled_at' => 'datetime',
     ];
 

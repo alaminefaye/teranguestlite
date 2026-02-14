@@ -212,16 +212,17 @@ class PalaceServiceController extends Controller
             'status' => 'pending',
         ]);
 
-        // Notification au client (guest) uniquement
+        // Notification au client de la chambre
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendToGuest(
-                $stay['guest_id'],
-                'Demande de service enregistrée',
-                "Votre demande #{$palaceRequest->request_number} a été enregistrée.",
-                ['type' => 'palace_request', 'request_id' => (string) $palaceRequest->id, 'screen' => 'PalaceRequestDetails']
-            );
-
+            if ($palaceRequest->room_id) {
+                $firebaseService->sendToClientOfRoom(
+                    $palaceRequest->room_id,
+                    'Demande de service palace enregistrée',
+                    "Votre demande #{$palaceRequest->request_number} a été enregistrée",
+                    ['type' => 'palace', 'request_id' => (string) $palaceRequest->id, 'screen' => 'PalaceRequests']
+                );
+            }
             // Notifier le staff
             $firebaseService->sendToStaff(
                 $request->user()->enterprise_id,

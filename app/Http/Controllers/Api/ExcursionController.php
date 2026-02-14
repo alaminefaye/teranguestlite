@@ -177,10 +177,16 @@ class ExcursionController extends Controller
             'status' => 'confirmed',
         ]);
 
-        // Notification au client (guest) uniquement
+        // Notification au client de la chambre
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendReservationConfirmationToGuest($stay['guest_id'], $booking, 'EXC-' . $booking->id);
+            if ($booking->room_id) {
+                $firebaseService->sendReservationConfirmationToRoom(
+                    $booking->room_id,
+                    (string) $booking->id,
+                    $excursion->name
+                );
+            }
         } catch (\Exception $e) {
             \Log::error('Firebase notification error: ' . $e->getMessage());
         }

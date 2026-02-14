@@ -24,33 +24,6 @@ class GuestReservationHelper
     public const MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED = 'Code client invalide ou expiré. Vérifiez le code à 6 chiffres reçu à l\'enregistrement ou contactez la réception.';
 
     /**
-     * Retourne le guest_id auquel l'utilisateur est lié pour les notifications (séjour en cours).
-     * 1) Si l'utilisateur a un room_number : réservation active pour cette chambre → guest_id.
-     * 2) Sinon : réservation active dont user_id = cet utilisateur → guest_id.
-     * Ainsi le token FCM peut être lié au bon guest même si room_number n'est pas renseigné.
-     */
-    public static function guestIdForUser(User $user): ?int
-    {
-        if (! $user->enterprise_id) {
-            return null;
-        }
-        $stay = self::activeStayForUser($user);
-        if ($stay !== null && isset($stay['guest_id'])) {
-            return $stay['guest_id'];
-        }
-        // Fallback : réservation en cours liée au compte user (user_id)
-        $reservation = Reservation::withoutGlobalScope('enterprise')
-            ->where('enterprise_id', $user->enterprise_id)
-            ->where('user_id', $user->id)
-            ->whereIn('status', ['confirmed', 'checked_in'])
-            ->where('check_in', '<=', now())
-            ->where('check_out', '>=', now())
-            ->orderByDesc('check_in')
-            ->first();
-        return $reservation && $reservation->guest_id ? $reservation->guest_id : null;
-    }
-
-    /**
      * Pour l'utilisateur connecté (room_number + enterprise_id), retourne la chambre, la réservation active et le guest_id.
      * Retourne null si l'utilisateur n'a pas de chambre ou aucun séjour actif (check_in <= now <= check_out, status confirmed/checked_in).
      *

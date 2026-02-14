@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -18,17 +17,12 @@ import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
-import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase doit être initialisé avant toute utilisation (y compris NotificationService)
+  // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
   await Firebase.initializeApp();
-
-  // Notifications push (Android / iOS)
-  await NotificationService().init();
-  if (kDebugMode) NotificationService().debugPrintState();
 
   // Initialiser le locale français pour les dates
   await initializeDateFormatting('fr_FR', null);
@@ -43,18 +37,14 @@ void main() async {
     ),
   );
 
-  // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin.
-  // Sur iPad (Stage Manager, etc.) iOS peut refuser le changement → on lance l'app quand même.
+  // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
     DeviceOrientation.portraitUp,
-  ])
-      .then((_) => runApp(const MyApp()))
-      .catchError((Object e, StackTrace _) {
-        if (kDebugMode) debugPrint('Orientation (ignored): $e');
-        runApp(const MyApp());
-      });
+  ]).then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {

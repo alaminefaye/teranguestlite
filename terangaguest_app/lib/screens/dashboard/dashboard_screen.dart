@@ -23,7 +23,6 @@ import '../spa/spa_services_list_screen.dart';
 import '../excursions/excursions_list_screen.dart';
 import '../laundry/laundry_list_screen.dart';
 import '../palace/palace_list_screen.dart';
-import '../notifications/notifications_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -377,10 +376,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          HapticHelper.lightImpact();
-                          context.navigateTo(const NotificationsScreen());
-                        },
+                        onPressed: () {},
                         padding: const EdgeInsets.all(8),
                         iconSize: iconSize,
                         icon: Icon(

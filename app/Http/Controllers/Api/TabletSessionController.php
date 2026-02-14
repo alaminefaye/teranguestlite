@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guest;
-use App\Models\GuestFcmToken;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Reservation;
@@ -167,60 +166,6 @@ class TabletSessionController extends Controller
     }
 
     /**
-     * Enregistrer le FCM token de la tablette pour ce client (guest).
-     * Appelé après validation du code : la tablette envoie guest_id, room_id, reservation_id, fcm_token.
-     * Seules les notifications liées à ce client (commandes, réservations, statuts) lui parviendront sur cette tablette.
-     */
-    public function registerFcmToken(Request $request): JsonResponse
-    {
-        $request->validate([
-            'guest_id' => 'required|exists:guests,id',
-            'room_id' => 'required|exists:rooms,id',
-            'reservation_id' => 'required|exists:reservations,id',
-            'fcm_token' => 'required|string|max:500',
-        ]);
-
-        $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
-        $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
-        if (! $guest || ! $room || $room->enterprise_id !== $guest->enterprise_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Session invalide.',
-            ], 403);
-        }
-
-        $reservation = Reservation::withoutGlobalScope('enterprise')
-            ->where('id', $request->reservation_id)
-            ->where('guest_id', $guest->id)
-            ->where('room_id', $room->id)
-            ->whereIn('status', ['confirmed', 'checked_in'])
-            ->where('check_in', '<=', now())
-            ->where('check_out', '>=', now())
-            ->first();
-
-        if (! $reservation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Séjour invalide ou expiré.',
-            ], 403);
-        }
-
-        try {
-            GuestFcmToken::register($guest->enterprise_id, $guest->id, trim($request->fcm_token), 'tablet');
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Impossible d\'enregistrer le token.',
-            ], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Token enregistré.',
-        ], 200);
-    }
-
-    /**
      * Passer une commande room service depuis la tablette (session client).
      * POST /api/tablet/checkout
      * Body: guest_id, room_id, reservation_id (pour revalidation), items[], special_instructions
@@ -309,12 +254,12 @@ class TabletSessionController extends Controller
             $order->orderItems()->create($itemData);
         }
 
-        // Notification au client (guest) uniquement — tablette en chambre
+        // Notification push au client de la chambre (tablette)
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendNewOrderNotificationToClient($order);
+            $firebaseService->sendNewOrderNotificationToRoom($order);
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            \Log::error('Firebase notification error (tablet checkout): ' . $e->getMessage());
         }
 
         return response()->json([

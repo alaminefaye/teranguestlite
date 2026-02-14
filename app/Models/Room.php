@@ -53,6 +53,14 @@ class Room extends Model
     }
 
     /**
+     * Accès tablette (compte User role=guest) lié à cette chambre
+     */
+    public function tabletAccessUser()
+    {
+        return $this->hasOne(User::class, 'room_id')->where('role', 'guest');
+    }
+
+    /**
      * Scope pour les chambres disponibles
      */
     public function scopeAvailable($query)

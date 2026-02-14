@@ -1,6 +1,5 @@
 <?php
 
-use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -21,45 +20,6 @@ use App\Http\Controllers\Api\VehicleController;
 */
 
 // ==========================================
-// FIREBASE DEBUG — Test token OAuth2 en contexte WEB (comme les notifs)
-// Actif uniquement si APP_DEBUG=true. Permet de vérifier si PHP-FPM peut
-// atteindre oauth2.googleapis.com (si échec ici = firewall / réseau web).
-// ==========================================
-if (config('app.debug')) {
-    Route::get('/firebase-test-token-from-web', function () {
-        $envValue = config('services.firebase.credentials');
-        $path = $envValue
-            ? (str_starts_with($envValue, '/') ? $envValue : base_path($envValue))
-            : base_path('firebase-credentials.json');
-        $absolutePath = is_file($path) ? realpath($path) : $path;
-
-        try {
-            $credentials = new ServiceAccountCredentials(
-                ['https://www.googleapis.com/auth/firebase.messaging'],
-                $absolutePath
-            );
-            $token = $credentials->fetchAuthToken();
-            if (! empty($token['access_token'])) {
-                return response()->json([
-                    'ok' => true,
-                    'message' => 'Token OAuth2 obtenu en contexte WEB (même processus que les notifications).',
-                    'token_prefix' => substr($token['access_token'], 0, 20) . '...',
-                ]);
-            }
-            return response()->json(['ok' => false, 'message' => 'Token vide', 'keys' => array_keys($token ?? [])], 500);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'ok' => false,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'hint' => 'Si connexion refusée / timeout : le processus web (PHP-FPM) ne peut pas joindre oauth2.googleapis.com. Demander à l\'hébergeur d\'autoriser les sorties HTTPS vers oauth2.googleapis.com et fcm.googleapis.com.',
-            ], 500);
-        }
-    });
-}
-
-// ==========================================
 // AUTHENTIFICATION (Public)
 // ==========================================
 Route::prefix('auth')->group(function () {
@@ -72,7 +32,6 @@ Route::prefix('auth')->group(function () {
 Route::prefix('tablet')->group(function () {
     Route::post('/validate-code', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateCode']);
     Route::post('/validate-session', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateSession']);
-    Route::post('/register-fcm-token', [\App\Http\Controllers\Api\TabletSessionController::class, 'registerFcmToken']);
     Route::post('/checkout', [\App\Http\Controllers\Api\TabletSessionController::class, 'checkout']);
 });
 
@@ -97,7 +56,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // FCM TOKEN MANAGEMENT
     // ==========================================
     Route::post('/fcm-token', [FcmTokenController::class, 'store']);
-    Route::post('/fcm-token/test', [FcmTokenController::class, 'test']);
     Route::delete('/fcm-token', [FcmTokenController::class, 'destroy']);
     
     // ==========================================

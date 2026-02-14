@@ -141,10 +141,16 @@ class SpaServiceController extends Controller
             'status' => 'confirmed',
         ]);
 
-        // Notification au client (guest) uniquement
+        // Notification au client de la chambre
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $firebaseService->sendReservationConfirmationToGuest($stay['guest_id'], $reservation, $reservation->reservation_number ?? null);
+            if ($reservation->room_id) {
+                $firebaseService->sendReservationConfirmationToRoom(
+                    $reservation->room_id,
+                    $reservation->id,
+                    $service->name
+                );
+            }
         } catch (\Exception $e) {
             \Log::error('Firebase notification error: ' . $e->getMessage());
         }

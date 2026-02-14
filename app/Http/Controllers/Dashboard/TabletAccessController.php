@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 /**
- * Gestion des accès tablette : comptes "Client Chambre XXX" (User role=guest avec room_number).
- * Visible par le gérant de l'hôtel dans son dashboard.
+ * Gestion des accès tablette : uniquement les identifiants avec le rôle guest
+ * (comptes "Client Chambre XXX"). Visible par le gérant de l'hôtel dans son dashboard.
  */
 class TabletAccessController extends Controller
 {
@@ -25,16 +25,18 @@ class TabletAccessController extends Controller
         return $id;
     }
 
-    private function queryGuestUsers()
+    /** Requête des accès tablette : uniquement les users avec rôle guest. */
+    private function queryTabletAccessUsers()
     {
-        return User::where('enterprise_id', $this->getEnterpriseId())
-            ->where('role', 'guest')
+        return User::guests()
+            ->with('room')
+            ->where('enterprise_id', $this->getEnterpriseId())
             ->orderBy('room_number');
     }
 
     public function index(Request $request): View
     {
-        $query = $this->queryGuestUsers();
+        $query = $this->queryTabletAccessUsers();
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -45,7 +47,7 @@ class TabletAccessController extends Controller
         }
 
         $guests = $query->paginate(15);
-        $total = $this->queryGuestUsers()->count();
+        $total = $this->queryTabletAccessUsers()->count();
 
         return view('pages.dashboard.tablet-accesses.index', [
             'title' => 'Accès tablettes',
@@ -54,22 +56,60 @@ class TabletAccessController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
         $enterpriseId = $this->getEnterpriseId();
-        $usedRoomNumbers = User::where('enterprise_id', $enterpriseId)
-            ->where('role', 'guest')
+
+        // Chambres déjà reliées : uniquement par les identifiants avec rôle guest
+        $usedRoomIds = User::guests()
+            ->where('enterprise_id', $enterpriseId)
+            ->whereNotNull('room_id')
+            ->pluck('room_id');
+        $usedRoomNumbers = User::guests()
+            ->where('enterprise_id', $enterpriseId)
             ->whereNotNull('room_number')
             ->pluck('room_number');
+        $roomIdsByNumber = Room::where('enterprise_id', $enterpriseId)
+            ->whereIn('room_number', $usedRoomNumbers)
+            ->pluck('id');
+        $allUsedRoomIds = $usedRoomIds->merge($roomIdsByNumber)->unique()->values();
+
+        $preselectedRoomId = request('room_id') ? (int) request('room_id') : null;
+        if ($preselectedRoomId && $allUsedRoomIds->contains($preselectedRoomId)) {
+            $preselectedRoom = Room::where('enterprise_id', $enterpriseId)->find($preselectedRoomId);
+            $existingAccess = $preselectedRoom
+                ? User::guests()
+                    ->where('enterprise_id', $enterpriseId)
+                    ->where(function ($q) use ($preselectedRoom) {
+                        $q->where('room_id', $preselectedRoom->id)->orWhere('room_number', $preselectedRoom->room_number);
+                    })
+                    ->first()
+                : null;
+            if ($existingAccess) {
+                return redirect()->route('dashboard.tablet-accesses.edit', $existingAccess->id)
+                    ->with('info', 'Cette chambre a déjà un accès tablette. Vous pouvez le modifier ci-dessous.');
+            }
+        }
 
         $rooms = Room::where('enterprise_id', $enterpriseId)
-            ->whereNotIn('room_number', $usedRoomNumbers)
+            ->whereNotIn('id', $allUsedRoomIds)
             ->orderBy('room_number')
             ->get();
+
+        // Pré-sélection : n'ajouter la chambre à la liste que si elle n'est pas déjà reliée
+        if ($preselectedRoomId && !$rooms->contains('id', $preselectedRoomId)) {
+            $preselectedRoom = Room::where('enterprise_id', $enterpriseId)->find($preselectedRoomId);
+            if ($preselectedRoom && !$allUsedRoomIds->contains($preselectedRoom->id)) {
+                $rooms = $rooms->push($preselectedRoom)->sortBy('room_number')->values();
+            } else {
+                $preselectedRoomId = null;
+            }
+        }
 
         return view('pages.dashboard.tablet-accesses.create', [
             'title' => 'Créer un accès tablette',
             'rooms' => $rooms,
+            'preselectedRoomId' => $preselectedRoomId,
         ]);
     }
 
@@ -85,7 +125,13 @@ class TabletAccessController extends Controller
         $enterpriseId = $this->getEnterpriseId();
         $room = Room::where('id', $validated['room_id'])->where('enterprise_id', $enterpriseId)->firstOrFail();
 
-        if (User::where('enterprise_id', $enterpriseId)->where('role', 'guest')->where('room_number', $room->room_number)->exists()) {
+        $alreadyLinked = User::guests()
+            ->where('enterprise_id', $enterpriseId)
+            ->where(function ($q) use ($room) {
+                $q->where('room_id', $room->id)->orWhere('room_number', $room->room_number);
+            })
+            ->exists();
+        if ($alreadyLinked) {
             return back()->withInput()->with('error', 'Un accès tablette existe déjà pour cette chambre.');
         }
 
@@ -99,6 +145,7 @@ class TabletAccessController extends Controller
             'enterprise_id' => $enterpriseId,
             'department' => null,
             'room_number' => $room->room_number,
+            'room_id' => $room->id,
         ]);
 
         return redirect()->route('dashboard.tablet-accesses.index')
@@ -107,27 +154,36 @@ class TabletAccessController extends Controller
 
     public function edit(int $id): View|RedirectResponse
     {
-        $user = User::where('id', $id)
-            ->where('role', 'guest')
+        $user = User::guests()
+            ->where('id', $id)
             ->where('enterprise_id', $this->getEnterpriseId())
             ->firstOrFail();
 
         $enterpriseId = $this->getEnterpriseId();
-        $usedRoomNumbers = User::where('enterprise_id', $enterpriseId)
-            ->where('role', 'guest')
-            ->whereNotNull('room_number')
+        // Chambres déjà prises par un autre accès (uniquement rôle guest)
+        $usedRoomIds = User::guests()
+            ->where('enterprise_id', $enterpriseId)
+            ->whereNotNull('room_id')
             ->where('id', '!=', $user->id)
+            ->pluck('room_id');
+        $usedRoomNumbers = User::guests()
+            ->where('enterprise_id', $enterpriseId)
+            ->where('id', '!=', $user->id)
+            ->whereNotNull('room_number')
             ->pluck('room_number');
+        $roomIdsByNumber = Room::where('enterprise_id', $enterpriseId)
+            ->whereIn('room_number', $usedRoomNumbers)
+            ->pluck('id');
+        $allUsedRoomIds = $usedRoomIds->merge($roomIdsByNumber)->unique()->values();
 
+        $currentRoomId = $user->room_id ?? Room::where('enterprise_id', $enterpriseId)->where('room_number', $user->room_number)->value('id');
         $rooms = Room::where('enterprise_id', $enterpriseId)
-            ->where(function ($q) use ($user, $usedRoomNumbers) {
-                $q->where('room_number', $user->room_number)
-                    ->orWhereNotIn('room_number', $usedRoomNumbers);
+            ->where(function ($q) use ($currentRoomId, $allUsedRoomIds) {
+                $q->where('id', $currentRoomId)
+                    ->orWhereNotIn('id', $allUsedRoomIds);
             })
             ->orderBy('room_number')
             ->get();
-
-        $currentRoomId = Room::where('enterprise_id', $enterpriseId)->where('room_number', $user->room_number)->value('id');
 
         return view('pages.dashboard.tablet-accesses.edit', [
             'title' => 'Modifier l\'accès tablette',
@@ -139,8 +195,8 @@ class TabletAccessController extends Controller
 
     public function update(Request $request, int $id): RedirectResponse
     {
-        $user = User::where('id', $id)
-            ->where('role', 'guest')
+        $user = User::guests()
+            ->where('id', $id)
             ->where('enterprise_id', $this->getEnterpriseId())
             ->firstOrFail();
 
@@ -153,9 +209,9 @@ class TabletAccessController extends Controller
 
         $room = Room::where('id', $validated['room_id'])->where('enterprise_id', $this->getEnterpriseId())->firstOrFail();
 
-        $existing = User::where('enterprise_id', $this->getEnterpriseId())
-            ->where('role', 'guest')
-            ->where('room_number', $room->room_number)
+        $existing = User::guests()
+            ->where('enterprise_id', $this->getEnterpriseId())
+            ->where('room_id', $room->id)
             ->where('id', '!=', $user->id)
             ->exists();
         if ($existing) {
@@ -165,6 +221,7 @@ class TabletAccessController extends Controller
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->room_number = $room->room_number;
+        $user->room_id = $room->id;
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
@@ -176,8 +233,8 @@ class TabletAccessController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
-        $user = User::where('id', $id)
-            ->where('role', 'guest')
+        $user = User::guests()
+            ->where('id', $id)
             ->where('enterprise_id', $this->getEnterpriseId())
             ->firstOrFail();
 

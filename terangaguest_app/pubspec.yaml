@@ -61,17 +61,15 @@ dependencies:
 
   # Cache images (performance, offline)
   cached_network_image: ^3.4.1
+
+  # Firebase (notifications push)
+  firebase_core: ^3.8.1
+  firebase_messaging: ^15.1.6
   
   # Location & Weather
   geolocator: ^13.0.3
   http: ^1.2.2
   weather: ^3.1.1
-
-  # Firebase Cloud Messaging (notifications push)
-  firebase_core: ^3.8.0
-  firebase_messaging: ^15.2.0
-  # Afficher les notifications en premier plan (sinon FCM ne les affiche pas)
-  flutter_local_notifications: ^17.2.3
 
 dev_dependencies:
   flutter_test:

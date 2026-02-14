@@ -205,12 +205,6 @@ class OrderController extends Controller
             $roomId = $room?->id;
         }
 
-        $guestId = null;
-        $stay = \App\Services\GuestReservationHelper::activeStayForUser($user);
-        if ($stay !== null && isset($stay['guest_id'])) {
-            $guestId = $stay['guest_id'];
-        }
-
         $subtotal = $order->orderItems->sum('total_price');
         $tax = 0;
         $deliveryFee = 0;
@@ -218,7 +212,6 @@ class OrderController extends Controller
 
         $newOrder = Order::create([
             'user_id' => $user->id,
-            'guest_id' => $guestId,
             'enterprise_id' => $user->enterprise_id,
             'room_id' => $roomId,
             'order_number' => $this->generateOrderNumber(),
@@ -243,11 +236,12 @@ class OrderController extends Controller
             ]);
         }
 
-        // Notification au client uniquement
+        // Notification au client de la chambre
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-            $newOrder->load('user', 'guest');
-            $firebaseService->sendNewOrderNotificationToClient($newOrder);
+            if ($newOrder->room_id) {
+                $firebaseService->sendNewOrderNotificationToRoom($newOrder);
+            }
         } catch (\Exception $e) {
             \Log::error('Firebase notification error: ' . $e->getMessage());
         }
@@ -298,14 +292,7 @@ class OrderController extends Controller
             ], 400);
         }
 
-        $order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
-
-        try {
-            $order->load('user', 'guest');
-            app(\App\Services\FirebaseNotificationService::class)->sendOrderStatusNotificationToClient($order);
-        } catch (\Exception $e) {
-            \Log::error('Firebase order status notification (cancel): ' . $e->getMessage());
-        }
+        $order->update(['status' => 'cancelled']);
 
         return response()->json([
             'success' => true,

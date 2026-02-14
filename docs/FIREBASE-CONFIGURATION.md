@@ -366,26 +366,10 @@ public function update(Request $request, Order $order)
 ## 🛠️ VARIABLES D'ENVIRONNEMENT
 
 ```env
-# Firebase Configuration (fichier JSON du compte de service)
-# Exemple : fichier à la racine du projet
-FIREBASE_CREDENTIALS=teranguest-74262-844fbd9b5264.json
-# Ou : FIREBASE_CREDENTIALS=storage/app/firebase/credentials.json
+# Firebase Configuration
+FIREBASE_CREDENTIALS=storage/app/firebase/credentials.json
+FIREBASE_PROJECT_ID=terangaguest
 ```
-
-**Important :** Le fichier `teranguest-74262-844fbd9b5264.json` (compte de service Firebase) doit être présent au chemin indiqué. Ne pas le committer dans Git.
-
----
-
-## 📱 NOTIFICATIONS CLIENT UNIQUEMENT
-
-Les notifications (commandes, réservations, changement de statut) sont envoyées **uniquement au client concerné** :
-
-- **Tablette en chambre** : après validation du code client, la tablette peut enregistrer son token FCM via `POST /api/tablet/register-fcm-token` (guest_id, room_id, reservation_id, fcm_token). Seules les notifications liées à ce guest arrivent sur cette tablette.
-- **App mobile (client connecté)** : à la connexion, `POST /api/fcm-token` enregistre le token ; si l’utilisateur a un séjour actif (chambre), le token est aussi lié à son **guest**. Les notifications sont envoyées à tous les appareils enregistrés pour ce guest (tablette + téléphone si le client est connecté).
-- **Réservations (spa, restaurant, excursions, blanchisserie, palace)** : notification envoyée au **guest** concerné.
-- **Commandes** : nouvelle commande et chaque changement de statut (confirmée, en préparation, prête, livrée, annulée) notifient le client (guest ou user selon l’origine de la commande).
-
-Table `guest_fcm_tokens` : associe chaque token FCM à un `guest_id` (et `source` : mobile ou tablet). Ainsi un client ne reçoit jamais les notifications d’un autre.
 
 ---
 

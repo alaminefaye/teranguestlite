@@ -26,6 +26,7 @@ class User extends Authenticatable
         'enterprise_id',
         'department',
         'room_number',
+        'room_id',
         'must_change_password',
         'fcm_token',
         'fcm_token_updated_at',
@@ -62,6 +63,14 @@ class User extends Authenticatable
     public function enterprise()
     {
         return $this->belongsTo(Enterprise::class);
+    }
+
+    /**
+     * Chambre liée (pour les accès tablette, role=guest)
+     */
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 
     /**

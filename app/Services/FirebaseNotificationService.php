@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\GuestFcmToken;
-use App\Models\Reservation;
+use App\Models\Room;
 use App\Models\User;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
@@ -11,15 +10,6 @@ use Kreait\Firebase\Messaging\AndroidConfig;
 use Kreait\Firebase\Messaging\ApnsConfig;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Notifications push FCM – uniquement vers le client concerné.
- *
- * Exigences (voir docs/NOTIFICATIONS-EXIGENCES-SYNC.md) :
- * - Notifier pour : nouvelle commande, commande validée, chaque changement de statut,
- *   réservations (spa, restaurant, excursions, blanchisserie, palace).
- * - Ciblage : sendToGuest(guest_id) ou sendToUser(user) selon la commande/réservation.
- * - Aucun envoi au client d'une autre chambre : tokens stockés par guest_id dans guest_fcm_tokens.
- */
 class FirebaseNotificationService
 {
     protected $messaging;
@@ -27,141 +17,6 @@ class FirebaseNotificationService
     public function __construct()
     {
         $this->messaging = app('firebase.messaging');
-    }
-
-    /**
-     * FCM exige que toutes les valeurs du payload "data" soient des chaînes.
-     */
-    private function ensureStringData(array $data): array
-    {
-        $out = [];
-        foreach ($data as $key => $value) {
-            $out[$key] = is_scalar($value) ? (string) $value : json_encode($value);
-        }
-        return $out;
-    }
-
-    /**
-     * Envoyer une notification push au client (guest) : tous les appareils enregistrés pour ce guest
-     * (tablette en chambre + app mobile si le client s'est connecté avec un compte lié à ce guest).
-     */
-    public function sendToGuest(int $guestId, string $title, string $body, array $data = []): bool
-    {
-        $tokens = GuestFcmToken::where('guest_id', $guestId)
-            ->whereNotNull('fcm_token')
-            ->where('fcm_token', '!=', '')
-            ->pluck('fcm_token')
-            ->unique()
-            ->values()
-            ->toArray();
-
-        if (empty($tokens)) {
-            Log::warning("No FCM tokens found for guest {$guestId}");
-            return false;
-        }
-
-        try {
-            $message = CloudMessage::new()
-                ->withNotification(Notification::create($title, $body))
-                ->withData($this->ensureStringData($data))
-                ->withAndroidConfig(
-                    AndroidConfig::fromArray([
-                        'priority' => 'high',
-                        'notification' => [
-                            'sound' => 'default',
-                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                            'channel_id' => 'terangaguest_orders',
-                        ],
-                    ])
-                )
-                ->withApnsConfig(
-                    ApnsConfig::fromArray([
-                        'payload' => [
-                            'aps' => [
-                                'sound' => 'default',
-                                'badge' => 1,
-                            ],
-                        ],
-                    ])
-                );
-
-            $report = $this->messaging->sendMulticast($message, $tokens);
-            $suffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $tokens);
-            Log::info("Notification sent to guest {$guestId} (" . count($tokens) . " device(s)): {$title}", ['token_suffixes' => $suffixes]);
-
-            if ($report->hasFailures()) {
-                $unknown = $report->unknownTokens();
-                $invalid = $report->invalidTokens();
-                $unknownSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $unknown);
-                $invalidSuffixes = array_map(fn ($t) => strlen($t) >= 8 ? '...' . substr($t, -8) : '(short)', $invalid);
-                $failureReasons = [];
-                foreach ($report->failures()->getItems() as $item) {
-                    $err = $item->error();
-                    $suffix = $item->target()->type() === 'token' && strlen($item->target()->value()) >= 8
-                        ? '...' . substr($item->target()->value(), -8) : '(token)';
-                    $failureReasons[$suffix] = $err ? $err->getMessage() : 'unknown';
-                }
-                Log::warning("FCM multicast had failures for guest {$guestId}", [
-                    'successes' => $report->successes()->count(),
-                    'failures' => $report->failures()->count(),
-                    'unknown_tokens' => $unknownSuffixes,
-                    'invalid_tokens' => $invalidSuffixes,
-                    'failure_reasons' => $failureReasons,
-                ]);
-            }
-
-            GuestFcmToken::where('guest_id', $guestId)->update(['last_used_at' => now()]);
-            return true;
-        } catch (\Exception $e) {
-            Log::error("Failed to send notification to guest {$guestId}: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Envoyer une notification push à un token FCM précis (ex. test depuis l'app).
-     */
-    public function sendToToken(string $token, string $title, string $body, array $data = []): bool
-    {
-        $token = trim($token);
-        if ($token === '') {
-            Log::warning('FCM sendToToken: empty token');
-            return false;
-        }
-        try {
-            $message = CloudMessage::new()
-                ->withToken($token)
-                ->withNotification(Notification::create($title, $body))
-                ->withData($this->ensureStringData($data))
-                ->withAndroidConfig(
-                    AndroidConfig::fromArray([
-                        'priority' => 'high',
-                        'notification' => [
-                            'sound' => 'default',
-                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                            'channel_id' => 'terangaguest_orders',
-                        ],
-                    ])
-                )
-                ->withApnsConfig(
-                    ApnsConfig::fromArray([
-                        'payload' => [
-                            'aps' => [
-                                'sound' => 'default',
-                                'badge' => 1,
-                            ],
-                        ],
-                    ])
-                );
-            $this->messaging->send($message);
-            $suffix = strlen($token) >= 8 ? substr($token, -8) : '(short)';
-            Log::info("FCM test notification sent to token ...{$suffix}: {$title}");
-            return true;
-        } catch (\Exception $e) {
-            $suffix = strlen($token) >= 8 ? substr($token, -8) : '(short)';
-            Log::error("FCM sendToToken failed ...{$suffix}: " . $e->getMessage());
-            return false;
-        }
     }
 
     /**
@@ -174,19 +29,16 @@ class FirebaseNotificationService
             return false;
         }
 
-        $token = trim($user->fcm_token);
         try {
-            $message = CloudMessage::new()
-                ->withToken($token)
+            $message = CloudMessage::withTarget('token', $user->fcm_token)
                 ->withNotification(Notification::create($title, $body))
-                ->withData($this->ensureStringData($data))
+                ->withData($data)
                 ->withAndroidConfig(
                     AndroidConfig::fromArray([
                         'priority' => 'high',
                         'notification' => [
                             'sound' => 'default',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                            'channel_id' => 'terangaguest_orders',
                         ],
                     ])
                 )
@@ -202,13 +54,11 @@ class FirebaseNotificationService
                 );
 
             $this->messaging->send($message);
-
-            Log::info("Notification sent to user {$user->id} (order status): {$title}");
+            
+            Log::info("Notification sent to user {$user->id}: {$title}");
             return true;
         } catch (\Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), [
-                'exception_class' => get_class($e),
-            ]);
+            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage());
             return false;
         }
     }
@@ -261,37 +111,49 @@ class FirebaseNotificationService
     }
 
     /**
-     * Notification nouvelle commande : envoyée uniquement au client concerné (guest ou user).
+     * Récupère le User (tablette / compte chambre) qui doit recevoir les notifications pour cette chambre.
+     * Un User avec room_number = room.room_number et enterprise_id = room.enterprise_id, avec un FCM token.
      */
-    public function sendNewOrderNotificationToClient($order): bool
+    public function getUserForRoom(int $roomId): ?User
     {
-        $formattedTotal = $order->total ? number_format($order->total, 0, ',', ' ') . ' FCFA' : '—';
-        $title = "Nouvelle commande #{$order->order_number}";
-        $body = "Votre commande d'un montant de {$formattedTotal} a été reçue.";
-        $data = [
-            'type' => 'order',
-            'order_id' => (string) $order->id,
-            'order_number' => $order->order_number,
-            'screen' => 'OrderDetails',
-        ];
+        $room = Room::withoutGlobalScope('enterprise')->find($roomId);
+        if (! $room) {
+            return null;
+        }
 
-        if ($order->guest_id) {
-            return $this->sendToGuest($order->guest_id, $title, $body, $data);
-        }
-        if ($order->user_id && $order->user && $order->user->fcm_token) {
-            return $this->sendToUser($order->user, $title, $body, $data);
-        }
-        Log::warning("Order {$order->id}: no guest_id nor user FCM token for notification");
-        return false;
+        return User::where('enterprise_id', $room->enterprise_id)
+            ->where('room_number', $room->room_number)
+            ->whereNotNull('fcm_token')
+            ->where('fcm_token', '!=', '')
+            ->first();
     }
 
-    /** @deprecated Utiliser sendNewOrderNotificationToClient pour cibler le client */
-    public function sendNewOrderNotification(User $user, $order)
+    /**
+     * Envoyer une notification au client de la chambre (User lié à cette chambre).
+     */
+    public function sendToClientOfRoom(int $roomId, string $title, string $body, array $data = []): bool
     {
-        $formattedTotal = $order->total ? number_format($order->total, 0, ',', ' ') . ' FCFA' : '—';
+        $user = $this->getUserForRoom($roomId);
+        if (! $user) {
+            Log::warning("No user with FCM token found for room_id {$roomId}");
+            return false;
+        }
+        return $this->sendToUser($user, $title, $body, $data);
+    }
+
+    /**
+     * Envoyer une notification de nouvelle commande au client de la chambre concernée.
+     */
+    public function sendNewOrderNotificationToRoom($order): bool
+    {
+        if (empty($order->room_id)) {
+            Log::warning("Order {$order->id} has no room_id, cannot send notification to client");
+            return false;
+        }
+        $formattedTotal = $order->formatted_total ?? (number_format($order->total, 0, ',', ' ') . ' FCFA');
         $title = "Nouvelle commande #{$order->order_number}";
         $body = "Votre commande d'un montant de {$formattedTotal} a été reçue.";
-        return $this->sendToUser($user, $title, $body, [
+        return $this->sendToClientOfRoom($order->room_id, $title, $body, [
             'type' => 'order',
             'order_id' => (string) $order->id,
             'order_number' => $order->order_number,
@@ -300,10 +162,13 @@ class FirebaseNotificationService
     }
 
     /**
-     * Notification changement de statut de commande : envoyée uniquement au client concerné.
+     * Envoyer une notification de changement de statut de commande au client de la chambre.
      */
-    public function sendOrderStatusNotificationToClient($order): bool
+    public function sendOrderStatusNotificationToRoom($order): bool
     {
+        if (empty($order->room_id)) {
+            return false;
+        }
         $statusMessages = [
             'confirmed' => 'Votre commande a été confirmée',
             'preparing' => 'Votre commande est en préparation',
@@ -314,74 +179,48 @@ class FirebaseNotificationService
         ];
         $title = "Commande #{$order->order_number}";
         $body = $statusMessages[$order->status] ?? "Statut de commande mis à jour";
-        $data = [
+        return $this->sendToClientOfRoom($order->room_id, $title, $body, [
             'type' => 'order_status',
             'order_id' => (string) $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,
             'screen' => 'OrderDetails',
-        ];
-
-        // Commande sans guest_id (ex. créée depuis le dashboard) : résoudre le guest via la chambre (séjour en cours)
-        $guestId = $order->guest_id;
-        if ($guestId === null && $order->room_id) {
-            $reservation = Reservation::where('enterprise_id', $order->enterprise_id)
-                ->currentStay($order->room_id)
-                ->first();
-            if ($reservation && $reservation->guest_id) {
-                $guestId = $reservation->guest_id;
-                Log::info("Order status: resolved guest {$guestId} from room {$order->room_id} for order #{$order->order_number}");
-            }
-        }
-
-        // Essayer d'abord par guest (tokens tablette + app enregistrés pour ce guest)
-        if ($guestId) {
-            $sent = $this->sendToGuest($guestId, $title, $body, $data);
-            if ($sent) {
-                return true;
-            }
-            Log::info("Order status: no tokens for guest {$guestId}, trying user fallback");
-        }
-
-        // Fallback 1 : envoyer à l'utilisateur (user.fcm_token) si la commande a un user_id
-        if ($order->user_id && $order->user) {
-            $user = $order->user;
-            if (! empty(trim($user->fcm_token ?? ''))) {
-                return $this->sendToUser($user, $title, $body, $data);
-            }
-            Log::warning("Order status: user {$user->id} has no FCM token (order #{$order->order_number})");
-        }
-
-        // Fallback 2 : commande avec guest mais sans user_id (ex. commande dashboard) → user lié au guest via résa active
-        if ($guestId) {
-            $reservation = Reservation::where('enterprise_id', $order->enterprise_id)
-                ->where('guest_id', $guestId)
-                ->whereNotNull('user_id')
-                ->whereIn('status', ['confirmed', 'checked_in'])
-                ->where('check_in', '<=', now())
-                ->where('check_out', '>=', now())
-                ->first();
-            if ($reservation && $reservation->user_id) {
-                $user = User::find($reservation->user_id);
-                if ($user && ! empty(trim($user->fcm_token ?? ''))) {
-                    $sent = $this->sendToUser($user, $title, $body, $data);
-                    if ($sent) {
-                        Log::info("Order status: sent to user {$user->id} via guest {$guestId} reservation (order #{$order->order_number})");
-                        return true;
-                    }
-                }
-            }
-        }
-
-        Log::warning("Order status: notification could not be sent for order #{$order->order_number}", [
-            'guest_id' => $order->guest_id,
-            'user_id' => $order->user_id,
         ]);
-
-        return false;
     }
 
-    /** @deprecated Utiliser sendOrderStatusNotificationToClient */
+    /**
+     * Envoyer une notification de confirmation de réservation au client de la chambre.
+     */
+    public function sendReservationConfirmationToRoom(int $roomId, string $reservationNumber, string $serviceName = 'Réservation'): bool
+    {
+        $title = "Réservation confirmée";
+        $body = "Votre réservation {$serviceName} #{$reservationNumber} a été confirmée.";
+        return $this->sendToClientOfRoom($roomId, $title, $body, [
+            'type' => 'reservation',
+            'reservation_number' => $reservationNumber,
+            'screen' => 'Reservations',
+        ]);
+    }
+
+    /**
+     * Envoyer une notification de nouvelle commande (legacy: à un User donné)
+     */
+    public function sendNewOrderNotification(User $user, $order)
+    {
+        $title = "Nouvelle commande #{$order->order_number}";
+        $body = "Votre commande d'un montant de {$order->formatted_total} a été reçue.";
+        
+        return $this->sendToUser($user, $title, $body, [
+            'type' => 'order',
+            'order_id' => (string) $order->id,
+            'order_number' => $order->order_number,
+            'screen' => 'OrderDetails',
+        ]);
+    }
+
+    /**
+     * Envoyer une notification de changement de statut de commande
+     */
     public function sendOrderStatusNotification(User $user, $order)
     {
         $statusMessages = [
@@ -392,8 +231,10 @@ class FirebaseNotificationService
             'delivered' => 'Votre commande a été livrée',
             'cancelled' => 'Votre commande a été annulée',
         ];
+
         $title = "Commande #{$order->order_number}";
         $body = $statusMessages[$order->status] ?? "Statut de commande mis à jour";
+        
         return $this->sendToUser($user, $title, $body, [
             'type' => 'order_status',
             'order_id' => (string) $order->id,
@@ -404,26 +245,13 @@ class FirebaseNotificationService
     }
 
     /**
-     * Notification confirmation de réservation : envoyée au client (guest) concerné.
+     * Envoyer une notification de confirmation de réservation
      */
-    public function sendReservationConfirmationToGuest(int $guestId, $reservation, string $reservationNumber = null): bool
-    {
-        $number = $reservationNumber ?? (isset($reservation->reservation_number) ? $reservation->reservation_number : (string) ($reservation->id ?? $reservation));
-        $title = "Réservation confirmée";
-        $body = "Votre réservation #{$number} a été confirmée.";
-        return $this->sendToGuest($guestId, $title, $body, [
-            'type' => 'reservation',
-            'reservation_id' => (string) ($reservation->id ?? $reservation),
-            'reservation_number' => $number,
-            'screen' => 'ReservationDetails',
-        ]);
-    }
-
-    /** @deprecated Utiliser sendReservationConfirmationToGuest pour cibler le client */
     public function sendReservationConfirmation(User $user, $reservation)
     {
         $title = "Réservation confirmée";
         $body = "Votre réservation #{$reservation->reservation_number} a été confirmée.";
+        
         return $this->sendToUser($user, $title, $body, [
             'type' => 'reservation',
             'reservation_id' => (string) $reservation->id,

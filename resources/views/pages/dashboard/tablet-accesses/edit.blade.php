@@ -17,6 +17,11 @@
         {{ session('error') }}
     </div>
 @endif
+@if(session('info'))
+    <div class="mb-6 rounded-lg bg-blue-light-50 p-4 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400">
+        {{ session('info') }}
+    </div>
+@endif
 
 <form action="{{ route('dashboard.tablet-accesses.update', $user->id) }}" method="POST" class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 max-w-lg">
     @csrf

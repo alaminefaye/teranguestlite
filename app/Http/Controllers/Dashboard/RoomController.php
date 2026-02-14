@@ -29,7 +29,7 @@ class RoomController extends Controller
             $query->where('room_number', 'like', '%' . $request->search . '%');
         }
 
-        $rooms = $query->orderBy('room_number', 'asc')->paginate(10);
+        $rooms = $query->with('tabletAccessUser')->orderBy('room_number', 'asc')->paginate(10);
 
         // Statistiques
         $stats = [
