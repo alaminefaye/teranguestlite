@@ -13,7 +13,9 @@ use Kreait\Firebase\Exception\MessagingApiExceptionConverter;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\ApiClient as MessagingApiClient;
 use Kreait\Firebase\Messaging\AppInstanceApiClient;
+use Kreait\Firebase\Messaging\Message;
 use Kreait\Firebase\Messaging\RequestFactory as MessagingRequestFactory;
+use Psr\Http\Message\RequestInterface;
 
 class FirebaseServiceProvider extends ServiceProvider
 {
@@ -88,7 +90,7 @@ class FirebaseServiceProvider extends ServiceProvider
                 $expiresIn = (int) ($tokenData['expires_in'] ?? 3600);
                 $tokenState = [
                     'token' => $accessToken,
-                    'expires_at' => time() + $expiresIn - 300, // rafraîchir 5 min avant
+                    'expires_at' => time() + $expiresIn - 300,
                 ];
                 Log::info('Firebase: OAuth2 access token obtained for FCM', ['expires_in' => $expiresIn]);
             } catch (\Throwable $e) {
@@ -96,27 +98,35 @@ class FirebaseServiceProvider extends ServiceProvider
                 return $factory->createMessaging();
             }
 
-            $handler = HandlerStack::create();
-            $handler->push(function (callable $next) use ($credentials, $authTokenHandler, &$tokenState) {
-                return function ($request, array $options) use ($next, $credentials, $authTokenHandler, &$tokenState) {
-                    if (time() >= $tokenState['expires_at']) {
+            $httpFactory = new HttpFactory();
+            $innerRequestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
+
+            // Wrapper qui ajoute Authorization sur chaque requête (évite le middleware Guzzle/Pool).
+            $requestFactory = new class($innerRequestFactory, $credentials, $authTokenHandler, $tokenState) implements \Kreait\Firebase\Messaging\RequestFactoryInterface {
+                public function __construct(
+                    private MessagingRequestFactory $inner,
+                    private ServiceAccountCredentials $credentials,
+                    private $authTokenHandler,
+                    private array &$tokenState,
+                ) {}
+
+                public function createRequest(Message $message, string $projectId, bool $validateOnly): RequestInterface
+                {
+                    if (time() >= $this->tokenState['expires_at']) {
                         try {
-                            $tokenData = $credentials->fetchAuthToken($authTokenHandler);
-                            $tokenState['token'] = $tokenData['access_token'] ?? $tokenState['token'];
-                            $tokenState['expires_at'] = time() + (int) ($tokenData['expires_in'] ?? 3600) - 300;
+                            $tokenData = $this->credentials->fetchAuthToken($this->authTokenHandler);
+                            $this->tokenState['token'] = $tokenData['access_token'] ?? $this->tokenState['token'];
+                            $this->tokenState['expires_at'] = time() + (int) ($tokenData['expires_in'] ?? 3600) - 300;
                         } catch (\Throwable $e) {
                             Log::warning('Firebase: token refresh failed: ' . $e->getMessage());
                         }
                     }
-                    $request = $request->withHeader('Authorization', 'Bearer ' . $tokenState['token']);
-                    return $next($request, $options);
-                };
-            });
+                    $request = $this->inner->createRequest($message, $projectId, $validateOnly);
+                    return $request->withHeader('Authorization', 'Bearer ' . $this->tokenState['token']);
+                }
+            };
 
-            $messagingHttpClient = new Client(['handler' => $handler]);
-
-            $httpFactory = new HttpFactory();
-            $requestFactory = new MessagingRequestFactory($httpFactory, $httpFactory);
+            $messagingHttpClient = new Client();
             $clock = \Beste\Clock\SystemClock::create();
             $errorHandler = new MessagingApiExceptionConverter($clock);
             $messagingApiClient = new MessagingApiClient($messagingHttpClient, $projectId, $requestFactory);
