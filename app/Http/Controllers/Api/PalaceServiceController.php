@@ -120,15 +120,18 @@ class PalaceServiceController extends Controller
             'metadata.vehicle_id' => 'nullable|integer|exists:vehicles,id',
             'metadata.rental_days' => 'nullable|integer|min:1|max:90',
             'metadata.rental_duration_hours' => 'nullable|integer|min:1|max:720',
+            'metadata.tour_type' => 'nullable|string|max:100',
+            'metadata.guests_count' => 'nullable|integer|min:1|max:50',
         ]);
 
         $metadata = $request->input('metadata');
         $hasDescription = !empty(trim($request->input('description', '')));
         $hasVehicleMeta = is_array($metadata) && !empty($metadata['vehicle_request_type']);
-        if (!$hasDescription && !$hasVehicleMeta) {
+        $hasGuidedTourMeta = is_array($metadata) && (isset($metadata['tour_type']) || isset($metadata['guests_count']));
+        if (!$hasDescription && !$hasVehicleMeta && !$hasGuidedTourMeta) {
             return response()->json([
                 'success' => false,
-                'message' => 'Indiquez soit les détails de la demande (description), soit le type véhicule (taxi ou location) avec les champs associés.',
+                'message' => 'Indiquez les détails de la demande (description), le type véhicule (taxi/location) ou les infos visite guidée (type de circuit, nombre de personnes).',
             ], 422);
         }
 
@@ -328,6 +331,17 @@ class PalaceServiceController extends Controller
             }
             if (!empty($m['rental_duration_hours'])) {
                 $parts[] = $m['rental_duration_hours'] . ' h';
+            }
+            return implode(' | ', $parts);
+        }
+        if (isset($m['tour_type']) || isset($m['guests_count'])) {
+            $parts = ['Visite guidée'];
+            $labels = ['cultural' => 'Culturel', 'gastronomic' => 'Gastronomique', 'historical' => 'Historique'];
+            if (!empty($m['tour_type'])) {
+                $parts[] = $labels[$m['tour_type']] ?? $m['tour_type'];
+            }
+            if (!empty($m['guests_count'])) {
+                $parts[] = (int) $m['guests_count'] . ' personne(s)';
             }
             return implode(' | ', $parts);
         }

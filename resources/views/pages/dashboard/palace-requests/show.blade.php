@@ -69,6 +69,21 @@
             </dl>
         </div>
         @endif
+
+        @if(is_array($meta) && (isset($meta['tour_type']) || isset($meta['guests_count'])) && empty($meta['vehicle_request_type']))
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="font-medium text-gray-900 dark:text-white/90 mb-2">Visite guidée personnalisée</h3>
+            <dl class="space-y-2 text-sm">
+                @if(!empty($meta['tour_type']))
+                    @php
+                        $tourLabels = ['cultural' => 'Culturel', 'gastronomic' => 'Gastronomique', 'historical' => 'Historique'];
+                    @endphp
+                    <div><dt class="text-gray-500 dark:text-gray-400">Type de circuit</dt><dd class="font-medium">{{ $tourLabels[$meta['tour_type']] ?? $meta['tour_type'] }}</dd></div>
+                @endif
+                @if(!empty($meta['guests_count']))<div><dt class="text-gray-500 dark:text-gray-400">Nombre de personnes</dt><dd class="font-medium">{{ $meta['guests_count'] }}</dd></div>@endif
+            </dl>
+        </div>
+        @endif
     </div>
 </div>
 @endsection
