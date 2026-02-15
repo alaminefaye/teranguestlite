@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
         $this->call(EnterpriseSeeder::class);
         echo "\n";
 
+        echo "📖 Configuration Hotel Infos & Sécurité...\n";
+        $this->call(HotelInfosSecuritySeeder::class);
+        echo "\n";
+
         // 2. Créer les utilisateurs (Super Admin + admins + staff + guests)
         echo "👥 Création des utilisateurs...\n";
         $this->call(UserSeeder::class);
