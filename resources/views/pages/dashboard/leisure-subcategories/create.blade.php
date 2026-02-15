@@ -34,7 +34,8 @@
             <div>
                 <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type (écran ouvert dans l'app) <span class="text-error-500">*</span></label>
                 <select name="type" id="type" required class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    <option value="golf_tennis" {{ old('type') == 'golf_tennis' ? 'selected' : '' }}>Golf & Tennis</option>
+                    <option value="golf" {{ old('type') == 'golf' ? 'selected' : '' }}>Golf</option>
+                    <option value="tennis" {{ old('type') == 'tennis' ? 'selected' : '' }}>Tennis</option>
                     <option value="fitness" {{ old('type') == 'fitness' ? 'selected' : '' }}>Sport & Fitness</option>
                     <option value="spa" {{ old('type') == 'spa' ? 'selected' : '' }}>Spa & Wellness</option>
                     <option value="other" {{ old('type') == 'other' ? 'selected' : '' }}>Autre</option>

@@ -9,10 +9,12 @@ import '../../widgets/service_card.dart';
 import '../../providers/palace_provider.dart';
 import '../../models/palace.dart';
 
-/// Golf & Tennis : Tee-time, Court de tennis, Location de matériel.
-/// Chaque option ouvre un formulaire (date/heure + précisions) → demande Palace (concierge).
+/// Golf ou Tennis : chaque sport a sa propre page (Tee-time + matériel pour Golf, Court + matériel pour Tennis).
 class GolfTennisScreen extends StatefulWidget {
-  const GolfTennisScreen({super.key});
+  const GolfTennisScreen({super.key, required this.sportType});
+
+  /// 'golf' = options Golf (Tee-time, Matériel). 'tennis' = options Tennis (Court, Matériel).
+  final String sportType;
 
   @override
   State<GolfTennisScreen> createState() => _GolfTennisScreenState();
@@ -135,7 +137,8 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
               ),
               FilledButton(
                 onPressed: () async {
-                  final parts = <String>['Golf & Tennis - $optionLabel'];
+                  final prefix = widget.sportType == 'tennis' ? 'Tennis' : 'Golf';
+                  final parts = <String>['$prefix - $optionLabel'];
                   if (selectedDate != null) {
                     parts.add('Date: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}');
                   }
@@ -190,11 +193,16 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
 
-    final options = [
-      (l10n.golfTennisTeetime, Icons.sports_golf_outlined, 'tee_time'),
-      (l10n.golfTennisCourt, Icons.sports_tennis_outlined, 'court'),
-      (l10n.golfTennisEquipment, Icons.sports_outlined, 'equipment'),
-    ];
+    final isGolf = widget.sportType == 'golf';
+    final options = isGolf
+        ? [
+            (l10n.golfTennisTeetime, Icons.sports_golf_outlined, 'tee_time'),
+            (l10n.golfTennisEquipment, Icons.sports_outlined, 'equipment'),
+          ]
+        : [
+            (l10n.golfTennisCourt, Icons.sports_tennis_outlined, 'court'),
+            (l10n.golfTennisEquipment, Icons.sports_outlined, 'equipment'),
+          ];
 
     return Scaffold(
       body: Container(
@@ -236,6 +244,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
   }
 
   Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
+    final isGolf = widget.sportType == 'golf';
+    final title = isGolf ? l10n.golfTitle : l10n.tennisTitle;
+    final subtitle = isGolf ? l10n.golfSubtitle : l10n.tennisSubtitle;
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -254,7 +265,7 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  l10n.golfTennisTitle,
+                  title,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -263,7 +274,7 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.golfTennisSubtitle,
+                  subtitle,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textGray,

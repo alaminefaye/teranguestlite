@@ -143,6 +143,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wellnessSportLeisureSubtitle => 'سبا، غولف، تنس، لياقة';
 
   @override
+  String get golfTitle => 'غولف';
+
+  @override
+  String get golfSubtitle => 'حجز تي-تايم واستئجار المعدات';
+
+  @override
+  String get tennisTitle => 'تنس';
+
+  @override
+  String get tennisSubtitle => 'حجز الملاعب واستئجار المعدات';
+
+  @override
   String get golfTennisTitle => 'غولف وتنس';
 
   @override

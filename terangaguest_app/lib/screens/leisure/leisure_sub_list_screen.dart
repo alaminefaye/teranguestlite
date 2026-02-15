@@ -24,8 +24,10 @@ class LeisureSubListScreen extends StatelessWidget {
     switch (type) {
       case 'spa':
         return Icons.spa_outlined;
-      case 'golf_tennis':
+      case 'golf':
         return Icons.sports_golf_outlined;
+      case 'tennis':
+        return Icons.sports_tennis_outlined;
       case 'fitness':
         return Icons.fitness_center_outlined;
       default:
@@ -38,8 +40,10 @@ class LeisureSubListScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     if (child.type == 'spa') {
       context.navigateTo(const SpaServicesListScreen());
-    } else if (child.type == 'golf_tennis') {
-      context.navigateTo(const GolfTennisScreen());
+    } else if (child.type == 'golf' || child.type == 'golf_tennis') {
+      context.navigateTo(const GolfTennisScreen(sportType: 'golf'));
+    } else if (child.type == 'tennis') {
+      context.navigateTo(const GolfTennisScreen(sportType: 'tennis'));
     } else if (child.type == 'fitness') {
       context.navigateTo(const SportFitnessScreen());
     } else {

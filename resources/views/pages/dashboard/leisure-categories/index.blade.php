@@ -40,6 +40,7 @@
     @empty
         <div class="col-span-3 text-center py-12">
             <p class="text-gray-600 dark:text-gray-400 mb-4">Aucune catégorie principale. Créez Sport et Loisirs pour que les clients voient les deux boxes dans l'app, puis ajoutez les activités (Golf, Tennis, Spa, etc.) dans chaque catégorie.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Si vous venez d'installer : exécutez <code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">php artisan db:seed --class=LeisureSeeder</code> pour créer Sport, Loisirs et les activités par défaut pour votre établissement. Vérifiez aussi que votre compte est bien rattaché à un établissement.</p>
             <a href="{{ route('dashboard.leisure-categories.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Ajouter une catégorie</a>
         </div>
     @endforelse

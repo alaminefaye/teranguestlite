@@ -44,7 +44,7 @@ class LeisureSubcategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'type' => 'required|in:golf_tennis,fitness,spa,other',
+            'type' => 'required|in:golf,tennis,fitness,spa,other',
             'display_order' => 'nullable|integer|min:0',
         ]);
 
@@ -78,7 +78,7 @@ class LeisureSubcategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'type' => 'required|in:golf_tennis,fitness,spa,other',
+            'type' => 'required|in:golf,tennis,fitness,spa,other',
             'display_order' => 'nullable|integer|min:0',
         ]);
 

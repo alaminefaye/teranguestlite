@@ -14,8 +14,9 @@ class LeisureCategory extends Model
     public const TYPE_LOISIRS = 'loisirs';
 
     /** Sous-catégories (écran 2) - type = slug pour l'app */
+    public const TYPE_GOLF = 'golf';
+    public const TYPE_TENNIS = 'tennis';
     public const TYPE_SPA = 'spa';
-    public const TYPE_GOLF_TENNIS = 'golf_tennis';
     public const TYPE_FITNESS = 'fitness';
     public const TYPE_OTHER = 'other';
 
@@ -53,8 +54,9 @@ class LeisureCategory extends Model
         return match ($this->type) {
             self::TYPE_SPORT => 'Sport',
             self::TYPE_LOISIRS => 'Loisirs',
+            self::TYPE_GOLF => 'Golf',
+            self::TYPE_TENNIS => 'Tennis',
             self::TYPE_SPA => 'Spa & Wellness',
-            self::TYPE_GOLF_TENNIS => 'Golf & Tennis',
             self::TYPE_FITNESS => 'Sport & Fitness',
             self::TYPE_OTHER => 'Autre',
             default => ucfirst(str_replace('_', ' ', $this->type ?? '')),

@@ -366,6 +366,30 @@ abstract class AppLocalizations {
   /// **'Spa, Golf, Tennis, Fitness'**
   String get wellnessSportLeisureSubtitle;
 
+  /// No description provided for @golfTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Golf'**
+  String get golfTitle;
+
+  /// No description provided for @golfSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation Tee-time et location de matériel'**
+  String get golfSubtitle;
+
+  /// No description provided for @tennisTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tennis'**
+  String get tennisTitle;
+
+  /// No description provided for @tennisSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation de courts et location de matériel'**
+  String get tennisSubtitle;
+
   /// No description provided for @golfTennisTitle.
   ///
   /// In fr, this message translates to:

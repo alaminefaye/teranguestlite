@@ -143,6 +143,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wellnessSportLeisureSubtitle => 'Spa, Golf, Tennis, Fitness';
 
   @override
+  String get golfTitle => 'Golf';
+
+  @override
+  String get golfSubtitle => 'Tee-time booking and equipment rental';
+
+  @override
+  String get tennisTitle => 'Tennis';
+
+  @override
+  String get tennisSubtitle => 'Court booking and equipment rental';
+
+  @override
   String get golfTennisTitle => 'Golf & Tennis';
 
   @override

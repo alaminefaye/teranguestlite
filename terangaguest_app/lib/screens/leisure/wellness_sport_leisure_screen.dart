@@ -61,8 +61,9 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
         type: 'sport',
         displayOrder: 0,
         children: [
-          LeisureCategoryDto(id: 1, name: l10n.golfTennisTitle, description: null, type: 'golf_tennis', displayOrder: 0),
-          LeisureCategoryDto(id: 2, name: l10n.sportFitnessTitle, description: null, type: 'fitness', displayOrder: 1),
+          LeisureCategoryDto(id: 1, name: l10n.golfTitle, description: null, type: 'golf', displayOrder: 0),
+          LeisureCategoryDto(id: 2, name: l10n.tennisTitle, description: null, type: 'tennis', displayOrder: 1),
+          LeisureCategoryDto(id: 3, name: l10n.sportFitnessTitle, description: null, type: 'fitness', displayOrder: 2),
         ],
       ),
       LeisureMainCategoryDto(
@@ -72,7 +73,7 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
         type: 'loisirs',
         displayOrder: 1,
         children: [
-          LeisureCategoryDto(id: 3, name: l10n.spaWellness, description: null, type: 'spa', displayOrder: 0),
+          LeisureCategoryDto(id: 4, name: l10n.spaWellness, description: null, type: 'spa', displayOrder: 0),
         ],
       ),
     ];
