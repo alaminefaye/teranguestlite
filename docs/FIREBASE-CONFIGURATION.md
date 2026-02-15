@@ -393,11 +393,16 @@ Si les logs montrent **« Firebase: OAuth2 access token obtained for FCM »** pu
 - Le token est bien obtenu côté application, mais **FCM reçoit la requête sans (ou avec un) credential valide**.
 - Sur **hébergement partagé** (ex. mutualisé), un **proxy sortant** peut **supprimer le header `Authorization`** avant que la requête n’atteigne `fcm.googleapis.com`. C’est une cause très fréquente de ce 401.
 
+**Preuve (hébergement O2Switch / serveur « dent »)** : exécuter depuis le serveur :
+`php artisan fcm:test --curl-oneline --user=6` puis copier-coller la ligne `curl` affichée. Si la réponse est **HTTP_CODE:401**, c’est que la requête qui part du serveur vers `fcm.googleapis.com` arrive chez Google sans le header `Authorization` (supprimé par un proxy/pare-feu entre le serveur et Google).
+
 **À faire :**
 
-1. **Contacter l’hébergeur** et demander que le header **`Authorization`** soit **conservé et transmis** pour les requêtes HTTPS sortantes vers **`fcm.googleapis.com`** (ou plus large : `*.googleapis.com`). Beaucoup de proxies suppriment ce header par défaut pour des raisons de sécurité.
+1. **Contacter l’hébergeur** (ex. O2Switch) avec un message du type :
+   > « Nous utilisons Firebase Cloud Messaging (FCM) pour des notifications push. Les requêtes sortantes vers `https://fcm.googleapis.com` doivent envoyer le header HTTP `Authorization: Bearer <token>`. Actuellement, depuis notre serveur (ex. dent), une requête curl avec ce header reçoit 401 "Request is missing required authentication credential" / THIRD_PARTY_AUTH_ERROR. Pouvez-vous vérifier qu’aucun proxy ou pare-feu ne supprime ou modifie le header `Authorization` pour les requêtes HTTPS vers `fcm.googleapis.com` (ou *.googleapis.com) ? »
 2. Si l’hébergeur ne peut pas le faire : **envoyer les notifications depuis un autre serveur** (VPS, autre hébergement) qui n’utilise pas de proxy strippant les headers, en gardant le même code et les mêmes credentials.
 3. Vérifier qu’aucune règle (pare-feu, WAF, « security ») ne supprime ou modifie les headers d’authentification pour les domaines Google.
+4. **En attendant** : l’application enregistre les notifications pour **polling in-app** ; les tablettes peuvent les récupérer via l’API sans push temps réel.
 
 ### Erreur « Permission cloudmessaging.messages.create denied »
 

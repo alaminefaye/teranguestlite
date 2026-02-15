@@ -75,6 +75,15 @@ Route::middleware(['auth'])->group(function () {
         
         // Services Palace
         Route::resource('palace-services', \App\Http\Controllers\Dashboard\PalaceServiceController::class);
+
+        // Amenities & Conciergerie (catégories + articles dynamiques pour l'app mobile)
+        Route::resource('amenity-categories', \App\Http\Controllers\Dashboard\AmenityCategoryController::class);
+        Route::get('amenity-categories/{amenity_category}/items', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'index'])->name('amenity-categories.items.index');
+        Route::get('amenity-categories/{amenity_category}/items/create', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'create'])->name('amenity-categories.items.create');
+        Route::post('amenity-categories/{amenity_category}/items', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'store'])->name('amenity-categories.items.store');
+        Route::get('amenity-categories/{amenity_category}/items/{item}/edit', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'edit'])->name('amenity-categories.items.edit');
+        Route::put('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'update'])->name('amenity-categories.items.update');
+        Route::delete('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'destroy'])->name('amenity-categories.items.destroy');
         
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);

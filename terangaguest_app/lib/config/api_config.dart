@@ -57,6 +57,9 @@ class ApiConfig {
   static const String laundryRequest = '/laundry/request';
   static const String myLaundryRequests = '/my-laundry-requests';
   
+  // Amenities & Conciergerie (dynamique depuis l'admin)
+  static const String amenityCategories = '/amenity-categories';
+
   // Palace Services
   static const String palaceServices = '/palace-services';
   static const String myPalaceRequests = '/my-palace-requests';

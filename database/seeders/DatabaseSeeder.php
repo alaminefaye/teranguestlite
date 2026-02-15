@@ -58,7 +58,12 @@ class DatabaseSeeder extends Seeder
         $this->call(PalaceSeeder::class);
         echo "\n";
 
-        // 10. Créer les véhicules (location avec chauffeur)
+        // 10. Créer les catégories et articles Amenities & Conciergerie
+        echo "🛁 Création des Amenities & Conciergerie...\n";
+        $this->call(AmenitySeeder::class);
+        echo "\n";
+
+        // 11. Créer les véhicules (location avec chauffeur)
         echo "🚗 Création des véhicules...\n";
         $this->call(VehicleSeeder::class);
         echo "\n";
@@ -75,6 +80,7 @@ class DatabaseSeeder extends Seeder
         echo "   - 20 Excursions (4 par hôtel)\n";
         echo "   - 40 Services Blanchisserie (8 par hôtel)\n";
         echo "   - 40 Services Palace (8 par hôtel)\n";
+        echo "   - 20 Catégories Amenities (4 par hôtel) + articles\n";
         echo "   - 40 Véhicules (8 par hôtel)\n";
         echo "\n🎉 Base de données prête pour les tests !\n\n";
     }

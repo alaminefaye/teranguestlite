@@ -384,6 +384,174 @@ abstract class AppLocalizations {
   /// **'Centre d\'Appels'**
   String get callCenter;
 
+  /// No description provided for @servicesChambreLogistique.
+  ///
+  /// In fr, this message translates to:
+  /// **'SERVICES EN CHAMBRE & LOGISTIQUE'**
+  String get servicesChambreLogistique;
+
+  /// No description provided for @roomServiceRestauration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Room Service & Restauration'**
+  String get roomServiceRestauration;
+
+  /// No description provided for @roomServiceRestaurationDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Menu digital haute définition permettant de commander repas et boissons avec suivi en temps réel de la préparation.'**
+  String get roomServiceRestaurationDesc;
+
+  /// No description provided for @laundryDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grille tarifaire interactive et demande de ramassage immédiate du linge.'**
+  String get laundryDesc;
+
+  /// No description provided for @amenitiesConcierge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amenities & Conciergerie'**
+  String get amenitiesConcierge;
+
+  /// No description provided for @amenitiesConciergeDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande simplifiée d\'articles de toilette, oreillers supplémentaires, kit de rasage ou tout autre service sans passer par le téléphone.'**
+  String get amenitiesConciergeDesc;
+
+  /// No description provided for @minibarIntelligent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mini-bar Intelligent'**
+  String get minibarIntelligent;
+
+  /// No description provided for @minibarIntelligentDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inventaire digital des produits et déclaration simplifiée des consommations.'**
+  String get minibarIntelligentDesc;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get comingSoon;
+
+  /// No description provided for @amenityToiletries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Articles de toilette'**
+  String get amenityToiletries;
+
+  /// No description provided for @amenityPillows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oreillers supplémentaires'**
+  String get amenityPillows;
+
+  /// No description provided for @amenityShavingKit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kit de rasage'**
+  String get amenityShavingKit;
+
+  /// No description provided for @amenityOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre demande'**
+  String get amenityOther;
+
+  /// No description provided for @amenityDetailsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez si besoin (optionnel)'**
+  String get amenityDetailsHint;
+
+  /// No description provided for @amenitySelectQuantities.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez les articles et quantités'**
+  String get amenitySelectQuantities;
+
+  /// No description provided for @amenityPillowCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre d\'oreillers'**
+  String get amenityPillowCount;
+
+  /// No description provided for @amenityOtherDetailsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez votre demande (optionnel)'**
+  String get amenityOtherDetailsHint;
+
+  /// No description provided for @amenityItemSoap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Savon'**
+  String get amenityItemSoap;
+
+  /// No description provided for @amenityItemShampoo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Shampooing'**
+  String get amenityItemShampoo;
+
+  /// No description provided for @amenityItemToothpaste.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dentifrice'**
+  String get amenityItemToothpaste;
+
+  /// No description provided for @amenityItemToothbrush.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brosse à dents'**
+  String get amenityItemToothbrush;
+
+  /// No description provided for @amenityItemComb.
+  ///
+  /// In fr, this message translates to:
+  /// **'Peigne'**
+  String get amenityItemComb;
+
+  /// No description provided for @amenityItemTowels.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serviettes'**
+  String get amenityItemTowels;
+
+  /// No description provided for @amenityItemPillow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oreiller supplémentaire'**
+  String get amenityItemPillow;
+
+  /// No description provided for @amenityItemRazor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rasoir'**
+  String get amenityItemRazor;
+
+  /// No description provided for @amenityItemShavingFoam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mousse à raser'**
+  String get amenityItemShavingFoam;
+
+  /// No description provided for @amenityItemAfterShave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après-rasage'**
+  String get amenityItemAfterShave;
+
+  /// No description provided for @amenityItemBlades.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lames de rechange'**
+  String get amenityItemBlades;
+
   /// No description provided for @back.
   ///
   /// In fr, this message translates to:

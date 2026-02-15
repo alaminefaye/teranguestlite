@@ -152,6 +152,95 @@ class AppLocalizationsFr extends AppLocalizations {
   String get callCenter => 'Centre d\'Appels';
 
   @override
+  String get servicesChambreLogistique => 'SERVICES EN CHAMBRE & LOGISTIQUE';
+
+  @override
+  String get roomServiceRestauration => 'Room Service & Restauration';
+
+  @override
+  String get roomServiceRestaurationDesc =>
+      'Menu digital haute définition permettant de commander repas et boissons avec suivi en temps réel de la préparation.';
+
+  @override
+  String get laundryDesc =>
+      'Grille tarifaire interactive et demande de ramassage immédiate du linge.';
+
+  @override
+  String get amenitiesConcierge => 'Amenities & Conciergerie';
+
+  @override
+  String get amenitiesConciergeDesc =>
+      'Demande simplifiée d\'articles de toilette, oreillers supplémentaires, kit de rasage ou tout autre service sans passer par le téléphone.';
+
+  @override
+  String get minibarIntelligent => 'Mini-bar Intelligent';
+
+  @override
+  String get minibarIntelligentDesc =>
+      'Inventaire digital des produits et déclaration simplifiée des consommations.';
+
+  @override
+  String get comingSoon => 'Bientôt disponible';
+
+  @override
+  String get amenityToiletries => 'Articles de toilette';
+
+  @override
+  String get amenityPillows => 'Oreillers supplémentaires';
+
+  @override
+  String get amenityShavingKit => 'Kit de rasage';
+
+  @override
+  String get amenityOther => 'Autre demande';
+
+  @override
+  String get amenityDetailsHint => 'Précisez si besoin (optionnel)';
+
+  @override
+  String get amenitySelectQuantities =>
+      'Sélectionnez les articles et quantités';
+
+  @override
+  String get amenityPillowCount => 'Nombre d\'oreillers';
+
+  @override
+  String get amenityOtherDetailsHint => 'Décrivez votre demande (optionnel)';
+
+  @override
+  String get amenityItemSoap => 'Savon';
+
+  @override
+  String get amenityItemShampoo => 'Shampooing';
+
+  @override
+  String get amenityItemToothpaste => 'Dentifrice';
+
+  @override
+  String get amenityItemToothbrush => 'Brosse à dents';
+
+  @override
+  String get amenityItemComb => 'Peigne';
+
+  @override
+  String get amenityItemTowels => 'Serviettes';
+
+  @override
+  String get amenityItemPillow => 'Oreiller supplémentaire';
+
+  @override
+  String get amenityItemRazor => 'Rasoir';
+
+  @override
+  String get amenityItemShavingFoam => 'Mousse à raser';
+
+  @override
+  String get amenityItemAfterShave => 'Après-rasage';
+
+  @override
+  String get amenityItemBlades => 'Lames de rechange';
+
+  @override
   String get back => 'Retour';
 
   @override

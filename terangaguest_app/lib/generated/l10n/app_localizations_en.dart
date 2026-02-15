@@ -152,6 +152,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callCenter => 'Call Center';
 
   @override
+  String get servicesChambreLogistique => 'ROOM & LOGISTICS SERVICES';
+
+  @override
+  String get roomServiceRestauration => 'Room Service & Dining';
+
+  @override
+  String get roomServiceRestaurationDesc =>
+      'High-definition digital menu to order meals and drinks with real-time preparation tracking.';
+
+  @override
+  String get laundryDesc =>
+      'Interactive price list and immediate laundry pickup request.';
+
+  @override
+  String get amenitiesConcierge => 'Amenities & Concierge';
+
+  @override
+  String get amenitiesConciergeDesc =>
+      'Simplified request for toiletries, extra pillows, shaving kit or any other service without calling.';
+
+  @override
+  String get minibarIntelligent => 'Smart Mini-bar';
+
+  @override
+  String get minibarIntelligentDesc =>
+      'Digital inventory of products and simplified consumption declaration.';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get amenityToiletries => 'Toiletries';
+
+  @override
+  String get amenityPillows => 'Extra pillows';
+
+  @override
+  String get amenityShavingKit => 'Shaving kit';
+
+  @override
+  String get amenityOther => 'Other request';
+
+  @override
+  String get amenityDetailsHint => 'Specify if needed (optional)';
+
+  @override
+  String get amenitySelectQuantities => 'Select items and quantities';
+
+  @override
+  String get amenityPillowCount => 'Number of pillows';
+
+  @override
+  String get amenityOtherDetailsHint => 'Describe your request (optional)';
+
+  @override
+  String get amenityItemSoap => 'Soap';
+
+  @override
+  String get amenityItemShampoo => 'Shampoo';
+
+  @override
+  String get amenityItemToothpaste => 'Toothpaste';
+
+  @override
+  String get amenityItemToothbrush => 'Toothbrush';
+
+  @override
+  String get amenityItemComb => 'Comb';
+
+  @override
+  String get amenityItemTowels => 'Towels';
+
+  @override
+  String get amenityItemPillow => 'Extra pillow';
+
+  @override
+  String get amenityItemRazor => 'Razor';
+
+  @override
+  String get amenityItemShavingFoam => 'Shaving foam';
+
+  @override
+  String get amenityItemAfterShave => 'After-shave';
+
+  @override
+  String get amenityItemBlades => 'Razor blades';
+
+  @override
   String get back => 'Back';
 
   @override

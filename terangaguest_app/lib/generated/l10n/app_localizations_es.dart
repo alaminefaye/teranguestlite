@@ -153,6 +153,94 @@ class AppLocalizationsEs extends AppLocalizations {
   String get callCenter => 'Centro de llamadas';
 
   @override
+  String get servicesChambreLogistique => 'SERVICIOS EN HABITACIÓN Y LOGÍSTICA';
+
+  @override
+  String get roomServiceRestauration => 'Room Service y Restauración';
+
+  @override
+  String get roomServiceRestaurationDesc =>
+      'Menú digital en alta definición para pedir comidas y bebidas con seguimiento en tiempo real de la preparación.';
+
+  @override
+  String get laundryDesc =>
+      'Tarifa interactiva y solicitud inmediata de recogida de ropa.';
+
+  @override
+  String get amenitiesConcierge => 'Amenidades y Conserjería';
+
+  @override
+  String get amenitiesConciergeDesc =>
+      'Solicitud simplificada de artículos de tocador, almohadas extra, kit de afeitado o cualquier otro servicio sin llamar.';
+
+  @override
+  String get minibarIntelligent => 'Minibar Inteligente';
+
+  @override
+  String get minibarIntelligentDesc =>
+      'Inventario digital de productos y declaración simplificada de consumiciones.';
+
+  @override
+  String get comingSoon => 'Próximamente';
+
+  @override
+  String get amenityToiletries => 'Artículos de tocador';
+
+  @override
+  String get amenityPillows => 'Almohadas adicionales';
+
+  @override
+  String get amenityShavingKit => 'Kit de afeitado';
+
+  @override
+  String get amenityOther => 'Otra solicitud';
+
+  @override
+  String get amenityDetailsHint => 'Especifique si desea (opcional)';
+
+  @override
+  String get amenitySelectQuantities => 'Seleccione artículos y cantidades';
+
+  @override
+  String get amenityPillowCount => 'Número de almohadas';
+
+  @override
+  String get amenityOtherDetailsHint => 'Describa su solicitud (opcional)';
+
+  @override
+  String get amenityItemSoap => 'Jabón';
+
+  @override
+  String get amenityItemShampoo => 'Champú';
+
+  @override
+  String get amenityItemToothpaste => 'Pasta de dientes';
+
+  @override
+  String get amenityItemToothbrush => 'Cepillo de dientes';
+
+  @override
+  String get amenityItemComb => 'Peine';
+
+  @override
+  String get amenityItemTowels => 'Toallas';
+
+  @override
+  String get amenityItemPillow => 'Almohada adicional';
+
+  @override
+  String get amenityItemRazor => 'Maquinilla de afeitar';
+
+  @override
+  String get amenityItemShavingFoam => 'Espuma de afeitar';
+
+  @override
+  String get amenityItemAfterShave => 'Loción aftershave';
+
+  @override
+  String get amenityItemBlades => 'Cuchillas de repuesto';
+
+  @override
   String get back => 'Volver';
 
   @override

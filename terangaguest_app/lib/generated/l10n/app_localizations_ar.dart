@@ -152,6 +152,93 @@ class AppLocalizationsAr extends AppLocalizations {
   String get callCenter => 'مركز الاتصالات';
 
   @override
+  String get servicesChambreLogistique => 'خدمات الغرفة واللوجستيات';
+
+  @override
+  String get roomServiceRestauration => 'خدمة الغرفة والمطعم';
+
+  @override
+  String get roomServiceRestaurationDesc =>
+      'قائمة رقمية عالية الوضوح لطلب الوجبات والمشروبات مع متابعة التحضير في الوقت الفعلي.';
+
+  @override
+  String get laundryDesc => 'قائمة أسعار تفاعلية وطلب استلام فوري للملابس.';
+
+  @override
+  String get amenitiesConcierge => 'المرافق والكونسيرج';
+
+  @override
+  String get amenitiesConciergeDesc =>
+      'طلب مبسط لمستلزمات الحمام، وسائد إضافية، طقم حلاقة أو أي خدمة أخرى دون الاتصال.';
+
+  @override
+  String get minibarIntelligent => 'ميني بار ذكي';
+
+  @override
+  String get minibarIntelligentDesc =>
+      'جرد رقمي للمنتجات وإعلان مبسط للاستهلاك.';
+
+  @override
+  String get comingSoon => 'قريباً';
+
+  @override
+  String get amenityToiletries => 'مستلزمات الحمام';
+
+  @override
+  String get amenityPillows => 'وسائد إضافية';
+
+  @override
+  String get amenityShavingKit => 'طقم حلاقة';
+
+  @override
+  String get amenityOther => 'طلب آخر';
+
+  @override
+  String get amenityDetailsHint => 'حدد إن لزم (اختياري)';
+
+  @override
+  String get amenitySelectQuantities => 'اختر المنتجات والكميات';
+
+  @override
+  String get amenityPillowCount => 'عدد الوسائد';
+
+  @override
+  String get amenityOtherDetailsHint => 'صف طلبك (اختياري)';
+
+  @override
+  String get amenityItemSoap => 'صابون';
+
+  @override
+  String get amenityItemShampoo => 'شامبو';
+
+  @override
+  String get amenityItemToothpaste => 'معجون أسنان';
+
+  @override
+  String get amenityItemToothbrush => 'فرشاة أسنان';
+
+  @override
+  String get amenityItemComb => 'مشط';
+
+  @override
+  String get amenityItemTowels => 'مناشف';
+
+  @override
+  String get amenityItemPillow => 'وسادة إضافية';
+
+  @override
+  String get amenityItemRazor => 'ماكينة حلاقة';
+
+  @override
+  String get amenityItemShavingFoam => 'رغوة حلاقة';
+
+  @override
+  String get amenityItemAfterShave => 'لوشن بعد الحلاقة';
+
+  @override
+  String get amenityItemBlades => 'شفرة حلاقة';
+
+  @override
   String get back => 'رجوع';
 
   @override

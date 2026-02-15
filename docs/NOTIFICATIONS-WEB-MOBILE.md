@@ -4,6 +4,20 @@ Ce document recense **tous les dossiers, fichiers et paramétrages** liés aux n
 
 ---
 
+## Statut – Marche, envoi et paramétrage (en place)
+
+| Élément | Statut | Détail |
+|--------|--------|--------|
+| **Paramétrage** | OK | Credentials Firebase (JSON), `.env` (FIREBASE_CREDENTIALS, FIREBASE_PROJECT_ID), FirebaseServiceProvider, migration `fcm_token` sur `users`. |
+| **Enregistrement token** | OK | App : `FcmService.registerTokenIfNeeded()` après connexion ; API `POST /api/fcm-token`. Suppression à la déconnexion `DELETE /api/fcm-token`. |
+| **Envoi (backend)** | OK | `FirebaseNotificationService` : envoi via HTTP API (OAuth2) + fallback stockage en base pour polling. |
+| **Déclencheurs** | OK | Nouvelle commande (Room Service, Palace, Session tablette) ; changement statut commande (Dashboard) ; confirmation résa (Restaurant, Spa, Excursion) ; demandes Blanchisserie / Palace. |
+| **Destinataire** | OK | Par chambre : `getUserForRoom(room_id)` → user guest avec `room_id`/`room_number` et `fcm_token` renseigné. |
+
+**Limitation connue** : sur certains hébergements (ex. O2Switch), le proxy peut supprimer le header `Authorization` vers FCM → 401. Dans ce cas les notifications sont stockées pour **polling in-app**. Voir `FIREBASE-CONFIGURATION.md` (section 401).
+
+---
+
 ## Processus – Envoi et réception des notifications
 
 ### 1. Configuration initiale (une fois)

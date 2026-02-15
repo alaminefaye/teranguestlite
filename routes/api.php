@@ -121,6 +121,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-laundry-requests', [LaundryServiceController::class, 'myRequests']);
     
     // ==========================================
+    // AMENITIES & CONCIERGERIE (catégories + articles dynamiques)
+    // ==========================================
+    Route::get('/amenity-categories', [\App\Http\Controllers\Api\AmenityCategoryController::class, 'index']);
+
+    // ==========================================
     // SERVICES PALACE
     // ==========================================
     Route::prefix('palace-services')->group(function () {
