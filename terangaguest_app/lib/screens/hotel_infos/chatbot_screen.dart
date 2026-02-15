@@ -203,11 +203,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                             itemBuilder: (context, index) {
                               final msg = _messages[index];
                               final isMe = msg.senderType == 'guest';
-                              return _buildMessageBubble(context, msg, isMe);
+                              final guestName = user?.name.trim();
+                              return _buildMessageBubble(
+                                context,
+                                msg,
+                                isMe,
+                                guestName?.isNotEmpty == true
+                                    ? guestName!
+                                    : 'Vous',
+                              );
                             },
                           ),
                         ),
-                      _buildInputBar(context, user?.name ?? 'You'),
+                      _buildInputBar(context, user?.name ?? 'Vous'),
                     ],
                   ),
                 ),
@@ -223,7 +231,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     BuildContext context,
     ChatMessage message,
     bool isMe,
+    String guestDisplayName,
   ) {
+    final authorLabel = isMe ? guestDisplayName : 'Assistant de l’hôtel';
     final time = DateFormat.Hm().format(message.createdAt.toLocal());
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -241,15 +251,35 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: isMe
+                    ? Colors.white.withValues(alpha: 0.9)
+                    : Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                authorLabel,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isMe ? AppTheme.primaryDark : Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
             if (message.content != null && message.content!.isNotEmpty)
               Text(
                 message.content!,
                 style: TextStyle(
                   color: isMe ? AppTheme.primaryDark : Colors.white,
-                  fontSize: 15,
+                  fontSize: 18,
                   height: 1.3,
                 ),
               ),
@@ -261,8 +291,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 style: TextStyle(
                   color: isMe
                       ? AppTheme.primaryDark.withValues(alpha: 0.8)
-                      : AppTheme.textGray,
-                  fontSize: 11,
+                      : Colors.white.withValues(alpha: 0.8),
+                  fontSize: 13,
                 ),
               ),
             ),
