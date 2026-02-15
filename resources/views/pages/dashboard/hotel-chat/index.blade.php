@@ -34,7 +34,10 @@
                     </div>
                     <div class="flex items-center gap-3">
                         @if($last)
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $last->format('d/m H:i') }}</span>
+                            @php
+                                $lastDate = $last instanceof \Illuminate\Support\Carbon ? $last : \Illuminate\Support\Carbon::parse($last);
+                            @endphp
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $lastDate->format('d/m H:i') }}</span>
                         @endif
                         @if($unread > 0)
                             <span class="inline-flex min-w-[2rem] justify-center rounded-full bg-error-500 px-2 py-1 text-xs font-semibold text-white">
@@ -51,4 +54,3 @@
     </div>
 @endif
 @endsection
-

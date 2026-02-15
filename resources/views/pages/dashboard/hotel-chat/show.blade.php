@@ -35,7 +35,7 @@
         </span>
     </div>
 
-    <div class="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+    <div class="mb-4 max-h-[55vh] space-y-3 overflow-y-auto pr-1">
         @forelse($messages as $message)
             @php
                 $isGuest = $message->sender_type === 'guest';
@@ -62,6 +62,33 @@
             </div>
         @endforelse
     </div>
+
+    <form action="{{ route('dashboard.hotel-chat.reply', $conversation) }}" method="POST" class="space-y-3">
+        @csrf
+        <div>
+            <label for="content" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Répondre à l'invité
+            </label>
+            <textarea
+                id="content"
+                name="content"
+                rows="3"
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                placeholder="Écrire une réponse au client..."
+            >{{ old('content') }}</textarea>
+            @error('content')
+                <p class="mt-1 text-xs text-error-500">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="flex items-center justify-end gap-3">
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-theme-xs hover:bg-brand-600 focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+            >
+                Envoyer
+            </button>
+        </div>
+    </form>
 </div>
 @endsection
-

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\HotelConversation;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ChatController extends Controller
@@ -57,5 +58,32 @@ class ChatController extends Controller
             'messages' => $messages,
         ]);
     }
-}
 
+    public function reply(Request $request, HotelConversation $conversation): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($conversation->enterprise_id !== $user->enterprise_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $conversation->messages()->create([
+            'sender_id' => $user->id,
+            'sender_type' => 'staff',
+            'message_type' => 'text',
+            'content' => $validated['content'],
+        ]);
+
+        $conversation->last_message_at = now();
+        $conversation->status = $conversation->status ?: 'open';
+        $conversation->save();
+
+        return redirect()
+            ->route('dashboard.hotel-chat.show', $conversation)
+            ->with('status', 'Message envoyé.');
+    }
+}

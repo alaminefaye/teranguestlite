@@ -122,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
         // Chat invités (messages de la tablette)
         Route::get('hotel-chat', [\App\Http\Controllers\Dashboard\ChatController::class, 'index'])->name('hotel-chat.index');
         Route::get('hotel-chat/{conversation}', [\App\Http\Controllers\Dashboard\ChatController::class, 'show'])->name('hotel-chat.show');
+        Route::post('hotel-chat/{conversation}/reply', [\App\Http\Controllers\Dashboard\ChatController::class, 'reply'])->name('hotel-chat.reply');
 
         // Accès tablettes : comptes "Client Chambre XXX" (User role=guest) — gérant de l'hôtel
         Route::get('tablet-accesses', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'index'])->name('tablet-accesses.index');
