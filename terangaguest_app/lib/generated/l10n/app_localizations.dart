@@ -372,6 +372,12 @@ abstract class AppLocalizations {
   /// **'Golf & Tennis'**
   String get golfTennisTitle;
 
+  /// No description provided for @golfTennisSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation Tee-time, courts et location de matériel'**
+  String get golfTennisSubtitle;
+
   /// No description provided for @golfTennisTeetime.
   ///
   /// In fr, this message translates to:
@@ -395,6 +401,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sport & Fitness'**
   String get sportFitnessTitle;
+
+  /// No description provided for @sportFitnessSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Horaires de la salle et réservation de coach personnel'**
+  String get sportFitnessSubtitle;
 
   /// No description provided for @sportFitnessGymHours.
   ///

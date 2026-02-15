@@ -139,44 +139,39 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
 
   Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
         children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  HapticHelper.lightImpact();
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.accentGold),
-              ),
-              Expanded(
-                child: Text(
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+            onPressed: () {
+              HapticHelper.lightImpact();
+              Navigator.of(context).pop();
+            },
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
                   l10n.wellnessSportLeisure,
-                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.accentGold,
-                    letterSpacing: 0.5,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-              const SizedBox(width: 48),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text(
-              l10n.wellnessSportLeisureSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppTheme.textGray,
-                height: 1.3,
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.wellnessSportLeisureSubtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

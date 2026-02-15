@@ -36,6 +36,9 @@ class LeisureSeeder extends Seeder
             $sportChildren = [
                 ['name' => 'Golf & Tennis', 'description' => 'Réservation Tee-time, courts de tennis et location de matériel.', 'type' => 'golf_tennis', 'display_order' => 0],
                 ['name' => 'Sport & Fitness', 'description' => 'Horaires de la salle et réservation de coach personnel.', 'type' => 'fitness', 'display_order' => 1],
+                ['name' => 'Piscine', 'description' => 'Accès piscine et créneaux nage.', 'type' => 'other', 'display_order' => 2],
+                ['name' => 'Yoga & Pilates', 'description' => 'Cours et séances yoga, pilates.', 'type' => 'other', 'display_order' => 3],
+                ['name' => 'Running & VTT', 'description' => 'Parcours running et VTT, location de matériel.', 'type' => 'other', 'display_order' => 4],
             ];
             foreach ($sportChildren as $data) {
                 LeisureCategory::create([

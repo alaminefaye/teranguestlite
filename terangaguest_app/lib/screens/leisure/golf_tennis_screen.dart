@@ -237,29 +237,41 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
 
   Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: const EdgeInsets.all(20.0),
       child: Row(
         children: [
           IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () {
               HapticHelper.lightImpact();
               Navigator.of(context).pop();
             },
-            icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.accentGold),
           ),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              l10n.golfTennisTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppTheme.accentGold,
-                letterSpacing: 0.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.golfTennisTitle,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.golfTennisSubtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textGray,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 48),
         ],
       ),
     );

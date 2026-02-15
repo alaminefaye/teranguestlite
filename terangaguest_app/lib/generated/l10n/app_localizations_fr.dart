@@ -146,6 +146,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get golfTennisTitle => 'Golf & Tennis';
 
   @override
+  String get golfTennisSubtitle =>
+      'Réservation Tee-time, courts et location de matériel';
+
+  @override
   String get golfTennisTeetime => 'Réservation Tee-time';
 
   @override
@@ -156,6 +160,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sportFitnessTitle => 'Sport & Fitness';
+
+  @override
+  String get sportFitnessSubtitle =>
+      'Horaires de la salle et réservation de coach personnel';
 
   @override
   String get sportFitnessGymHours => 'Horaires de la salle de sport';

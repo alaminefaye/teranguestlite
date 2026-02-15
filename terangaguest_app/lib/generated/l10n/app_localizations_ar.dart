@@ -146,6 +146,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get golfTennisTitle => 'غولف وتنس';
 
   @override
+  String get golfTennisSubtitle => 'حجز تي-تايم والم courts واستئجار المعدات';
+
+  @override
   String get golfTennisTeetime => 'حجز تي-تايم';
 
   @override
@@ -156,6 +159,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sportFitnessTitle => 'الرياضة واللياقة';
+
+  @override
+  String get sportFitnessSubtitle => 'ساعات القاعة وحجز مدرب شخصي';
 
   @override
   String get sportFitnessGymHours => 'ساعات القاعة الرياضية';
