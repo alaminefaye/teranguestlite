@@ -127,15 +127,31 @@
                 'xl:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
                 'ml-0': $store.sidebar.isMobileOpen
             }">
-            <!-- app header start -->
             @include('layouts.app-header')
-            <!-- app header end -->
             <main class="w-full min-w-0 p-4 md:p-6">
                 @yield('content')
             </main>
         </div>
 
     </div>
+
+    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'staff'))
+        @php $count = $unreadChatCount ?? 0; @endphp
+        <a href="{{ route('dashboard.hotel-chat.index') }}"
+           class="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-lg hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+            <div class="relative flex h-14 w-14 items-center justify-center">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 10h8M8 14h5M5 5h14a2 2 0 012 2v9a2 2 0 01-2 2H9l-4 4v-4H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                </svg>
+                @if($count > 0)
+                    <span class="absolute -top-1 -right-1 flex min-h-[1.5rem] min-w-[1.5rem] items-center justify-center rounded-full bg-error-500 px-1 text-xs font-bold">
+                        {{ $count > 99 ? '99+' : $count }}
+                    </span>
+                @endif
+            </div>
+        </a>
+    @endif
 
 </body>
 

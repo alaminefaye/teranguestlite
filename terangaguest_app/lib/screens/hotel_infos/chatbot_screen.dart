@@ -48,7 +48,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = e.toString();
+        _error =
+            'Impossible de charger la discussion pour le moment.\n'
+            'Merci de vérifier la connexion internet ou de réessayer plus tard.';
       });
     }
   }
@@ -75,8 +77,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         _sending = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
+        const SnackBar(
+          content: Text(
+            'Impossible d’envoyer le message.\n'
+            'Merci de vérifier la connexion internet ou de réessayer plus tard.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -115,7 +120,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -137,7 +145,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           ),
                           Text(
                             l10n.chatbotDesc,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -149,7 +160,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppTheme.primaryBlue.withValues(alpha: 0.4),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -157,7 +170,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         const Expanded(
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.accentGold,
+                              ),
                             ),
                           ),
                         )
@@ -168,7 +183,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                               padding: const EdgeInsets.all(24),
                               child: Text(
                                 _error!,
-                                style: const TextStyle(color: AppTheme.textGray),
+                                style: const TextStyle(
+                                  color: AppTheme.textGray,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -178,7 +195,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         Expanded(
                           child: ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             itemCount: _messages.length,
                             itemBuilder: (context, index) {
                               final msg = _messages[index];
@@ -199,7 +219,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
-  Widget _buildMessageBubble(BuildContext context, ChatMessage message, bool isMe) {
+  Widget _buildMessageBubble(
+    BuildContext context,
+    ChatMessage message,
+    bool isMe,
+  ) {
     final time = DateFormat.Hm().format(message.createdAt.toLocal());
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -208,7 +232,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 480),
         decoration: BoxDecoration(
-          color: isMe ? AppTheme.accentGold : AppTheme.primaryBlue.withValues(alpha: 0.8),
+          color: isMe
+              ? AppTheme.accentGold
+              : AppTheme.primaryBlue.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(16).copyWith(
             bottomLeft: Radius.circular(isMe ? 16 : 4),
             bottomRight: Radius.circular(isMe ? 4 : 16),
@@ -233,7 +259,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               child: Text(
                 time,
                 style: TextStyle(
-                  color: isMe ? AppTheme.primaryDark.withValues(alpha: 0.8) : AppTheme.textGray,
+                  color: isMe
+                      ? AppTheme.primaryDark.withValues(alpha: 0.8)
+                      : AppTheme.textGray,
                   fontSize: 11,
                 ),
               ),
@@ -258,7 +286,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.primaryDark.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: TextField(
                   controller: _controller,
@@ -267,7 +297,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: l10n.chatbotDesc,
-                    hintStyle: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+                    hintStyle: const TextStyle(
+                      color: AppTheme.textGray,
+                      fontSize: 14,
+                    ),
                     border: InputBorder.none,
                   ),
                   onSubmitted: (_) => _sendMessage(),
