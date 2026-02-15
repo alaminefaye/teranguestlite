@@ -57,7 +57,30 @@
                     <div class="{{ $authorClasses }}">
                         {{ $authorLabel }}
                     </div>
-                    @if($message->content)
+                    @if($message->message_type === 'image' && isset($message->metadata['url']))
+                        <div class="mt-2">
+                            <a href="{{ $message->metadata['url'] }}" target="_blank" class="block">
+                                <img
+                                    src="{{ $message->metadata['url'] }}"
+                                    alt="Image envoyée par le client"
+                                    class="max-h-64 w-full rounded-xl object-cover"
+                                >
+                            </a>
+                            @if($message->content)
+                                <div class="mt-1 text-sm">{{ $message->content }}</div>
+                            @endif
+                        </div>
+                    @elseif($message->message_type === 'audio' && isset($message->metadata['url']))
+                        <div class="mt-2 space-y-1">
+                            @if($message->content)
+                                <div class="text-sm">{{ $message->content }}</div>
+                            @endif
+                            <audio controls class="w-full">
+                                <source src="{{ $message->metadata['url'] }}" type="{{ $message->metadata['mime_type'] ?? 'audio/mpeg' }}">
+                                Votre navigateur ne supporte pas la lecture audio.
+                            </audio>
+                        </div>
+                    @elseif($message->content)
                         <div class="mt-0.5">{{ $message->content }}</div>
                     @endif
                     <div class="mt-1 {{ $metaClasses }}">

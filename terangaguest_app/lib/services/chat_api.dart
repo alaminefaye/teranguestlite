@@ -48,4 +48,46 @@ class ChatApi {
       throw Exception('Erreur inattendue lors de l’envoi du message.');
     }
   }
+
+  Future<ChatMessage> sendMediaMessage({
+    required String filePath,
+    required String fileName,
+    required String messageType,
+    String? content,
+    int? durationSeconds,
+  }) async {
+    try {
+      final Map<String, dynamic> payload = {'message_type': messageType};
+
+      if (content != null && content.trim().isNotEmpty) {
+        payload['content'] = content.trim();
+      }
+
+      if (durationSeconds != null && durationSeconds > 0) {
+        payload['duration'] = durationSeconds;
+      }
+
+      payload['file'] = await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      );
+
+      final formData = FormData.fromMap(payload);
+
+      final response = await _api.post('/chat/messages', data: formData);
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] != true) {
+        throw Exception(
+          data['message'] ?? 'Erreur lors de l’envoi du message.',
+        );
+      }
+      return ChatMessage.fromJson(data['data'] as Map<String, dynamic>);
+    } on DioException {
+      throw Exception(
+        'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
+      );
+    } catch (_) {
+      throw Exception('Erreur inattendue lors de l’envoi du message.');
+    }
+  }
 }

@@ -55,9 +55,27 @@ class ChatController extends Controller
     {
         $user = $request->user();
 
-        $validated = $request->validate([
-            'content' => ['required', 'string', 'max:2000'],
-        ]);
+        $messageType = $request->input('message_type', 'text');
+
+        $rules = [
+            'message_type' => ['nullable', 'string', 'in:text,image,audio'],
+            'duration' => ['nullable', 'integer', 'min:1', 'max:3600'],
+        ];
+
+        if ($messageType === 'text' || $messageType === null) {
+            $rules['content'] = ['required', 'string', 'max:2000'];
+            $rules['file'] = ['nullable', 'file'];
+        } else {
+            $rules['content'] = ['nullable', 'string', 'max:2000'];
+            $rules['file'] = [
+                'required',
+                'file',
+                'max:10240',
+                'mimetypes:image/jpeg,image/png,image/webp,image/heic,audio/mpeg,audio/mp4,audio/x-m4a,audio/aac,audio/wav,audio/ogg',
+            ];
+        }
+
+        $validated = $request->validate($rules);
 
         $conversation = HotelConversation::firstOrCreate(
             [
@@ -70,11 +88,37 @@ class ChatController extends Controller
             ]
         );
 
+        $type = $validated['message_type'] ?? 'text';
+        $metadata = null;
+        $content = $validated['content'] ?? null;
+
+        if ($type === 'image' || $type === 'audio') {
+            $uploadedFile = $request->file('file');
+
+            if ($uploadedFile) {
+                $path = $uploadedFile->store('hotel-chat', 'public');
+                $url = asset('storage/' . $path);
+
+                $metadata = [
+                    'url' => $url,
+                    'path' => $path,
+                    'original_name' => $uploadedFile->getClientOriginalName(),
+                    'mime_type' => $uploadedFile->getClientMimeType(),
+                    'size' => $uploadedFile->getSize(),
+                ];
+
+                if ($type === 'audio' && isset($validated['duration'])) {
+                    $metadata['duration'] = (int) $validated['duration'];
+                }
+            }
+        }
+
         $message = $conversation->messages()->create([
             'sender_id' => $user->id,
             'sender_type' => 'guest',
-            'message_type' => 'text',
-            'content' => $validated['content'],
+            'message_type' => $type,
+            'content' => $content,
+            'metadata' => $metadata,
         ]);
 
         $conversation->last_message_at = now();
@@ -94,4 +138,3 @@ class ChatController extends Controller
         ], 201);
     }
 }
-

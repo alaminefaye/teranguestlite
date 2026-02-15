@@ -49,6 +49,10 @@
 	<string>Cette application a besoin de votre localisation pour afficher la météo locale.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Cette application a besoin de votre localisation pour afficher la météo locale.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cette application a besoin d’accéder à vos photos pour envoyer des images au personnel de l’hôtel.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Cette application a besoin d’accéder au microphone pour permettre l’envoi de messages vocaux au personnel de l’hôtel.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

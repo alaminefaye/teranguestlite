@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -80,6 +82,96 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         const SnackBar(
           content: Text(
             'Impossible d’envoyer le message.\n'
+            'Merci de vérifier la connexion internet ou de réessayer plus tard.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickAndSendImage() async {
+    if (_sending) return;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.single;
+    final path = file.path;
+    if (path == null) return;
+
+    HapticHelper.lightImpact();
+    setState(() {
+      _sending = true;
+    });
+
+    try {
+      final msg = await _api.sendMediaMessage(
+        filePath: path,
+        fileName: file.name,
+        messageType: 'image',
+      );
+      if (!mounted) return;
+      setState(() {
+        _messages.add(msg);
+        _sending = false;
+      });
+      _scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _sending = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Impossible d’envoyer le média.\n'
+            'Merci de vérifier la connexion internet ou de réessayer plus tard.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickAndSendAudio() async {
+    if (_sending) return;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+      allowMultiple: false,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.single;
+    final path = file.path;
+    if (path == null) return;
+
+    HapticHelper.lightImpact();
+    setState(() {
+      _sending = true;
+    });
+
+    try {
+      final msg = await _api.sendMediaMessage(
+        filePath: path,
+        fileName: file.name,
+        messageType: 'audio',
+      );
+      if (!mounted) return;
+      setState(() {
+        _messages.add(msg);
+        _sending = false;
+      });
+      _scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _sending = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Impossible d’envoyer le message vocal.\n'
             'Merci de vérifier la connexion internet ou de réessayer plus tard.',
           ),
           backgroundColor: Colors.red,
@@ -274,15 +366,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            if (message.content != null && message.content!.isNotEmpty)
-              Text(
-                message.content!,
-                style: TextStyle(
-                  color: isMe ? AppTheme.primaryDark : Colors.white,
-                  fontSize: 18,
-                  height: 1.3,
-                ),
-              ),
+            _buildMessageContent(message, isMe),
             const SizedBox(height: 4),
             Align(
               alignment: Alignment.bottomRight,
@@ -302,6 +386,129 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
+  Widget _buildMessageContent(ChatMessage message, bool isMe) {
+    if (message.messageType == 'image') {
+      final imageUrl = message.metadata?['url'] as String?;
+      if (imageUrl == null || imageUrl.isEmpty) {
+        if (message.content != null && message.content!.isNotEmpty) {
+          return Text(
+            message.content!,
+            style: TextStyle(
+              color: isMe ? AppTheme.primaryDark : Colors.white,
+              fontSize: 18,
+              height: 1.3,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }
+      return Column(
+        crossAxisAlignment: isMe
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => _openMediaUrl(imageUrl),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(imageUrl, width: 260, fit: BoxFit.cover),
+            ),
+          ),
+          if (message.content != null && message.content!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                message.content!,
+                style: TextStyle(
+                  color: isMe ? AppTheme.primaryDark : Colors.white,
+                  fontSize: 16,
+                  height: 1.3,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    if (message.messageType == 'audio') {
+      final audioUrl = message.metadata?['url'] as String?;
+      final durationSeconds = message.metadata?['duration'] as int?;
+      final label = durationSeconds != null && durationSeconds > 0
+          ? 'Message vocal (${_formatDuration(durationSeconds)})'
+          : 'Message vocal';
+
+      if (audioUrl == null || audioUrl.isEmpty) {
+        return Text(
+          label,
+          style: TextStyle(
+            color: isMe ? AppTheme.primaryDark : Colors.white,
+            fontSize: 16,
+          ),
+        );
+      }
+
+      return InkWell(
+        onTap: () => _openMediaUrl(audioUrl),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: isMe
+                ? AppTheme.primaryDark.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.play_arrow_rounded,
+                color: isMe ? AppTheme.primaryDark : Colors.white,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isMe ? AppTheme.primaryDark : Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (message.content != null && message.content!.isNotEmpty) {
+      return Text(
+        message.content!,
+        style: TextStyle(
+          color: isMe ? AppTheme.primaryDark : Colors.white,
+          fontSize: 18,
+          height: 1.3,
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Future<void> _openMediaUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return;
+    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  String _formatDuration(int seconds) {
+    final clamped = seconds < 0 ? 0 : seconds;
+    final minutes = clamped ~/ 60;
+    final remainingSeconds = clamped % 60;
+    final twoDigits = remainingSeconds.toString().padLeft(2, '0');
+    return '$minutes:$twoDigits';
+  }
+
   Widget _buildInputBar(BuildContext context, String displayName) {
     final l10n = AppLocalizations.of(context);
     return SafeArea(
@@ -310,6 +517,26 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         child: Row(
           children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: _sending ? null : _pickAndSendImage,
+                  icon: Icon(
+                    Icons.photo_outlined,
+                    color: _sending ? AppTheme.textGray : AppTheme.accentGold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _sending ? null : _pickAndSendAudio,
+                  icon: Icon(
+                    Icons.mic_none_rounded,
+                    color: _sending ? AppTheme.textGray : AppTheme.accentGold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 4),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
