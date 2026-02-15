@@ -55,6 +55,8 @@ class LeisureSeeder extends Seeder
                 ['name' => 'Running & VTT', 'description' => 'Parcours running et VTT, location de matériel.', 'type' => 'other', 'display_order' => 7],
                 ['name' => 'Beach Volley', 'description' => 'Réservation du terrain et créneaux beach volley.', 'type' => 'other', 'display_order' => 8],
                 ['name' => 'Cours collectifs', 'description' => 'Cours de groupe : stretching, cardio, renforcement.', 'type' => 'other', 'display_order' => 9],
+                ['name' => 'Terrain de foot', 'description' => 'Réservation du terrain de football.', 'type' => 'other', 'display_order' => 10],
+                ['name' => 'Terrain de basket', 'description' => 'Réservation du terrain de basket-ball.', 'type' => 'other', 'display_order' => 11],
             ];
             foreach ($sportChildren as $data) {
                 LeisureCategory::withoutGlobalScope('enterprise')->firstOrCreate(

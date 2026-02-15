@@ -50,6 +50,8 @@ class LeisureSubListScreen extends StatelessWidget {
     if (n.contains('cours collectifs') || n.contains('groupe')) return Icons.groups_outlined;
     if (n.contains('hammam') || n.contains('sauna')) return Icons.thermostat_outlined;
     if (n.contains('excursion') || n.contains('découverte')) return Icons.explore_outlined;
+    if (n.contains('foot') || n.contains('football')) return Icons.sports_soccer_outlined;
+    if (n.contains('basket')) return Icons.sports_basketball_outlined;
     return Icons.directions_run_outlined;
   }
 
