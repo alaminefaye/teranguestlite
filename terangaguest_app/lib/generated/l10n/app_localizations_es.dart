@@ -238,6 +238,76 @@ class AppLocalizationsEs extends AppLocalizations {
   String get callCenter => 'Centro de llamadas';
 
   @override
+  String get hotelInfosSecurity => 'HOTEL INFOS & SÉCURITÉ';
+
+  @override
+  String get hotelInfosSecuritySubtitle =>
+      'Livret d\'accueil, assistance urgence et chatbot';
+
+  @override
+  String get hotelInfos => 'Hôtel Infos';
+
+  @override
+  String get hotelInfosDesc => 'Wi-Fi, plans, règlement et infos pratiques';
+
+  @override
+  String get assistanceEmergency => 'Assistance & Urgence';
+
+  @override
+  String get assistanceEmergencyDesc =>
+      'Médecin ou urgence sécurité (chambre identifiée)';
+
+  @override
+  String get chatbotMultilingual => 'Chatbot IA Multilingue';
+
+  @override
+  String get chatbotDesc => 'Assistant digital 24/7';
+
+  @override
+  String get wifiCode => 'Code Wi-Fi';
+
+  @override
+  String get wifiPassword => 'Mot de passe Wi-Fi';
+
+  @override
+  String get houseRules => 'Règlement intérieur';
+
+  @override
+  String get practicalInfo => 'Informations pratiques';
+
+  @override
+  String get requestDoctor => 'Solliciter un médecin';
+
+  @override
+  String get reportSecurityEmergency => 'Signaler une urgence sécurité';
+
+  @override
+  String get roomLabel => 'Chambre';
+
+  @override
+  String get emergencyRequestSent =>
+      'Demande envoyée. L\'équipe va vous contacter.';
+
+  @override
+  String get noActiveStayForEmergency =>
+      'Un séjour actif est requis. Connectez-vous avec le compte de la chambre ou contactez la réception.';
+
+  @override
+  String get assistanceDoctorNotConfigured =>
+      'Le service Assistance médecin n\'est pas configuré pour cet établissement.';
+
+  @override
+  String get assistanceSecurityNotConfigured =>
+      'Le service Urgence sécurité n\'est pas configuré pour cet établissement.';
+
+  @override
+  String get chatbotComingSoon => 'Bientôt disponible';
+
+  @override
+  String get chatbotComingSoonHint =>
+      'Le chatbot multilingue sera disponible prochainement.';
+
+  @override
   String get servicesChambreLogistique => 'SERVICIOS EN HABITACIÓN Y LOGÍSTICA';
 
   @override

@@ -24,6 +24,7 @@ import '../restaurants/restaurants_list_screen.dart';
 import '../spa/spa_services_list_screen.dart';
 import '../exploration/exploration_mobility_screen.dart';
 import '../excursions/excursions_list_screen.dart';
+import '../hotel_infos/hotel_infos_security_screen.dart';
 import '../laundry/laundry_list_screen.dart';
 import '../palace/palace_list_screen.dart';
 
@@ -97,6 +98,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         break;
       case '/palace':
         context.navigateTo(const PalaceListScreen());
+        break;
+      case '/hotel-infos-security':
+        context.navigateTo(const HotelInfosSecurityScreen());
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -518,7 +522,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'title': l10n.wellnessSportLeisure, 'icon': Icons.spa_outlined, 'route': '/wellness-sport-leisure'},
       {'title': l10n.palaceServices, 'icon': Icons.auto_awesome_outlined, 'route': '/palace'},
       {'title': l10n.explorationMobility, 'icon': Icons.explore_outlined, 'route': '/exploration-mobility'},
-      {'title': l10n.callCenter, 'icon': Icons.phone_outlined, 'route': 'tel:'},
+      {'title': l10n.hotelInfosSecurity, 'icon': Icons.info_outline_rounded, 'route': '/hotel-infos-security'},
     ];
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);

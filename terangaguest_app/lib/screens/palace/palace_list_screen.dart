@@ -107,8 +107,10 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
           );
         }
 
-        // Ne pas afficher les services réservés à EXPLORATION & MOBILITÉ (Location, Transfert, Visites guidées)
-        final servicesForList = provider.services.where((s) => !s.isExplorationMobilityOnly).toList();
+        // Ne pas afficher les services réservés à EXPLORATION & MOBILITÉ ni Hotel Infos & Sécurité (médecin, urgence)
+        final servicesForList = provider.services
+            .where((s) => !s.isExplorationMobilityOnly && !s.isHotelSecurityOnly)
+            .toList();
 
         if (servicesForList.isEmpty) {
           final l10n = AppLocalizations.of(context);

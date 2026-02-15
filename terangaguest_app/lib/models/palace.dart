@@ -35,6 +35,12 @@ class PalaceService {
         lower.contains('location');
   }
 
+  /// True si le service est réservé au module Hotel Infos & Sécurité (médecin, urgence).
+  bool get isHotelSecurityOnly {
+    final lower = name.toLowerCase();
+    return lower.contains('médecin') || (lower.contains('urgence') && lower.contains('sécurité'));
+  }
+
   /// True si le service est réservé au module EXPLORATION & MOBILITÉ (ne pas afficher dans « Autres services »).
   bool get isExplorationMobilityOnly {
     final lower = name.toLowerCase();

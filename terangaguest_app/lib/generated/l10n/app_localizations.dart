@@ -540,6 +540,132 @@ abstract class AppLocalizations {
   /// **'Centre d\'Appels'**
   String get callCenter;
 
+  /// No description provided for @hotelInfosSecurity.
+  ///
+  /// In fr, this message translates to:
+  /// **'HOTEL INFOS & SÉCURITÉ'**
+  String get hotelInfosSecurity;
+
+  /// No description provided for @hotelInfosSecuritySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livret d\'accueil, assistance urgence et chatbot'**
+  String get hotelInfosSecuritySubtitle;
+
+  /// No description provided for @hotelInfos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hôtel Infos'**
+  String get hotelInfos;
+
+  /// No description provided for @hotelInfosDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wi-Fi, plans, règlement et infos pratiques'**
+  String get hotelInfosDesc;
+
+  /// No description provided for @assistanceEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistance & Urgence'**
+  String get assistanceEmergency;
+
+  /// No description provided for @assistanceEmergencyDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médecin ou urgence sécurité (chambre identifiée)'**
+  String get assistanceEmergencyDesc;
+
+  /// No description provided for @chatbotMultilingual.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chatbot IA Multilingue'**
+  String get chatbotMultilingual;
+
+  /// No description provided for @chatbotDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistant digital 24/7'**
+  String get chatbotDesc;
+
+  /// No description provided for @wifiCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code Wi-Fi'**
+  String get wifiCode;
+
+  /// No description provided for @wifiPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe Wi-Fi'**
+  String get wifiPassword;
+
+  /// No description provided for @houseRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règlement intérieur'**
+  String get houseRules;
+
+  /// No description provided for @practicalInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations pratiques'**
+  String get practicalInfo;
+
+  /// No description provided for @requestDoctor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solliciter un médecin'**
+  String get requestDoctor;
+
+  /// No description provided for @reportSecurityEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler une urgence sécurité'**
+  String get reportSecurityEmergency;
+
+  /// No description provided for @roomLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre'**
+  String get roomLabel;
+
+  /// No description provided for @emergencyRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée. L\'équipe va vous contacter.'**
+  String get emergencyRequestSent;
+
+  /// No description provided for @noActiveStayForEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un séjour actif est requis. Connectez-vous avec le compte de la chambre ou contactez la réception.'**
+  String get noActiveStayForEmergency;
+
+  /// No description provided for @assistanceDoctorNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le service Assistance médecin n\'est pas configuré pour cet établissement.'**
+  String get assistanceDoctorNotConfigured;
+
+  /// No description provided for @assistanceSecurityNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le service Urgence sécurité n\'est pas configuré pour cet établissement.'**
+  String get assistanceSecurityNotConfigured;
+
+  /// No description provided for @chatbotComingSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get chatbotComingSoon;
+
+  /// No description provided for @chatbotComingSoonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le chatbot multilingue sera disponible prochainement.'**
+  String get chatbotComingSoonHint;
+
   /// No description provided for @servicesChambreLogistique.
   ///
   /// In fr, this message translates to:

@@ -235,6 +235,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callCenter => 'Call Center';
 
   @override
+  String get hotelInfosSecurity => 'HOTEL INFOS & SECURITY';
+
+  @override
+  String get hotelInfosSecuritySubtitle =>
+      'Welcome booklet, emergency assistance and chatbot';
+
+  @override
+  String get hotelInfos => 'Hotel Infos';
+
+  @override
+  String get hotelInfosDesc => 'Wi-Fi, maps, house rules and practical info';
+
+  @override
+  String get assistanceEmergency => 'Assistance & Emergency';
+
+  @override
+  String get assistanceEmergencyDesc =>
+      'Request a doctor or report a security emergency (room identified)';
+
+  @override
+  String get chatbotMultilingual => 'Multilingual AI Chatbot';
+
+  @override
+  String get chatbotDesc => '24/7 digital assistant';
+
+  @override
+  String get wifiCode => 'Wi-Fi network';
+
+  @override
+  String get wifiPassword => 'Wi-Fi password';
+
+  @override
+  String get houseRules => 'House rules';
+
+  @override
+  String get practicalInfo => 'Practical information';
+
+  @override
+  String get requestDoctor => 'Request a doctor';
+
+  @override
+  String get reportSecurityEmergency => 'Report security emergency';
+
+  @override
+  String get roomLabel => 'Room';
+
+  @override
+  String get emergencyRequestSent => 'Request sent. The team will contact you.';
+
+  @override
+  String get noActiveStayForEmergency =>
+      'An active stay is required. Sign in with the room account or contact reception.';
+
+  @override
+  String get assistanceDoctorNotConfigured =>
+      'Doctor assistance service is not configured for this property.';
+
+  @override
+  String get assistanceSecurityNotConfigured =>
+      'Security emergency service is not configured for this property.';
+
+  @override
+  String get chatbotComingSoon => 'Coming soon';
+
+  @override
+  String get chatbotComingSoonHint =>
+      'The multilingual chatbot will be available soon.';
+
+  @override
   String get servicesChambreLogistique => 'ROOM & LOGISTICS SERVICES';
 
   @override

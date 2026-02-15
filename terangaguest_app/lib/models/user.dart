@@ -133,6 +133,50 @@ class User {
   }
 }
 
+/// Données livret d'accueil (Wi‑Fi, règlement, plan, infos pratiques).
+class HotelInfos {
+  final String wifiNetwork;
+  final String wifiPassword;
+  final String houseRules;
+  final String? mapUrl;
+  final String practicalInfo;
+
+  HotelInfos({
+    this.wifiNetwork = '',
+    this.wifiPassword = '',
+    this.houseRules = '',
+    this.mapUrl,
+    this.practicalInfo = '',
+  });
+
+  factory HotelInfos.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return HotelInfos();
+    return HotelInfos(
+      wifiNetwork: json['wifi_network'] as String? ?? '',
+      wifiPassword: json['wifi_password'] as String? ?? '',
+      houseRules: json['house_rules'] as String? ?? '',
+      mapUrl: json['map_url'] as String?,
+      practicalInfo: json['practical_info'] as String? ?? '',
+    );
+  }
+}
+
+/// Assistance & Urgence (médecin, sécurité).
+class EmergencySettings {
+  final bool doctorEnabled;
+  final bool securityEnabled;
+
+  EmergencySettings({this.doctorEnabled = true, this.securityEnabled = true});
+
+  factory EmergencySettings.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return EmergencySettings();
+    return EmergencySettings(
+      doctorEnabled: json['doctor_enabled'] as bool? ?? true,
+      securityEnabled: json['security_enabled'] as bool? ?? true,
+    );
+  }
+}
+
 // Classe pour l'entreprise dans User
 class Enterprise {
   final int id;
@@ -143,6 +187,9 @@ class Enterprise {
   /// Horaires de la salle de sport (affichés dans Sport & Fitness).
   final String? gymHours;
   final String? type;
+  final HotelInfos hotelInfos;
+  final EmergencySettings emergency;
+  final String? chatbotUrl;
 
   Enterprise({
     required this.id,
@@ -151,7 +198,11 @@ class Enterprise {
     this.coverPhoto,
     this.gymHours,
     this.type,
-  });
+    HotelInfos? hotelInfos,
+    EmergencySettings? emergency,
+    this.chatbotUrl,
+  })  : hotelInfos = hotelInfos ?? HotelInfos(),
+        emergency = emergency ?? EmergencySettings();
 
   factory Enterprise.fromJson(Map<String, dynamic> json) {
     return Enterprise(
@@ -161,6 +212,9 @@ class Enterprise {
       coverPhoto: json['cover_photo'] as String?,
       gymHours: json['gym_hours'] as String?,
       type: json['type'] as String?,
+      hotelInfos: HotelInfos.fromJson(json['hotel_infos'] as Map<String, dynamic>?),
+      emergency: EmergencySettings.fromJson(json['emergency'] as Map<String, dynamic>?),
+      chatbotUrl: json['chatbot_url'] as String?,
     );
   }
 
@@ -180,6 +234,18 @@ class Enterprise {
       'cover_photo': coverPhoto,
       'gym_hours': gymHours,
       'type': type,
+      'hotel_infos': {
+        'wifi_network': hotelInfos.wifiNetwork,
+        'wifi_password': hotelInfos.wifiPassword,
+        'house_rules': hotelInfos.houseRules,
+        'map_url': hotelInfos.mapUrl,
+        'practical_info': hotelInfos.practicalInfo,
+      },
+      'emergency': {
+        'doctor_enabled': emergency.doctorEnabled,
+        'security_enabled': emergency.securityEnabled,
+      },
+      'chatbot_url': chatbotUrl,
     };
   }
 }

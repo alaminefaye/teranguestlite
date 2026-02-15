@@ -74,6 +74,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'index'])->name('gym-hours.index');
         Route::put('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'update'])->name('gym-hours.update');
 
+        // Hotel Infos & Sécurité (livret d'accueil, assistance urgence, chatbot)
+        Route::get('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'index'])->name('hotel-infos-security.index');
+        Route::put('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'update'])->name('hotel-infos-security.update');
+
         // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
         Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
         Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');

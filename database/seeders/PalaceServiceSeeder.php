@@ -21,6 +21,8 @@ class PalaceServiceSeeder extends Seeder
             ['name' => 'Organisation Événement Privé', 'category' => 'vip', 'price' => null, 'price_on_request' => true, 'is_premium' => true],
             ['name' => 'Réservation Restaurant Externe', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
             ['name' => 'Visites guidées personnalisées', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
+            ['name' => 'Assistance médecin', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
+            ['name' => 'Urgence sécurité', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
         ];
 
         foreach ($services as $i => $data) {
