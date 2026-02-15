@@ -69,6 +69,15 @@ Route::middleware(['auth'])->group(function () {
         
         // Services Spa
         Route::resource('spa-services', \App\Http\Controllers\Dashboard\SpaServiceController::class);
+
+        // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
+        Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
+        Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');
+        Route::get('leisure-categories/{leisure_category}/subcategories/create', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'create'])->name('leisure-categories.subcategories.create');
+        Route::post('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'store'])->name('leisure-categories.subcategories.store');
+        Route::get('leisure-categories/{leisure_category}/subcategories/{subcategory}/edit', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'edit'])->name('leisure-categories.subcategories.edit');
+        Route::put('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'update'])->name('leisure-categories.subcategories.update');
+        Route::delete('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'destroy'])->name('leisure-categories.subcategories.destroy');
         
         // Blanchisserie
         Route::resource('laundry-services', \App\Http\Controllers\Dashboard\LaundryServiceController::class);

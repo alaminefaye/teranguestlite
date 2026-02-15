@@ -16,6 +16,7 @@ class Enterprise extends Model
         'email',
         'logo',
         'cover_photo',
+        'gym_hours',
         'city',
         'country',
         'status',

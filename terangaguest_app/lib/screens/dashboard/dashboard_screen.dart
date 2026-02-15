@@ -17,6 +17,7 @@ import '../../utils/layout_helper.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
 import '../services_chambre/room_and_logistics_screen.dart';
+import '../leisure/wellness_sport_leisure_screen.dart';
 import '../profile/profile_screen.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/restaurants_list_screen.dart';
@@ -77,6 +78,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         break;
       case '/restaurants':
         context.navigateTo(const RestaurantsListScreen());
+        break;
+      case '/wellness-sport-leisure':
+        context.navigateTo(const WellnessSportLeisureScreen());
         break;
       case '/spa':
         context.navigateTo(const SpaServicesListScreen());
@@ -507,7 +511,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final services = [
       {'title': l10n.servicesChambreLogistique, 'icon': Icons.room_service_outlined, 'route': '/services-chambre-logistique'},
       {'title': l10n.restaurantsBars, 'icon': Icons.restaurant_menu_outlined, 'route': '/restaurants'},
-      {'title': l10n.spaWellness, 'icon': Icons.spa_outlined, 'route': '/spa'},
+      {'title': l10n.wellnessSportLeisure, 'icon': Icons.spa_outlined, 'route': '/wellness-sport-leisure'},
       {'title': l10n.palaceServices, 'icon': Icons.auto_awesome_outlined, 'route': '/palace'},
       {'title': l10n.excursions, 'icon': Icons.terrain_outlined, 'route': '/excursions'},
       {'title': l10n.callCenter, 'icon': Icons.phone_outlined, 'route': 'tel:'},

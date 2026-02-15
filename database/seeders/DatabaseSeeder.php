@@ -63,7 +63,12 @@ class DatabaseSeeder extends Seeder
         $this->call(AmenitySeeder::class);
         echo "\n";
 
-        // 11. Créer les véhicules (location avec chauffeur)
+        // 11. Créer Bien-être, Sport & Loisirs (2 catégories principales + activités)
+        echo "🏃 Création des Bien-être, Sport & Loisirs (Sport, Loisirs + activités)...\n";
+        $this->call(LeisureSeeder::class);
+        echo "\n";
+
+        // 12. Créer les véhicules (location avec chauffeur)
         echo "🚗 Création des véhicules...\n";
         $this->call(VehicleSeeder::class);
         echo "\n";
@@ -81,6 +86,7 @@ class DatabaseSeeder extends Seeder
         echo "   - 40 Services Blanchisserie (8 par hôtel)\n";
         echo "   - 40 Services Palace (8 par hôtel)\n";
         echo "   - 20 Catégories Amenities (4 par hôtel) + articles\n";
+        echo "   - Bien-être/Sport/Loisirs : 2 principales (Sport, Loisirs) + 3 activités par hôtel\n";
         echo "   - 40 Véhicules (8 par hôtel)\n";
         echo "\n🎉 Base de données prête pour les tests !\n\n";
     }

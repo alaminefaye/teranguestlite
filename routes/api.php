@@ -126,6 +126,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/amenity-categories', [\App\Http\Controllers\Api\AmenityCategoryController::class, 'index']);
 
     // ==========================================
+    // BIEN-ÊTRE, SPORT & LOISIRS (Spa, Golf/Tennis, Fitness - dynamique)
+    // ==========================================
+    Route::get('/leisure-categories', [\App\Http\Controllers\Api\LeisureCategoryController::class, 'index']);
+
+    // ==========================================
     // SERVICES PALACE
     // ==========================================
     Route::prefix('palace-services')->group(function () {

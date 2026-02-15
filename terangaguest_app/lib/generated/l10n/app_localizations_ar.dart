@@ -137,6 +137,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get spaWellness => 'السبا والعافية';
 
   @override
+  String get wellnessSportLeisure => 'العافية والرياضة والترفيه';
+
+  @override
+  String get wellnessSportLeisureSubtitle => 'سبا، غولف، تنس، لياقة';
+
+  @override
+  String get golfTennisTitle => 'غولف وتنس';
+
+  @override
+  String get golfTennisTeetime => 'حجز تي-تايم';
+
+  @override
+  String get golfTennisCourt => 'ملعب تنس';
+
+  @override
+  String get golfTennisEquipment => 'استئجار معدات';
+
+  @override
+  String get sportFitnessTitle => 'الرياضة واللياقة';
+
+  @override
+  String get sportFitnessGymHours => 'ساعات القاعة الرياضية';
+
+  @override
+  String get sportFitnessBookCoach => 'حجز مدرب شخصي';
+
+  @override
+  String get gymHoursDefault => 'استفسر من الاستقبال عن الساعات.';
+
+  @override
   String get palaceServices => 'خدمات أخرى';
 
   @override

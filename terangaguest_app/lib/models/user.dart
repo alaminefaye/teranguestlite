@@ -140,6 +140,8 @@ class Enterprise {
   final String? logo;
   /// Image de couverture pour l'écran d'accueil (grande photo en fond).
   final String? coverPhoto;
+  /// Horaires de la salle de sport (affichés dans Sport & Fitness).
+  final String? gymHours;
   final String? type;
 
   Enterprise({
@@ -147,6 +149,7 @@ class Enterprise {
     required this.name,
     this.logo,
     this.coverPhoto,
+    this.gymHours,
     this.type,
   });
 
@@ -156,6 +159,7 @@ class Enterprise {
       name: json['name'] as String,
       logo: json['logo'] as String?,
       coverPhoto: json['cover_photo'] as String?,
+      gymHours: json['gym_hours'] as String?,
       type: json['type'] as String?,
     );
   }
@@ -174,6 +178,7 @@ class Enterprise {
       'name': name,
       'logo': logo,
       'cover_photo': coverPhoto,
+      'gym_hours': gymHours,
       'type': type,
     };
   }

@@ -354,6 +354,66 @@ abstract class AppLocalizations {
   /// **'Spa et Bien-être'**
   String get spaWellness;
 
+  /// No description provided for @wellnessSportLeisure.
+  ///
+  /// In fr, this message translates to:
+  /// **'BIEN-ÊTRE, SPORT & LOISIRS'**
+  String get wellnessSportLeisure;
+
+  /// No description provided for @wellnessSportLeisureSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spa, Golf, Tennis, Fitness'**
+  String get wellnessSportLeisureSubtitle;
+
+  /// No description provided for @golfTennisTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Golf & Tennis'**
+  String get golfTennisTitle;
+
+  /// No description provided for @golfTennisTeetime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation Tee-time'**
+  String get golfTennisTeetime;
+
+  /// No description provided for @golfTennisCourt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Court de tennis'**
+  String get golfTennisCourt;
+
+  /// No description provided for @golfTennisEquipment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location de matériel'**
+  String get golfTennisEquipment;
+
+  /// No description provided for @sportFitnessTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sport & Fitness'**
+  String get sportFitnessTitle;
+
+  /// No description provided for @sportFitnessGymHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Horaires de la salle de sport'**
+  String get sportFitnessGymHours;
+
+  /// No description provided for @sportFitnessBookCoach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réserver un coach personnel'**
+  String get sportFitnessBookCoach;
+
+  /// No description provided for @gymHoursDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Consultez la réception pour les horaires.'**
+  String get gymHoursDefault;
+
   /// No description provided for @palaceServices.
   ///
   /// In fr, this message translates to:

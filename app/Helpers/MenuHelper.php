@@ -135,6 +135,7 @@ class MenuHelper
                         'path' => '#',
                         'subItems' => [
                             ['name' => 'Spa & Bien-être', 'path' => '/dashboard/spa-services'],
+                            ['name' => 'Bien-être, Sport & Loisirs', 'path' => '/dashboard/leisure-categories'],
                             ['name' => 'Blanchisserie', 'path' => '/dashboard/laundry-services'],
                             ['name' => 'Amenities & Conciergerie', 'path' => '/dashboard/amenity-categories'],
                             ['name' => 'Services Palace', 'path' => '/dashboard/palace-services'],

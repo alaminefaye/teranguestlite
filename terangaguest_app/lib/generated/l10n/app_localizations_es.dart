@@ -138,6 +138,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get spaWellness => 'Spa y Bienestar';
 
   @override
+  String get wellnessSportLeisure => 'BIENESTAR, DEPORTE Y OCIO';
+
+  @override
+  String get wellnessSportLeisureSubtitle => 'Spa, Golf, Tenis, Fitness';
+
+  @override
+  String get golfTennisTitle => 'Golf y Tenis';
+
+  @override
+  String get golfTennisTeetime => 'Reserva Tee-time';
+
+  @override
+  String get golfTennisCourt => 'Pista de tenis';
+
+  @override
+  String get golfTennisEquipment => 'Alquiler de material';
+
+  @override
+  String get sportFitnessTitle => 'Deporte y Fitness';
+
+  @override
+  String get sportFitnessGymHours => 'Horario del gimnasio';
+
+  @override
+  String get sportFitnessBookCoach => 'Reservar un entrenador personal';
+
+  @override
+  String get gymHoursDefault => 'Consulte recepción para horarios.';
+
+  @override
   String get palaceServices => 'Otros servicios';
 
   @override
