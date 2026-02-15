@@ -145,7 +145,7 @@
                           d="M8 10h8M8 14h5M5 5h14a2 2 0 012 2v9a2 2 0 01-2 2H9l-4 4v-4H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                 </svg>
                 @if($count > 0)
-                    <span class="absolute -top-1 -right-1 flex min-h-[1.5rem] min-w-[1.5rem] items-center justify-center rounded-full bg-error-500 px-1 text-xs font-bold">
+                    <span class="absolute bottom-1 right-1 flex min-h-[1.5rem] min-w-[1.5rem] items-center justify-center rounded-full bg-error-500 px-1 text-xs font-bold">
                         {{ $count > 99 ? '99+' : $count }}
                     </span>
                 @endif
