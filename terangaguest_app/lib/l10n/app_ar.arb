@@ -236,6 +236,7 @@
   "preferredTimeOptional": "الوقت المفضل (اختياري)",
   "selectDateAndTime": "اختر التاريخ والوقت",
   "sendRequest": "إرسال الطلب",
+  "requestReservationHint": "أدخل التاريخ والوقت والتفاصيل في النموذج.",
   "requestSent": "تم إرسال الطلب!",
   "requestSentMessage": "تم تسجيل طلب الخدمة.",
   "confirmRequest": "تأكيد الطلب",

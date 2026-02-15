@@ -5,18 +5,22 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
+import '../../models/leisure_category.dart';
 import '../../models/palace.dart';
-/// Sport & Fitness : affichage des horaires de la salle + réservation d'un coach personnel.
-class SportFitnessScreen extends StatefulWidget {
-  const SportFitnessScreen({super.key});
+
+/// Écran générique pour toute activité loisir/sport (Squash, Piscine, Yoga, etc.) :
+/// une demande de réservation ou d'info (date, heure, précisions) envoyée au concierge (Palace).
+class LeisureRequestScreen extends StatefulWidget {
+  const LeisureRequestScreen({super.key, required this.activity});
+
+  final LeisureCategoryDto activity;
 
   @override
-  State<SportFitnessScreen> createState() => _SportFitnessScreenState();
+  State<LeisureRequestScreen> createState() => _LeisureRequestScreenState();
 }
 
-class _SportFitnessScreenState extends State<SportFitnessScreen> {
+class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +38,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
     return available.isNotEmpty ? available.first : null;
   }
 
-  void _onBookCoachTap(BuildContext context) {
+  void _openRequestDialog(BuildContext context) {
     HapticHelper.lightImpact();
     final l10n = AppLocalizations.of(context);
     final provider = context.read<PalaceProvider>();
@@ -65,8 +69,8 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
               side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
             ),
             title: Text(
-              l10n.sportFitnessBookCoach,
-              style: const TextStyle(color: AppTheme.accentGold),
+              '${widget.activity.name} - ${l10n.book}',
+              style: const TextStyle(color: AppTheme.accentGold, fontSize: 18),
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -110,7 +114,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: notesController,
-                    maxLines: 2,
+                    maxLines: 3,
                     decoration: InputDecoration(
                       hintText: l10n.describeRequest,
                       hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
@@ -133,7 +137,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
               ),
               FilledButton(
                 onPressed: () async {
-                  final parts = <String>['Sport & Fitness - Réservation coach personnel'];
+                  final parts = <String>['${widget.activity.name} - Demande'];
                   if (selectedDate != null) {
                     parts.add('Date: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}');
                   }
@@ -178,17 +182,12 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
           );
         },
       ),
-    ).then((_) => notesController.dispose());
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final user = context.watch<AuthProvider>().user;
-    final gymHours = user?.enterprise?.gymHours?.trim();
-    final gymHoursDisplay = (gymHours != null && gymHours.isNotEmpty)
-        ? gymHours
-        : l10n.gymHoursDefault;
 
     return Scaffold(
       body: Container(
@@ -198,17 +197,12 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(context, l10n),
+              _buildAppBar(context),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: LayoutHelper.horizontalPadding(context).copyWith(top: 20, bottom: 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildGymHoursCard(l10n.sportFitnessGymHours, gymHoursDisplay),
-                      const SizedBox(height: 20),
-                      _buildCoachCard(context, l10n),
-                    ],
+                child: Center(
+                  child: Padding(
+                    padding: LayoutHelper.horizontalPadding(context),
+                    child: _buildReservationCard(context, l10n),
                   ),
                 ),
               ),
@@ -219,56 +213,15 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
     );
   }
 
-  Widget _buildGymHoursCard(String title, String hoursText) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.6),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.schedule_outlined, color: AppTheme.accentGold, size: 24),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            hoursText,
-            style: const TextStyle(
-              fontSize: 15,
-              height: 1.45,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoachCard(BuildContext context, AppLocalizations l10n) {
+  Widget _buildReservationCard(BuildContext context, AppLocalizations l10n) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _onBookCoachTap(context),
+        onTap: () => _openRequestDialog(context),
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
           decoration: BoxDecoration(
             color: AppTheme.primaryDark.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(16),
@@ -278,31 +231,41 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
             ),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.fitness_center_outlined,
-                size: 44,
+                Icons.calendar_month_outlined,
+                size: 48,
                 color: AppTheme.accentGold,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
-                l10n.sportFitnessBookCoach,
-                textAlign: TextAlign.center,
+                l10n.book,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 8),
+              Text(
+                l10n.requestReservationHint,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textGray,
+                  height: 1.3,
+                ),
+              ),
+              const SizedBox(height: 20),
               FilledButton.icon(
-                onPressed: () => _onBookCoachTap(context),
-                icon: const Icon(Icons.calendar_today_outlined, size: 18),
-                label: Text(l10n.book),
+                onPressed: () => _openRequestDialog(context),
+                icon: const Icon(Icons.edit_calendar_outlined, size: 20),
+                label: Text(l10n.sendRequest),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.accentGold,
                   foregroundColor: AppTheme.primaryDark,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -315,7 +278,10 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
+  Widget _buildAppBar(BuildContext context) {
+    final hasDescription = widget.activity.description != null &&
+        widget.activity.description!.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -334,21 +300,25 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  l10n.sportFitnessTitle,
+                  widget.activity.name,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.sportFitnessSubtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textGray,
+                if (hasDescription) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.activity.description!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textGray,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                ],
               ],
             ),
           ),

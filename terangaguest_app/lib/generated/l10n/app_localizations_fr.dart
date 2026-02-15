@@ -718,6 +718,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sendRequest => 'Envoyer la demande';
 
   @override
+  String get requestReservationHint =>
+      'Indiquez la date, l\'heure et vos précisions dans le formulaire.';
+
+  @override
   String get requestSent => 'Demande envoyée !';
 
   @override

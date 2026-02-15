@@ -70,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
         // Services Spa
         Route::resource('spa-services', \App\Http\Controllers\Dashboard\SpaServiceController::class);
 
+        // Horaires salle de sport (établissement courant)
+        Route::get('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'index'])->name('gym-hours.index');
+        Route::put('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'update'])->name('gym-hours.update');
+
         // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
         Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
         Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');

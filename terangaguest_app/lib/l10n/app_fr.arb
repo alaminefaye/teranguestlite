@@ -236,6 +236,7 @@
   "preferredTimeOptional": "Heure souhaitée (optionnel)",
   "selectDateAndTime": "Sélectionner date et heure",
   "sendRequest": "Envoyer la demande",
+  "requestReservationHint": "Indiquez la date, l'heure et vos précisions dans le formulaire.",
   "requestSent": "Demande envoyée !",
   "requestSentMessage": "Votre demande de service a été enregistrée.",
   "confirmRequest": "Confirmer la demande",

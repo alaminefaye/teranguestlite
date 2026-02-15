@@ -698,6 +698,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendRequest => 'إرسال الطلب';
 
   @override
+  String get requestReservationHint =>
+      'أدخل التاريخ والوقت والتفاصيل في النموذج.';
+
+  @override
   String get requestSent => 'تم إرسال الطلب!';
 
   @override

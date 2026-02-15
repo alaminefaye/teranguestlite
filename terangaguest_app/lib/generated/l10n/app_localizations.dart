@@ -1440,6 +1440,12 @@ abstract class AppLocalizations {
   /// **'Envoyer la demande'**
   String get sendRequest;
 
+  /// No description provided for @requestReservationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez la date, l\'heure et vos précisions dans le formulaire.'**
+  String get requestReservationHint;
+
   /// No description provided for @requestSent.
   ///
   /// In fr, this message translates to:

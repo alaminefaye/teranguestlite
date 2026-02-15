@@ -236,6 +236,7 @@
   "preferredTimeOptional": "Preferred time (optional)",
   "selectDateAndTime": "Select date and time",
   "sendRequest": "Send request",
+  "requestReservationHint": "Enter date, time and details in the form.",
   "requestSent": "Request sent!",
   "requestSentMessage": "Your service request has been recorded.",
   "confirmRequest": "Confirm request",

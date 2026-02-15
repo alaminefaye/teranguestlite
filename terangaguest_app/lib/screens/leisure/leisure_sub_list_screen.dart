@@ -9,6 +9,7 @@ import '../../models/leisure_category.dart';
 import '../spa/spa_services_list_screen.dart';
 import 'golf_tennis_screen.dart';
 import 'sport_fitness_screen.dart';
+import 'leisure_request_screen.dart';
 
 /// Liste des activités d'une catégorie principale (Sport ou Loisirs).
 /// Données dynamiques : enfants de la catégorie principale.
@@ -20,8 +21,8 @@ class LeisureSubListScreen extends StatelessWidget {
 
   final LeisureMainCategoryDto mainCategory;
 
-  static IconData _iconForType(String type) {
-    switch (type) {
+  static IconData _iconForActivity(LeisureCategoryDto child) {
+    switch (child.type) {
       case 'spa':
         return Icons.spa_outlined;
       case 'golf':
@@ -30,14 +31,30 @@ class LeisureSubListScreen extends StatelessWidget {
         return Icons.sports_tennis_outlined;
       case 'fitness':
         return Icons.fitness_center_outlined;
+      case 'other':
+        return _iconForOtherByName(child.name);
       default:
-        return Icons.directions_run_outlined;
+        return _iconForOtherByName(child.name);
     }
+  }
+
+  static IconData _iconForOtherByName(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('squash')) return Icons.sports_tennis_outlined;
+    if (n.contains('piscine') || n.contains('pool')) return Icons.pool_outlined;
+    if (n.contains('yoga') || n.contains('pilates')) return Icons.self_improvement_outlined;
+    if (n.contains('aquagym') || n.contains('natation')) return Icons.pool_outlined;
+    if (n.contains('running')) return Icons.directions_run_outlined;
+    if (n.contains('vtt') || n.contains('vélo')) return Icons.directions_bike_outlined;
+    if (n.contains('beach') || n.contains('volley')) return Icons.sports_volleyball_outlined;
+    if (n.contains('cours collectifs') || n.contains('groupe')) return Icons.groups_outlined;
+    if (n.contains('hammam') || n.contains('sauna')) return Icons.thermostat_outlined;
+    if (n.contains('excursion') || n.contains('découverte')) return Icons.explore_outlined;
+    return Icons.directions_run_outlined;
   }
 
   void _onActivityTap(BuildContext context, LeisureCategoryDto child) {
     HapticHelper.lightImpact();
-    final l10n = AppLocalizations.of(context);
     if (child.type == 'spa') {
       context.navigateTo(const SpaServicesListScreen());
     } else if (child.type == 'golf' || child.type == 'golf_tennis') {
@@ -47,13 +64,7 @@ class LeisureSubListScreen extends StatelessWidget {
     } else if (child.type == 'fitness') {
       context.navigateTo(const SportFitnessScreen());
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.comingSoon),
-          backgroundColor: AppTheme.accentGold,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      context.navigateTo(LeisureRequestScreen(activity: child));
     }
   }
 
@@ -104,7 +115,7 @@ class LeisureSubListScreen extends StatelessWidget {
                             final child = children[index];
                             return ServiceCard(
                               title: child.name,
-                              icon: _iconForType(child.type),
+                              icon: _iconForActivity(child),
                               onTap: () => _onActivityTap(context, child),
                             );
                           },
