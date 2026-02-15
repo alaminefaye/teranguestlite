@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ExcursionController;
 use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\HotelAssistantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::get('/profile', [AuthController::class, 'profile']);
     });
+
+    Route::post('/assistant/chat', [HotelAssistantController::class, 'chat']);
     
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);

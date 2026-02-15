@@ -50,4 +50,11 @@ return [
             : (env('FIREBASE_CREDENTIALS') ? storage_path('app/firebase/' . basename(trim(env('FIREBASE_CREDENTIALS')))) : null),
     ],
 
+    'ai_chat' => [
+        'provider' => env('AI_CHAT_PROVIDER', 'external'),
+        'base_url' => env('AI_CHAT_BASE_URL'),
+        'api_key' => env('AI_CHAT_API_KEY'),
+        'model' => env('AI_CHAT_MODEL', 'gpt-4.1-mini'),
+    ],
+
 ];
