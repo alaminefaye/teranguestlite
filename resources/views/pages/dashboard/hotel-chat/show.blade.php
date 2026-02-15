@@ -42,13 +42,25 @@
                 $bubbleClasses = $isGuest
                     ? 'bg-brand-50 text-gray-800 dark:bg-brand-900/40 dark:text-white/90'
                     : 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900';
+                $authorLabel = $isGuest
+                    ? ($conversation->user?->name ?? 'Client')
+                    : ($message->sender_name ?? 'Assistant hôtel');
+                $authorClasses = $isGuest
+                    ? 'text-[11px] font-medium text-gray-600 dark:text-gray-200'
+                    : 'text-[11px] font-medium text-white/80 dark:text-gray-800';
+                $metaClasses = $isGuest
+                    ? 'text-xs text-gray-500 dark:text-gray-400'
+                    : 'text-xs text-gray-300 dark:text-gray-600';
             @endphp
             <div class="flex {{ $isGuest ? 'justify-start' : 'justify-end' }}">
                 <div class="max-w-xl rounded-2xl px-4 py-2 text-sm {{ $bubbleClasses }}">
+                    <div class="{{ $authorClasses }}">
+                        {{ $authorLabel }}
+                    </div>
                     @if($message->content)
-                        <div>{{ $message->content }}</div>
+                        <div class="mt-0.5">{{ $message->content }}</div>
                     @endif
-                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="mt-1 {{ $metaClasses }}">
                         {{ $message->created_at?->format('d/m H:i') }}
                         @if(!$isGuest && $message->read_at)
                             · Vu
