@@ -21,51 +21,23 @@ class FirebaseNotificationService
 
     public function __construct()
     {
+        $this->credentialsPath = config('services.firebase.credentials');
+        $this->projectId = config('services.firebase.project_id');
+
+        if ($this->credentialsPath && file_exists($this->credentialsPath)) {
+            $contents = @file_get_contents($this->credentialsPath);
+            $decoded = $contents ? json_decode($contents, true) : null;
+            if ($decoded && isset($decoded['project_id'])) {
+                $this->projectId = $this->projectId ?: $decoded['project_id'];
+            }
+        }
+
         try {
             $this->messaging = app('firebase.messaging');
-            $this->credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
-            $this->projectId = env('FIREBASE_PROJECT_ID');
-            
-            // If we have credentials, try to load project_id from them
-            if ($this->credentialsPath && file_exists($this->credentialsPath)) {
-                $contents = file_get_contents($this->credentialsPath);
-                $decoded = json_decode($contents, true);
-                if ($decoded && isset($decoded['project_id'])) {
-                    $this->projectId = $this->projectId ?: $decoded['project_id'];
-                }
-            }
         } catch (\Exception $e) {
             Log::error('FirebaseNotificationService constructor error: ' . $e->getMessage());
-            $this->credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
-            $this->projectId = env('FIREBASE_PROJECT_ID');
+            $this->messaging = null;
         }
-    }
-
-    /**
-     * Resolve the credentials file path
-     */
-    private function resolveCredentialsPath(?string $path): ?string
-    {
-        if ($path === null || $path === '') {
-            return null;
-        }
-
-        $path = trim($path);
-        if (realpath($path) !== false) {
-            return realpath($path);
-        }
-
-        $fromBase = base_path($path);
-        if (is_readable($fromBase)) {
-            return realpath($fromBase) ?: $fromBase;
-        }
-
-        $fromStorage = storage_path('app/firebase/' . basename($path));
-        if (is_readable($fromStorage)) {
-            return realpath($fromStorage) ?: $fromStorage;
-        }
-
-        return $fromBase;
     }
 
     /**

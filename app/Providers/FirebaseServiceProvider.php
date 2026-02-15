@@ -14,10 +14,10 @@ class FirebaseServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton('firebase', function ($app) {
-            $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+            $credentialsPath = config('services.firebase.credentials');
 
             if (! $credentialsPath || ! is_readable($credentialsPath)) {
-                $msg = 'Firebase credentials file not found or not readable. FIREBASE_CREDENTIALS=' . (env('FIREBASE_CREDENTIALS') ?? 'null') . ', base_path=' . base_path();
+                $msg = 'Firebase credentials file not found or not readable. FIREBASE_CREDENTIALS_PATH=' . (env('FIREBASE_CREDENTIALS_PATH') ?? 'null') . ', resolved=' . ($credentialsPath ?? 'null');
                 Log::error($msg);
                 throw new \Exception($msg);
             }
@@ -36,7 +36,7 @@ class FirebaseServiceProvider extends ServiceProvider
 
             $factory = (new Factory)->withServiceAccount($absolutePath);
 
-            $projectId = env('FIREBASE_PROJECT_ID') ?: ($decoded['project_id'] ?? null);
+            $projectId = config('services.firebase.project_id') ?: ($decoded['project_id'] ?? null);
             if ($projectId) {
                 $factory = $factory->withProjectId($projectId);
             }
@@ -47,33 +47,6 @@ class FirebaseServiceProvider extends ServiceProvider
         $this->app->singleton('firebase.messaging', function ($app) {
             return $app->make('firebase')->createMessaging();
         });
-    }
-
-    /**
-     * Resolve the credentials file path (absolute, or relative to base_path / storage/app/firebase).
-     */
-    private function resolveCredentialsPath(?string $path): ?string
-    {
-        if ($path === null || $path === '') {
-            return null;
-        }
-
-        $path = trim($path);
-        if (realpath($path) !== false) {
-            return realpath($path);
-        }
-
-        $fromBase = base_path($path);
-        if (is_readable($fromBase)) {
-            return realpath($fromBase) ?: $fromBase;
-        }
-
-        $fromStorage = storage_path('app/firebase/' . basename($path));
-        if (is_readable($fromStorage)) {
-            return realpath($fromStorage) ?: $fromStorage;
-        }
-
-        return $fromBase;
     }
 
     /**

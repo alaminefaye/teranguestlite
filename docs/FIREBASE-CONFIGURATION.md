@@ -365,24 +365,28 @@ public function update(Request $request, Order $order)
 
 ## 🛠️ VARIABLES D'ENVIRONNEMENT
 
+La configuration Firebase passe par **`config/services.php`** (comme dans le projet gestion-compagny). Les variables utilisées :
+
 ```env
-# Firebase Configuration
-# Chemin vers le fichier JSON du compte de service (depuis Firebase Console > Paramètres du projet > Comptes de service > Générer une nouvelle clé privée)
-FIREBASE_CREDENTIALS=storage/app/firebase/credentials.json
-FIREBASE_PROJECT_ID=terangaguest
+# Firebase (recommandé : chemin relatif à storage/)
+FIREBASE_CREDENTIALS_PATH=app/firebase/teranguest-74262-bad96dcbc8cd.json
+FIREBASE_PROJECT_ID=teranguest-74262
 ```
+
+- **FIREBASE_CREDENTIALS_PATH** : chemin **absolu** (ex. `/home/.../storage/app/firebase/xxx.json`) ou **relatif à `storage/`** (ex. `app/firebase/teranguest-74262-xxx.json`). Le fichier JSON est celui téléchargé depuis Firebase Console > Comptes de service > Générer une nouvelle clé privée.
+- **Fallback** : si `FIREBASE_CREDENTIALS_PATH` n’est pas défini, le projet utilise **FIREBASE_CREDENTIALS** (nom de fichier) et cherche dans `storage/app/firebase/<fichier>`.
 
 ### Erreur « Request is missing required authentication credential »
 
 Si les logs affichent cette erreur :
 
-1. **Fichier credentials** : Le JSON doit être celui téléchargé depuis **Firebase Console** > **Paramètres du projet** > **Comptes de service** > **Générer une nouvelle clé privée**. Il doit contenir au minimum `project_id`, `client_email`, `private_key`.
+1. **Fichier credentials** : Le JSON doit contenir au minimum `project_id`, `client_email`, `private_key`.
 
-2. **Emplacement** : Soit mettre le fichier à la racine du projet (ex. `teranguest-xxx.json`) et mettre `FIREBASE_CREDENTIALS=teranguest-xxx.json`, soit le placer dans `storage/app/firebase/` et utiliser le même nom dans `.env`.
+2. **Emplacement** : Placer le fichier dans `storage/app/firebase/` et définir `FIREBASE_CREDENTIALS_PATH=app/firebase/<nom_du_fichier>.json` (ou garder `FIREBASE_CREDENTIALS=<nom_du_fichier>.json` en fallback).
 
-3. **API activée** : Dans **Google Cloud Console** (même projet que Firebase) > **APIs & Services** > **Enabled APIs**, activer **« Firebase Cloud Messaging API »** (ou **Cloud Messaging API**).
+3. **API activée** : Dans **Google Cloud Console** > **APIs & Services** > **Enabled APIs**, activer **« Firebase Cloud Messaging API »**.
 
-4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir de `FIREBASE_CREDENTIALS` pour que les librairies Google utilisent le bon fichier.
+4. **GOOGLE_APPLICATION_CREDENTIALS** : Le provider définit automatiquement cette variable à partir du chemin résolu dans `config('services.firebase.credentials')`.
 
 **Contournement serveur** : L’application utilise un client FCM dédié et un envoi direct avec token OAuth2 en header. Si l’erreur persiste, vérifier que le serveur peut joindre `https://oauth2.googleapis.com` (pas de blocage sortant / pare-feu).
 

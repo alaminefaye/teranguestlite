@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    /*
+    | Firebase (notifications push FCM)
+    | Comme gestion-compagny : FIREBASE_CREDENTIALS_PATH = chemin absolu ou relatif à storage/
+    | Ex. .env : FIREBASE_CREDENTIALS_PATH=app/firebase/teranguest-74262-bad96dcbc8cd.json
+    | Ancienne variable FIREBASE_CREDENTIALS (nom de fichier) : storage/app/firebase/<fichier>
+    */
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'credentials' => env('FIREBASE_CREDENTIALS_PATH')
+            ? (str_starts_with(env('FIREBASE_CREDENTIALS_PATH'), '/')
+                ? env('FIREBASE_CREDENTIALS_PATH')
+                : storage_path(env('FIREBASE_CREDENTIALS_PATH')))
+            : (env('FIREBASE_CREDENTIALS') ? storage_path('app/firebase/' . basename(trim(env('FIREBASE_CREDENTIALS')))) : null),
+    ],
+
 ];

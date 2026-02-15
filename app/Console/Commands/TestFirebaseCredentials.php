@@ -27,12 +27,12 @@ class TestFirebaseCredentials extends Command
             return $this->testOAuthTokenGeneration();
         }
 
-        // Check credentials file
-        $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+        // Check credentials file (config comme gestion-compagny)
+        $credentialsPath = config('services.firebase.credentials');
         if (!$credentialsPath || !file_exists($credentialsPath)) {
             $this->error('Fichier de credentials Firebase non trouvé.');
-            $this->line('Chemin recherché: ' . env('FIREBASE_CREDENTIALS'));
-            $this->line('Vérifiez FIREBASE_CREDENTIALS dans .env et que le fichier existe (racine ou storage/app/firebase/).');
+            $this->line('Chemin configuré: ' . ($credentialsPath ?? 'null'));
+            $this->line('Vérifiez FIREBASE_CREDENTIALS_PATH dans .env (ex. app/firebase/teranguest-74262-xxx.json).');
             return 1;
         }
         $this->info('Credentials trouvés: ' . $credentialsPath);
@@ -112,9 +112,9 @@ class TestFirebaseCredentials extends Command
      */
     private function testOAuthTokenGeneration(): int
     {
-        $credentialsPath = $this->resolveCredentialsPath(env('FIREBASE_CREDENTIALS'));
+        $credentialsPath = config('services.firebase.credentials');
         if (!$credentialsPath || !file_exists($credentialsPath)) {
-            $this->error('Fichier de credentials non trouvé.');
+            $this->error('Fichier de credentials non trouvé. Vérifiez FIREBASE_CREDENTIALS_PATH dans .env.');
             return 1;
         }
 
@@ -170,33 +170,6 @@ class TestFirebaseCredentials extends Command
             $this->error('Response: ' . $response->body());
             return 1;
         }
-    }
-
-    /**
-     * Resolve the credentials file path
-     */
-    private function resolveCredentialsPath(?string $path): ?string
-    {
-        if ($path === null || $path === '') {
-            return null;
-        }
-
-        $path = trim($path);
-        if (realpath($path) !== false) {
-            return realpath($path);
-        }
-
-        $fromBase = base_path($path);
-        if (is_readable($fromBase)) {
-            return realpath($fromBase) ?: $fromBase;
-        }
-
-        $fromStorage = storage_path('app/firebase/' . basename($path));
-        if (is_readable($fromStorage)) {
-            return realpath($fromStorage) ?: $fromStorage;
-        }
-
-        return $fromBase;
     }
 
     /**
