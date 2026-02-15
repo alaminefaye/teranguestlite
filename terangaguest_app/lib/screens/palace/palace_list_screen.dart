@@ -107,7 +107,10 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
           );
         }
 
-        if (provider.services.isEmpty) {
+        // Ne pas afficher les services réservés à EXPLORATION & MOBILITÉ (Location, Transfert, Visites guidées)
+        final servicesForList = provider.services.where((s) => !s.isExplorationMobilityOnly).toList();
+
+        if (servicesForList.isEmpty) {
           final l10n = AppLocalizations.of(context);
           return EmptyStateWidget(
             icon: Icons.star_outline,
@@ -136,9 +139,9 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                   crossAxisSpacing: LayoutHelper.gridSpacing(context),
                   mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
-                itemCount: provider.services.length,
+                itemCount: servicesForList.length,
                 itemBuilder: (context, index) {
-                  final service = provider.services[index];
+                  final service = servicesForList[index];
                   return GestureDetector(
                     onTap: service.isAvailable
                         ? () {

@@ -20,12 +20,19 @@ class PalaceServiceSeeder extends Seeder
             ['name' => 'Majordome Personnel', 'category' => 'butler', 'price' => 100000, 'price_on_request' => false, 'is_premium' => true],
             ['name' => 'Organisation Événement Privé', 'category' => 'vip', 'price' => null, 'price_on_request' => true, 'is_premium' => true],
             ['name' => 'Réservation Restaurant Externe', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
+            ['name' => 'Visites guidées personnalisées', 'category' => 'concierge', 'price' => null, 'price_on_request' => true, 'is_premium' => false],
         ];
 
         foreach ($services as $i => $data) {
-            PalaceService::create(array_merge($data, ['enterprise_id' => $enterprise->id, 'display_order' => $i + 1, 'description' => 'Service de luxe pour votre confort.']));
+            PalaceService::firstOrCreate(
+                [
+                    'enterprise_id' => $enterprise->id,
+                    'name' => $data['name'],
+                ],
+                array_merge($data, ['display_order' => $i + 1, 'description' => 'Service de luxe pour votre confort.', 'status' => 'available'])
+            );
         }
-        
-        $this->command->info('✅ 6 services palace créés !');
+
+        $this->command->info('✅ Services palace (dont Exploration & Mobilité) créés !');
     }
 }

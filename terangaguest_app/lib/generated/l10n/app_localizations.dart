@@ -456,6 +456,66 @@ abstract class AppLocalizations {
   /// **'Autres services'**
   String get palaceServices;
 
+  /// No description provided for @explorationMobility.
+  ///
+  /// In fr, this message translates to:
+  /// **'EXPLORATION & MOBILITÉ'**
+  String get explorationMobility;
+
+  /// No description provided for @explorationMobilitySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location véhicule, découverte, visites guidées et transferts'**
+  String get explorationMobilitySubtitle;
+
+  /// No description provided for @vehicleRental.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location de Véhicule'**
+  String get vehicleRental;
+
+  /// No description provided for @vehicleRentalDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catalogue de véhicules (berlines, 4x4, citadines) avec réservation et options de confort.'**
+  String get vehicleRentalDesc;
+
+  /// No description provided for @sitesTouristiques.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découverte & Sites Touristiques'**
+  String get sitesTouristiques;
+
+  /// No description provided for @sitesTouristiquesDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieux incontournables : Lac Rose, Île de Gorée, Plateau… Photos et descriptifs.'**
+  String get sitesTouristiquesDesc;
+
+  /// No description provided for @guidedTours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visites Guidées Personnalisées'**
+  String get guidedTours;
+
+  /// No description provided for @guidedToursDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.'**
+  String get guidedToursDesc;
+
+  /// No description provided for @transfersVtc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transferts & VTC'**
+  String get transfersVtc;
+
+  /// No description provided for @transfersVtcDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navettes aéroport ou chauffeurs privés pour des trajets sécurisés.'**
+  String get transfersVtcDesc;
+
   /// No description provided for @excursions.
   ///
   /// In fr, this message translates to:
@@ -1943,6 +2003,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Annuler cette réservation ?'**
   String get cancelReservationConfirm;
+
+  /// No description provided for @vehicleRentalTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location de Véhicule'**
+  String get vehicleRentalTitle;
+
+  /// No description provided for @vehicleRentalSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un véhicule et envoyez votre demande de réservation.'**
+  String get vehicleRentalSubtitle;
+
+  /// No description provided for @noVehicleAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun véhicule disponible'**
+  String get noVehicleAvailable;
+
+  /// No description provided for @noVehicleAvailableHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les véhicules seront bientôt proposés par l\'établissement.'**
+  String get noVehicleAvailableHint;
+
+  /// No description provided for @requestVehicleRental.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander cette location'**
+  String get requestVehicleRental;
+
+  /// No description provided for @rentalDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date souhaitée'**
+  String get rentalDate;
+
+  /// No description provided for @rentalDuration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée (heures)'**
+  String get rentalDuration;
+
+  /// No description provided for @rentalDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre de jours'**
+  String get rentalDays;
+
+  /// No description provided for @guidedToursTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visites Guidées Personnalisées'**
+  String get guidedToursTitle;
+
+  /// No description provided for @guidedToursSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez la date, le type de circuit et le nombre de personnes.'**
+  String get guidedToursSubtitle;
+
+  /// No description provided for @tourType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de circuit'**
+  String get tourType;
+
+  /// No description provided for @tourTypeCultural.
+  ///
+  /// In fr, this message translates to:
+  /// **'Culturel'**
+  String get tourTypeCultural;
+
+  /// No description provided for @tourTypeGastronomic.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gastronomique'**
+  String get tourTypeGastronomic;
+
+  /// No description provided for @tourTypeHistorical.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get tourTypeHistorical;
+
+  /// No description provided for @transfersVtcTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transferts & VTC'**
+  String get transfersVtcTitle;
+
+  /// No description provided for @transfersVtcSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Navette aéroport ou chauffeur privé. Indiquez lieu de prise en charge et destination.'**
+  String get transfersVtcSubtitle;
+
+  /// No description provided for @pickupPlace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu de prise en charge'**
+  String get pickupPlace;
+
+  /// No description provided for @destinationPlace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Destination'**
+  String get destinationPlace;
+
+  /// No description provided for @sitesTouristiquesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découverte & Sites Touristiques'**
+  String get sitesTouristiquesTitle;
+
+  /// No description provided for @sitesTouristiquesSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vitrine des lieux incontournables avec photos et descriptifs.'**
+  String get sitesTouristiquesSubtitle;
+
+  /// No description provided for @filterVehicleType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get filterVehicleType;
+
+  /// No description provided for @filterMinSeats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Places min.'**
+  String get filterMinSeats;
+
+  /// No description provided for @vehicleTypeBerline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Berline'**
+  String get vehicleTypeBerline;
+
+  /// No description provided for @vehicleTypeSuv.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUV'**
+  String get vehicleTypeSuv;
+
+  /// No description provided for @vehicleTypeMinibus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minibus'**
+  String get vehicleTypeMinibus;
+
+  /// No description provided for @vehicleTypeVan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Van'**
+  String get vehicleTypeVan;
+
+  /// No description provided for @vehicleTypeOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get vehicleTypeOther;
 }
 
 class _AppLocalizationsDelegate

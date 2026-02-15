@@ -188,6 +188,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get palaceServices => 'Other services';
 
   @override
+  String get explorationMobility => 'EXPLORATION & MOBILITY';
+
+  @override
+  String get explorationMobilitySubtitle =>
+      'Vehicle rental, discovery, guided tours and transfers';
+
+  @override
+  String get vehicleRental => 'Vehicle Rental';
+
+  @override
+  String get vehicleRentalDesc =>
+      'Interactive catalog of vehicles (sedans, 4x4, city cars) with direct booking and comfort options.';
+
+  @override
+  String get sitesTouristiques => 'Discovery & Tourist Sites';
+
+  @override
+  String get sitesTouristiquesDesc =>
+      'Must-see places: Lac Rose, Gorée Island, Plateau… Photos and detailed descriptions.';
+
+  @override
+  String get guidedTours => 'Personalized Guided Tours';
+
+  @override
+  String get guidedToursDesc =>
+      'Book certified guides for cultural, gastronomic or historical tours.';
+
+  @override
+  String get transfersVtc => 'Transfers & Chauffeur';
+
+  @override
+  String get transfersVtcDesc =>
+      'Airport shuttles or private drivers for secure trips.';
+
+  @override
   String get excursions => 'Excursions';
 
   @override
@@ -983,4 +1018,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelReservationConfirm => 'Cancel this reservation?';
+
+  @override
+  String get vehicleRentalTitle => 'Vehicle Rental';
+
+  @override
+  String get vehicleRentalSubtitle =>
+      'Choose a vehicle and submit your rental request.';
+
+  @override
+  String get noVehicleAvailable => 'No vehicles available';
+
+  @override
+  String get noVehicleAvailableHint =>
+      'Vehicles will soon be offered by the establishment.';
+
+  @override
+  String get requestVehicleRental => 'Request this rental';
+
+  @override
+  String get rentalDate => 'Preferred date';
+
+  @override
+  String get rentalDuration => 'Duration (hours)';
+
+  @override
+  String get rentalDays => 'Number of days';
+
+  @override
+  String get guidedToursTitle => 'Personalized Guided Tours';
+
+  @override
+  String get guidedToursSubtitle =>
+      'Enter date, tour type and number of people.';
+
+  @override
+  String get tourType => 'Tour type';
+
+  @override
+  String get tourTypeCultural => 'Cultural';
+
+  @override
+  String get tourTypeGastronomic => 'Gastronomic';
+
+  @override
+  String get tourTypeHistorical => 'Historical';
+
+  @override
+  String get transfersVtcTitle => 'Transfers & Chauffeur';
+
+  @override
+  String get transfersVtcSubtitle =>
+      'Airport shuttle or private driver. Enter pickup and destination.';
+
+  @override
+  String get pickupPlace => 'Pickup location';
+
+  @override
+  String get destinationPlace => 'Destination';
+
+  @override
+  String get sitesTouristiquesTitle => 'Discovery & Tourist Sites';
+
+  @override
+  String get sitesTouristiquesSubtitle =>
+      'Showcase of must-see places with photos and descriptions.';
+
+  @override
+  String get filterVehicleType => 'Type';
+
+  @override
+  String get filterMinSeats => 'Min. seats';
+
+  @override
+  String get vehicleTypeBerline => 'Sedan';
+
+  @override
+  String get vehicleTypeSuv => 'SUV';
+
+  @override
+  String get vehicleTypeMinibus => 'Minibus';
+
+  @override
+  String get vehicleTypeVan => 'Van';
+
+  @override
+  String get vehicleTypeOther => 'Other';
 }

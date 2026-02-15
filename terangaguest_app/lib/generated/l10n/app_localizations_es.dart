@@ -191,6 +191,41 @@ class AppLocalizationsEs extends AppLocalizations {
   String get palaceServices => 'Otros servicios';
 
   @override
+  String get explorationMobility => 'EXPLORATION & MOBILITÉ';
+
+  @override
+  String get explorationMobilitySubtitle =>
+      'Location véhicule, découverte, visites guidées et transferts';
+
+  @override
+  String get vehicleRental => 'Location de Véhicule';
+
+  @override
+  String get vehicleRentalDesc =>
+      'Catalogue de véhicules (berlines, 4x4, citadines) avec réservation et options de confort.';
+
+  @override
+  String get sitesTouristiques => 'Découverte & Sites Touristiques';
+
+  @override
+  String get sitesTouristiquesDesc =>
+      'Lieux incontournables : Lac Rose, Île de Gorée, Plateau… Photos et descriptifs.';
+
+  @override
+  String get guidedTours => 'Visites Guidées Personnalisées';
+
+  @override
+  String get guidedToursDesc =>
+      'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.';
+
+  @override
+  String get transfersVtc => 'Transferts & VTC';
+
+  @override
+  String get transfersVtcDesc =>
+      'Navettes aéroport ou chauffeurs privés pour des trajets sécurisés.';
+
+  @override
   String get excursions => 'Excursiones';
 
   @override
@@ -991,4 +1026,90 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cancelReservationConfirm => '¿Cancelar esta reserva?';
+
+  @override
+  String get vehicleRentalTitle => 'Location de Véhicule';
+
+  @override
+  String get vehicleRentalSubtitle =>
+      'Choisissez un véhicule et envoyez votre demande de réservation.';
+
+  @override
+  String get noVehicleAvailable => 'Aucun véhicule disponible';
+
+  @override
+  String get noVehicleAvailableHint =>
+      'Les véhicules seront bientôt proposés par l\'établissement.';
+
+  @override
+  String get requestVehicleRental => 'Demander cette location';
+
+  @override
+  String get rentalDate => 'Date souhaitée';
+
+  @override
+  String get rentalDuration => 'Durée (heures)';
+
+  @override
+  String get rentalDays => 'Nombre de jours';
+
+  @override
+  String get guidedToursTitle => 'Visites Guidées Personnalisées';
+
+  @override
+  String get guidedToursSubtitle =>
+      'Indiquez la date, le type de circuit et le nombre de personnes.';
+
+  @override
+  String get tourType => 'Type de circuit';
+
+  @override
+  String get tourTypeCultural => 'Culturel';
+
+  @override
+  String get tourTypeGastronomic => 'Gastronomique';
+
+  @override
+  String get tourTypeHistorical => 'Historique';
+
+  @override
+  String get transfersVtcTitle => 'Transferts & VTC';
+
+  @override
+  String get transfersVtcSubtitle =>
+      'Navette aéroport ou chauffeur privé. Indiquez lieu de prise en charge et destination.';
+
+  @override
+  String get pickupPlace => 'Lieu de prise en charge';
+
+  @override
+  String get destinationPlace => 'Destination';
+
+  @override
+  String get sitesTouristiquesTitle => 'Découverte & Sites Touristiques';
+
+  @override
+  String get sitesTouristiquesSubtitle =>
+      'Vitrine des lieux incontournables avec photos et descriptifs.';
+
+  @override
+  String get filterVehicleType => 'Type';
+
+  @override
+  String get filterMinSeats => 'Places min.';
+
+  @override
+  String get vehicleTypeBerline => 'Berline';
+
+  @override
+  String get vehicleTypeSuv => 'SUV';
+
+  @override
+  String get vehicleTypeMinibus => 'Minibus';
+
+  @override
+  String get vehicleTypeVan => 'Van';
+
+  @override
+  String get vehicleTypeOther => 'Autre';
 }

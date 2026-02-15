@@ -35,6 +35,17 @@ class PalaceService {
         lower.contains('location');
   }
 
+  /// True si le service est réservé au module EXPLORATION & MOBILITÉ (ne pas afficher dans « Autres services »).
+  bool get isExplorationMobilityOnly {
+    final lower = name.toLowerCase();
+    return lower.contains('transfert') ||
+        lower.contains('vtc') ||
+        lower.contains('navette') ||
+        (lower.contains('location') && (lower.contains('voiture') || lower.contains('véhicule') || lower.contains('chauffeur'))) ||
+        lower.contains('visites guidées') ||
+        lower.contains('visite guidée');
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
