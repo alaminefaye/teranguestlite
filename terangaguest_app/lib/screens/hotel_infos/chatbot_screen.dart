@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -25,6 +26,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final List<ChatMessage> _messages = [];
   bool _loading = true;
   bool _sending = false;
+  bool _pickingMedia = false;
   String? _error;
 
   @override
@@ -91,11 +93,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _pickAndSendImage() async {
-    if (_sending) return;
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
+    if (_sending || _pickingMedia) return;
+    _pickingMedia = true;
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+    } on PlatformException catch (e) {
+      if (e.code == 'multiple_request') {
+        _pickingMedia = false;
+        return;
+      }
+      _pickingMedia = false;
+      rethrow;
+    }
+    _pickingMedia = false;
     if (result == null || result.files.isEmpty) return;
     final file = result.files.single;
     final path = file.path;
@@ -136,11 +150,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _pickAndSendAudio() async {
-    if (_sending) return;
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-      allowMultiple: false,
-    );
+    if (_sending || _pickingMedia) return;
+    _pickingMedia = true;
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.audio,
+        allowMultiple: false,
+      );
+    } on PlatformException catch (e) {
+      if (e.code == 'multiple_request') {
+        _pickingMedia = false;
+        return;
+      }
+      _pickingMedia = false;
+      rethrow;
+    }
+    _pickingMedia = false;
     if (result == null || result.files.isEmpty) return;
     final file = result.files.single;
     final path = file.path;

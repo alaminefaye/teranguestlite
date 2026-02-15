@@ -10,6 +10,7 @@ class User {
   final String? fcmToken;
   final Enterprise? enterprise;
   final DateTime? createdAt;
+
   /// True si l'utilisateur a un séjour actif (réservation de chambre) et peut faire des réservations (spa, restaurant, etc.)
   final bool canReserve;
 
@@ -166,13 +167,13 @@ class EmergencySettings {
   final bool doctorEnabled;
   final bool securityEnabled;
 
-  EmergencySettings({this.doctorEnabled = true, this.securityEnabled = true});
+  EmergencySettings({this.doctorEnabled = false, this.securityEnabled = false});
 
   factory EmergencySettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) return EmergencySettings();
     return EmergencySettings(
-      doctorEnabled: json['doctor_enabled'] as bool? ?? true,
-      securityEnabled: json['security_enabled'] as bool? ?? true,
+      doctorEnabled: json['doctor_enabled'] as bool? ?? false,
+      securityEnabled: json['security_enabled'] as bool? ?? false,
     );
   }
 }
@@ -182,8 +183,10 @@ class Enterprise {
   final int id;
   final String name;
   final String? logo;
+
   /// Image de couverture pour l'écran d'accueil (grande photo en fond).
   final String? coverPhoto;
+
   /// Horaires de la salle de sport (affichés dans Sport & Fitness).
   final String? gymHours;
   final String? type;
@@ -201,8 +204,8 @@ class Enterprise {
     HotelInfos? hotelInfos,
     EmergencySettings? emergency,
     this.chatbotUrl,
-  })  : hotelInfos = hotelInfos ?? HotelInfos(),
-        emergency = emergency ?? EmergencySettings();
+  }) : hotelInfos = hotelInfos ?? HotelInfos(),
+       emergency = emergency ?? EmergencySettings();
 
   factory Enterprise.fromJson(Map<String, dynamic> json) {
     return Enterprise(
@@ -212,8 +215,12 @@ class Enterprise {
       coverPhoto: json['cover_photo'] as String?,
       gymHours: json['gym_hours'] as String?,
       type: json['type'] as String?,
-      hotelInfos: HotelInfos.fromJson(json['hotel_infos'] as Map<String, dynamic>?),
-      emergency: EmergencySettings.fromJson(json['emergency'] as Map<String, dynamic>?),
+      hotelInfos: HotelInfos.fromJson(
+        json['hotel_infos'] as Map<String, dynamic>?,
+      ),
+      emergency: EmergencySettings.fromJson(
+        json['emergency'] as Map<String, dynamic>?,
+      ),
       chatbotUrl: json['chatbot_url'] as String?,
     );
   }

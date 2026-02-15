@@ -146,8 +146,8 @@ class Enterprise extends Model
     {
         $s = is_array($this->settings) ? ($this->settings['emergency'] ?? []) : [];
         return [
-            'doctor_enabled' => (bool) ($s['doctor_enabled'] ?? true),
-            'security_enabled' => (bool) ($s['security_enabled'] ?? true),
+            'doctor_enabled' => (bool) ($s['doctor_enabled'] ?? false),
+            'security_enabled' => (bool) ($s['security_enabled'] ?? false),
         ];
     }
 

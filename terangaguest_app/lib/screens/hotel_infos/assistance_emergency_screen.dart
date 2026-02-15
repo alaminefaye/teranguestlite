@@ -18,14 +18,51 @@ class AssistanceEmergencyScreen extends StatefulWidget {
 class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
   bool _sendingDoctor = false;
   bool _sendingSecurity = false;
+  String? _configError;
 
-  Future<int?> _findServiceId(String keyword) async {
+  Future<int?> _findDoctorServiceId() async {
     final api = PalaceApi();
     final services = await api.getPalaceServices();
     for (final s in services) {
-      if (s.name.toLowerCase().contains(keyword)) return s.id;
+      final name = (s.name ?? '').toLowerCase();
+      final normalized = _normalize(name);
+      if (name.contains('médecin') ||
+          normalized.contains('medecin') ||
+          name.contains('doctor') ||
+          name.contains('docteur')) {
+        return s.id;
+      }
     }
     return null;
+  }
+
+  Future<int?> _findSecurityServiceId() async {
+    final api = PalaceApi();
+    final services = await api.getPalaceServices();
+    for (final s in services) {
+      final name = (s.name ?? '').toLowerCase();
+      final normalized = _normalize(name);
+      if (name.contains('urgence') ||
+          normalized.contains('urgence') ||
+          name.contains('sécurité') ||
+          normalized.contains('securite') ||
+          name.contains('security') ||
+          name.contains('emergency')) {
+        return s.id;
+      }
+    }
+    return null;
+  }
+
+  String _normalize(String input) {
+    return input
+        .replaceAll('é', 'e')
+        .replaceAll('è', 'e')
+        .replaceAll('ê', 'e')
+        .replaceAll('à', 'a')
+        .replaceAll('â', 'a')
+        .replaceAll('ù', 'u')
+        .replaceAll('û', 'u');
   }
 
   Future<void> _sendRequest(String type) async {
@@ -47,10 +84,19 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     }
 
     if (type == 'doctor') {
-      final id = await _findServiceId('médecin');
+      final id = await _findDoctorServiceId();
       if (id == null) {
-        if (mounted) _showSnack(l10n.assistanceDoctorNotConfigured, isError: true);
+        if (mounted) {
+          setState(() {
+            _configError = l10n.assistanceDoctorNotConfigured;
+          });
+        }
         return;
+      }
+      if (mounted && _configError != null) {
+        setState(() {
+          _configError = null;
+        });
       }
       setState(() => _sendingDoctor = true);
       try {
@@ -68,10 +114,19 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
         if (mounted) setState(() => _sendingDoctor = false);
       }
     } else {
-      final id = await _findServiceId('urgence');
+      final id = await _findSecurityServiceId();
       if (id == null) {
-        if (mounted) _showSnack(l10n.assistanceSecurityNotConfigured, isError: true);
+        if (mounted) {
+          setState(() {
+            _configError = l10n.assistanceSecurityNotConfigured;
+          });
+        }
         return;
+      }
+      if (mounted && _configError != null) {
+        setState(() {
+          _configError = null;
+        });
       }
       setState(() => _sendingSecurity = true);
       try {
@@ -200,6 +255,41 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                             child: Text(
                               l10n.comingSoon,
                               style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      if (_configError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 24),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.red.withValues(alpha: 0.8),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.redAccent,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    _configError!,
+                                    style: const TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
