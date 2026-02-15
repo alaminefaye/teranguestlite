@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\HotelAssistantController;
+use App\Http\Controllers\Api\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/assistant/chat', [HotelAssistantController::class, 'chat']);
+
+    Route::get('/chat/messages', [ChatController::class, 'index']);
+    Route::post('/chat/messages', [ChatController::class, 'store']);
     
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);
