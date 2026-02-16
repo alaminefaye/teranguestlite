@@ -6,6 +6,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
+import '../../widgets/service_card.dart';
 
 /// Assistance & Urgence : boutons Médecin et Urgence sécurité (chambre identifiée).
 class AssistanceEmergencyScreen extends StatefulWidget {
@@ -232,35 +234,40 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  padding: LayoutHelper.horizontalPadding(
+                    context,
+                  ).copyWith(top: 16, bottom: 24),
                   child: Column(
                     children: [
                       if (doctorEnabled)
-                        _actionCard(
-                          context,
-                          icon: Icons.medical_services_outlined,
-                          title: l10n.requestDoctor,
-                          loading: _sendingDoctor,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            _sendRequest('doctor');
-                          },
+                        SizedBox(
+                          width: double.infinity,
+                          height: 150,
+                          child: ServiceCard(
+                            title: l10n.requestDoctor,
+                            icon: Icons.medical_services_outlined,
+                            onTap: _sendingDoctor
+                                ? () {}
+                                : () {
+                                    _confirmAndSend('doctor');
+                                  },
+                          ),
                         ),
                       if (doctorEnabled && securityEnabled)
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                       if (securityEnabled)
-                        _actionCard(
-                          context,
-                          icon: Icons.security_outlined,
-                          title: l10n.reportSecurityEmergency,
-                          loading: _sendingSecurity,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            _sendRequest('security');
-                          },
+                        SizedBox(
+                          width: double.infinity,
+                          height: 150,
+                          child: ServiceCard(
+                            title: l10n.reportSecurityEmergency,
+                            icon: Icons.security_outlined,
+                            onTap: _sendingSecurity
+                                ? () {}
+                                : () {
+                                    _confirmAndSend('security');
+                                  },
+                          ),
                         ),
                       if (!doctorEnabled && !securityEnabled)
                         Center(
@@ -321,62 +328,101 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     );
   }
 
-  Widget _actionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required bool loading,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: loading ? null : onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppTheme.accentGold.withValues(alpha: 0.5),
+  Future<void> _confirmAndSend(String type) async {
+    final l10n = AppLocalizations.of(context);
+    final user = context.read<AuthProvider>().user;
+    final room = user?.roomNumber;
+    final name = user?.name ?? 'Client';
+    final actionLabel = type == 'doctor'
+        ? l10n.requestDoctor
+        : l10n.reportSecurityEmergency;
+
+    final buffer = StringBuffer()
+      ..write('Vous êtes sur le point de ')
+      ..write(actionLabel.toLowerCase())
+      ..write(' pour ')
+      ..write(name);
+    if (room != null && room.isNotEmpty) {
+      buffer.write(' (chambre $room)');
+    }
+    buffer.write(
+      '. Cette action enverra immédiatement une alerte au personnel de l’hôtel.',
+    );
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            'Confirmer la demande ?',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: AppTheme.accentGold, size: 40),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+          content: Text(
+            buffer.toString(),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 15,
+              height: 1.4,
+            ),
+          ),
+          actionsPadding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: 12,
+            top: 4,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text(
+                'Annuler',
+                style: TextStyle(
+                  color: AppTheme.textGray,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              if (loading)
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppTheme.accentGold,
-                    ),
-                  ),
-                )
-              else
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppTheme.accentGold,
-                  size: 18,
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentGold,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
                 ),
-            ],
-          ),
-        ),
-      ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text(
+                'Confirmer',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
     );
+
+    if (confirmed == true && mounted) {
+      HapticHelper.lightImpact();
+      await _sendRequest(type);
+    }
   }
 }
