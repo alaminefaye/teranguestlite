@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Enterprise;
-use App\Models\PalaceService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -19,9 +17,14 @@ class HotelInfosSecurityController extends Controller
             abort(404, 'Établissement non trouvé.');
         }
 
+        $palaceServices = $enterprise->palaceServices()
+            ->orderBy('name')
+            ->get();
+
         return view('pages.dashboard.hotel-infos-security.edit', [
             'title' => 'Hotel Infos & Sécurité',
             'enterprise' => $enterprise,
+            'palaceServices' => $palaceServices,
         ]);
     }
 
@@ -40,6 +43,8 @@ class HotelInfosSecurityController extends Controller
             'practical_info' => 'nullable|string|max:5000',
             'doctor_enabled' => 'nullable|boolean',
             'security_enabled' => 'nullable|boolean',
+            'doctor_service_id' => 'nullable|integer',
+            'security_service_id' => 'nullable|integer',
             'chatbot_url' => 'nullable|url|max:500',
         ]);
 
@@ -62,89 +67,14 @@ class HotelInfosSecurityController extends Controller
         $settings['emergency'] = [
             'doctor_enabled' => $request->boolean('doctor_enabled', true),
             'security_enabled' => $request->boolean('security_enabled', true),
+            'doctor_service_id' => $request->input('doctor_service_id') ?: null,
+            'security_service_id' => $request->input('security_service_id') ?: null,
         ];
         $settings['chatbot_url'] = $request->input('chatbot_url') ? trim($request->input('chatbot_url')) : null;
 
         $enterprise->update(['settings' => $settings]);
 
-        $this->syncEmergencyPalaceServices($enterprise, $settings['emergency']);
-
         return redirect()->route('dashboard.hotel-infos-security.index')
             ->with('success', 'Hotel Infos & Sécurité enregistrés.');
-    }
-
-    private function syncEmergencyPalaceServices(Enterprise $enterprise, array $emergency): void
-    {
-        $doctorEnabled = (bool) ($emergency['doctor_enabled'] ?? false);
-        $securityEnabled = (bool) ($emergency['security_enabled'] ?? false);
-
-        $doctorService = PalaceService::where('enterprise_id', $enterprise->id)
-            ->where(function ($q) {
-                $q->where('category', 'concierge')
-                  ->orWhereNull('category');
-            })
-            ->where(function ($q) {
-                $q->where('name', 'like', '%médecin%')
-                  ->orWhere('name', 'like', '%medecin%')
-                  ->orWhere('name', 'like', '%doctor%')
-                  ->orWhere('name', 'like', '%docteur%');
-            })
-            ->first();
-
-        if ($doctorEnabled) {
-            if (!$doctorService) {
-                PalaceService::create([
-                    'enterprise_id' => $enterprise->id,
-                    'name' => 'Assistance médecin',
-                    'category' => 'concierge',
-                    'description' => 'Assistance médicale pour les clients de l’hôtel.',
-                    'image' => null,
-                    'price' => 0,
-                    'price_on_request' => true,
-                    'status' => 'available',
-                    'is_premium' => false,
-                    'display_order' => 0,
-                ]);
-            } else {
-                $doctorService->update(['status' => 'available']);
-            }
-        } elseif ($doctorService) {
-            $doctorService->update(['status' => 'unavailable']);
-        }
-
-        $securityService = PalaceService::where('enterprise_id', $enterprise->id)
-            ->where(function ($q) {
-                $q->where('category', 'concierge')
-                  ->orWhereNull('category');
-            })
-            ->where(function ($q) {
-                $q->where('name', 'like', '%urgence%')
-                  ->orWhere('name', 'like', '%sécurité%')
-                  ->orWhere('name', 'like', '%securite%')
-                  ->orWhere('name', 'like', '%security%')
-                  ->orWhere('name', 'like', '%emergency%');
-            })
-            ->first();
-
-        if ($securityEnabled) {
-            if (!$securityService) {
-                PalaceService::create([
-                    'enterprise_id' => $enterprise->id,
-                    'name' => 'Urgence sécurité',
-                    'category' => 'concierge',
-                    'description' => 'Urgence sécurité pour les clients de l’hôtel.',
-                    'image' => null,
-                    'price' => 0,
-                    'price_on_request' => true,
-                    'status' => 'available',
-                    'is_premium' => false,
-                    'display_order' => 0,
-                ]);
-            } else {
-                $securityService->update(['status' => 'available']);
-            }
-        } elseif ($securityService) {
-            $securityService->update(['status' => 'unavailable']);
-        }
     }
 }

@@ -12,7 +12,8 @@ class AssistanceEmergencyScreen extends StatefulWidget {
   const AssistanceEmergencyScreen({super.key});
 
   @override
-  State<AssistanceEmergencyScreen> createState() => _AssistanceEmergencyScreenState();
+  State<AssistanceEmergencyScreen> createState() =>
+      _AssistanceEmergencyScreenState();
 }
 
 class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
@@ -68,6 +69,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
   Future<void> _sendRequest(String type) async {
     final l10n = AppLocalizations.of(context);
     final user = context.read<AuthProvider>().user;
+    final emergency = user?.enterprise?.emergency;
     final roomInfo = user?.roomNumber != null && user!.roomNumber!.isNotEmpty
         ? '${l10n.roomLabel} ${user.roomNumber}'
         : 'Chambre non identifiée';
@@ -84,7 +86,8 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     }
 
     if (type == 'doctor') {
-      final id = await _findDoctorServiceId();
+      final configuredId = emergency?.doctorServiceId;
+      final id = configuredId ?? await _findDoctorServiceId();
       if (id == null) {
         if (mounted) {
           setState(() {
@@ -101,10 +104,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
       setState(() => _sendingDoctor = true);
       try {
         await context.read<PalaceProvider>().createPalaceRequest(
-              serviceId: id,
-              details: description,
-              metadata: {'type': 'doctor', 'room': user?.roomNumber},
-            );
+          serviceId: id,
+          details: description,
+          metadata: {'type': 'doctor', 'room': user?.roomNumber},
+        );
         if (mounted) {
           _showSnack(l10n.emergencyRequestSent);
         }
@@ -114,7 +117,8 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
         if (mounted) setState(() => _sendingDoctor = false);
       }
     } else {
-      final id = await _findSecurityServiceId();
+      final configuredId = emergency?.securityServiceId;
+      final id = configuredId ?? await _findSecurityServiceId();
       if (id == null) {
         if (mounted) {
           setState(() {
@@ -131,10 +135,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
       setState(() => _sendingSecurity = true);
       try {
         await context.read<PalaceProvider>().createPalaceRequest(
-              serviceId: id,
-              details: description,
-              metadata: {'type': 'security', 'room': user?.roomNumber},
-            );
+          serviceId: id,
+          details: description,
+          metadata: {'type': 'security', 'room': user?.roomNumber},
+        );
         if (mounted) {
           _showSnack(l10n.emergencyRequestSent);
         }
@@ -181,7 +185,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -200,7 +207,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                           ),
                           Text(
                             l10n.assistanceEmergencyDesc,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                           if (roomNumber != null && roomNumber.isNotEmpty)
                             Padding(
@@ -222,7 +232,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Column(
                     children: [
                       if (doctorEnabled)
@@ -236,7 +249,8 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                             _sendRequest('doctor');
                           },
                         ),
-                      if (doctorEnabled && securityEnabled) const SizedBox(height: 16),
+                      if (doctorEnabled && securityEnabled)
+                        const SizedBox(height: 16),
                       if (securityEnabled)
                         _actionCard(
                           context,
@@ -254,7 +268,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                             padding: const EdgeInsets.all(24),
                             child: Text(
                               l10n.comingSoon,
-                              style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                              style: const TextStyle(
+                                color: AppTheme.textGray,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
@@ -321,7 +338,9 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
           decoration: BoxDecoration(
             color: AppTheme.primaryBlue.withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: AppTheme.accentGold.withValues(alpha: 0.5),
+            ),
           ),
           child: Row(
             children: [
@@ -343,11 +362,17 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
                   ),
                 )
               else
-                const Icon(Icons.arrow_forward_ios, color: AppTheme.accentGold, size: 18),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppTheme.accentGold,
+                  size: 18,
+                ),
             ],
           ),
         ),

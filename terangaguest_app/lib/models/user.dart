@@ -166,14 +166,30 @@ class HotelInfos {
 class EmergencySettings {
   final bool doctorEnabled;
   final bool securityEnabled;
+  final int? doctorServiceId;
+  final int? securityServiceId;
 
-  EmergencySettings({this.doctorEnabled = false, this.securityEnabled = false});
+  EmergencySettings({
+    this.doctorEnabled = false,
+    this.securityEnabled = false,
+    this.doctorServiceId,
+    this.securityServiceId,
+  });
 
   factory EmergencySettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) return EmergencySettings();
+    int? parseId(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
     return EmergencySettings(
       doctorEnabled: json['doctor_enabled'] as bool? ?? false,
       securityEnabled: json['security_enabled'] as bool? ?? false,
+      doctorServiceId: parseId(json['doctor_service_id']),
+      securityServiceId: parseId(json['security_service_id']),
     );
   }
 }
@@ -251,6 +267,8 @@ class Enterprise {
       'emergency': {
         'doctor_enabled': emergency.doctorEnabled,
         'security_enabled': emergency.securityEnabled,
+        'doctor_service_id': emergency.doctorServiceId,
+        'security_service_id': emergency.securityServiceId,
       },
       'chatbot_url': chatbotUrl,
     };

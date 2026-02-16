@@ -148,6 +148,8 @@ class Enterprise extends Model
         return [
             'doctor_enabled' => (bool) ($s['doctor_enabled'] ?? false),
             'security_enabled' => (bool) ($s['security_enabled'] ?? false),
+            'doctor_service_id' => isset($s['doctor_service_id']) ? (int) $s['doctor_service_id'] : null,
+            'security_service_id' => isset($s['security_service_id']) ? (int) $s['security_service_id'] : null,
         ];
     }
 
