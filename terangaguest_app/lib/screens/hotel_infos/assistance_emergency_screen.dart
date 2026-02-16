@@ -332,19 +332,36 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     final l10n = AppLocalizations.of(context);
     final user = context.read<AuthProvider>().user;
     final room = user?.roomNumber;
-    final name = user?.name ?? 'Client';
     final actionLabel = type == 'doctor'
         ? l10n.requestDoctor
         : l10n.reportSecurityEmergency;
+
+    final rawName = user?.name?.trim();
+    String displayTarget;
+    if (room != null && room.isNotEmpty) {
+      final lowerName = rawName?.toLowerCase();
+      final looksLikeRoomAlias =
+          lowerName != null &&
+          lowerName.contains('chambre') &&
+          lowerName.contains(room.toLowerCase());
+      if (rawName != null && rawName.isNotEmpty && !looksLikeRoomAlias) {
+        displayTarget = '$rawName (chambre $room)';
+      } else {
+        displayTarget = 'la chambre $room';
+      }
+    } else {
+      if (rawName != null && rawName.isNotEmpty) {
+        displayTarget = rawName;
+      } else {
+        displayTarget = 'ce client';
+      }
+    }
 
     final buffer = StringBuffer()
       ..write('Vous êtes sur le point de ')
       ..write(actionLabel.toLowerCase())
       ..write(' pour ')
-      ..write(name);
-    if (room != null && room.isNotEmpty) {
-      buffer.write(' (chambre $room)');
-    }
+      ..write(displayTarget);
     buffer.write(
       '. Cette action enverra immédiatement une alerte au personnel de l’hôtel.',
     );
