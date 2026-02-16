@@ -118,6 +118,21 @@ class LaundryProvider with ChangeNotifier {
     }
   }
 
+  Future<void> updateLaundryRequestStatus({
+    required int requestId,
+    required String action,
+  }) async {
+    try {
+      await _laundryApi.updateLaundryRequestStatus(
+        requestId: requestId,
+        action: action,
+      );
+      await fetchMyLaundryRequests();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Rafraîchir
   Future<void> refreshLaundryServices() async {
     await fetchLaundryServices();

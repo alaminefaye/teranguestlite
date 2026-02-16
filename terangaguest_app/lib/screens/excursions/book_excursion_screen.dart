@@ -545,7 +545,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
 
     if (relyingOnCanReserve) {
       await auth.loadUser();
-      if (!context.mounted) return;
+      if (!mounted) return;
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

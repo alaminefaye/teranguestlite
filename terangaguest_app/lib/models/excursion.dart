@@ -93,6 +93,8 @@ class ExcursionBooking {
   final String status;
   final String? specialRequests;
   final DateTime createdAt;
+  final String? roomNumber;
+  final String? guestName;
 
   ExcursionBooking({
     required this.id,
@@ -105,6 +107,8 @@ class ExcursionBooking {
     required this.status,
     this.specialRequests,
     required this.createdAt,
+    this.roomNumber,
+    this.guestName,
   });
 
   factory ExcursionBooking.fromJson(Map<String, dynamic> json) {
@@ -137,6 +141,8 @@ class ExcursionBooking {
       status: json['status'] as String? ?? 'confirmed',
       specialRequests: json['special_requests'] as String?,
       createdAt: createdAt,
+      roomNumber: json['room_number'] as String?,
+      guestName: json['guest_name'] as String?,
     );
   }
 

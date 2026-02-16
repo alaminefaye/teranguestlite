@@ -92,6 +92,25 @@ class SpaProvider with ChangeNotifier {
     }
   }
 
+  Future<void> updateSpaReservationStatus({
+    required int reservationId,
+    required String action,
+    DateTime? date,
+    String? time,
+  }) async {
+    try {
+      await _spaApi.updateSpaReservationStatus(
+        reservationId: reservationId,
+        action: action,
+        date: date,
+        time: time,
+      );
+      await fetchMySpaReservations();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshSpaServices() async {
     await fetchSpaServices(category: _selectedCategory);

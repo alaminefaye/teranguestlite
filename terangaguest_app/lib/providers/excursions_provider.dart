@@ -91,6 +91,21 @@ class ExcursionsProvider with ChangeNotifier {
     }
   }
 
+  Future<void> updateExcursionBookingStatus({
+    required int bookingId,
+    required String action,
+  }) async {
+    try {
+      await _excursionsApi.updateExcursionBookingStatus(
+        bookingId: bookingId,
+        action: action,
+      );
+      await fetchMyExcursionBookings();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshExcursions() async {
     await fetchExcursions();

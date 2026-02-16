@@ -101,7 +101,18 @@ class OrdersProvider with ChangeNotifier {
   Future<void> cancelOrder(int orderId) async {
     try {
       await _ordersApi.cancelOrder(orderId);
-      // Rafraîchir la liste après annulation
+      await fetchOrders(status: _selectedStatus);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+   Future<void> updateOrderStatus({
+    required int orderId,
+    required String action,
+  }) async {
+    try {
+      await _ordersApi.updateOrderStatus(orderId: orderId, action: action);
       await fetchOrders(status: _selectedStatus);
     } catch (e) {
       throw e.toString();

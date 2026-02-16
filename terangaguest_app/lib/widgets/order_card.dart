@@ -17,6 +17,21 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final orderLabel = AppLocalizations.of(context).orderLabel(order.id);
+    final hasRoomOrGuest = order.roomNumber != null || order.guestName != null;
+    final roomGuestText = () {
+      final parts = <String>[];
+      if (order.roomNumber != null && order.roomNumber!.isNotEmpty) {
+        parts.add('Chambre ${order.roomNumber}');
+      }
+      if (order.guestName != null && order.guestName!.isNotEmpty) {
+        if (parts.isNotEmpty) {
+          parts.add('– ${order.guestName}');
+        } else {
+          parts.add(order.guestName!);
+        }
+      }
+      return parts.join(' ');
+    }();
     return Semantics(
       button: true,
       label: orderLabel,
@@ -85,7 +100,6 @@ class OrderCard extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // Date et heure
                 Row(
                   children: [
                     const Icon(
@@ -103,6 +117,30 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                if (hasRoomOrGuest) const SizedBox(height: 6),
+
+                if (hasRoomOrGuest)
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.meeting_room,
+                        size: 14,
+                        color: AppTheme.textGray,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          roomGuestText,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textGray,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
 
                 const SizedBox(height: 8),
 

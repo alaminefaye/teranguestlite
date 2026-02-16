@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../admin/admin_home_screen.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -62,9 +63,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Naviguer selon le statut
     if (authProvider.isAuthenticated) {
-      // Utilisateur connecté → Dashboard
+      final home = _resolveHomeScreen(authProvider);
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => home),
       );
     } else {
       // Pas connecté → Login
@@ -72,6 +73,13 @@ class _SplashScreenState extends State<SplashScreen>
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
+  }
+
+  Widget _resolveHomeScreen(AuthProvider auth) {
+    if (auth.isAdmin || auth.isStaff) {
+      return const AdminHomeScreen();
+    }
+    return const DashboardScreen();
   }
 
   @override

@@ -131,4 +131,38 @@ class SpaApi {
       rethrow;
     }
   }
+
+  Future<SpaReservation> updateSpaReservationStatus({
+    required int reservationId,
+    required String action,
+    DateTime? date,
+    String? time,
+  }) async {
+    try {
+      final data = <String, dynamic>{
+        'action': action,
+      };
+
+      if (date != null) {
+        data['date'] = date.toIso8601String().split('T')[0];
+      }
+
+      if (time != null && time.isNotEmpty) {
+        data['time'] = time;
+      }
+
+      final response = await _apiService.post(
+        '${ApiConfig.spaReservations}/$reservationId/status',
+        data: data,
+      );
+
+      return SpaReservation.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDioException(e);
+      throw Exception(message);
+    }
+  }
 }

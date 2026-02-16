@@ -326,11 +326,12 @@ class _CreateLaundryRequestScreenState
   Future<void> _handleConfirmRequest() async {
     final auth = context.read<AuthProvider>();
     final clientCode = _clientCodeController.text.trim();
-    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+    final relyingOnCanReserve =
+        clientCode.isEmpty && (auth.user?.canReserve == true);
 
     if (relyingOnCanReserve) {
       await auth.loadUser();
-      if (!context.mounted) return;
+      if (!mounted) return;
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -351,7 +352,7 @@ class _CreateLaundryRequestScreenState
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
+        builder: (dialogContext) => const Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
           ),
@@ -365,12 +366,13 @@ class _CreateLaundryRequestScreenState
         clientCode: clientCode.isNotEmpty ? clientCode : null,
       );
 
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
       if (mounted) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             backgroundColor: AppTheme.primaryBlue,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -393,7 +395,7 @@ class _CreateLaundryRequestScreenState
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
@@ -410,7 +412,8 @@ class _CreateLaundryRequestScreenState
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
       if (mounted) {
         final message = e.toString().replaceFirst('Exception: ', '');

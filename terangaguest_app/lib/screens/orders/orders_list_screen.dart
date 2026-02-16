@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/order_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -90,6 +91,10 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -111,7 +116,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context).myOrders,
+                  isStaffOrAdmin ? 'Commandes Room Service' : l10n.myOrders,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -120,7 +125,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context).ordersHistorySubtitle,
+                  isStaffOrAdmin
+                      ? 'Suivi et traitement des commandes room service'
+                      : l10n.ordersHistorySubtitle,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textGray,

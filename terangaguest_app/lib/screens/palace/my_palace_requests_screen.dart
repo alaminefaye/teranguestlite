@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
+import '../../models/palace.dart';
 
 class MyPalaceRequestsScreen extends StatefulWidget {
   const MyPalaceRequestsScreen({super.key});
@@ -25,6 +27,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -55,7 +61,9 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            AppLocalizations.of(context).myRequests,
+                            isStaffOrAdmin
+                                ? 'Services Palace / Conciergerie'
+                                : l10n.myRequests,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -64,7 +72,9 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            AppLocalizations.of(context).palaceServices,
+                            isStaffOrAdmin
+                                ? 'Suivi des demandes palace & conciergerie'
+                                : l10n.palaceServices,
                             style: const TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
@@ -85,6 +95,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
   }
 
   Widget _buildContent() {
+    final l10n = AppLocalizations.of(context);
     return Consumer<PalaceProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
@@ -96,7 +107,6 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         }
 
         if (provider.requests.isEmpty) {
-          final l10n = AppLocalizations.of(context);
           return EmptyStateWidget(
             icon: Icons.star_outline,
             title: l10n.noPalaceRequest,
@@ -122,6 +132,24 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
               itemCount: provider.requests.length,
               itemBuilder: (context, index) {
                 final request = provider.requests[index];
+                final hasRoomOrGuest =
+                    request.roomNumber != null || request.guestName != null;
+                final roomGuestText = () {
+                  final parts = <String>[];
+                  if (request.roomNumber != null &&
+                      request.roomNumber!.isNotEmpty) {
+                    parts.add('Chambre ${request.roomNumber}');
+                  }
+                  if (request.guestName != null &&
+                      request.guestName!.isNotEmpty) {
+                    if (parts.isNotEmpty) {
+                      parts.add('– ${request.guestName}');
+                    } else {
+                      parts.add(request.guestName!);
+                    }
+                  }
+                  return parts.join(' ');
+                }();
                 return Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
@@ -229,6 +257,29 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                   ],
                                 ),
                               ],
+                              if (hasRoomOrGuest) const SizedBox(height: 6),
+                              if (hasRoomOrGuest)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.meeting_room,
+                                      size: 14,
+                                      color: AppTheme.textGray,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        roomGuestText,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textGray,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              _buildStaffActions(request),
                             ],
                           ),
                         ],
@@ -313,6 +364,140 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         return l10n.statusCancelled;
       default:
         return status;
+    }
+  }
+
+  Widget _buildStaffActions(PalaceRequest request) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    if (!isStaffOrAdmin) {
+      return const SizedBox.shrink();
+    }
+
+    final actions = <Map<String, String>>[];
+
+    if (request.status == 'pending') {
+      actions.add({'action': 'accept', 'label': 'Accepter'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    } else if (request.status == 'in_progress') {
+      actions.add({'action': 'complete', 'label': 'Marquer comme terminée'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            for (var i = 0; i < actions.length; i++)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: i == actions.length - 1 ? 0 : 8,
+                  ),
+                  child: SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.red
+                            : AppTheme.accentGold,
+                        foregroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.white
+                            : AppTheme.primaryDark,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () =>
+                          _handleStaffAction(request, actions[i]['action']!),
+                      child: Text(
+                        actions[i]['label']!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleStaffAction(PalaceRequest request, String action) async {
+    final l10n = AppLocalizations.of(context);
+
+    String title;
+    String message;
+
+    if (action == 'accept') {
+      title = 'Accepter la demande';
+      message = 'Accepter cette demande de service palace / conciergerie ?';
+    } else if (action == 'complete') {
+      title = 'Marquer comme terminée';
+      message = 'Marquer cette demande comme terminée ?';
+    } else if (action == 'cancel') {
+      title = l10n.cancel;
+      message = 'Annuler cette demande de service palace ?';
+    } else {
+      return;
+    }
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<PalaceProvider>().updatePalaceRequestStatus(
+        requestId: request.id,
+        action: action,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Statut mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      final messageError = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$messageError'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

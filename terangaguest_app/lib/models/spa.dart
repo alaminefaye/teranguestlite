@@ -79,6 +79,8 @@ class SpaReservation {
   final String? specialRequests;
   final double price;
   final DateTime createdAt;
+  final String? roomNumber;
+  final String? guestName;
 
   SpaReservation({
     required this.id,
@@ -90,6 +92,8 @@ class SpaReservation {
     this.specialRequests,
     required this.price,
     required this.createdAt,
+    this.roomNumber,
+    this.guestName,
   });
 
   factory SpaReservation.fromJson(Map<String, dynamic> json) {
@@ -108,6 +112,8 @@ class SpaReservation {
       specialRequests: json['special_requests'] as String?,
       price: _parseDouble(json['price']),
       createdAt: createdAtRaw != null ? DateTime.parse(createdAtRaw as String) : DateTime.now(),
+      roomNumber: json['room_number'] as String?,
+      guestName: json['guest_name'] as String?,
     );
   }
 

@@ -39,8 +39,10 @@ class PalaceApi {
           : null;
 
       final data = <String, dynamic>{
-        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
-        if (description != null && description.isNotEmpty) 'description': description,
+        if (clientCode != null && clientCode.trim().isNotEmpty)
+          'client_code': clientCode.trim(),
+        if (description != null && description.isNotEmpty)
+          'description': description,
         if (requestedFor != null) 'requested_for': requestedFor,
         if (metadata != null && metadata.isNotEmpty) 'metadata': metadata,
       };
@@ -51,7 +53,8 @@ class PalaceApi {
       );
 
       return PalaceRequest.fromJson(
-          response.data['data'] as Map<String, dynamic>);
+        response.data['data'] as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       final message = _messageFromDio(e);
@@ -90,6 +93,21 @@ class PalaceApi {
     }
   }
 
+  Future<List<PalaceRequest>> getEmergencyPalaceRequests() async {
+    try {
+      final response = await _apiService.get(
+        '${ApiConfig.myPalaceRequests}?emergency=1',
+      );
+
+      return (response.data['data'] as List)
+          .map((json) => PalaceRequest.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      rethrow;
+    }
+  }
+
   /// Annuler une demande
   Future<void> cancelPalaceRequest(int requestId) async {
     try {
@@ -97,6 +115,27 @@ class PalaceApi {
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
+    }
+  }
+
+  /// Mettre à jour le statut d'une demande (staff/admin).
+  Future<PalaceRequest> updatePalaceRequestStatus({
+    required int requestId,
+    required String action,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '/palace-requests/$requestId/status',
+        data: {'action': action},
+      );
+
+      return PalaceRequest.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDio(e);
+      throw Exception(message);
     }
   }
 }

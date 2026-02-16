@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import '../config/api_config.dart';
 import '../models/vehicle.dart';
 import 'api_service.dart';
 

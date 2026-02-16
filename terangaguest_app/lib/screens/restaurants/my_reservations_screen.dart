@@ -6,6 +6,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
 import '../../widgets/empty_state.dart';
 import '../../providers/restaurants_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/layout_helper.dart';
 
 class MyRestaurantReservationsScreen extends StatefulWidget {
@@ -50,6 +51,10 @@ class _MyRestaurantReservationsScreenState
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -65,7 +70,9 @@ class _MyRestaurantReservationsScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context).myReservations,
+                  isStaffOrAdmin
+                      ? 'Réservations Restaurants'
+                      : l10n.myReservations,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -74,7 +81,9 @@ class _MyRestaurantReservationsScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context).restaurantsBars,
+                  isStaffOrAdmin
+                      ? 'Suivi des réservations restaurants'
+                      : l10n.restaurantsBars,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textGray,
@@ -136,6 +145,25 @@ class _MyRestaurantReservationsScreenState
   }
 
   Widget _buildReservationCard(RestaurantReservation reservation) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final hasRoomOrGuest =
+        reservation.roomNumber != null || reservation.guestName != null;
+    final roomGuestText = () {
+      final parts = <String>[];
+      if (reservation.roomNumber != null &&
+          reservation.roomNumber!.isNotEmpty) {
+        parts.add('Chambre ${reservation.roomNumber}');
+      }
+      if (reservation.guestName != null && reservation.guestName!.isNotEmpty) {
+        if (parts.isNotEmpty) {
+          parts.add('– ${reservation.guestName}');
+        } else {
+          parts.add(reservation.guestName!);
+        }
+      }
+      return parts.join(' ');
+    }();
     return Transform(
       transform: Matrix4.identity()
         ..setEntry(3, 2, 0.001)
@@ -236,6 +264,28 @@ class _MyRestaurantReservationsScreenState
                     ],
                   ),
                   const SizedBox(height: 6),
+                  if (hasRoomOrGuest) const SizedBox(height: 6),
+                  if (hasRoomOrGuest)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.meeting_room,
+                          size: 14,
+                          color: AppTheme.textGray,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            roomGuestText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textGray,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   Row(
                     children: [
                       const Icon(
@@ -253,7 +303,8 @@ class _MyRestaurantReservationsScreenState
                       ),
                     ],
                   ),
-                  if (_canCancelReservation(reservation)) ...[
+                  if (!isStaffOrAdmin &&
+                      _canCancelReservation(reservation)) ...[
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -279,6 +330,7 @@ class _MyRestaurantReservationsScreenState
                       ),
                     ),
                   ],
+                  if (isStaffOrAdmin) _buildStaffActions(reservation),
                 ],
               ),
             ],
@@ -286,6 +338,144 @@ class _MyRestaurantReservationsScreenState
         ),
       ),
     );
+  }
+
+  Widget _buildStaffActions(RestaurantReservation reservation) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    if (!isStaffOrAdmin) {
+      return const SizedBox.shrink();
+    }
+
+    final actions = <Map<String, String>>[];
+
+    if (reservation.status == 'pending') {
+      actions.add({'action': 'confirm', 'label': 'Confirmer'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    } else if (reservation.status == 'confirmed') {
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'honor', 'label': 'Marquer honorée'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            for (var i = 0; i < actions.length; i++)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: i == actions.length - 1 ? 0 : 8,
+                  ),
+                  child: SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.red
+                            : AppTheme.accentGold,
+                        foregroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.white
+                            : AppTheme.primaryDark,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () => _handleStaffAction(
+                        reservation,
+                        actions[i]['action']!,
+                      ),
+                      child: Text(
+                        actions[i]['label']!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleStaffAction(
+    RestaurantReservation reservation,
+    String action,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+
+    String title;
+    String message;
+
+    if (action == 'confirm') {
+      title = 'Confirmer la réservation';
+      message = 'Confirmer cette réservation restaurant ?';
+    } else if (action == 'cancel') {
+      title = l10n.cancel;
+      message = l10n.cancelReservationConfirm;
+    } else if (action == 'honor') {
+      title = 'Marquer comme honorée';
+      message = 'Marquer cette réservation comme honorée ?';
+    } else {
+      return;
+    }
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<RestaurantsProvider>().updateReservationStatus(
+        reservationId: reservation.id,
+        action: action,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Statut mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   bool _canCancelReservation(RestaurantReservation r) {
@@ -421,6 +611,8 @@ class _MyRestaurantReservationsScreenState
         return l10n.statusConfirmed;
       case 'cancelled':
         return l10n.statusCancelled;
+      case 'honored':
+        return l10n.statusCompleted;
       default:
         return status;
     }

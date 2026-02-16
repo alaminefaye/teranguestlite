@@ -106,6 +106,26 @@ class RestaurantsApi {
     }
   }
 
+  Future<RestaurantReservation> updateReservationStatus({
+    required int reservationId,
+    required String action,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '${ApiConfig.restaurantReservations}/$reservationId/status',
+        data: {'action': action},
+      );
+
+      return RestaurantReservation.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDio(e);
+      throw Exception(message);
+    }
+  }
+
   /// Annuler une réservation (si > 24h avant)
   Future<void> cancelReservation(int reservationId) async {
     try {

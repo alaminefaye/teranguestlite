@@ -94,6 +94,21 @@ class RestaurantsProvider with ChangeNotifier {
     }
   }
 
+  Future<void> updateReservationStatus({
+    required int reservationId,
+    required String action,
+  }) async {
+    try {
+      await _restaurantsApi.updateReservationStatus(
+        reservationId: reservationId,
+        action: action,
+      );
+      await fetchMyReservations();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshRestaurants() async {
     await fetchRestaurants(type: _selectedType);

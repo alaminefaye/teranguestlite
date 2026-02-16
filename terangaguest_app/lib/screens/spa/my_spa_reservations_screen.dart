@@ -8,6 +8,7 @@ import '../../widgets/empty_state.dart';
 import '../../providers/spa_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
+import '../../providers/auth_provider.dart';
 import 'spa_reservation_detail_screen.dart';
 
 class MySpaReservationsScreen extends StatefulWidget {
@@ -51,6 +52,10 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -66,7 +71,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context).mySpaReservations,
+                  isStaffOrAdmin
+                      ? 'Réservations Spa & Bien-être'
+                      : l10n.mySpaReservations,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -75,7 +82,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context).spaWellness,
+                  isStaffOrAdmin
+                      ? 'Suivi des réservations spa'
+                      : l10n.spaWellness,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textGray,
@@ -148,6 +157,25 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
   }
 
   Widget _buildReservationCard(SpaReservation reservation) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final hasRoomOrGuest =
+        reservation.roomNumber != null || reservation.guestName != null;
+    final roomGuestText = () {
+      final parts = <String>[];
+      if (reservation.roomNumber != null &&
+          reservation.roomNumber!.isNotEmpty) {
+        parts.add('Chambre ${reservation.roomNumber}');
+      }
+      if (reservation.guestName != null && reservation.guestName!.isNotEmpty) {
+        if (parts.isNotEmpty) {
+          parts.add('– ${reservation.guestName}');
+        } else {
+          parts.add(reservation.guestName!);
+        }
+      }
+      return parts.join(' ');
+    }();
     return Transform(
       transform: Matrix4.identity()
         ..setEntry(3, 2, 0.001)
@@ -245,6 +273,28 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                     ],
                   ),
                   const SizedBox(height: 6),
+                  if (hasRoomOrGuest) const SizedBox(height: 6),
+                  if (hasRoomOrGuest)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.meeting_room,
+                          size: 14,
+                          color: AppTheme.textGray,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            roomGuestText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textGray,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   Text(
                     reservation.formattedPrice,
                     style: const TextStyle(
@@ -253,7 +303,8 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       color: AppTheme.accentGold,
                     ),
                   ),
-                  if (_canCancelSpaReservation(reservation)) ...[
+                  if (!isStaffOrAdmin &&
+                      _canCancelSpaReservation(reservation)) ...[
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -279,6 +330,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       ),
                     ),
                   ],
+                  if (isStaffOrAdmin) _buildStaffActions(reservation),
                 ],
               ),
             ],
@@ -286,6 +338,173 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildStaffActions(SpaReservation reservation) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    if (!isStaffOrAdmin) {
+      return const SizedBox.shrink();
+    }
+
+    final actions = <Map<String, String>>[];
+
+    if (reservation.status == 'pending') {
+      actions.add({'action': 'confirm', 'label': 'Confirmer'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'reschedule', 'label': 'Replanifier'});
+    } else if (reservation.status == 'confirmed') {
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'reschedule', 'label': 'Replanifier'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: actions.map((a) {
+            final isCancel = a['action'] == 'cancel';
+            return SizedBox(
+              height: 34,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isCancel ? Colors.red : AppTheme.accentGold,
+                  foregroundColor: isCancel
+                      ? Colors.white
+                      : AppTheme.primaryDark,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                onPressed: () => _handleStaffAction(reservation, a['action']!),
+                child: Text(
+                  a['label']!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleStaffAction(
+    SpaReservation reservation,
+    String action,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+
+    DateTime? newDate;
+    String? newTime;
+
+    if (action == 'reschedule') {
+      final pickedDate = await showDatePicker(
+        context: context,
+        initialDate: reservation.date.isAfter(DateTime.now())
+            ? reservation.date
+            : DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      );
+
+      if (pickedDate == null) return;
+
+      final initialTimeParts = reservation.time.split(':');
+      final initialTimeOfDay = TimeOfDay(
+        hour: int.tryParse(initialTimeParts.first) ?? 10,
+        minute: initialTimeParts.length > 1
+            ? int.tryParse(initialTimeParts[1]) ?? 0
+            : 0,
+      );
+
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: initialTimeOfDay,
+      );
+
+      if (pickedTime == null) return;
+
+      newDate = pickedDate;
+      final hour = pickedTime.hour.toString().padLeft(2, '0');
+      final minute = pickedTime.minute.toString().padLeft(2, '0');
+      newTime = '$hour:$minute';
+    }
+
+    String title;
+    String message;
+
+    if (action == 'confirm') {
+      title = 'Confirmer la réservation';
+      message = 'Confirmer cette réservation spa ?';
+    } else if (action == 'cancel') {
+      title = l10n.cancel;
+      message = l10n.cancelReservationConfirm;
+    } else if (action == 'reschedule') {
+      title = 'Replanifier la réservation';
+      message = 'Confirmer la nouvelle date/heure pour cette réservation spa ?';
+    } else {
+      return;
+    }
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<SpaProvider>().updateSpaReservationStatus(
+        reservationId: reservation.id,
+        action: action,
+        date: newDate,
+        time: newTime,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Statut mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   bool _canCancelSpaReservation(SpaReservation r) {

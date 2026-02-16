@@ -60,6 +60,8 @@ class LaundryRequest {
   final DateTime createdAt;
   final DateTime? pickupTime;
   final DateTime? deliveryTime;
+  final String? roomNumber;
+  final String? guestName;
 
   LaundryRequest({
     required this.id,
@@ -70,6 +72,8 @@ class LaundryRequest {
     required this.createdAt,
     this.pickupTime,
     this.deliveryTime,
+    this.roomNumber,
+    this.guestName,
   });
 
   static int _parseIntSafe(dynamic v) {
@@ -107,6 +111,8 @@ class LaundryRequest {
       createdAt: createdAt,
       pickupTime: pickupTime,
       deliveryTime: deliveryTime,
+      roomNumber: json['room_number'] as String?,
+      guestName: json['guest_name'] as String?,
     );
   }
 
@@ -150,6 +156,8 @@ class LaundryRequest {
       'created_at': createdAt.toIso8601String(),
       'pickup_time': pickupTime?.toIso8601String(),
       'delivery_time': deliveryTime?.toIso8601String(),
+      'room_number': roomNumber,
+      'guest_name': guestName,
     };
   }
 }

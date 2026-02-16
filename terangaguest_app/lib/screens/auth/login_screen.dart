@@ -5,6 +5,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/animated_button.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../admin/admin_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,9 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Login réussi → Dashboard
+      final home = _resolveHomeScreen(authProvider);
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => home),
       );
     } else {
       // Afficher l'erreur
@@ -61,6 +62,13 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
+  }
+
+  Widget _resolveHomeScreen(AuthProvider auth) {
+    if (auth.isAdmin || auth.isStaff) {
+      return const AdminHomeScreen();
+    }
+    return const DashboardScreen();
   }
 
   @override

@@ -179,12 +179,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             CachedNetworkImage(
               imageUrl: backgroundImageUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
+              placeholder: (context, url) => Container(
                 decoration: const BoxDecoration(
                   gradient: AppTheme.backgroundGradient,
                 ),
               ),
-              errorWidget: (_, __, ___) => Container(
+              errorWidget: (context, url, error) => Container(
                 decoration: const BoxDecoration(
                   gradient: AppTheme.backgroundGradient,
                 ),
@@ -228,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       imageUrl: logoUrl,
                       height: logoSize,
                       fit: BoxFit.contain,
-                      placeholder: (_, __) => SizedBox(
+                      placeholder: (context, url) => SizedBox(
                         height: logoSize,
                         child: Center(
                           child: SizedBox(
@@ -241,7 +241,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                       ),
-                      errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                      errorWidget: (context, url, error) =>
+                          const SizedBox.shrink(),
                     ),
                   if (logoUrl != null && logoUrl.isNotEmpty) SizedBox(height: isVeryCompact ? 12 : 18),
                   Text(

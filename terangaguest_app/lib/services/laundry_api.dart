@@ -84,6 +84,26 @@ class LaundryApi {
     }
   }
 
+  Future<LaundryRequest> updateLaundryRequestStatus({
+    required int requestId,
+    required String action,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '${ApiConfig.laundryRequests}/$requestId/status',
+        data: {'action': action},
+      );
+
+      return LaundryRequest.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDio(e);
+      throw Exception(message);
+    }
+  }
+
   /// Annuler une demande
   Future<void> cancelLaundryRequest(int requestId) async {
     try {

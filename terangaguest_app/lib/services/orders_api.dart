@@ -80,4 +80,19 @@ class OrdersApi {
       rethrow;
     }
   }
+
+  Future<void> updateOrderStatus({
+    required int orderId,
+    required String action,
+  }) async {
+    try {
+      await _apiService.post(
+        '${ApiConfig.orders}/$orderId/status',
+        data: {'action': action},
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      rethrow;
+    }
+  }
 }

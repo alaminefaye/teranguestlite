@@ -114,4 +114,24 @@ class ExcursionsApi {
       rethrow;
     }
   }
+
+  Future<ExcursionBooking> updateExcursionBookingStatus({
+    required int bookingId,
+    required String action,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '/excursion-bookings/$bookingId/status',
+        data: {'action': action},
+      );
+
+      return ExcursionBooking.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDio(e);
+      throw Exception(message);
+    }
+  }
 }

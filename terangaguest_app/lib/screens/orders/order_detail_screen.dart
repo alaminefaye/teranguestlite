@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../models/order.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -262,17 +263,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 ),
               ),
               const SizedBox(height: 30),
-              if (_order!.status == 'delivered')
-                FadeTransition(
-                  opacity: _buttonsAnim,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.06),
-                      end: Offset.zero,
-                    ).animate(_buttonsAnim),
-                    child: _buildReorderButton(),
+              FadeTransition(
+                opacity: _buttonsAnim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.06),
+                    end: Offset.zero,
+                  ).animate(_buttonsAnim),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildStaffActions(),
+                      if (_order!.status == 'delivered') ...[
+                        const SizedBox(height: 16),
+                        _buildReorderButton(),
+                      ],
+                    ],
                   ),
                 ),
+              ),
             ],
           );
         },
@@ -281,6 +290,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   Widget _buildOrderHeader() {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -318,7 +329,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildStatusBadge(_order!.status),
-              if (_order!.canCancel) ...[
+              if (_order!.canCancel && !isStaffOrAdmin) ...[
                 const SizedBox(width: 12),
                 _buildCancelButtonInline(),
               ],
@@ -716,6 +727,93 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildStaffActions() {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    if (!isStaffOrAdmin || _order == null) {
+      return const SizedBox.shrink();
+    }
+
+    final status = _order!.status;
+    final actions = <Map<String, String>>[];
+
+    if (status == 'pending') {
+      actions.add({'action': 'confirm', 'label': 'Confirmer la commande'});
+    } else if (status == 'confirmed') {
+      actions.add({'action': 'prepare', 'label': 'Lancer la préparation'});
+    } else if (status == 'preparing') {
+      actions.add({'action': 'mark_ready', 'label': 'Marquer comme prête'});
+    } else if (status == 'ready') {
+      actions.add({'action': 'deliver', 'label': 'Mettre en livraison'});
+    } else if (status == 'delivering') {
+      actions.add({'action': 'complete', 'label': 'Marquer comme livrée'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: actions.map((a) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: AnimatedButton(
+            text: a['label']!,
+            onPressed: () => _handleStaffAction(a['action']!),
+            width: double.infinity,
+            height: 52,
+            backgroundColor: AppTheme.accentGold,
+            textColor: AppTheme.primaryDark,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> _handleStaffAction(String action) async {
+    if (_order == null) return;
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
+        ),
+      );
+
+      await context.read<OrdersProvider>().updateOrderStatus(
+        orderId: _order!.id,
+        action: action,
+      );
+
+      await _loadOrderDetail();
+
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Statut de la commande mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Map<String, Color> _getStatusColor(String status) {

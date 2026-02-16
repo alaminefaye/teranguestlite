@@ -79,6 +79,22 @@ class PalaceProvider with ChangeNotifier {
     }
   }
 
+  /// Mettre à jour le statut d'une demande (staff/admin).
+  Future<void> updatePalaceRequestStatus({
+    required int requestId,
+    required String action,
+  }) async {
+    try {
+      await _palaceApi.updatePalaceRequestStatus(
+        requestId: requestId,
+        action: action,
+      );
+      await fetchMyPalaceRequests();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir
   Future<void> refreshPalaceServices() async {
     await fetchPalaceServices();

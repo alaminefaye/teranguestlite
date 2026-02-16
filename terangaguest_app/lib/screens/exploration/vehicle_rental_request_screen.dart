@@ -177,13 +177,22 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                             firstDate: DateTime.now(),
                             lastDate: DateTime.now().add(const Duration(days: 365)),
                           );
-                          if (date == null || !mounted) return;
+                          if (!context.mounted || date == null) return;
                           final time = await showTimePicker(
                             context: context,
                             initialTime: TimeOfDay.now(),
                           );
-                          if (time == null || !mounted) return;
-                          setState(() => _requestedFor = DateTime(date.year, date.month, date.day, time.hour, time.minute));
+                          if (!context.mounted || time == null) return;
+                          if (!mounted) return;
+                          setState(
+                            () => _requestedFor = DateTime(
+                              date.year,
+                              date.month,
+                              date.day,
+                              time.hour,
+                              time.minute,
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 16),
