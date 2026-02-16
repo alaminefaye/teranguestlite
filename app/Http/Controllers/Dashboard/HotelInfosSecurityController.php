@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
+use App\Models\PalaceService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -65,7 +67,84 @@ class HotelInfosSecurityController extends Controller
 
         $enterprise->update(['settings' => $settings]);
 
+        $this->syncEmergencyPalaceServices($enterprise, $settings['emergency']);
+
         return redirect()->route('dashboard.hotel-infos-security.index')
             ->with('success', 'Hotel Infos & Sécurité enregistrés.');
+    }
+
+    private function syncEmergencyPalaceServices(Enterprise $enterprise, array $emergency): void
+    {
+        $doctorEnabled = (bool) ($emergency['doctor_enabled'] ?? false);
+        $securityEnabled = (bool) ($emergency['security_enabled'] ?? false);
+
+        $doctorService = PalaceService::where('enterprise_id', $enterprise->id)
+            ->where(function ($q) {
+                $q->where('category', 'concierge')
+                  ->orWhereNull('category');
+            })
+            ->where(function ($q) {
+                $q->where('name', 'like', '%médecin%')
+                  ->orWhere('name', 'like', '%medecin%')
+                  ->orWhere('name', 'like', '%doctor%')
+                  ->orWhere('name', 'like', '%docteur%');
+            })
+            ->first();
+
+        if ($doctorEnabled) {
+            if (!$doctorService) {
+                PalaceService::create([
+                    'enterprise_id' => $enterprise->id,
+                    'name' => 'Assistance médecin',
+                    'category' => 'concierge',
+                    'description' => 'Assistance médicale pour les clients de l’hôtel.',
+                    'image' => null,
+                    'price' => 0,
+                    'price_on_request' => true,
+                    'status' => 'available',
+                    'is_premium' => false,
+                    'display_order' => 0,
+                ]);
+            } else {
+                $doctorService->update(['status' => 'available']);
+            }
+        } elseif ($doctorService) {
+            $doctorService->update(['status' => 'unavailable']);
+        }
+
+        $securityService = PalaceService::where('enterprise_id', $enterprise->id)
+            ->where(function ($q) {
+                $q->where('category', 'concierge')
+                  ->orWhereNull('category');
+            })
+            ->where(function ($q) {
+                $q->where('name', 'like', '%urgence%')
+                  ->orWhere('name', 'like', '%sécurité%')
+                  ->orWhere('name', 'like', '%securite%')
+                  ->orWhere('name', 'like', '%security%')
+                  ->orWhere('name', 'like', '%emergency%');
+            })
+            ->first();
+
+        if ($securityEnabled) {
+            if (!$securityService) {
+                PalaceService::create([
+                    'enterprise_id' => $enterprise->id,
+                    'name' => 'Urgence sécurité',
+                    'category' => 'concierge',
+                    'description' => 'Urgence sécurité pour les clients de l’hôtel.',
+                    'image' => null,
+                    'price' => 0,
+                    'price_on_request' => true,
+                    'status' => 'available',
+                    'is_premium' => false,
+                    'display_order' => 0,
+                ]);
+            } else {
+                $securityService->update(['status' => 'available']);
+            }
+        } elseif ($securityService) {
+            $securityService->update(['status' => 'unavailable']);
+        }
     }
 }
