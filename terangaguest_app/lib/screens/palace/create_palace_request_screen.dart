@@ -91,17 +91,19 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         vehicleType: _filterVehicleType,
         minSeats: _filterMinSeats,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           _vehicles = list;
           _loadingVehicles = false;
         });
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _vehicles = [];
           _loadingVehicles = false;
         });
+      }
     }
   }
 
@@ -542,8 +544,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                                       fit: BoxFit.cover,
                                       loadingBuilder:
                                           (context, child, loadingProgress) {
-                                            if (loadingProgress == null)
+                                            if (loadingProgress == null) {
                                               return child;
+                                            }
                                             return const SizedBox(
                                               height: 52,
                                               child: Center(
@@ -1107,11 +1110,12 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
     final auth = context.read<AuthProvider>();
     final clientCode = _clientCodeController.text.trim();
-    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+    final relyingOnCanReserve =
+        clientCode.isEmpty && (auth.user?.canReserve == true);
 
     if (relyingOnCanReserve) {
       await auth.loadUser();
-      if (!context.mounted) return;
+      if (!mounted) return;
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1132,7 +1136,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
+        builder: (dialogContext) => const Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
           ),
@@ -1149,12 +1153,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         clientCode: clientCode.isNotEmpty ? clientCode : null,
       );
 
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
       if (mounted) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             backgroundColor: AppTheme.primaryBlue,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -1177,7 +1182,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
@@ -1194,7 +1199,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
       if (mounted) {
         final message = e.toString().replaceFirst('Exception: ', '');

@@ -49,7 +49,7 @@ class AdminSummary {
     final palace = (json['palace'] as Map?) ?? {};
     final emergency = (json['emergency'] as Map?) ?? {};
 
-    int _int(Map data, String key) {
+    int toInt(Map data, String key) {
       final value = data[key];
       if (value is int) return value;
       if (value is num) return value.toInt();
@@ -57,22 +57,22 @@ class AdminSummary {
     }
 
     return AdminSummary(
-      ordersPending: _int(orders, 'pending'),
-      ordersInProgress: _int(orders, 'in_progress'),
-      ordersDelivered: _int(orders, 'delivered'),
-      restaurantPending: _int(restaurants, 'pending'),
-      restaurantToday: _int(restaurants, 'today'),
-      spaPending: _int(spa, 'pending'),
-      spaToday: _int(spa, 'today'),
-      excursionsPending: _int(excursions, 'pending'),
-      excursionsToday: _int(excursions, 'today'),
-      laundryPending: _int(laundry, 'pending'),
-      laundryInProgress: _int(laundry, 'in_progress'),
-      laundryDelivered: _int(laundry, 'delivered'),
-      palacePending: _int(palace, 'pending'),
-      palaceInProgress: _int(palace, 'in_progress'),
-      palaceCompleted: _int(palace, 'completed'),
-      emergencyOpen: _int(emergency, 'open'),
+      ordersPending: toInt(orders, 'pending'),
+      ordersInProgress: toInt(orders, 'in_progress'),
+      ordersDelivered: toInt(orders, 'delivered'),
+      restaurantPending: toInt(restaurants, 'pending'),
+      restaurantToday: toInt(restaurants, 'today'),
+      spaPending: toInt(spa, 'pending'),
+      spaToday: toInt(spa, 'today'),
+      excursionsPending: toInt(excursions, 'pending'),
+      excursionsToday: toInt(excursions, 'today'),
+      laundryPending: toInt(laundry, 'pending'),
+      laundryInProgress: toInt(laundry, 'in_progress'),
+      laundryDelivered: toInt(laundry, 'delivered'),
+      palacePending: toInt(palace, 'pending'),
+      palaceInProgress: toInt(palace, 'in_progress'),
+      palaceCompleted: toInt(palace, 'completed'),
+      emergencyOpen: toInt(emergency, 'open'),
     );
   }
 }

@@ -9,6 +9,7 @@ use App\Models\PalaceRequest;
 use App\Models\Room;
 use App\Models\Vehicle;
 use App\Services\GuestReservationHelper;
+use Illuminate\Support\Facades\Log;
 
 class PalaceServiceController extends Controller
 {
@@ -233,7 +234,7 @@ class PalaceServiceController extends Controller
                 "Nouvelle demande de service : {$service->name}"
             );
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -265,14 +266,55 @@ class PalaceServiceController extends Controller
      */
     public function myRequests(Request $request)
     {
-        $requests = PalaceRequest::with('palaceService')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $onlyEmergency = $request->boolean('emergency');
+
+        $query = PalaceRequest::with(['palaceService', 'room', 'guest']);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        if ($onlyEmergency) {
+            $enterprise = $user->enterprise;
+            $doctorServiceId = null;
+            $securityServiceId = null;
+
+            if ($enterprise) {
+                $emergency = $enterprise->emergency;
+                $doctorServiceId = $emergency['doctor_service_id'] ?? null;
+                $securityServiceId = $emergency['security_service_id'] ?? null;
+            }
+
+            $query->where(function ($q) use ($doctorServiceId, $securityServiceId) {
+                if ($doctorServiceId) {
+                    $q->orWhere('palace_service_id', $doctorServiceId);
+                }
+                if ($securityServiceId) {
+                    $q->orWhere('palace_service_id', $securityServiceId);
+                }
+                $q->orWhere(function ($qq) {
+                    $qq->where('metadata->type', 'doctor')
+                        ->orWhere('metadata->type', 'security');
+                });
+            });
+        }
+
+        $requests = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
             'data' => $requests->map(function ($req) {
+                $metadata = is_array($req->metadata) ? $req->metadata : [];
+                $emergencyType = null;
+                if (isset($metadata['type']) && in_array($metadata['type'], ['doctor', 'security'], true)) {
+                    $emergencyType = $metadata['type'];
+                }
+
                 return [
                     'id' => $req->id,
                     'request_number' => $req->request_number,
@@ -284,17 +326,136 @@ class PalaceServiceController extends Controller
                     'requested_for' => $req->requested_for,
                     'description' => $req->description,
                     'estimated_price' => $req->estimated_price,
-                    'formatted_price' => $req->estimated_price ? 
-                        number_format($req->estimated_price, 0, '', ' ') . ' FCFA' : 
+                    'formatted_price' => $req->estimated_price ?
+                        number_format($req->estimated_price, 0, '', ' ') . ' FCFA' :
                         'Prix sur demande',
                     'status' => $req->status,
                     'metadata' => $req->metadata,
+                    'room_number' => $req->room ? $req->room->room_number : null,
+                    'guest_name' => $req->guest ? $req->guest->name : null,
                     'created_at' => $req->created_at->toISOString(),
+                    'emergency_type' => $emergencyType,
                 ];
             }),
             'meta' => [
                 'current_page' => $requests->currentPage(),
                 'total' => $requests->total(),
+            ],
+        ], 200);
+    }
+
+    /**
+     * Mise à jour du statut d'une demande palace (staff/admin uniquement).
+     */
+    public function updateRequestStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (! method_exists($user, 'isAdmin') || ! method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (! ($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'in:accept,complete,cancel'],
+        ]);
+
+        $palaceRequest = PalaceRequest::with(['room', 'guest', 'palaceService'])->find($id);
+
+        if (! $palaceRequest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande non trouvée',
+            ], 404);
+        }
+
+        if ($palaceRequest->enterprise_id !== $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande introuvable pour cet établissement',
+            ], 404);
+        }
+
+        $action = $validated['action'];
+        $currentStatus = $palaceRequest->status;
+
+        if ($action === 'accept') {
+            if ($currentStatus !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les demandes en attente peuvent être acceptées',
+                ], 400);
+            }
+            $palaceRequest->status = 'in_progress';
+            $palaceRequest->confirmed_at = now();
+        } elseif ($action === 'complete') {
+            if (! in_array($currentStatus, ['pending', 'in_progress'], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les demandes en cours ou en attente peuvent être terminées',
+                ], 400);
+            }
+            $palaceRequest->status = 'completed';
+        } elseif ($action === 'cancel') {
+            if (in_array($currentStatus, ['completed', 'cancelled'], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible d’annuler une demande déjà terminée ou annulée',
+                ], 400);
+            }
+            $palaceRequest->status = 'cancelled';
+            $palaceRequest->cancelled_at = now();
+        }
+
+        $palaceRequest->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            if ($palaceRequest->room_id) {
+                $statusLabel = $palaceRequest->status;
+                $firebaseService->sendToClientOfRoom(
+                    $palaceRequest->room_id,
+                    'Statut de demande palace mis à jour',
+                    "Votre demande #{$palaceRequest->request_number} est maintenant {$statusLabel}",
+                    [
+                        'type' => 'palace_status',
+                        'request_id' => (string) $palaceRequest->id,
+                        'status' => $palaceRequest->status,
+                        'screen' => 'PalaceRequests',
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (palace status): ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $palaceRequest->id,
+                'request_number' => $palaceRequest->request_number,
+                'palace_service' => [
+                    'id' => $palaceRequest->palaceService->id,
+                    'name' => $palaceRequest->palaceService->name,
+                    'category' => $palaceRequest->palaceService->category,
+                ],
+                'requested_for' => $palaceRequest->requested_for,
+                'description' => $palaceRequest->description,
+                'estimated_price' => $palaceRequest->estimated_price,
+                'formatted_price' => $palaceRequest->formatted_estimated_price,
+                'status' => $palaceRequest->status,
+                'metadata' => $palaceRequest->metadata,
+                'room_number' => $palaceRequest->room ? $palaceRequest->room->room_number : null,
+                'guest_name' => $palaceRequest->guest ? $palaceRequest->guest->name : null,
             ],
         ], 200);
     }

@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Services\FirebaseNotificationService;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -44,18 +46,26 @@ class OrderController extends Controller
     }
 
     /**
-     * Liste des commandes : celles de l'utilisateur connecté (user_id) OU celles du guest de sa chambre (code client).
+     * Liste des commandes.
+     * - Pour un guest (tablette en chambre) : commandes de l'utilisateur connecté OU du guest de sa chambre.
+     * - Pour un admin/staff : toutes les commandes Room Service de l'entreprise (grâce au scope multi-tenant).
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-        $query = Order::where(function ($q) use ($user, $guestIds) {
-            $q->where('user_id', $user->id);
-            if (! empty($guestIds)) {
-                $q->orWhereIn('guest_id', $guestIds);
-            }
-        });
+        $isStaffOrAdmin = $user->isAdmin() || $user->isStaff();
+
+        if ($isStaffOrAdmin) {
+            $query = Order::byType('room_service');
+        } else {
+            $guestIds = $this->guestIdsForUserRoom($user);
+            $query = Order::where(function ($q) use ($user, $guestIds) {
+                $q->where('user_id', $user->id);
+                if (! empty($guestIds)) {
+                    $q->orWhereIn('guest_id', $guestIds);
+                }
+            });
+        }
 
         // Filtrer par statut
         if ($request->filled('status')) {
@@ -68,7 +78,10 @@ class OrderController extends Controller
         $query->orderBy($sortBy, $sortOrder);
 
         $perPage = $request->input('per_page', 15);
-        $orders = $query->withCount('orderItems')->paginate($perPage);
+        $orders = $query
+            ->withCount('orderItems')
+            ->with(['room', 'guest'])
+            ->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -82,6 +95,8 @@ class OrderController extends Controller
                     'status' => $order->status,
                     'status_label' => $order->status_name,
                     'items_count' => $order->order_items_count,
+                    'room_number' => $order->room ? $order->room->room_number : null,
+                    'guest_name' => $order->guest ? $order->guest->name : null,
                     'created_at' => $order->created_at->toISOString(),
                     'estimated_delivery' => $order->created_at->addMinutes(30)->toISOString(),
                 ];
@@ -98,21 +113,28 @@ class OrderController extends Controller
     }
 
     /**
-     * Détails d'une commande (si elle appartient à l'utilisateur connecté ou au guest de sa chambre)
+     * Détails d'une commande.
+     * - Pour un guest (tablette en chambre) : uniquement ses commandes / celles du guest de sa chambre.
+     * - Pour un admin/staff : n'importe quelle commande de l'entreprise.
      */
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $guestIds = $this->guestIdsForUserRoom($user);
-        $order = Order::with('orderItems.menuItem')
-            ->where('id', $id)
-            ->where(function ($q) use ($user, $guestIds) {
+        $isStaffOrAdmin = $user->isAdmin() || $user->isStaff();
+
+        $query = Order::with('orderItems.menuItem');
+
+        if (! $isStaffOrAdmin) {
+            $guestIds = $this->guestIdsForUserRoom($user);
+            $query->where(function ($q) use ($user, $guestIds) {
                 $q->where('user_id', $user->id);
                 if (! empty($guestIds)) {
                     $q->orWhereIn('guest_id', $guestIds);
                 }
-            })
-            ->first();
+            });
+        }
+
+        $order = $query->where('id', $id)->first();
 
         if (!$order) {
             return response()->json([
@@ -249,7 +271,7 @@ class OrderController extends Controller
                 $firebaseService->sendNewOrderNotificationToRoom($newOrder);
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -307,6 +329,108 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'status' => $order->status,
+            ],
+        ], 200);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $user = $request->user();
+        if (! method_exists($user, 'isAdmin') || ! method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+        if (! ($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'action' => ['required', 'string', 'in:confirm,prepare,mark_ready,deliver,complete'],
+        ]);
+
+        $order = Order::where('id', $id)->first();
+
+        if (! $order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée',
+            ], 404);
+        }
+
+        if ($order->enterprise_id !== $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande introuvable pour cet établissement',
+            ], 404);
+        }
+
+        $action = $validated['action'];
+
+        if ($action === 'confirm') {
+            if ($order->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes en attente peuvent être confirmées.',
+                ], 400);
+            }
+            $order->status = 'confirmed';
+        } elseif ($action === 'prepare') {
+            if ($order->status !== 'confirmed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes confirmées peuvent être préparées.',
+                ], 400);
+            }
+            $order->status = 'preparing';
+        } elseif ($action === 'mark_ready') {
+            if ($order->status !== 'preparing') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes en préparation peuvent être marquées comme prêtes.',
+                ], 400);
+            }
+            $order->status = 'ready';
+        } elseif ($action === 'deliver') {
+            if ($order->status !== 'ready') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes prêtes peuvent être mises en livraison.',
+                ], 400);
+            }
+            $order->status = 'delivering';
+        } elseif ($action === 'complete') {
+            if ($order->status !== 'delivering') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seules les commandes en livraison peuvent être marquées comme livrées.',
+                ], 400);
+            }
+            $order->status = 'delivered';
+        }
+
+        $order->save();
+
+        try {
+            if (! empty($order->room_id)) {
+                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (order status API): ' . $e->getMessage(), ['order_id' => $order->id]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut de la commande mis à jour.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'status_label' => $order->status_name,
             ],
         ], 200);
     }

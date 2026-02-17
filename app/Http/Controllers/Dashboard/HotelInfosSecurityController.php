@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class HotelInfosSecurityController extends Controller
 {
     public function index(): View
     {
-        $enterprise = auth()->user()->enterprise;
+        $enterprise = Auth::user()->enterprise;
         if (!$enterprise) {
             abort(404, 'Établissement non trouvé.');
         }
@@ -30,7 +31,7 @@ class HotelInfosSecurityController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $enterprise = auth()->user()->enterprise;
+        $enterprise = Auth::user()->enterprise;
         if (!$enterprise) {
             abort(404, 'Établissement non trouvé.');
         }

@@ -475,14 +475,14 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       ),
     );
 
-    if (ok != true || !context.mounted) return;
+    if (ok != true || !mounted) return;
 
     try {
       await context.read<PalaceProvider>().updatePalaceRequestStatus(
         requestId: request.id,
         action: action,
       );
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Statut mis à jour'),
@@ -490,7 +490,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         ),
       );
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       final messageError = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

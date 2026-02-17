@@ -14,20 +14,23 @@ class TabletSessionApi {
     int? roomId,
     String? roomNumber,
   }) async {
-    if (roomId == null && (roomNumber == null || roomNumber.isEmpty)) {
+    final hasRoomNumber = (roomNumber?.isNotEmpty ?? false);
+    if (roomId == null && !hasRoomNumber) {
       throw Exception(
         'Indiquez le numéro de chambre ou l\'identifiant de la chambre.',
       );
     }
     try {
+      final payload = <String, dynamic>{'code': code.trim()};
+      if (roomId != null) {
+        payload['room_id'] = roomId;
+      }
+      if (hasRoomNumber) {
+        payload['room_number'] = roomNumber;
+      }
       final response = await _api.post(
         ApiConfig.tabletValidateCode,
-        data: {
-          'code': code.trim(),
-          if (roomId != null) 'room_id': roomId,
-          if (roomNumber != null && roomNumber.isNotEmpty)
-            'room_number': roomNumber,
-        },
+        data: payload,
       );
       final data = response.data as Map<String, dynamic>?;
       if (data == null || data['success'] != true || data['data'] == null) {

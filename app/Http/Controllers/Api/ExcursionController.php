@@ -8,6 +8,7 @@ use App\Models\Excursion;
 use App\Models\ExcursionBooking;
 use App\Models\Room;
 use App\Services\GuestReservationHelper;
+use Illuminate\Support\Facades\Log;
 
 class ExcursionController extends Controller
 {
@@ -188,7 +189,7 @@ class ExcursionController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -216,10 +217,18 @@ class ExcursionController extends Controller
      */
     public function myBookings(Request $request)
     {
-        $bookings = ExcursionBooking::with('excursion')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = ExcursionBooking::with(['excursion', 'room', 'guest']);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $bookings = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -237,12 +246,99 @@ class ExcursionController extends Controller
                     'total_price' => $booking->total_price,
                     'formatted_total' => number_format($booking->total_price, 0, '', ' ') . ' FCFA',
                     'status' => $booking->status,
+                    'room_number' => $booking->room ? $booking->room->room_number : null,
+                    'guest_name' => $booking->guest ? $booking->guest->name : null,
                     'created_at' => $booking->created_at->toISOString(),
                 ];
             }),
             'meta' => [
                 'current_page' => $bookings->currentPage(),
                 'total' => $bookings->total(),
+            ],
+        ], 200);
+    }
+
+    public function updateBookingStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $booking = ExcursionBooking::with(['excursion', 'room', 'guest'])->find($id);
+
+        if (! $booking || $booking->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée',
+            ], 404);
+        }
+
+        $action = $request->input('action');
+        $validActions = ['confirm', 'complete', 'cancel'];
+
+        if (!in_array($action, $validActions, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action invalide',
+            ], 400);
+        }
+
+        $statusTransitions = [
+            'confirm' => ['pending' => 'confirmed'],
+            'complete' => ['confirmed' => 'completed'],
+            'cancel' => ['pending' => 'cancelled', 'confirmed' => 'cancelled'],
+        ];
+
+        if (!isset($statusTransitions[$action][$booking->status])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transition de statut non autorisée',
+            ], 400);
+        }
+
+        $nextStatus = $statusTransitions[$action][$booking->status];
+        $booking->status = $nextStatus;
+
+        if ($nextStatus === 'confirmed' && ! $booking->confirmed_at) {
+            $booking->confirmed_at = now();
+        }
+
+        if ($nextStatus === 'cancelled' && ! $booking->cancelled_at) {
+            $booking->cancelled_at = now();
+        }
+
+        $booking->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $booking->id,
+                'excursion' => [
+                    'id' => $booking->excursion->id,
+                    'name' => $booking->excursion->name,
+                    'type' => $booking->excursion->type,
+                ],
+                'date' => $booking->booking_date?->format('Y-m-d'),
+                'adults' => $booking->number_of_adults,
+                'children' => $booking->number_of_children,
+                'total_price' => $booking->total_price,
+                'formatted_total' => number_format($booking->total_price, 0, '', ' ') . ' FCFA',
+                'status' => $booking->status,
+                'room_number' => $booking->room ? $booking->room->room_number : null,
+                'guest_name' => $booking->guest ? $booking->guest->name : null,
+                'created_at' => $booking->created_at->toISOString(),
             ],
         ], 200);
     }

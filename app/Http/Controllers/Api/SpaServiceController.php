@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\SpaService;
 use App\Models\SpaReservation;
 use App\Services\GuestReservationHelper;
+use Illuminate\Support\Facades\Log;
 
 class SpaServiceController extends Controller
 {
@@ -152,7 +153,7 @@ class SpaServiceController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -179,10 +180,18 @@ class SpaServiceController extends Controller
      */
     public function myReservations(Request $request)
     {
-        $reservations = SpaReservation::with('spaService')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = SpaReservation::with(['spaService', 'room', 'guest']);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $reservations = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -199,12 +208,124 @@ class SpaServiceController extends Controller
                     'price' => (float) $res->price,
                     'formatted_price' => number_format($res->price, 0, '', ' ') . ' FCFA',
                     'status' => $res->status,
+                    'room_number' => $res->room ? $res->room->room_number : null,
+                    'guest_name' => $res->guest ? $res->guest->name : null,
                     'created_at' => $res->created_at->toISOString(),
                 ];
             }),
             'meta' => [
                 'current_page' => $reservations->currentPage(),
                 'total' => $reservations->total(),
+            ],
+        ], 200);
+    }
+
+    public function updateReservationStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $reservation = SpaReservation::with(['spaService', 'room', 'guest'])->find($id);
+
+        if (! $reservation || $reservation->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée',
+            ], 404);
+        }
+
+        $action = $request->input('action');
+        $validActions = ['confirm', 'cancel', 'reschedule'];
+
+        if (!in_array($action, $validActions, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action invalide',
+            ], 400);
+        }
+
+        if ($action === 'reschedule') {
+            $request->validate([
+                'date' => 'required|date|after_or_equal:today',
+                'time' => 'required|date_format:H:i',
+            ]);
+
+            if (!in_array($reservation->status, ['pending', 'confirmed'], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La replanification est uniquement possible pour les réservations en attente ou confirmées',
+                ], 400);
+            }
+
+            $reservation->reservation_date = $request->input('date');
+            $reservation->reservation_time = $request->input('time');
+
+            if ($reservation->status === 'pending') {
+                $reservation->status = 'confirmed';
+            }
+
+            if ($reservation->status === 'confirmed' && ! $reservation->confirmed_at) {
+                $reservation->confirmed_at = now();
+            }
+
+            $reservation->save();
+        } else {
+            $statusTransitions = [
+                'confirm' => ['pending' => 'confirmed'],
+                'cancel' => ['pending' => 'cancelled', 'confirmed' => 'cancelled'],
+            ];
+
+            if (!isset($statusTransitions[$action][$reservation->status])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transition de statut non autorisée',
+                ], 400);
+            }
+
+            $nextStatus = $statusTransitions[$action][$reservation->status];
+            $reservation->status = $nextStatus;
+
+            if ($nextStatus === 'confirmed' && ! $reservation->confirmed_at) {
+                $reservation->confirmed_at = now();
+            }
+
+            if ($nextStatus === 'cancelled' && ! $reservation->cancelled_at) {
+                $reservation->cancelled_at = now();
+            }
+
+            $reservation->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $reservation->id,
+                'spa_service' => [
+                    'id' => $reservation->spaService->id,
+                    'name' => $reservation->spaService->name,
+                    'duration' => $reservation->spaService->duration,
+                ],
+                'date' => $reservation->reservation_date->format('Y-m-d'),
+                'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                'price' => (float) $reservation->price,
+                'formatted_price' => number_format($reservation->price, 0, '', ' ') . ' FCFA',
+                'status' => $reservation->status,
+                'room_number' => $reservation->room ? $reservation->room->room_number : null,
+                'guest_name' => $reservation->guest ? $reservation->guest->name : null,
+                'created_at' => $reservation->created_at->toISOString(),
             ],
         ], 200);
     }

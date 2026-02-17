@@ -509,11 +509,12 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
 
     final auth = context.read<AuthProvider>();
     final clientCode = _clientCodeController.text.trim();
-    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+    final relyingOnCanReserve =
+        clientCode.isEmpty && (auth.user?.canReserve == true);
 
     if (relyingOnCanReserve) {
       await auth.loadUser();
-      if (!context.mounted) return;
+      if (!mounted) return;
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

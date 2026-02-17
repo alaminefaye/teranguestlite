@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Restaurant;
 use App\Models\RestaurantReservation;
 use App\Models\Room;
@@ -121,7 +122,7 @@ class RestaurantController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -140,10 +141,18 @@ class RestaurantController extends Controller
 
     public function myReservations(Request $request)
     {
-        $reservations = RestaurantReservation::with('restaurant')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = RestaurantReservation::with(['restaurant', 'room', 'guest']);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $reservations = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -155,10 +164,95 @@ class RestaurantController extends Controller
                     'time' => \Carbon\Carbon::parse($res->reservation_time)->format('H:i'),
                     'guests' => $res->number_of_guests,
                     'status' => $res->status,
+                    'room_number' => $res->room ? $res->room->room_number : null,
+                    'guest_name' => $res->guest ? $res->guest->name : null,
                     'created_at' => $res->created_at->toISOString(),
                 ];
             }),
             'meta' => ['current_page' => $reservations->currentPage(), 'total' => $reservations->total()],
+        ], 200);
+    }
+
+    public function updateReservationStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $reservation = RestaurantReservation::find($id);
+
+        if (!$reservation || $reservation->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée',
+            ], 404);
+        }
+
+        $action = $request->input('action');
+        $validActions = ['confirm', 'cancel', 'honor'];
+
+        if (!in_array($action, $validActions, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action invalide',
+            ], 400);
+        }
+
+        $statusTransitions = [
+            'confirm' => ['pending' => 'confirmed'],
+            'cancel' => ['pending' => 'cancelled', 'confirmed' => 'cancelled'],
+            'honor' => ['confirmed' => 'honored'],
+        ];
+
+        if (!isset($statusTransitions[$action][$reservation->status])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transition de statut non autorisée',
+            ], 400);
+        }
+
+        $nextStatus = $statusTransitions[$action][$reservation->status];
+
+        $reservation->status = $nextStatus;
+
+        if ($nextStatus === 'confirmed' && !$reservation->confirmed_at) {
+            $reservation->confirmed_at = now();
+        }
+
+        if ($nextStatus === 'cancelled' && !$reservation->cancelled_at) {
+            $reservation->cancelled_at = now();
+        }
+
+        $reservation->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $reservation->id,
+                'restaurant' => [
+                    'id' => $reservation->restaurant->id,
+                    'name' => $reservation->restaurant->name,
+                ],
+                'date' => $reservation->reservation_date->format('Y-m-d'),
+                'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                'guests' => $reservation->number_of_guests,
+                'status' => $reservation->status,
+                'room_number' => $reservation->room ? $reservation->room->room_number : null,
+                'guest_name' => $reservation->guest ? $reservation->guest->name : null,
+                'created_at' => $reservation->created_at->toISOString(),
+            ],
         ], 200);
     }
 

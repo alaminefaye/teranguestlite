@@ -8,6 +8,7 @@ use App\Models\LaundryService;
 use App\Models\LaundryRequest;
 use App\Models\Room;
 use App\Services\GuestReservationHelper;
+use Illuminate\Support\Facades\Log;
 
 class LaundryServiceController extends Controller
 {
@@ -135,7 +136,7 @@ class LaundryServiceController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -169,9 +170,18 @@ class LaundryServiceController extends Controller
      */
     public function myRequests(Request $request)
     {
-        $requests = LaundryRequest::where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = LaundryRequest::with(['room', 'guest']);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $requests = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -185,12 +195,119 @@ class LaundryServiceController extends Controller
                     'pickup_time' => $req->pickup_time,
                     'delivery_time' => $req->delivery_time,
                     'status' => $req->status,
+                    'room_number' => $req->room ? $req->room->room_number : null,
+                    'guest_name' => $req->guest ? $req->guest->name : null,
                     'created_at' => $req->created_at->toISOString(),
                 ];
             }),
             'meta' => [
                 'current_page' => $requests->currentPage(),
                 'total' => $requests->total(),
+            ],
+        ], 200);
+    }
+
+    public function updateRequestStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $laundryRequest = LaundryRequest::with(['room', 'guest'])->find($id);
+
+        if (! $laundryRequest || $laundryRequest->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande non trouvée',
+            ], 404);
+        }
+
+        $action = $request->input('action');
+        $validActions = ['pickup', 'ready', 'deliver', 'cancel'];
+
+        if (!in_array($action, $validActions, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action invalide',
+            ], 400);
+        }
+
+        $statusTransitions = [
+            'pickup' => ['pending' => 'picked_up'],
+            'ready' => ['picked_up' => 'ready'],
+            'deliver' => ['ready' => 'delivered'],
+            'cancel' => [
+                'pending' => 'cancelled',
+                'picked_up' => 'cancelled',
+                'ready' => 'cancelled',
+            ],
+        ];
+
+        if (!isset($statusTransitions[$action][$laundryRequest->status])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transition de statut non autorisée',
+            ], 400);
+        }
+
+        $laundryRequest->status = $statusTransitions[$action][$laundryRequest->status];
+        $laundryRequest->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            if ($laundryRequest->room_id) {
+                $statusMessages = [
+                    'picked_up' => 'Votre linge a été pris en charge',
+                    'ready' => 'Votre linge est prêt',
+                    'delivered' => 'Votre linge a été livré',
+                    'cancelled' => 'Votre demande de blanchisserie a été annulée',
+                ];
+
+                $title = "Blanchisserie #{$laundryRequest->request_number}";
+                $body = $statusMessages[$laundryRequest->status] ?? 'Statut de blanchisserie mis à jour';
+
+                $firebaseService->sendToClientOfRoom(
+                    $laundryRequest->room_id,
+                    $title,
+                    $body,
+                    [
+                        'type' => 'laundry_status',
+                        'request_id' => (string) $laundryRequest->id,
+                        'status' => $laundryRequest->status,
+                        'screen' => 'LaundryRequests',
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (laundry status): ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $laundryRequest->id,
+                'request_number' => $laundryRequest->request_number,
+                'total_price' => $laundryRequest->total_price,
+                'formatted_total' => number_format($laundryRequest->total_price, 0, '', ' ') . ' FCFA',
+                'items_count' => count($laundryRequest->items),
+                'pickup_time' => $laundryRequest->pickup_time,
+                'delivery_time' => $laundryRequest->delivery_time,
+                'status' => $laundryRequest->status,
+                'room_number' => $laundryRequest->room ? $laundryRequest->room->room_number : null,
+                'guest_name' => $laundryRequest->guest ? $laundryRequest->guest->name : null,
+                'created_at' => $laundryRequest->created_at->toISOString(),
             ],
         ], 200);
     }

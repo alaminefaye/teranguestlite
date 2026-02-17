@@ -30,18 +30,18 @@ class _CartScreenState extends State<CartScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final tabletSession = context.read<TabletSessionProvider>();
       final cart = context.read<CartProvider>();
-      tabletSession
-          .clearError(); // Ne plus afficher une ancienne erreur "séjour invalide" sur le panier
-      cart.clearError(); // Idem pour une erreur de checkout précédente
+      tabletSession.clearError();
+      cart.clearError();
       await tabletSession.load();
-      // Récupérer automatiquement le numéro de chambre depuis l'utilisateur connecté (API)
+      if (!mounted) return;
       if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
         final authUser = context.read<AuthProvider>().user;
-        if (authUser?.roomNumber != null &&
-            authUser!.roomNumber!.trim().isNotEmpty) {
-          await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
+        final roomNumber = authUser?.roomNumber?.trim() ?? '';
+        if (roomNumber.isNotEmpty) {
+          await tabletSession.setRoomNumber(roomNumber);
         }
       }
     });
@@ -53,7 +53,7 @@ class _CartScreenState extends State<CartScreen> {
     super.dispose();
   }
 
-  Future<void> _checkout(BuildContext context) async {
+  Future<void> _checkout() async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final tabletSession = Provider.of<TabletSessionProvider>(
       context,
@@ -79,27 +79,27 @@ class _CartScreenState extends State<CartScreen> {
     // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
     if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
       final authUser = context.read<AuthProvider>().user;
-      if (authUser?.roomNumber != null &&
-          authUser!.roomNumber!.trim().isNotEmpty) {
-        await tabletSession.setRoomNumber(authUser.roomNumber!.trim());
+      final roomNumber = authUser?.roomNumber?.trim() ?? '';
+      if (roomNumber.isNotEmpty) {
+        await tabletSession.setRoomNumber(roomNumber);
       }
     }
     if (!tabletSession.hasSession) {
-      final success = await _showGuestCodeDialog(context, tabletSession);
-      if (!success || !context.mounted) return;
+      final success = await _showGuestCodeDialog(tabletSession);
+      if (!success) return;
       if (!tabletSession.hasSession) return;
     }
 
     // À ce niveau : s'actualiser et vérifier que la session (séjour) est encore valide avant la confirmation.
     // Si la session a expiré, effacer et redemander le code.
     bool sessionValid = false;
-    while (!sessionValid && context.mounted) {
+    while (!sessionValid && mounted) {
       try {
         await tabletSession.validateCurrentSession();
         sessionValid = true;
       } catch (_) {
         await tabletSession.clearSession();
-        if (!context.mounted) return;
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -109,22 +109,23 @@ class _CartScreenState extends State<CartScreen> {
             duration: const Duration(seconds: 3),
           ),
         );
-        final success = await _showGuestCodeDialog(context, tabletSession);
-        if (!success || !context.mounted) return;
+        final success = await _showGuestCodeDialog(tabletSession);
+        if (!success) return;
         if (!tabletSession.hasSession) return;
       }
     }
-    if (!context.mounted || !tabletSession.hasSession) return;
+    if (!mounted || !tabletSession.hasSession) return;
 
     // Confirmation identité + moyen de paiement.
     final confirmResult = await _showConfirmIdentityDialog(
       context,
       tabletSession.session!,
     );
-    if (!confirmResult.confirmed ||
-        confirmResult.paymentMethod == null ||
-        !context.mounted)
+    if (!mounted ||
+        !confirmResult.confirmed ||
+        confirmResult.paymentMethod == null) {
       return;
+    }
 
     HapticHelper.confirm();
     setState(() => _isProcessing = true);
@@ -137,18 +138,18 @@ class _CartScreenState extends State<CartScreen> {
       );
 
       setState(() => _isProcessing = false);
-      if (!context.mounted) return;
+      if (!mounted) return;
       HapticHelper.success();
       // Norme : après checkout, déconnecter automatiquement la session code client.
       await tabletSession.clearSession();
-      if (!context.mounted) return;
+      if (!mounted) return;
       NavigationHelper.replaceWith(
         context,
         OrderConfirmationScreen(orderData: result),
       );
     } catch (e) {
       setState(() => _isProcessing = false);
-      if (!context.mounted) return;
+      if (!mounted) return;
       HapticHelper.error();
       final message = _userFriendlyErrorMessage(e);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,10 +181,7 @@ class _CartScreenState extends State<CartScreen> {
 
   /// Affiche le dialogue "Entrez votre code client" pour la tablette.
   /// La chambre est en lecture seule (tablette reliée à une chambre) ; seul le code est saisi.
-  Future<bool> _showGuestCodeDialog(
-    BuildContext context,
-    TabletSessionProvider tabletSession,
-  ) async {
+  Future<bool> _showGuestCodeDialog(TabletSessionProvider tabletSession) async {
     tabletSession
         .clearError(); // Dialogue ouvert sans message d'erreur précédent
     String? code;
@@ -458,21 +456,30 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ..._paymentMethods.map(
-                    (e) => RadioListTile<String>(
-                      value: e.$1,
-                      groupValue: selectedPayment,
-                      onChanged: (v) => setState(() => selectedPayment = v),
-                      title: Text(
-                        e.$2,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                      activeColor: AppTheme.accentGold,
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
+                  RadioGroup<String>(
+                    groupValue: selectedPayment,
+                    onChanged: (value) {
+                      setState(() => selectedPayment = value);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: _paymentMethods
+                          .map(
+                            (e) => RadioListTile<String>(
+                              value: e.$1,
+                              title: Text(
+                                e.$2,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              activeColor: AppTheme.accentGold,
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                 ],
@@ -949,7 +956,7 @@ class _CartScreenState extends State<CartScreen> {
           AnimatedButton(
             text: l10n.placeOrder,
             icon: Icons.check_circle,
-            onPressed: _isProcessing ? null : () => _checkout(context),
+            onPressed: _isProcessing ? null : _checkout,
             isLoading: _isProcessing,
             width: double.infinity,
             height: 56,

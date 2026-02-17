@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\EnterpriseController;
@@ -228,16 +229,20 @@ Route::middleware(['auth'])->group(function () {
 
 // Redirection par défaut
 Route::get('/', function () {
-    if (auth()->check()) {
-        if (auth()->user()->isSuperAdmin()) {
+    $user = Auth::user();
+
+    if ($user) {
+        if ($user->role === 'super_admin' && $user->enterprise_id === null) {
             return redirect()->route('admin.dashboard');
         }
-        if (auth()->user()->isAdmin() || auth()->user()->isStaff()) {
+
+        if (in_array($user->role, ['admin', 'staff'], true)) {
             return redirect()->route('dashboard.index');
         }
-        // Guest
+
         return redirect()->route('guest.dashboard');
     }
+
     return redirect()->route('login');
 });
 

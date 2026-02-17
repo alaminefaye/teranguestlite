@@ -349,23 +349,37 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
   static IconData _iconForLaundryService(LaundryService service) {
     final n = service.name.toLowerCase();
     // Vêtements : icône nettoyage à sec / vêtement
-    if (n.contains('chemise') || n.contains('shirt')) return Icons.dry_cleaning;
-    if (n.contains('costume') || n.contains('suit')) return Icons.dry_cleaning;
-    if (n.contains('pantalon') || n.contains('pants') || n.contains('trousers'))
+    if (n.contains('chemise') || n.contains('shirt')) {
       return Icons.dry_cleaning;
-    if (n.contains('robe') || n.contains('dress')) return Icons.dry_cleaning;
+    }
+    if (n.contains('costume') || n.contains('suit')) {
+      return Icons.dry_cleaning;
+    }
+    if (n.contains('pantalon') ||
+        n.contains('pants') ||
+        n.contains('trousers')) {
+      return Icons.dry_cleaning;
+    }
+    if (n.contains('robe') || n.contains('dress')) {
+      return Icons.dry_cleaning;
+    }
     // Linge de maison
     if (n.contains('draps') ||
         n.contains('sheet') ||
-        n.contains('linge') && !n.contains('serviette'))
+        (n.contains('linge') && !n.contains('serviette'))) {
       return Icons.bed;
-    if (n.contains('serviette') || n.contains('towel'))
+    }
+    if (n.contains('serviette') || n.contains('towel')) {
       return Icons.local_laundry_service;
+    }
     // Services
-    if (n.contains('nettoyage') && (n.contains('sec') || n.contains('délicat')))
+    if (n.contains('nettoyage') &&
+        (n.contains('sec') || n.contains('délicat'))) {
       return Icons.dry_cleaning;
-    if (n.contains('repassage') || n.contains('iron'))
+    }
+    if (n.contains('repassage') || n.contains('iron')) {
       return Icons.cleaning_services;
+    }
     return Icons.local_laundry_service;
   }
 }

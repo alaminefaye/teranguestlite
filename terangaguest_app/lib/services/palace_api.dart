@@ -34,17 +34,16 @@ class PalaceApi {
       final description = (details?.trim() ?? '').isEmpty
           ? null
           : details!.trim();
-      final requestedFor = scheduledTime != null
-          ? '${scheduledTime.year.toString().padLeft(4, '0')}-${scheduledTime.month.toString().padLeft(2, '0')}-${scheduledTime.day.toString().padLeft(2, '0')} ${scheduledTime.hour.toString().padLeft(2, '0')}:${scheduledTime.minute.toString().padLeft(2, '0')}'
-          : null;
+      final requestedFor = scheduledTime == null
+          ? null
+          : '${scheduledTime.year.toString().padLeft(4, '0')}-${scheduledTime.month.toString().padLeft(2, '0')}-${scheduledTime.day.toString().padLeft(2, '0')} ${scheduledTime.hour.toString().padLeft(2, '0')}:${scheduledTime.minute.toString().padLeft(2, '0')}';
 
       final data = <String, dynamic>{
-        if (clientCode != null && clientCode.trim().isNotEmpty)
-          'client_code': clientCode.trim(),
-        if (description != null && description.isNotEmpty)
-          'description': description,
-        if (requestedFor != null) 'requested_for': requestedFor,
-        if (metadata != null && metadata.isNotEmpty) 'metadata': metadata,
+        if (clientCode?.trim().isNotEmpty == true)
+          'client_code': clientCode!.trim(),
+        if (description?.isNotEmpty == true) 'description': description,
+        if (requestedFor?.isNotEmpty == true) 'requested_for': requestedFor,
+        if (metadata?.isNotEmpty == true) 'metadata': metadata,
       };
 
       final response = await _apiService.post(

@@ -453,14 +453,14 @@ class _MyRestaurantReservationsScreenState
       ),
     );
 
-    if (ok != true || !context.mounted) return;
+    if (!mounted || ok != true) return;
 
     try {
       await context.read<RestaurantsProvider>().updateReservationStatus(
         reservationId: reservation.id,
         action: action,
       );
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Statut mis à jour'),
@@ -468,7 +468,7 @@ class _MyRestaurantReservationsScreenState
         ),
       );
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.errorPrefix}$e'),

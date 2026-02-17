@@ -109,7 +109,9 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
 
         // Ne pas afficher les services réservés à EXPLORATION & MOBILITÉ ni Hotel Infos & Sécurité (médecin, urgence)
         final servicesForList = provider.services
-            .where((s) => !s.isExplorationMobilityOnly && !s.isHotelSecurityOnly)
+            .where(
+              (s) => !s.isExplorationMobilityOnly && !s.isHotelSecurityOnly,
+            )
             .toList();
 
         if (servicesForList.isEmpty) {
@@ -261,7 +263,7 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,
-      errorBuilder: (_, __, ___) => Container(
+      errorBuilder: (context, error, stackTrace) => Container(
         color: AppTheme.primaryDark.withValues(alpha: 0.5),
         child: fallbackIcon,
       ),
@@ -281,35 +283,49 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
     final cat = (service.category ?? '').toLowerCase();
     if (name.contains('baby') ||
         name.contains('enfant') ||
-        name.contains('garderie'))
+        name.contains('garderie')) {
       return Icons.child_care;
+    }
     if (name.contains('billetterie') ||
         name.contains('spectacle') ||
-        name.contains('ticket'))
+        name.contains('ticket')) {
       return Icons.confirmation_number;
+    }
     if (name.contains('voiture') ||
         name.contains('chauffeur') ||
-        name.contains('location'))
+        name.contains('location')) {
       return Icons.directions_car;
+    }
     if (name.contains('événement') ||
         name.contains('event') ||
-        name.contains('organisation'))
+        name.contains('organisation')) {
       return Icons.event;
+    }
     if (name.contains('pressing') ||
         name.contains('repassage') ||
-        name.contains('laundry'))
+        name.contains('laundry')) {
       return Icons.local_laundry_service;
-    if (name.contains('majordome') || name.contains('butler'))
+    }
+    if (name.contains('majordome') || name.contains('butler')) {
       return Icons.support_agent;
+    }
     if (name.contains('transfert') ||
         name.contains('aéroport') ||
-        name.contains('airport'))
+        name.contains('airport')) {
       return Icons.flight_takeoff;
-    if (name.contains('conciergerie') || name.contains('vip'))
+    }
+    if (name.contains('conciergerie') || name.contains('vip')) {
       return Icons.luggage;
-    if (cat == 'transport') return Icons.directions_car;
-    if (cat == 'butler') return Icons.support_agent;
-    if (cat == 'vip') return Icons.star;
+    }
+    if (cat == 'transport') {
+      return Icons.directions_car;
+    }
+    if (cat == 'butler') {
+      return Icons.support_agent;
+    }
+    if (cat == 'vip') {
+      return Icons.star;
+    }
     return Icons.auto_awesome;
   }
 }

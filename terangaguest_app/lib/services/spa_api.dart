@@ -89,7 +89,9 @@ class SpaApi {
       return 'Requête invalide. Vérifiez la date et l\'heure.';
     }
     if (e.response?.statusCode == 403) {
-      return (data is Map && data['message'] != null && (data['message'] as String).isNotEmpty)
+      return (data is Map &&
+              data['message'] != null &&
+              (data['message'] as String).isNotEmpty)
           ? (data['message'] as String)
           : 'Code client invalide ou séjour non actif. Vérifiez votre code.';
     }
@@ -99,8 +101,9 @@ class SpaApi {
         final first = errors.values.first;
         if (first is List && first.isNotEmpty) return first.first as String;
       }
-      if (data is Map && data['message'] != null)
+      if (data is Map && data['message'] != null) {
         return data['message'] as String;
+      }
       return 'Vérifiez les informations saisies (date, heure).';
     }
     return e.message ?? 'Erreur lors de la réservation.';
@@ -139,9 +142,7 @@ class SpaApi {
     String? time,
   }) async {
     try {
-      final data = <String, dynamic>{
-        'action': action,
-      };
+      final data = <String, dynamic>{'action': action};
 
       if (date != null) {
         data['date'] = date.toIso8601String().split('T')[0];

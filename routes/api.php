@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SpaServiceController;
 use App\Http\Controllers\Api\ExcursionController;
 use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
+use App\Http\Controllers\Api\AdminSummaryController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\HotelAssistantController;
 use App\Http\Controllers\Api\ChatController;
@@ -56,6 +57,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/chat/messages', [ChatController::class, 'index']);
     Route::post('/chat/messages', [ChatController::class, 'store']);
+    Route::prefix('staff')->group(function () {
+        Route::get('/chat/conversations', [ChatController::class, 'staffConversations']);
+        Route::get('/chat/conversations/{conversation}', [ChatController::class, 'staffConversationMessages']);
+        Route::post('/chat/conversations/{conversation}/messages', [ChatController::class, 'staffReply']);
+    });
     
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);
@@ -84,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::post('/{id}/reorder', [OrderController::class, 'reorder']);
         Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{id}/status', [OrderController::class, 'updateStatus']);
     });
     
     // ==========================================
@@ -96,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-restaurant-reservations', [RestaurantController::class, 'myReservations']);
     Route::post('/my-restaurant-reservations/{id}/cancel', [RestaurantController::class, 'cancelReservation']);
+    Route::post('/restaurant-reservations/{id}/status', [RestaurantController::class, 'updateReservationStatus']);
     
     // ==========================================
     // SPA & BIEN-ÊTRE
@@ -107,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-spa-reservations', [SpaServiceController::class, 'myReservations']);
     Route::post('/my-spa-reservations/{id}/cancel', [SpaServiceController::class, 'cancelReservation']);
+    Route::post('/spa-reservations/{id}/status', [SpaServiceController::class, 'updateReservationStatus']);
     
     // ==========================================
     // EXCURSIONS
@@ -117,6 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/book', [ExcursionController::class, 'book']);
     });
     Route::get('/my-excursion-bookings', [ExcursionController::class, 'myBookings']);
+    Route::post('/excursion-bookings/{id}/status', [ExcursionController::class, 'updateBookingStatus']);
     
     // ==========================================
     // BLANCHISSERIE (Laundry)
@@ -126,6 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/request', [LaundryServiceController::class, 'request']);
     });
     Route::get('/my-laundry-requests', [LaundryServiceController::class, 'myRequests']);
+    Route::post('/laundry-requests/{id}/status', [LaundryServiceController::class, 'updateRequestStatus']);
     
     // ==========================================
     // AMENITIES & CONCIERGERIE (catégories + articles dynamiques)
@@ -146,6 +157,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/request', [PalaceServiceController::class, 'request']);
     });
     Route::get('/my-palace-requests', [PalaceServiceController::class, 'myRequests']);
+    Route::post('/palace-requests/{id}/status', [PalaceServiceController::class, 'updateRequestStatus']);
+
+    // ==========================================
+    // ADMIN SUMMARY (page d'accueil staff mobile)
+    // ==========================================
+    Route::get('/admin/summary', [AdminSummaryController::class, 'index']);
 
     // Véhicules (pour formulaire Location)
     Route::get('/vehicles', [VehicleController::class, 'index']);

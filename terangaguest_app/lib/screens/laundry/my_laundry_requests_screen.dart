@@ -501,14 +501,14 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
       ),
     );
 
-    if (ok != true || !context.mounted) return;
+    if (!mounted || ok != true) return;
 
     try {
       await context.read<LaundryProvider>().updateLaundryRequestStatus(
         requestId: request.id,
         action: action,
       );
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Statut mis à jour'),
@@ -516,7 +516,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
         ),
       );
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       final messageError = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

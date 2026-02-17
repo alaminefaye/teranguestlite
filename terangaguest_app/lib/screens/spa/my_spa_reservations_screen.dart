@@ -416,7 +416,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         lastDate: DateTime.now().add(const Duration(days: 365)),
       );
 
-      if (pickedDate == null) return;
+      if (!mounted || pickedDate == null) return;
 
       final initialTimeParts = reservation.time.split(':');
       final initialTimeOfDay = TimeOfDay(
@@ -431,7 +431,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         initialTime: initialTimeOfDay,
       );
 
-      if (pickedTime == null) return;
+      if (!mounted || pickedTime == null) return;
 
       newDate = pickedDate;
       final hour = pickedTime.hour.toString().padLeft(2, '0');
@@ -480,7 +480,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
       ),
     );
 
-    if (ok != true || !context.mounted) return;
+    if (!mounted || ok != true) return;
 
     try {
       await context.read<SpaProvider>().updateSpaReservationStatus(
@@ -489,7 +489,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         date: newDate,
         time: newTime,
       );
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Statut mis à jour'),
@@ -497,7 +497,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         ),
       );
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.errorPrefix}$e'),
@@ -529,8 +529,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     SpaReservation reservation,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final dialogContext = context;
     final ok = await showDialog<bool>(
-      context: context,
+      context: dialogContext,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
         title: Text(
@@ -556,11 +557,13 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         ],
       ),
     );
-    if (ok != true || !context.mounted) return;
+    if (ok != true || !dialogContext.mounted) return;
     try {
-      await context.read<SpaProvider>().cancelSpaReservation(reservation.id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      await dialogContext.read<SpaProvider>().cancelSpaReservation(
+        reservation.id,
+      );
+      if (dialogContext.mounted) {
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
           SnackBar(
             content: Text(l10n.reservationCancelledMessage),
             backgroundColor: Colors.green,
@@ -568,8 +571,8 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         );
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (dialogContext.mounted) {
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
           SnackBar(
             content: Text('${l10n.errorPrefix}$e'),
             backgroundColor: Colors.red,
