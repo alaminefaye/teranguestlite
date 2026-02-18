@@ -4,7 +4,6 @@ class PalaceService {
   final String? description;
   final String? category;
   final bool isAvailable;
-
   /// URL complète de l'image (fournie par le serveur)
   final String? image;
 
@@ -39,8 +38,7 @@ class PalaceService {
   /// True si le service est réservé au module Hotel Infos & Sécurité (médecin, urgence).
   bool get isHotelSecurityOnly {
     final lower = name.toLowerCase();
-    return lower.contains('médecin') ||
-        (lower.contains('urgence') && lower.contains('sécurité'));
+    return lower.contains('médecin') || (lower.contains('urgence') && lower.contains('sécurité'));
   }
 
   /// True si le service est réservé au module EXPLORATION & MOBILITÉ (ne pas afficher dans « Autres services »).
@@ -49,10 +47,7 @@ class PalaceService {
     return lower.contains('transfert') ||
         lower.contains('vtc') ||
         lower.contains('navette') ||
-        (lower.contains('location') &&
-            (lower.contains('voiture') ||
-                lower.contains('véhicule') ||
-                lower.contains('chauffeur'))) ||
+        (lower.contains('location') && (lower.contains('voiture') || lower.contains('véhicule') || lower.contains('chauffeur'))) ||
         lower.contains('visites guidées') ||
         lower.contains('visite guidée');
   }
@@ -77,9 +72,6 @@ class PalaceRequest {
   final String status;
   final DateTime createdAt;
   final DateTime? scheduledTime;
-  final String? roomNumber;
-  final String? guestName;
-  final String? emergencyType;
 
   PalaceRequest({
     required this.id,
@@ -89,9 +81,6 @@ class PalaceRequest {
     required this.status,
     required this.createdAt,
     this.scheduledTime,
-    this.roomNumber,
-    this.guestName,
-    this.emergencyType,
   });
 
   static int _parseInt(dynamic v) {
@@ -110,8 +99,7 @@ class PalaceRequest {
     final serviceName = palaceService != null
         ? (palaceService['name'] as String? ?? '')
         : (json['service_name'] as String? ?? '');
-    final details =
-        json['description'] as String? ?? json['details'] as String?;
+    final details = json['description'] as String? ?? json['details'] as String?;
     final status = json['status'] as String? ?? 'pending';
     final createdAtRaw = json['created_at'];
     final createdAt = createdAtRaw != null
@@ -121,8 +109,8 @@ class PalaceRequest {
     final scheduledTime = requestedFor != null
         ? DateTime.tryParse(requestedFor as String)
         : (json['scheduled_time'] != null
-              ? DateTime.tryParse(json['scheduled_time'] as String)
-              : null);
+            ? DateTime.tryParse(json['scheduled_time'] as String)
+            : null);
 
     return PalaceRequest(
       id: _parseInt(json['id']),
@@ -132,9 +120,6 @@ class PalaceRequest {
       status: status,
       createdAt: createdAt,
       scheduledTime: scheduledTime,
-      roomNumber: json['room_number'] as String?,
-      guestName: json['guest_name'] as String?,
-      emergencyType: json['emergency_type'] as String?,
     );
   }
 
@@ -162,9 +147,6 @@ class PalaceRequest {
       'status': status,
       'created_at': createdAt.toIso8601String(),
       'scheduled_time': scheduledTime?.toIso8601String(),
-      'room_number': roomNumber,
-      'guest_name': guestName,
-      'emergency_type': emergencyType,
     };
   }
 }

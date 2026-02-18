@@ -106,20 +106,9 @@ class HotelInfosScreen extends StatelessWidget {
                                   infos.mapUrl!,
                                   fit: BoxFit.contain,
                                   width: double.infinity,
-                                  loadingBuilder: (context, child, progress) =>
-                                      progress == null
-                                          ? child
-                                          : const Center(
-                                              child: CircularProgressIndicator(
-                                                color: AppTheme.accentGold,
-                                              ),
-                                            ),
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(
-                                        Icons.map_outlined,
-                                        color: AppTheme.textGray,
-                                        size: 48,
-                                      ),
+                                  loadingBuilder: (_, child, progress) =>
+                                      progress == null ? child : const Center(child: CircularProgressIndicator(color: AppTheme.accentGold)),
+                                  errorBuilder: (_, __, ___) => const Icon(Icons.map_outlined, color: AppTheme.textGray, size: 48),
                                 ),
                               ),
                             ],

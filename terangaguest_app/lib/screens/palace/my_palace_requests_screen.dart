@@ -132,24 +132,8 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
               itemCount: provider.requests.length,
               itemBuilder: (context, index) {
                 final request = provider.requests[index];
-                final hasRoomOrGuest =
-                    request.roomNumber != null || request.guestName != null;
-                final roomGuestText = () {
-                  final parts = <String>[];
-                  if (request.roomNumber != null &&
-                      request.roomNumber!.isNotEmpty) {
-                    parts.add('Chambre ${request.roomNumber}');
-                  }
-                  if (request.guestName != null &&
-                      request.guestName!.isNotEmpty) {
-                    if (parts.isNotEmpty) {
-                      parts.add('– ${request.guestName}');
-                    } else {
-                      parts.add(request.guestName!);
-                    }
-                  }
-                  return parts.join(' ');
-                }();
+                final detailsText = (request.details ?? '').trim();
+                final hasDetails = detailsText.isNotEmpty;
                 return Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
@@ -257,8 +241,8 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                   ],
                                 ),
                               ],
-                              if (hasRoomOrGuest) const SizedBox(height: 6),
-                              if (hasRoomOrGuest)
+                              if (hasDetails) const SizedBox(height: 6),
+                              if (hasDetails)
                                 Row(
                                   children: [
                                     const Icon(
@@ -269,7 +253,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
-                                        roomGuestText,
+                                        detailsText,
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: AppTheme.textGray,

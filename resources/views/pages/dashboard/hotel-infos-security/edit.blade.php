@@ -70,63 +70,20 @@
 
             <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Assistance & Urgence</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Activer les boutons « Médecin » et « Urgence sécurité » dans l'app et choisir le service Palace utilisé pour chaque bouton.
-                </p>
-                <div class="space-y-6">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="hidden" name="doctor_enabled" value="0">
-                            <input type="checkbox" name="doctor_enabled" value="1" {{ old('doctor_enabled', $emergency['doctor_enabled'] ?? true) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Assistance médecin</span>
-                        </label>
-                        <div class="min-w-[260px]">
-                            <label for="doctor_service_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Service utilisé pour « Assistance médecin »
-                            </label>
-                            <select
-                                name="doctor_service_id"
-                                id="doctor_service_id"
-                                class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500"
-                            >
-                                <option value="">Choisir un service...</option>
-                                @foreach($palaceServices as $service)
-                                    <option value="{{ $service->id }}"
-                                        {{ (string) old('doctor_service_id', $emergency['doctor_service_id'] ?? '') === (string) $service->id ? 'selected' : '' }}>
-                                        {{ $service->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="hidden" name="security_enabled" value="0">
-                            <input type="checkbox" name="security_enabled" value="1" {{ old('security_enabled', $emergency['security_enabled'] ?? true) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Urgence sécurité</span>
-                        </label>
-                        <div class="min-w-[260px]">
-                            <label for="security_service_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Service utilisé pour « Urgence sécurité »
-                            </label>
-                            <select
-                                name="security_service_id"
-                                id="security_service_id"
-                                class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500"
-                            >
-                                <option value="">Choisir un service...</option>
-                                @foreach($palaceServices as $service)
-                                    <option value="{{ $service->id }}"
-                                        {{ (string) old('security_service_id', $emergency['security_service_id'] ?? '') === (string) $service->id ? 'selected' : '' }}>
-                                        {{ $service->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Activer les boutons « Médecin » et « Urgence sécurité » dans l'app (avec identification de la chambre).</p>
+                <div class="flex flex-wrap gap-6">
+                    <label class="inline-flex items-center">
+                        <input type="hidden" name="doctor_enabled" value="0">
+                        <input type="checkbox" name="doctor_enabled" value="1" {{ old('doctor_enabled', $emergency['doctor_enabled'] ?? true) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Assistance médecin</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="hidden" name="security_enabled" value="0">
+                        <input type="checkbox" name="security_enabled" value="1" {{ old('security_enabled', $emergency['security_enabled'] ?? true) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Urgence sécurité</span>
+                    </label>
                 </div>
             </div>
 

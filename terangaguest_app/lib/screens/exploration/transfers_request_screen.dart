@@ -34,13 +34,11 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
     final api = PalaceApi();
     try {
       final services = await api.getPalaceServices();
+      final lower = (String n) => n.toLowerCase();
       PalaceService? found;
       for (final s in services) {
-        final n = s.name.toLowerCase();
-        if (n.contains('transfert') ||
-            n.contains('vtc') ||
-            n.contains('navette') ||
-            n.contains('chauffeur')) {
+        final n = lower(s.name);
+        if (n.contains('transfert') || n.contains('vtc') || n.contains('navette') || n.contains('chauffeur')) {
           found = s;
           break;
         }
@@ -60,29 +58,20 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: isError ? Colors.red : AppTheme.accentGold,
-      ),
+      SnackBar(content: Text(msg), backgroundColor: isError ? Colors.red : AppTheme.accentGold),
     );
   }
 
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     if (_serviceId == null) {
-      _showSnack(
-        'Service Transferts & VTC non configuré. Contactez l\'établissement.',
-        isError: true,
-      );
+      _showSnack('Service Transferts & VTC non configuré. Contactez l\'établissement.', isError: true);
       return;
     }
     final pickup = _pickupController.text.trim();
     final destination = _destinationController.text.trim();
     if (pickup.isEmpty || destination.isEmpty) {
-      _showSnack(
-        'Indiquez le lieu de prise en charge et la destination.',
-        isError: true,
-      );
+      _showSnack('Indiquez le lieu de prise en charge et la destination.', isError: true);
       return;
     }
     setState(() => _sending = true);
@@ -93,13 +82,11 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
         'destination_address': destination,
       };
       await context.read<PalaceProvider>().createPalaceRequest(
-        serviceId: _serviceId!,
-        details: _detailsController.text.trim().isEmpty
-            ? null
-            : _detailsController.text.trim(),
-        scheduledTime: _requestedFor,
-        metadata: metadata,
-      );
+            serviceId: _serviceId!,
+            details: _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim(),
+            scheduledTime: _requestedFor,
+            metadata: metadata,
+          );
       if (mounted) {
         _showSnack(l10n.requestSentMessage);
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -132,10 +119,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppTheme.accentGold,
-                      ),
+                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -154,10 +138,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                           ),
                           Text(
                             l10n.transfersVtcSubtitle,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppTheme.textGray,
-                            ),
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
                           ),
                         ],
                       ),
@@ -167,10 +148,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -180,21 +158,10 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.pickupPlace,
                           hintText: 'Ex: Aéroport, Hôtel…',
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                          labelStyle: const TextStyle(color: AppTheme.accentGold),
+                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -204,21 +171,10 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.destinationPlace,
                           hintText: 'Ex: Centre-ville, Adresse…',
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                          labelStyle: const TextStyle(color: AppTheme.accentGold),
+                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -228,56 +184,25 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                             context: context,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
-                            ),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
                           );
-                          if (!context.mounted || date == null) return;
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (!context.mounted || time == null) return;
-                          if (!mounted) return;
-                          setState(
-                            () => _requestedFor = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            ),
-                          );
+                          if (date == null || !mounted) return;
+                          final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                          if (time == null || !mounted) return;
+                          setState(() => _requestedFor = DateTime(date.year, date.month, date.day, time.hour, time.minute));
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
                           decoration: InputDecoration(
                             labelText: l10n.date,
-                            labelStyle: const TextStyle(
-                              color: AppTheme.accentGold,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: AppTheme.accentGold.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
+                            labelStyle: const TextStyle(color: AppTheme.accentGold),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
                           ),
                           child: Text(
-                            _requestedFor != null
-                                ? DateFormat(
-                                    'dd/MM/yyyy HH:mm',
-                                  ).format(_requestedFor!)
-                                : '—',
+                            _requestedFor != null ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!) : '—',
                             style: TextStyle(
-                              color: _requestedFor != null
-                                  ? Colors.white
-                                  : AppTheme.textGray,
+                              color: _requestedFor != null ? Colors.white : AppTheme.textGray,
                               fontSize: 16,
                             ),
                           ),
@@ -291,41 +216,20 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.description,
                           hintText: l10n.describeRequest,
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                          labelStyle: const TextStyle(color: AppTheme.accentGold),
+                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
                         ),
                       ),
                       const SizedBox(height: 24),
                       FilledButton.icon(
-                        onPressed: _sending
-                            ? null
-                            : () {
-                                HapticHelper.lightImpact();
-                                _submit();
-                              },
+                        onPressed: _sending ? null : () { HapticHelper.lightImpact(); _submit(); },
                         icon: _sending
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.black54,
-                                  ),
-                                ),
+                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.black54)),
                               )
                             : const Icon(Icons.send_outlined, size: 20),
                         label: Text(_sending ? '...' : l10n.sendRequest),

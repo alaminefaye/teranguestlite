@@ -6,32 +6,26 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class HotelInfosSecurityController extends Controller
 {
     public function index(): View
     {
-        $enterprise = Auth::user()->enterprise;
+        $enterprise = auth()->user()->enterprise;
         if (!$enterprise) {
             abort(404, 'Établissement non trouvé.');
         }
 
-        $palaceServices = $enterprise->palaceServices()
-            ->orderBy('name')
-            ->get();
-
         return view('pages.dashboard.hotel-infos-security.edit', [
             'title' => 'Hotel Infos & Sécurité',
             'enterprise' => $enterprise,
-            'palaceServices' => $palaceServices,
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
-        $enterprise = Auth::user()->enterprise;
+        $enterprise = auth()->user()->enterprise;
         if (!$enterprise) {
             abort(404, 'Établissement non trouvé.');
         }
@@ -44,8 +38,6 @@ class HotelInfosSecurityController extends Controller
             'practical_info' => 'nullable|string|max:5000',
             'doctor_enabled' => 'nullable|boolean',
             'security_enabled' => 'nullable|boolean',
-            'doctor_service_id' => 'nullable|integer',
-            'security_service_id' => 'nullable|integer',
             'chatbot_url' => 'nullable|url|max:500',
         ]);
 
@@ -68,8 +60,6 @@ class HotelInfosSecurityController extends Controller
         $settings['emergency'] = [
             'doctor_enabled' => $request->boolean('doctor_enabled', true),
             'security_enabled' => $request->boolean('security_enabled', true),
-            'doctor_service_id' => $request->input('doctor_service_id') ?: null,
-            'security_service_id' => $request->input('security_service_id') ?: null,
         ];
         $settings['chatbot_url'] = $request->input('chatbot_url') ? trim($request->input('chatbot_url')) : null;
 

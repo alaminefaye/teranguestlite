@@ -29,7 +29,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminApi _adminApi = AdminApi();
   AdminSummary? _summary;
   bool _isLoading = false;
-  String? _error;
 
   @override
   void initState() {
@@ -40,7 +39,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   Future<void> _loadSummary() async {
     setState(() {
       _isLoading = true;
-      _error = null;
     });
 
     try {
@@ -53,7 +51,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -127,39 +124,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           child: Column(
             children: [
               _buildAppBar(context, enterpriseName),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.redAccent, width: 1),
-                    ),
-                    child: Row(
-                      children: const [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.redAccent,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Impossible de charger les statistiques. Les données peuvent être incomplètes.',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),
