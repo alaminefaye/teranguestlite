@@ -8,11 +8,7 @@ class OrderCard extends StatelessWidget {
   final Order order;
   final VoidCallback onTap;
 
-  const OrderCard({
-    super.key,
-    required this.order,
-    required this.onTap,
-  });
+  const OrderCard({super.key, required this.order, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -38,157 +34,154 @@ class OrderCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // Perspective 3D
-          ..rotateX(-0.05)
-          ..rotateY(0.02),
-        alignment: Alignment.center,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.primaryBlue,
-                AppTheme.primaryDark,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // Perspective 3D
+            ..rotateX(-0.05)
+            ..rotateY(0.02),
+          alignment: Alignment.center,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.accentGold, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: AppTheme.accentGold.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  spreadRadius: -2,
+                  offset: const Offset(0, -4),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppTheme.accentGold,
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 20,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: AppTheme.accentGold.withValues(alpha: 0.1),
-                blurRadius: 15,
-                spreadRadius: -2,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Numéro de commande + Badge statut
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        order.orderNumber,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Numéro de commande + Badge statut
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          order.orderNumber,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildStatusBadge(),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      _buildStatusBadge(),
+                    ],
+                  ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color: AppTheme.textGray,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm', 'fr_FR').format(order.createdAt),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.textGray,
-                      ),
-                    ),
-                  ],
-                ),
-
-                if (hasRoomOrGuest) const SizedBox(height: 6),
-
-                if (hasRoomOrGuest)
                   Row(
                     children: [
                       const Icon(
-                        Icons.meeting_room,
+                        Icons.access_time,
                         size: 14,
                         color: AppTheme.textGray,
                       ),
                       const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          roomGuestText,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textGray,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        DateFormat(
+                          'dd/MM/yyyy HH:mm',
+                          'fr_FR',
+                        ).format(order.createdAt),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textGray,
                         ),
                       ),
                     ],
                   ),
 
-                const SizedBox(height: 8),
+                  if (hasRoomOrGuest) const SizedBox(height: 6),
 
-                // Nombre d'articles
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.restaurant_menu,
-                      size: 14,
-                      color: AppTheme.textGray,
+                  if (hasRoomOrGuest)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.meeting_room,
+                          size: 14,
+                          color: AppTheme.textGray,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            roomGuestText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textGray,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${order.itemsCount} article${order.itemsCount > 1 ? 's' : ''}',
-                      style: const TextStyle(
-                        fontSize: 12,
+
+                  const SizedBox(height: 8),
+
+                  // Nombre d'articles
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.restaurant_menu,
+                        size: 14,
                         color: AppTheme.textGray,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${order.itemsCount} article${order.itemsCount > 1 ? 's' : ''}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textGray,
+                        ),
+                      ),
+                    ],
+                  ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                // Total + Flèche
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      order.formattedTotal,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
+                  // Total + Flèche
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        order.formattedTotal,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.accentGold,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
                         color: AppTheme.accentGold,
                       ),
-                    ),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: AppTheme.accentGold,
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -201,10 +194,7 @@ class OrderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: statusColors['bg'],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColors['border']!,
-          width: 1,
-        ),
+        border: Border.all(color: statusColors['border']!, width: 1),
       ),
       child: Text(
         order.statusLabel,

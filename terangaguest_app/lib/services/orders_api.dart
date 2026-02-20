@@ -14,10 +14,7 @@ class OrdersApi {
     int perPage = 15,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
       if (status != null && status.isNotEmpty) {
         queryParams['status'] = status;
@@ -46,9 +43,7 @@ class OrdersApi {
   /// Récupère le détail d'une commande
   Future<Order> getOrderDetail(int orderId) async {
     try {
-      final response = await _apiService.get(
-        '${ApiConfig.orders}/$orderId',
-      );
+      final response = await _apiService.get('${ApiConfig.orders}/$orderId');
 
       return Order.fromJson(response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -60,9 +55,7 @@ class OrdersApi {
   /// Recommander une commande (ajoute les articles au panier)
   Future<void> reorderOrder(int orderId) async {
     try {
-      await _apiService.post(
-        '${ApiConfig.orders}/$orderId/reorder',
-      );
+      await _apiService.post('${ApiConfig.orders}/$orderId/reorder');
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
@@ -72,9 +65,7 @@ class OrdersApi {
   /// Annuler une commande
   Future<void> cancelOrder(int orderId) async {
     try {
-      await _apiService.post(
-        '${ApiConfig.orders}/$orderId/cancel',
-      );
+      await _apiService.post('${ApiConfig.orders}/$orderId/cancel');
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

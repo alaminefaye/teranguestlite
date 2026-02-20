@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
@@ -46,14 +46,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       final home = _resolveHomeScreen(authProvider);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => home),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => home));
     } else {
       // Afficher l'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context).loginError),
+          content: Text(
+            authProvider.errorMessage ??
+                AppLocalizations.of(context).loginError,
+          ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -75,9 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -124,16 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppTheme.accentGold.withValues(alpha: 0.1),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 2,
-        ),
+        border: Border.all(color: AppTheme.accentGold, width: 2),
       ),
-      child: const Icon(
-        Icons.hotel,
-        size: 60,
-        color: AppTheme.accentGold,
-      ),
+      child: const Icon(Icons.hotel, size: 60, color: AppTheme.accentGold),
     );
   }
 
@@ -167,10 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 12),
         Text(
           AppLocalizations.of(context).login,
-          style: const TextStyle(
-            fontSize: 18,
-            color: AppTheme.textGray,
-          ),
+          style: const TextStyle(fontSize: 18, color: AppTheme.textGray),
         ),
       ],
     );
@@ -201,16 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppTheme.accentGold,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
       validator: (value) {
@@ -263,16 +249,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppTheme.accentGold,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
       validator: (value) {
@@ -303,10 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         Text(
           AppLocalizations.of(context).rememberMe,
-          style: TextStyle(
-            color: AppTheme.textGray,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppTheme.textGray, fontSize: 14),
         ),
       ],
     );

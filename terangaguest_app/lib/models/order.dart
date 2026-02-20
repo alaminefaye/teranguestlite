@@ -31,7 +31,9 @@ class Order {
       orderNumber: _parseString(json['order_number']),
       status: _parseString(json['status']),
       total: _parseDouble(json['total_amount'] ?? json['total']),
-      instructions: _parseStringNullable(json['special_instructions'] ?? json['instructions']),
+      instructions: _parseStringNullable(
+        json['special_instructions'] ?? json['instructions'],
+      ),
       createdAt: DateTime.parse(_parseString(json['created_at'])),
       deliveryTime: () {
         final raw = json['estimated_delivery'] ?? json['delivery_time'];
@@ -41,8 +43,14 @@ class Order {
       itemsCount: _parseInt(json['items_count']),
       items: json['items'] != null
           ? (json['items'] as List)
-              .map((item) => OrderItem.fromJson(item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map)))
-              .toList()
+                .map(
+                  (item) => OrderItem.fromJson(
+                    item is Map<String, dynamic>
+                        ? item
+                        : Map<String, dynamic>.from(item as Map),
+                  ),
+                )
+                .toList()
           : null,
       roomNumber: _parseStringNullable(json['room_number']),
       guestName: _parseStringNullable(json['guest_name']),
@@ -80,7 +88,9 @@ class Order {
 
   /// Annulation possible tant que la commande n'est pas "Prête" (ready), en livraison ou livrée.
   bool get canCancel {
-    return status == 'pending' || status == 'confirmed' || status == 'preparing';
+    return status == 'pending' ||
+        status == 'confirmed' ||
+        status == 'preparing';
   }
 
   String get statusLabel {
@@ -123,10 +133,14 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
-    final menuItemData = json['menu_item'] is Map ? json['menu_item'] as Map<String, dynamic>? : null;
+    final menuItemData = json['menu_item'] is Map
+        ? json['menu_item'] as Map<String, dynamic>?
+        : null;
     final id = _parseInt(json['id']);
     final menuItemId = _parseInt(menuItemData?['id'] ?? json['menu_item_id']);
-    final name = _parseString(menuItemData?['name'] ?? json['name'] ?? json['item_name']);
+    final name = _parseString(
+      menuItemData?['name'] ?? json['name'] ?? json['item_name'],
+    );
     final image = _parseStringNullable(menuItemData?['image'] ?? json['image']);
 
     return OrderItem(

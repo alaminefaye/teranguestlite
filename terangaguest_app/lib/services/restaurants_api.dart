@@ -8,14 +8,9 @@ class RestaurantsApi {
   final ApiService _apiService = ApiService();
 
   /// Récupère la liste des restaurants
-  Future<List<Restaurant>> getRestaurants({
-    String? type,
-    int page = 1,
-  }) async {
+  Future<List<Restaurant>> getRestaurants({String? type, int page = 1}) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-      };
+      final queryParams = <String, dynamic>{'page': page};
 
       if (type != null && type.isNotEmpty) {
         queryParams['type'] = type;
@@ -63,8 +58,10 @@ class RestaurantsApi {
         'date': date.toIso8601String().split('T')[0],
         'time': time,
         'guests': guests,
-        if (specialRequests != null && specialRequests.isNotEmpty) 'special_requests': specialRequests,
-        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+        if (specialRequests != null && specialRequests.isNotEmpty)
+          'special_requests': specialRequests,
+        if (clientCode != null && clientCode.trim().isNotEmpty)
+          'client_code': clientCode.trim(),
       };
       final response = await _apiService.post(
         '${ApiConfig.restaurants}/$restaurantId/reserve',
@@ -98,7 +95,10 @@ class RestaurantsApi {
       );
 
       return (response.data['data'] as List)
-          .map((json) => RestaurantReservation.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                RestaurantReservation.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');

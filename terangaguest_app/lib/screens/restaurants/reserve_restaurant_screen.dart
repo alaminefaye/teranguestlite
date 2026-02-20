@@ -592,8 +592,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
 
   Widget _buildConfirmButton() {
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit =
-        hasCode && _selectedDate != null && _selectedTime != null;
+    final canSubmit = hasCode && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,
@@ -610,7 +609,8 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
 
     final auth = context.read<AuthProvider>();
     final clientCode = _clientCodeController.text.trim();
-    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+    final relyingOnCanReserve =
+        clientCode.isEmpty && (auth.user?.canReserve == true);
 
     if (relyingOnCanReserve) {
       await auth.loadUser();

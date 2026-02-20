@@ -14,20 +14,26 @@ class FcmService {
     try {
       final granted = await requestPermission();
       if (!granted) {
-        debugPrint('FCM: permission non accordée — les notifications push ne seront pas reçues.');
+        debugPrint(
+          'FCM: permission non accordée — les notifications push ne seront pas reçues.',
+        );
       }
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null || token.isEmpty) {
-        debugPrint('FCM: token vide (vérifier GoogleService-Info.plist / google-services.json et les permissions).');
+        debugPrint(
+          'FCM: token vide (vérifier GoogleService-Info.plist / google-services.json et les permissions).',
+        );
         return;
       }
-      await _api.post(
-        ApiConfig.fcmToken,
-        data: {'fcm_token': token},
+      debugPrint('FCM: token obtenu au lancement: $token');
+      await _api.post(ApiConfig.fcmToken, data: {'fcm_token': token});
+      debugPrint(
+        'FCM: token enregistré côté serveur (notifications activées pour ce compte).',
       );
-      debugPrint('FCM: token enregistré côté serveur (notifications activées pour ce compte).');
     } on DioException catch (e) {
-      debugPrint('FCM register error: ${e.response?.statusCode} ${e.response?.data}');
+      debugPrint(
+        'FCM register error: ${e.response?.statusCode} ${e.response?.data}',
+      );
     } catch (e) {
       debugPrint('FCM token error: $e');
     }

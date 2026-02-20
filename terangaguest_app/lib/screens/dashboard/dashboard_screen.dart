@@ -14,6 +14,7 @@ import '../../services/weather_service.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
+import '../notifications/notifications_screen.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
 import '../services_chambre/room_and_logistics_screen.dart';
@@ -392,7 +393,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          HapticHelper.lightImpact();
+                          context.navigateTo(const NotificationsScreen());
+                        },
                         padding: const EdgeInsets.all(8),
                         iconSize: iconSize,
                         icon: Icon(

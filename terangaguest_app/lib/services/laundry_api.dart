@@ -29,15 +29,21 @@ class LaundryApi {
     String? clientCode,
   }) async {
     try {
-      final payloadItems = items.map((e) => {
-        'laundry_service_id': e['service_id'] ?? e['laundry_service_id']!,
-        'quantity': e['quantity']!,
-      }).toList();
+      final payloadItems = items
+          .map(
+            (e) => {
+              'laundry_service_id': e['service_id'] ?? e['laundry_service_id']!,
+              'quantity': e['quantity']!,
+            },
+          )
+          .toList();
 
       final data = <String, dynamic>{
         'items': payloadItems,
-        if (specialInstructions != null && specialInstructions.isNotEmpty) 'special_instructions': specialInstructions,
-        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+        if (specialInstructions != null && specialInstructions.isNotEmpty)
+          'special_instructions': specialInstructions,
+        if (clientCode != null && clientCode.trim().isNotEmpty)
+          'client_code': clientCode.trim(),
       };
       final response = await _apiService.post(
         ApiConfig.laundryRequest,
@@ -45,7 +51,8 @@ class LaundryApi {
       );
 
       return LaundryRequest.fromJson(
-          response.data['data'] as Map<String, dynamic>);
+        response.data['data'] as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       final message = _messageFromDio(e);

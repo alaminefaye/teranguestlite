@@ -6,7 +6,9 @@ import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
+import '../../utils/navigation_helper.dart';
 import '../../widgets/service_card.dart';
+import '../auth/login_screen.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/my_reservations_screen.dart';
 import '../spa/my_spa_reservations_screen.dart';
@@ -14,6 +16,7 @@ import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../hotel_infos/assistance_emergency_screen.dart';
+import '../notifications/notifications_screen.dart';
 import 'admin_chat_conversations_screen.dart';
 
 /// Page d'accueil pour les administrateurs / staff dans l'app mobile.
@@ -54,6 +57,61 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
+        ),
+        title: Text(l10n.logout, style: const TextStyle(color: Colors.white)),
+        content: Text(
+          l10n.logoutConfirm,
+          style: const TextStyle(color: AppTheme.textGray),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.logout,
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      HapticHelper.lightImpact();
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.logout();
+
+      if (context.mounted) {
+        NavigationHelper.navigateAndRemoveUntil(context, const LoginScreen());
+      }
+    }
+  }
+
+  void _openNotifications(BuildContext context) {
+    HapticHelper.lightImpact();
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
   }
 
   @override
@@ -109,7 +167,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         icon: Icons.chat_bubble_outline,
         label: 'Messages / Chat client',
         routeKey: 'admin-chat',
-        badge: 0,
+        badge: _summary?.chatUnreadConversations ?? 0,
       ),
     ];
 
@@ -192,6 +250,69 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     color: AppTheme.textGray,
                     fontSize: 13,
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.primaryDark.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: AppTheme.accentGold.withValues(alpha: 0.4),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        _openNotifications(context);
+                      },
+                      iconSize: 22,
+                      padding: const EdgeInsets.all(6),
+                      icon: const Icon(
+                        Icons.notifications_none,
+                        color: AppTheme.accentGold,
+                      ),
+                    ),
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.primaryDark,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () {
+                    _handleLogout(context);
+                  },
+                  iconSize: 22,
+                  padding: const EdgeInsets.all(6),
+                  icon: const Icon(Icons.logout, color: AppTheme.accentGold),
                 ),
               ],
             ),

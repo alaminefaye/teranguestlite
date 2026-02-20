@@ -123,8 +123,12 @@ class ExcursionBooking {
     final date = dateStr != null
         ? (DateTime.tryParse(dateStr) ?? DateTime.now())
         : DateTime.now();
-    final adultsCount = Excursion._parseIntSafe(json['adults'] ?? json['adults_count']);
-    final childrenCount = Excursion._parseIntSafe(json['children'] ?? json['children_count']);
+    final adultsCount = Excursion._parseIntSafe(
+      json['adults'] ?? json['adults_count'],
+    );
+    final childrenCount = Excursion._parseIntSafe(
+      json['children'] ?? json['children_count'],
+    );
     final createdAtStr = json['created_at'] as String?;
     final createdAt = createdAtStr != null
         ? (DateTime.tryParse(createdAtStr) ?? DateTime.now())

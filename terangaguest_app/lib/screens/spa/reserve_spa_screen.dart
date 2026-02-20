@@ -491,8 +491,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
 
   Widget _buildConfirmButton() {
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
-    final canSubmit =
-        hasCode && _selectedDate != null && _selectedTime != null;
+    final canSubmit = hasCode && _selectedDate != null && _selectedTime != null;
 
     return AnimatedButton(
       text: AppLocalizations.of(context).confirmReservation,

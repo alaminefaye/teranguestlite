@@ -30,10 +30,7 @@ class OrdersProvider with ChangeNotifier {
   }
 
   /// Récupère les commandes
-  Future<void> fetchOrders({
-    String? status,
-    bool loadMore = false,
-  }) async {
+  Future<void> fetchOrders({String? status, bool loadMore = false}) async {
     if (!loadMore) {
       _isLoading = true;
       _errorMessage = null;
@@ -72,10 +69,7 @@ class OrdersProvider with ChangeNotifier {
   Future<void> loadMoreOrders() async {
     if (_hasMorePages && !_isLoading) {
       _currentPage++;
-      await fetchOrders(
-        status: _selectedStatus,
-        loadMore: true,
-      );
+      await fetchOrders(status: _selectedStatus, loadMore: true);
     }
   }
 
@@ -107,7 +101,7 @@ class OrdersProvider with ChangeNotifier {
     }
   }
 
-   Future<void> updateOrderStatus({
+  Future<void> updateOrderStatus({
     required int orderId,
     required String action,
   }) async {

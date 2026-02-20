@@ -52,8 +52,10 @@ class ExcursionsApi {
         'date': date.toIso8601String().split('T')[0],
         'adults': adultsCount,
         'children': childrenCount,
-        if (specialRequests != null && specialRequests.isNotEmpty) 'special_requests': specialRequests,
-        if (clientCode != null && clientCode.trim().isNotEmpty) 'client_code': clientCode.trim(),
+        if (specialRequests != null && specialRequests.isNotEmpty)
+          'special_requests': specialRequests,
+        if (clientCode != null && clientCode.trim().isNotEmpty)
+          'client_code': clientCode.trim(),
       };
       final response = await _apiService.post(
         '${ApiConfig.excursions}/$excursionId/book',
@@ -90,12 +92,12 @@ class ExcursionsApi {
   /// Récupère les bookings de l'utilisateur
   Future<List<ExcursionBooking>> getMyExcursionBookings() async {
     try {
-      final response = await _apiService.get(
-        ApiConfig.myExcursionBookings,
-      );
+      final response = await _apiService.get(ApiConfig.myExcursionBookings);
 
       return (response.data['data'] as List)
-          .map((json) => ExcursionBooking.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => ExcursionBooking.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
@@ -106,9 +108,7 @@ class ExcursionsApi {
   /// Annuler un booking
   Future<void> cancelExcursionBooking(int bookingId) async {
     try {
-      await _apiService.post(
-        '/excursion-bookings/$bookingId/cancel',
-      );
+      await _apiService.post('/excursion-bookings/$bookingId/cancel');
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

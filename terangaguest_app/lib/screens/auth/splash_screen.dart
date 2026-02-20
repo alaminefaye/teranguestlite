@@ -64,14 +64,14 @@ class _SplashScreenState extends State<SplashScreen>
     // Naviguer selon le statut
     if (authProvider.isAuthenticated) {
       final home = _resolveHomeScreen(authProvider);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => home),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => home));
     } else {
       // Pas connecté → Login
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
     }
   }
 
@@ -92,9 +92,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

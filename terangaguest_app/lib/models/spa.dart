@@ -104,14 +104,22 @@ class SpaReservation {
     final createdAtRaw = json['created_at'];
     return SpaReservation(
       id: json['id'] as int,
-      serviceId: spaService != null ? (spaService['id'] as int) : (json['service_id'] as int? ?? 0),
-      serviceName: spaService != null ? (spaService['name'] as String) : (json['service_name'] as String? ?? ''),
-      date: dateRaw != null ? DateTime.parse(dateRaw as String) : DateTime.now(),
+      serviceId: spaService != null
+          ? (spaService['id'] as int)
+          : (json['service_id'] as int? ?? 0),
+      serviceName: spaService != null
+          ? (spaService['name'] as String)
+          : (json['service_name'] as String? ?? ''),
+      date: dateRaw != null
+          ? DateTime.parse(dateRaw as String)
+          : DateTime.now(),
       time: timeRaw != null ? (timeRaw as String) : '00:00',
       status: statusRaw != null ? (statusRaw as String) : 'confirmed',
       specialRequests: json['special_requests'] as String?,
       price: _parseDouble(json['price']),
-      createdAt: createdAtRaw != null ? DateTime.parse(createdAtRaw as String) : DateTime.now(),
+      createdAt: createdAtRaw != null
+          ? DateTime.parse(createdAtRaw as String)
+          : DateTime.now(),
       roomNumber: json['room_number'] as String?,
       guestName: json['guest_name'] as String?,
     );

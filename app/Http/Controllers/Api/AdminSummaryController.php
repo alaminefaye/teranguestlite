@@ -10,6 +10,7 @@ use App\Models\SpaReservation;
 use App\Models\ExcursionBooking;
 use App\Models\LaundryRequest;
 use App\Models\PalaceRequest;
+use App\Models\HotelConversation;
 
 class AdminSummaryController extends Controller
 {
@@ -103,6 +104,18 @@ class AdminSummaryController extends Controller
                 ->count(),
         ];
 
+        $chatSummary = [
+            'unread_conversations' => HotelConversation::where('enterprise_id', $enterpriseId)
+                ->whereHas('messages', function ($query) {
+                    $query->whereNull('read_at')
+                        ->where('sender_type', 'guest');
+                })
+                ->count(),
+            'open' => HotelConversation::where('enterprise_id', $enterpriseId)
+                ->whereIn('status', ['open', 'pending'])
+                ->count(),
+        ];
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -113,8 +126,8 @@ class AdminSummaryController extends Controller
                 'laundry' => $laundryRequests,
                 'palace' => $palaceRequests,
                 'emergency' => $emergencyRequests,
+                'chat' => $chatSummary,
             ],
         ], 200);
     }
 }
-

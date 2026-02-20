@@ -20,6 +20,8 @@ class AdminSummary {
   final int palaceInProgress;
   final int palaceCompleted;
   final int emergencyOpen;
+  final int chatUnreadConversations;
+  final int chatOpen;
 
   const AdminSummary({
     required this.ordersPending,
@@ -38,6 +40,8 @@ class AdminSummary {
     required this.palaceInProgress,
     required this.palaceCompleted,
     required this.emergencyOpen,
+    required this.chatUnreadConversations,
+    required this.chatOpen,
   });
 
   factory AdminSummary.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,7 @@ class AdminSummary {
     final laundry = (json['laundry'] as Map?) ?? {};
     final palace = (json['palace'] as Map?) ?? {};
     final emergency = (json['emergency'] as Map?) ?? {};
+    final chat = (json['chat'] as Map?) ?? {};
 
     int toInt(Map data, String key) {
       final value = data[key];
@@ -73,6 +78,8 @@ class AdminSummary {
       palaceInProgress: toInt(palace, 'in_progress'),
       palaceCompleted: toInt(palace, 'completed'),
       emergencyOpen: toInt(emergency, 'open'),
+      chatUnreadConversations: toInt(chat, 'unread_conversations'),
+      chatOpen: toInt(chat, 'open'),
     );
   }
 }

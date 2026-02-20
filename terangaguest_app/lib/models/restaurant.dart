@@ -59,7 +59,10 @@ class Restaurant {
   static List<String>? _parseAmenities(dynamic raw) {
     if (raw == null) return null;
     if (raw is! List) return null;
-    return raw.map((e) => e is String ? e : e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+    return raw
+        .map((e) => e is String ? e : e?.toString() ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
   }
 
   static int? _parseInt(dynamic value) {
@@ -116,8 +119,12 @@ class RestaurantReservation {
     final restaurant = json['restaurant'] as Map<String, dynamic>?;
     return RestaurantReservation(
       id: json['id'] as int,
-      restaurantId: restaurant != null ? (restaurant['id'] as int) : (json['restaurant_id'] as int? ?? 0),
-      restaurantName: restaurant != null ? (restaurant['name'] as String) : (json['restaurant_name'] as String? ?? ''),
+      restaurantId: restaurant != null
+          ? (restaurant['id'] as int)
+          : (json['restaurant_id'] as int? ?? 0),
+      restaurantName: restaurant != null
+          ? (restaurant['name'] as String)
+          : (json['restaurant_name'] as String? ?? ''),
       date: DateTime.parse(json['date'] as String),
       time: json['time'] as String,
       guests: _parseInt(json['guests']) ?? 1,

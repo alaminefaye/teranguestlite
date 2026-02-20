@@ -25,112 +25,168 @@ class ServiceCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // Perspective 3D
-          ..rotateX(-0.05) // Légère rotation X
-          ..rotateY(0.02), // Légère rotation Y
-        alignment: Alignment.center,
-        child: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppTheme.primaryBlue,
-                    AppTheme.primaryDark,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // Perspective 3D
+            ..rotateX(-0.05) // Légère rotation X
+            ..rotateY(0.02), // Légère rotation Y
+          alignment: Alignment.center,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.accentGold, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 10),
+                    ),
+                    BoxShadow(
+                      color: AppTheme.accentGold.withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      spreadRadius: -2,
+                      offset: const Offset(0, -4),
+                    ),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppTheme.accentGold,
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: AppTheme.accentGold.withValues(alpha: 0.1),
-                    blurRadius: 15,
-                    spreadRadius: -2,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 62, color: AppTheme.accentGold),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w900,
-                        color: AppTheme.accentGold,
-                        height: 1.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 62, color: AppTheme.accentGold),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.accentGold,
+                          height: 1.1,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            if (badge != null)
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Colors.white, width: 1),
-                  ),
-                  child: Text(
-                    badge!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  ],
                 ),
               ),
-            if (isLoading)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+              if (badge != null)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: _AnimatedBadge(label: badge!),
+                ),
+              if (isLoading)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-      ),
+    );
+  }
+}
+
+class _AnimatedBadge extends StatefulWidget {
+  const _AnimatedBadge({required this.label});
+
+  final String label;
+
+  @override
+  State<_AnimatedBadge> createState() => _AnimatedBadgeState();
+}
+
+class _AnimatedBadgeState extends State<_AnimatedBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  late Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 900),
+      vsync: this,
+    )..repeat(reverse: true);
+    _scale = Tween<double>(
+      begin: 0.9,
+      end: 1.05,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _opacity = Tween<double>(
+      begin: 0.7,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scale.value,
+          child: Opacity(
+            opacity: _opacity.value,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withValues(alpha: 0.45),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Text(
+                widget.label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

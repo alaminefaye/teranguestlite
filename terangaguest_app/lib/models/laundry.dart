@@ -102,8 +102,9 @@ class LaundryRequest {
     return LaundryRequest(
       id: _parseIntSafe(json['id']),
       items: itemsList
-          .map((item) =>
-              LaundryRequestItem.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => LaundryRequestItem.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       totalPrice: _parseDouble(json['total_price'] ?? json['total']),
       status: json['status'] as String? ?? 'pending',
@@ -184,7 +185,8 @@ class LaundryRequestItem {
         ? (service['name'] as String? ?? '')
         : (json['service_name'] as String? ?? '');
     final pricePerItem = _parseDouble(
-        json['price_per_item'] ?? json['unit_price'] ?? json['price']);
+      json['price_per_item'] ?? json['unit_price'] ?? json['price'],
+    );
     return LaundryRequestItem(
       serviceId: serviceId,
       serviceName: serviceName,
