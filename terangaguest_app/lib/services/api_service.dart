@@ -68,6 +68,29 @@ class ApiService {
     _dio.options.headers.remove('Authorization');
   }
 
+  static String formatDioError(
+    DioException e, {
+    String fallbackMessage = 'Erreur réseau. Vérifiez votre connexion et réessayez.',
+  }) {
+    final response = e.response;
+    final data = response?.data;
+
+    if (data is Map && data['message'] is String) {
+      final msg = (data['message'] as String).trim();
+      if (msg.isNotEmpty) return msg;
+    }
+
+    final status = response?.statusCode;
+    if (status == 503) {
+      return 'Erreur réseau (503). Le service est temporairement indisponible. Réessayez plus tard ou contactez la réception.';
+    }
+    if (status != null) {
+      return 'Erreur réseau ($status). Vérifiez votre connexion et réessayez.';
+    }
+
+    return e.message ?? fallbackMessage;
+  }
+
   // GET request
   Future<Response> get(
     String endpoint, {

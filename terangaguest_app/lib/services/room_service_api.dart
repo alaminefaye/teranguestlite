@@ -24,23 +24,52 @@ class RoomServiceApi {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data['success'] == true) {
-          final List categoriesJson = data['data'] as List;
-          return categoriesJson
-              .map((json) => MenuCategory.fromJson(json))
+
+        // Cas 1 : l'API renvoie déjà un tableau brut de catégories
+        if (data is List) {
+          return data
+              .whereType<Map<String, dynamic>>()
+              .map(MenuCategory.fromJson)
               .toList();
-        } else {
-          throw Exception(data['message'] ?? 'Erreur lors de la récupération des catégories');
         }
+
+        // Cas 2 : format enveloppé { success: true, data: [...] }
+        if (data is Map<String, dynamic>) {
+          if (data['success'] == true && data['data'] is List) {
+            final List<dynamic> categoriesJson = data['data'] as List<dynamic>;
+            return categoriesJson
+                .whereType<Map<String, dynamic>>()
+                .map(MenuCategory.fromJson)
+                .toList();
+          }
+
+          final message = data['message'];
+          throw Exception(
+            message is String && message.trim().isNotEmpty
+                ? message
+                : 'Erreur lors de la récupération des catégories',
+          );
+        }
+
+        // Format inattendu
+        throw Exception('Réponse inattendue du serveur (catégories).');
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception(e.response?.data['message'] ?? 'Erreur réseau');
-      } else {
-        throw Exception('Impossible de se connecter au serveur');
+      final res = e.response;
+      if (res != null) {
+        final data = res.data;
+        if (data is Map<String, dynamic>) {
+          final message = data['message'];
+          if (message is String && message.trim().isNotEmpty) {
+            throw Exception(message);
+          }
+        }
+        throw Exception('Erreur réseau (${res.statusCode ?? 'inconnue'}).');
       }
+
+      throw Exception('Impossible de se connecter au serveur');
     }
   }
 
