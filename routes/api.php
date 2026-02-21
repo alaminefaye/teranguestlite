@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ExcursionController;
 use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\AdminSummaryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);
+    
+    // Récapitulatif admin (badges & compteurs)
+    Route::get('/admin-summary', [AdminSummaryController::class, 'index']);
     
     // ==========================================
     // FCM TOKEN MANAGEMENT
