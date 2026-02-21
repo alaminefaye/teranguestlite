@@ -66,7 +66,7 @@ class AdminSummaryController extends Controller
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->count(),
             'today' => ExcursionBooking::where('enterprise_id', $enterpriseId)
-                ->whereDate('activity_date', today())
+                ->whereDate('booking_date', today())
                 ->count(),
         ];
 
