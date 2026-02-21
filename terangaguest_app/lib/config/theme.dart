@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Couleurs principales
@@ -23,6 +22,22 @@ class AppTheme {
     colors: [accentGold, accentGoldLight],
   );
 
+  // Helper method to create safe text styles
+  static TextStyle _createTextStyle({
+    required double fontSize,
+    required FontWeight fontWeight,
+    required Color color,
+    String fontFamily = 'Georgia',
+  }) {
+    return TextStyle(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      fontFamily: fontFamily,
+      letterSpacing: 0.5,
+    );
+  }
+
   // Theme principal
   static ThemeData get theme {
     return ThemeData(
@@ -36,30 +51,38 @@ class AppTheme {
         surface: primaryBlue,
       ),
 
-      // Typographie
+      // Typographie - Using Georgia (guaranteed iOS font)
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.playfairDisplay(
+        displayLarge: _createTextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: textWhite,
         ),
-        displayMedium: GoogleFonts.playfairDisplay(
+        displayMedium: _createTextStyle(
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: textWhite,
         ),
-        headlineMedium: GoogleFonts.montserrat(
+        headlineMedium: _createTextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: accentGold,
         ),
-        titleLarge: GoogleFonts.montserrat(
+        titleLarge: _createTextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: textWhite,
         ),
-        bodyLarge: GoogleFonts.montserrat(fontSize: 16, color: textGray),
-        bodyMedium: GoogleFonts.montserrat(fontSize: 14, color: textGray),
+        bodyLarge: _createTextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: textGray,
+        ),
+        bodyMedium: _createTextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+          color: textGray,
+        ),
       ),
 
       // App Bar
@@ -67,7 +90,7 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.playfairDisplay(
+        titleTextStyle: _createTextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: textWhite,

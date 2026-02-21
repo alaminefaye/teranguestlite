@@ -40,9 +40,6 @@ dependencies:
   # State Management
   provider: ^6.1.1
   
-  # Fonts
-  google_fonts: ^6.1.0
-  
   # Utils
   intl: ^0.20.2
   

@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
@@ -32,14 +35,27 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminApi _adminApi = AdminApi();
   AdminSummary? _summary;
   bool _isLoading = false;
+  Timer? _summaryTimer;
 
   @override
   void initState() {
     super.initState();
     _loadSummary();
+    _summaryTimer = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _loadSummary(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _summaryTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSummary() async {
+    if (_isLoading) return;
+    final previous = _summary;
     setState(() {
       _isLoading = true;
     });
@@ -51,12 +67,53 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         _summary = data;
         _isLoading = false;
       });
+      _handleSummaryDelta(previous, data);
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  void _handleSummaryDelta(AdminSummary? oldSummary, AdminSummary newSummary) {
+    if (oldSummary == null) return;
+    final messages = <String>[];
+    if (newSummary.ordersPending > oldSummary.ordersPending) {
+      messages.add('Nouvelle commande Room Service à traiter');
+    }
+    if (newSummary.restaurantPending > oldSummary.restaurantPending) {
+      messages.add('Nouvelle réservation restaurant à traiter');
+    }
+    if (newSummary.spaPending > oldSummary.spaPending) {
+      messages.add('Nouvelle réservation Spa & Bien-être à traiter');
+    }
+    if (newSummary.excursionsPending > oldSummary.excursionsPending) {
+      messages.add('Nouvelle demande Excursions & Activités à traiter');
+    }
+    if (newSummary.laundryPending > oldSummary.laundryPending) {
+      messages.add('Nouvelle demande Blanchisserie à traiter');
+    }
+    if (newSummary.palacePending > oldSummary.palacePending) {
+      messages.add('Nouvelle demande Palace / Conciergerie à traiter');
+    }
+    if (newSummary.emergencyOpen > oldSummary.emergencyOpen) {
+      messages.add('Nouvelle alerte Assistance & Urgence');
+    }
+    if (newSummary.chatUnreadConversations >
+        oldSummary.chatUnreadConversations) {
+      messages.add('Nouveau message client dans le chat');
+    }
+    if (messages.isEmpty) return;
+    if (!mounted) return;
+    final text = messages.join('\n');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        backgroundColor: AppTheme.accentGold,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -181,7 +238,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(context, enterpriseName),
+              _buildAdminHero(context, enterpriseName),
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),
@@ -217,44 +274,241 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
+  Widget _buildAdminHero(BuildContext context, String enterpriseName) {
+    final l10n = AppLocalizations.of(context);
+    final user = context.watch<AuthProvider>().user;
+    final enterprise = user?.enterprise;
+    final displayName = enterprise?.name.trim() ?? '';
+    final coverPath = enterprise?.coverPhoto;
+    final logoPath = enterprise?.logo;
+    final backgroundImageUrl = () {
+      String? p = coverPath;
+      if (p != null && p.trim().isNotEmpty) {
+        final trimmed = p.trim();
+        if (trimmed.startsWith('http')) return trimmed;
+        return ApiConfig.storageUrl(trimmed);
+      }
+      p = logoPath;
+      if (p != null && p.trim().isNotEmpty) {
+        final trimmed = p.trim();
+        if (trimmed.startsWith('http')) return trimmed;
+        return ApiConfig.storageUrl(trimmed);
+      }
+      return null;
+    }();
+    final logoUrl = () {
+      final p = logoPath;
+      if (p == null || p.trim().isEmpty) return null;
+      final trimmed = p.trim();
+      if (trimmed.startsWith('http')) return trimmed;
+      return ApiConfig.storageUrl(trimmed);
+    }();
+    final h = MediaQuery.sizeOf(context).height;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final isCompact = isLandscape ? (h < 900) : (h < 600);
+    final isVeryCompact = h < 500;
+    final pad = LayoutHelper.horizontalPaddingValue(context);
+    final logoSize = isVeryCompact ? 88.0 : (isCompact ? 120.0 : 160.0);
+    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
+    final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 24.0 : 30.0);
+    final heroHeight = isVeryCompact ? 180.0 : (isCompact ? 220.0 : 260.0);
+
+    return SizedBox(
+      height: heroHeight,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (backgroundImageUrl != null && backgroundImageUrl.isNotEmpty)
+            CachedNetworkImage(
+              imageUrl: backgroundImageUrl,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.backgroundGradient,
+                ),
+              ),
+              errorWidget: (_, __, ___) => Container(
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.backgroundGradient,
+                ),
+              ),
+            )
+          else
+            Container(
+              decoration: const BoxDecoration(
+                gradient: AppTheme.backgroundGradient,
+              ),
+            ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black26,
+                    Colors.transparent,
+                    Colors.black45,
+                    Colors.black.withValues(alpha: 0.75),
+                  ],
+                  stops: const [0.0, 0.25, 0.6, 1.0],
+                ),
+              ),
+              child: const SizedBox.shrink(),
+            ),
+          ),
+          Align(
+            alignment: const Alignment(0, -0.95),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: pad,
+                right: pad,
+                top: 12,
+                bottom: 12,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (logoUrl != null && logoUrl.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: logoUrl,
+                      height: logoSize,
+                      fit: BoxFit.contain,
+                      placeholder: (_, __) => SizedBox(
+                        height: logoSize,
+                        child: Center(
+                          child: SizedBox(
+                            width: logoSize * 0.4,
+                            height: logoSize * 0.4,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  if (logoUrl != null && logoUrl.isNotEmpty)
+                    SizedBox(height: isVeryCompact ? 12 : 18),
+                  Text(
+                    l10n.welcomeSubtitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.textWhite,
+                      fontSize: subtitleSize,
+                      fontWeight: FontWeight.w400,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.8),
+                          offset: const Offset(0, 1),
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: pad + 8,
+                top: 20,
+                bottom: 16,
+                right: pad + 8,
+              ),
+              child: Text(
+                'Bienvenue au ${displayName.isNotEmpty ? displayName : l10n.welcomeTitle}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: nameOnBannerSize,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.9),
+                      offset: const Offset(0, 1),
+                      blurRadius: 6,
+                    ),
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 12,
+                    offset: const Offset(0, 2),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'Espace Administrateur',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: _buildAppBar(context, enterpriseName),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAppBar(BuildContext context, String enterpriseName) {
+    final summary = _summary;
+    final hasAlerts =
+        summary != null &&
+        (summary.ordersPending > 0 ||
+            summary.restaurantPending > 0 ||
+            summary.spaPending > 0 ||
+            summary.excursionsPending > 0 ||
+            summary.laundryPending > 0 ||
+            summary.palacePending > 0 ||
+            summary.emergencyOpen > 0 ||
+            summary.chatUnreadConversations > 0);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.dashboard_outlined,
-            color: AppTheme.accentGold,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Espace Administrateur',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  enterpriseName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppTheme.textGray,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
           Container(
             decoration: BoxDecoration(
               color: AppTheme.primaryDark.withValues(alpha: 0.65),
@@ -288,22 +542,23 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         color: AppTheme.accentGold,
                       ),
                     ),
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppTheme.primaryDark,
-                            width: 1,
+                    if (hasAlerts)
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.primaryDark,
+                              width: 1,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
                 IconButton(

@@ -71,7 +71,7 @@ class ApiConfig {
   static const String myPalaceRequests = '/my-palace-requests';
 
   // Admin
-  static const String adminSummary = '/admin/summary';
+  static const String adminSummary = '/admin-summary';
 
   // FCM Token
   static const String fcmToken = '/fcm-token';

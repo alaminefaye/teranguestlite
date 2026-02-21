@@ -24,52 +24,25 @@ class RoomServiceApi {
 
       if (response.statusCode == 200) {
         final data = response.data;
-
-        // Cas 1 : l'API renvoie déjà un tableau brut de catégories
-        if (data is List) {
-          return data
-              .whereType<Map<String, dynamic>>()
-              .map(MenuCategory.fromJson)
+        if (data['success'] == true) {
+          final List categoriesJson = data['data'] as List;
+          return categoriesJson
+              .map((json) => MenuCategory.fromJson(json))
               .toList();
-        }
-
-        // Cas 2 : format enveloppé { success: true, data: [...] }
-        if (data is Map<String, dynamic>) {
-          if (data['success'] == true && data['data'] is List) {
-            final List<dynamic> categoriesJson = data['data'] as List<dynamic>;
-            return categoriesJson
-                .whereType<Map<String, dynamic>>()
-                .map(MenuCategory.fromJson)
-                .toList();
-          }
-
-          final message = data['message'];
+        } else {
           throw Exception(
-            message is String && message.trim().isNotEmpty
-                ? message
-                : 'Erreur lors de la récupération des catégories',
+            data['message'] ?? 'Erreur lors de la récupération des catégories',
           );
         }
-
-        // Format inattendu
-        throw Exception('Réponse inattendue du serveur (catégories).');
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      final res = e.response;
-      if (res != null) {
-        final data = res.data;
-        if (data is Map<String, dynamic>) {
-          final message = data['message'];
-          if (message is String && message.trim().isNotEmpty) {
-            throw Exception(message);
-          }
-        }
-        throw Exception('Erreur réseau (${res.statusCode ?? 'inconnue'}).');
+      if (e.response != null) {
+        throw Exception(e.response?.data['message'] ?? 'Erreur réseau');
+      } else {
+        throw Exception('Impossible de se connecter au serveur');
       }
-
-      throw Exception('Impossible de se connecter au serveur');
     }
   }
 
@@ -82,11 +55,8 @@ class RoomServiceApi {
     int perPage = 15,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
-      
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
+
       if (categoryId != null) queryParams['category_id'] = categoryId;
       if (available != null) queryParams['available'] = available ? 1 : 0;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
@@ -104,12 +74,11 @@ class RoomServiceApi {
               .map((json) => MenuItem.fromJson(json))
               .toList();
 
-          return {
-            'items': items,
-            'meta': data['meta'] ?? {},
-          };
+          return {'items': items, 'meta': data['meta'] ?? {}};
         } else {
-          throw Exception(data['message'] ?? 'Erreur lors de la récupération des articles');
+          throw Exception(
+            data['message'] ?? 'Erreur lors de la récupération des articles',
+          );
         }
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');
@@ -135,7 +104,9 @@ class RoomServiceApi {
         if (data['success'] == true) {
           return MenuItem.fromJson(data['data']);
         } else {
-          throw Exception(data['message'] ?? 'Erreur lors de la récupération du détail');
+          throw Exception(
+            data['message'] ?? 'Erreur lors de la récupération du détail',
+          );
         }
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');
@@ -160,7 +131,7 @@ class RoomServiceApi {
         'items': items,
         if (specialInstructions != null && specialInstructions.isNotEmpty)
           'special_instructions': specialInstructions,
-        ...? (deliveryTime != null ? {'delivery_time': deliveryTime} : null),
+        ...?(deliveryTime != null ? {'delivery_time': deliveryTime} : null),
       };
 
       final response = await _apiService.post(
@@ -194,7 +165,9 @@ class RoomServiceApi {
           );
         }
         if (statusCode == 401) {
-          throw Exception('Session expirée. Reconnectez-vous ou entrez votre code client.');
+          throw Exception(
+            'Session expirée. Reconnectez-vous ou entrez votre code client.',
+          );
         }
         if (errorData is Map && errorData.containsKey('errors')) {
           final errors = errorData['errors'] as Map<String, dynamic>;
@@ -203,9 +176,13 @@ class RoomServiceApi {
             throw Exception(firstError.first.toString());
           }
         }
-        throw Exception('Erreur lors de la commande. Réessayez ou contactez la réception.');
+        throw Exception(
+          'Erreur lors de la commande. Réessayez ou contactez la réception.',
+        );
       } else {
-        throw Exception('Impossible de se connecter au serveur. Vérifiez votre connexion.');
+        throw Exception(
+          'Impossible de se connecter au serveur. Vérifiez votre connexion.',
+        );
       }
     }
   }

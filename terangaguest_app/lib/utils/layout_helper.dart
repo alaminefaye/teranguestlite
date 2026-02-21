@@ -12,7 +12,8 @@ class LayoutHelper {
 
   /// Largeur totale (en paysage = width > height)
   static double width(BuildContext context) => MediaQuery.sizeOf(context).width;
-  static double height(BuildContext context) => MediaQuery.sizeOf(context).height;
+  static double height(BuildContext context) =>
+      MediaQuery.sizeOf(context).height;
 
   /// True si on considère l'appareil comme une tablette
   static bool isTablet(BuildContext context) {
@@ -35,10 +36,14 @@ class LayoutHelper {
   static double dashboardCellAspectRatio(BuildContext context) {
     final cols = gridCrossAxisCount(context);
     switch (cols) {
-      case 4: return 1.48;
-      case 3: return 1.38;
-      case 2: return 1.25;
-      default: return 1.4;
+      case 4:
+        return 1.48;
+      case 3:
+        return 1.38;
+      case 2:
+        return 1.25;
+      default:
+        return 1.4;
     }
   }
 
@@ -46,10 +51,14 @@ class LayoutHelper {
   static double listCellAspectRatio(BuildContext context) {
     final cols = gridCrossAxisCount(context);
     switch (cols) {
-      case 4: return 0.9;
-      case 3: return 0.85;
-      case 2: return 0.8;
-      default: return 0.9;
+      case 4:
+        return 0.9;
+      case 3:
+        return 0.85;
+      case 2:
+        return 0.8;
+      default:
+        return 0.9;
     }
   }
 

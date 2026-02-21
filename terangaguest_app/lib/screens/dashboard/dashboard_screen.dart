@@ -14,7 +14,6 @@ import '../../services/weather_service.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
-import '../notifications/notifications_screen.dart';
 import '../room_service/categories_screen.dart';
 import '../room_service/cart_screen.dart';
 import '../services_chambre/room_and_logistics_screen.dart';
@@ -62,10 +61,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _handleServiceTap(BuildContext context, String route, String serviceName) {
+  void _handleServiceTap(
+    BuildContext context,
+    String route,
+    String serviceName,
+  ) {
     // Feedback haptique au tap
     HapticHelper.lightImpact();
-    
+
     switch (route) {
       case '/services-chambre-logistique':
         context.navigateTo(const RoomAndLogisticsScreen());
@@ -106,7 +109,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).navigationTo(serviceName)),
+            content: Text(
+              AppLocalizations.of(context).navigationTo(serviceName),
+            ),
             backgroundColor: AppTheme.accentGold,
             duration: const Duration(seconds: 1),
           ),
@@ -118,18 +123,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
               // Bloc hero : grande image en fond, logo + slogan + nom dessus, boutons notification/profil en overlay sur l'image
               _buildEnterpriseHero(context),
               // Grille des services
-              Expanded(
-                child: _buildServicesGrid(context),
-              ),
+              Expanded(child: _buildServicesGrid(context)),
               _buildFooter(context),
             ],
           ),
@@ -145,17 +146,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final user = context.watch<AuthProvider>().user;
     final enterprise = user?.enterprise;
     final enterpriseName = enterprise?.name.trim() ?? '';
-    // Image de fond : priorité à la photo de couverture, sinon logo
     final coverPath = enterprise?.coverPhoto;
     final logoPath = enterprise?.logo;
-    final backgroundImageUrl = (coverPath != null && coverPath.isNotEmpty)
-        ? ApiConfig.storageUrl(coverPath)
-        : (logoPath != null && logoPath.isNotEmpty)
-            ? ApiConfig.storageUrl(logoPath)
-            : null;
+    final backgroundImageUrl = () {
+      String? p = coverPath;
+      if (p != null && p.trim().isNotEmpty) {
+        final trimmed = p.trim();
+        if (trimmed.startsWith('http')) return trimmed;
+        return ApiConfig.storageUrl(trimmed);
+      }
+      p = logoPath;
+      if (p != null && p.trim().isNotEmpty) {
+        final trimmed = p.trim();
+        if (trimmed.startsWith('http')) return trimmed;
+        return ApiConfig.storageUrl(trimmed);
+      }
+      return null;
+    }();
 
     final h = MediaQuery.sizeOf(context).height;
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
     final pad = LayoutHelper.horizontalPaddingValue(context);
@@ -163,9 +174,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
     final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 24.0 : 30.0);
     final iconSize = isVeryCompact ? 22.0 : (isCompact ? 26.0 : 32.0);
-    final logoUrl = (logoPath != null && logoPath.isNotEmpty)
-        ? ApiConfig.storageUrl(logoPath)
-        : null;
+    final logoUrl = () {
+      final p = logoPath;
+      if (p == null || p.trim().isEmpty) return null;
+      final trimmed = p.trim();
+      if (trimmed.startsWith('http')) return trimmed;
+      return ApiConfig.storageUrl(trimmed);
+    }();
     // Hauteur du hero pour que l'image s'affiche bien (une seule grande zone image)
     final heroHeight = isVeryCompact ? 180.0 : (isCompact ? 220.0 : 260.0);
 
@@ -220,7 +235,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Align(
             alignment: const Alignment(0, -0.95),
             child: Padding(
-              padding: EdgeInsets.only(left: pad, right: pad, top: 12, bottom: 12),
+              padding: EdgeInsets.only(
+                left: pad,
+                right: pad,
+                top: 12,
+                bottom: 12,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -244,7 +264,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       errorWidget: (_, __, ___) => const SizedBox.shrink(),
                     ),
-                  if (logoUrl != null && logoUrl.isNotEmpty) SizedBox(height: isVeryCompact ? 12 : 18),
+                  if (logoUrl != null && logoUrl.isNotEmpty)
+                    SizedBox(height: isVeryCompact ? 12 : 18),
                   Text(
                     l10n.welcomeSubtitle,
                     textAlign: TextAlign.center,
@@ -269,7 +290,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: EdgeInsets.only(left: pad + 8, top: 20, bottom: 16, right: pad + 8),
+              padding: EdgeInsets.only(
+                left: pad + 8,
+                top: 20,
+                bottom: 16,
+                right: pad + 8,
+              ),
               child: Text(
                 'Bienvenue au ${enterpriseName.isNotEmpty ? enterpriseName : l10n.welcomeTitle}',
                 textAlign: TextAlign.center,
@@ -393,10 +419,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          HapticHelper.lightImpact();
-                          context.navigateTo(const NotificationsScreen());
-                        },
+                        onPressed: () {},
                         padding: const EdgeInsets.all(8),
                         iconSize: iconSize,
                         icon: Icon(
@@ -420,7 +443,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           decoration: BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.primaryDark, width: 1),
+                            border: Border.all(
+                              color: AppTheme.primaryDark,
+                              width: 1,
+                            ),
                           ),
                         ),
                       ),
@@ -506,7 +532,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
-              trailing: selected ? const Icon(Icons.check, color: AppTheme.accentGold) : null,
+              trailing: selected
+                  ? const Icon(Icons.check, color: AppTheme.accentGold)
+                  : null,
               onTap: () async {
                 await localeProvider.setLocale(Locale(e.$1));
                 if (ctx.mounted) Navigator.of(ctx).pop();
@@ -521,12 +549,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildServicesGrid(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final services = [
-      {'title': l10n.servicesChambreLogistique, 'icon': Icons.room_service_outlined, 'route': '/services-chambre-logistique'},
-      {'title': l10n.restaurantsBars, 'icon': Icons.restaurant_menu_outlined, 'route': '/restaurants'},
-      {'title': l10n.wellnessSportLeisure, 'icon': Icons.spa_outlined, 'route': '/wellness-sport-leisure'},
-      {'title': l10n.palaceServices, 'icon': Icons.auto_awesome_outlined, 'route': '/palace'},
-      {'title': l10n.explorationMobility, 'icon': Icons.explore_outlined, 'route': '/exploration-mobility'},
-      {'title': l10n.hotelInfosSecurity, 'icon': Icons.info_outline_rounded, 'route': '/hotel-infos-security'},
+      {
+        'title': l10n.servicesChambreLogistique,
+        'icon': Icons.room_service_outlined,
+        'route': '/services-chambre-logistique',
+      },
+      {
+        'title': l10n.restaurantsBars,
+        'icon': Icons.restaurant_menu_outlined,
+        'route': '/restaurants',
+      },
+      {
+        'title': l10n.wellnessSportLeisure,
+        'icon': Icons.spa_outlined,
+        'route': '/wellness-sport-leisure',
+      },
+      {
+        'title': l10n.palaceServices,
+        'icon': Icons.auto_awesome_outlined,
+        'route': '/palace',
+      },
+      {
+        'title': l10n.explorationMobility,
+        'icon': Icons.explore_outlined,
+        'route': '/exploration-mobility',
+      },
+      {
+        'title': l10n.hotelInfosSecurity,
+        'icon': Icons.info_outline_rounded,
+        'route': '/hotel-infos-security',
+      },
     ];
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
@@ -550,7 +602,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             title: service['title'] as String,
             icon: service['icon'] as IconData,
             onTap: () {
-              _handleServiceTap(context, service['route'] as String, service['title'] as String);
+              _handleServiceTap(
+                context,
+                service['route'] as String,
+                service['title'] as String,
+              );
             },
           );
         },
@@ -560,7 +616,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildFooter(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
     final padV = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 12.0);
@@ -590,7 +647,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       context.navigateTo(const OrdersListScreen());
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: badgePadH + 4, vertical: badgePadV + 2),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: badgePadH + 4,
+                        vertical: badgePadV + 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -599,14 +659,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.receipt_long, size: weatherIconSize + 2, color: Colors.orange),
+                          Icon(
+                            Icons.receipt_long,
+                            size: weatherIconSize + 2,
+                            color: Colors.orange,
+                          ),
                           SizedBox(width: isCompact ? 6 : 8),
                           Text(
                             inProgressCount == 1
                                 ? '1 commande en cours'
                                 : '$inProgressCount commandes en cours',
                             style: TextStyle(
-                              fontSize: isVeryCompact ? 11.0 : (isCompact ? 12.0 : 14.0),
+                              fontSize: isVeryCompact
+                                  ? 11.0
+                                  : (isCompact ? 12.0 : 14.0),
                               fontWeight: FontWeight.w600,
                               color: Colors.orange,
                             ),
@@ -623,7 +689,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 stream: Stream.periodic(const Duration(seconds: 1)),
                 builder: (context, snapshot) {
                   final now = DateTime.now();
-                  final temperature = _currentWeather?.temperature?.celsius?.round() ?? 25;
+                  final temperature =
+                      _currentWeather?.temperature?.celsius?.round() ?? 25;
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -649,18 +716,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       SizedBox(width: isCompact ? 10 : 14),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: badgePadH, vertical: badgePadV),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: badgePadH,
+                          vertical: badgePadV,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.accentGold.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.accentGold, width: 1.5),
+                          border: Border.all(
+                            color: AppTheme.accentGold,
+                            width: 1.5,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               _currentWeather != null
-                                  ? WeatherService.getWeatherIcon(_currentWeather?.weatherMain)
+                                  ? WeatherService.getWeatherIcon(
+                                      _currentWeather?.weatherMain,
+                                    )
                                   : '☀️',
                               style: TextStyle(fontSize: weatherIconSize),
                             ),
@@ -709,9 +784,10 @@ class _BlinkingOrdersBadgeState extends State<_BlinkingOrdersBadge>
       duration: const Duration(milliseconds: 900),
       vsync: this,
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.45, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.45,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -722,9 +798,6 @@ class _BlinkingOrdersBadgeState extends State<_BlinkingOrdersBadge>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: widget.child,
-    );
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 }
