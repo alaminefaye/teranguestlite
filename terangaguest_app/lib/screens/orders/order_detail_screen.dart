@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:dio/dio.dart';
 import '../../config/theme.dart';
 import '../../models/order.dart';
 import '../../providers/orders_provider.dart';
@@ -98,8 +99,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         (_) => _startEntranceAnimations(),
       );
     } catch (e) {
+      final l10n = AppLocalizations.of(context);
+      String message = l10n.errorHint;
+      if (e is DioException) {
+        final status = e.response?.statusCode;
+        if (status == 404) {
+          message = l10n.orderNotFoundHint;
+        } else {
+          message = 'Impossible de charger le détail de la commande.';
+        }
+      }
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = message;
         _isLoading = false;
       });
     }
@@ -807,9 +818,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context);
+      final l10n = AppLocalizations.of(context);
+      String message = 'Impossible de mettre à jour le statut de la commande.';
+      if (e is DioException) {
+        final status = e.response?.statusCode;
+        if (status == 404) {
+          message = 'Cette commande n’existe plus ou n’est pas accessible.';
+        } else if (status == 403) {
+          message = 'Action réservée au staff de l’hôtel.';
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+          content: Text('${l10n.errorPrefix}$message'),
           backgroundColor: Colors.red,
         ),
       );
@@ -903,9 +924,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+      String message = 'Impossible d’annuler la commande.';
+      if (e is DioException) {
+        final status = e.response?.statusCode;
+        if (status == 404) {
+          message = 'Cette commande n’existe plus ou n’est pas accessible.';
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${l10n.errorPrefix}$e'),
+          content: Text('${l10n.errorPrefix}$message'),
           backgroundColor: Colors.red,
         ),
       );
@@ -950,9 +978,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
       // Afficher erreur
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        String message = 'Impossible de réimporter les articles dans le panier.';
+        if (e is DioException) {
+          final status = e.response?.statusCode;
+          if (status == 404) {
+            message = 'Cette commande n’existe plus ou n’est pas accessible.';
+          }
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorPrefix}$e'),
+            content: Text('${l10n.errorPrefix}$message'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

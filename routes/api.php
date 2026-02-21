@@ -77,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::post('/{id}/reorder', [OrderController::class, 'reorder']);
         Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{id}/status', [OrderController::class, 'updateStatus']);
     });
     
     // ==========================================
