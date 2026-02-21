@@ -114,7 +114,10 @@ class LaundryApi {
   /// Annuler une demande
   Future<void> cancelLaundryRequest(int requestId) async {
     try {
-      await _apiService.post('/laundry-requests/$requestId/cancel');
+      await _apiService.post(
+        '${ApiConfig.laundryRequests}/$requestId/status',
+        data: {'action': 'cancel'},
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
