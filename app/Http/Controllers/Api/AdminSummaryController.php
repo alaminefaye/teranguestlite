@@ -45,7 +45,7 @@ class AdminSummaryController extends Controller
 
         $restaurantReservations = [
             'pending' => RestaurantReservation::where('enterprise_id', $enterpriseId)
-                ->where('status', 'pending')
+                ->whereIn('status', ['pending', 'confirmed'])
                 ->count(),
             'today' => RestaurantReservation::where('enterprise_id', $enterpriseId)
                 ->whereDate('reservation_date', today())
@@ -54,7 +54,7 @@ class AdminSummaryController extends Controller
 
         $spaReservations = [
             'pending' => SpaReservation::where('enterprise_id', $enterpriseId)
-                ->where('status', 'pending')
+                ->whereIn('status', ['pending', 'confirmed'])
                 ->count(),
             'today' => SpaReservation::where('enterprise_id', $enterpriseId)
                 ->whereDate('reservation_date', today())
@@ -63,7 +63,7 @@ class AdminSummaryController extends Controller
 
         $excursionBookings = [
             'pending' => ExcursionBooking::where('enterprise_id', $enterpriseId)
-                ->where('status', 'pending')
+                ->whereIn('status', ['pending', 'confirmed'])
                 ->count(),
             'today' => ExcursionBooking::where('enterprise_id', $enterpriseId)
                 ->whereDate('activity_date', today())

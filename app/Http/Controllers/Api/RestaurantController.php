@@ -121,6 +121,17 @@ class RestaurantController extends Controller
                     $restaurant->name
                 );
             }
+
+            $firebaseService->sendToStaff(
+                $user->enterprise_id,
+                'Nouvelle réservation restaurant',
+                "Nouvelle réservation au restaurant {$restaurant->name} le " . $reservation->reservation_date->format('d/m/Y') . " à " . \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                [
+                    'type' => 'restaurant_reservation',
+                    'reservation_id' => (string) $reservation->id,
+                    'screen' => 'AdminRestaurantReservations',
+                ]
+            );
         } catch (\Exception $e) {
             Log::error('Firebase notification error: ' . $e->getMessage());
         }

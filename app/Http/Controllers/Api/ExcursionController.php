@@ -178,7 +178,7 @@ class ExcursionController extends Controller
             'status' => 'confirmed',
         ]);
 
-        // Notification au client de la chambre
+        // Notification au client de la chambre et au staff
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
             if ($booking->room_id) {
@@ -188,6 +188,17 @@ class ExcursionController extends Controller
                     $excursion->name
                 );
             }
+
+            $firebaseService->sendToStaff(
+                $user->enterprise_id,
+                'Nouvelle réservation excursion',
+                "Nouvelle excursion {$excursion->name} le " . $booking->booking_date?->format('d/m/Y'),
+                [
+                    'type' => 'excursion_booking',
+                    'booking_id' => (string) $booking->id,
+                    'screen' => 'AdminExcursionBookings',
+                ]
+            );
         } catch (\Exception $e) {
             Log::error('Firebase notification error: ' . $e->getMessage());
         }

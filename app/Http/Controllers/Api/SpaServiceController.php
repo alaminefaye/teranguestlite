@@ -142,7 +142,7 @@ class SpaServiceController extends Controller
             'status' => 'confirmed',
         ]);
 
-        // Notification au client de la chambre
+        // Notification au client de la chambre et au staff
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
             if ($reservation->room_id) {
@@ -152,6 +152,17 @@ class SpaServiceController extends Controller
                     $service->name
                 );
             }
+
+            $firebaseService->sendToStaff(
+                $user->enterprise_id,
+                'Nouvelle réservation spa',
+                "Nouvelle réservation spa {$service->name} le " . $reservation->reservation_date->format('d/m/Y') . " à " . \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                [
+                    'type' => 'spa_reservation',
+                    'reservation_id' => (string) $reservation->id,
+                    'screen' => 'AdminSpaReservations',
+                ]
+            );
         } catch (\Exception $e) {
             Log::error('Firebase notification error: ' . $e->getMessage());
         }
