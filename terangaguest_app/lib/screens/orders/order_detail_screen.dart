@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../models/order.dart';
 import '../../providers/orders_provider.dart';
@@ -303,6 +304,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   Widget _buildOrderHeader() {
     final auth = context.read<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final roomNumber = _order!.roomNumber;
+    final guestName = _order!.guestName;
+    final guestPhone = _order!.guestPhone;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -334,6 +338,38 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 ).format(_order!.createdAt),
                 style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
               ),
+              const SizedBox(height: 10),
+              if (roomNumber != null && roomNumber.isNotEmpty)
+                Text(
+                  'Chambre $roomNumber',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              if (guestName != null && guestName.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    guestName,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                ),
+              if (guestPhone != null && guestPhone.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    guestPhone,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                ),
             ],
           ),
           Row(
@@ -558,6 +594,47 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 ),
                 child: Row(
                   children: [
+                    if (item.image != null && item.image!.isNotEmpty)
+                      Container(
+                        width: 54,
+                        height: 54,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: AppTheme.primaryDark.withValues(alpha: 0.6),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: CachedNetworkImage(
+                            imageUrl: item.image!,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.restaurant,
+                                  size: 22,
+                                  color: AppTheme.accentGold,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.restaurant,
+                                  size: 22,
+                                  color: AppTheme.accentGold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,7 +1056,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       // Afficher erreur
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        String message = 'Impossible de réimporter les articles dans le panier.';
+        String message =
+            'Impossible de réimporter les articles dans le panier.';
         if (e is DioException) {
           final status = e.response?.statusCode;
           if (status == 404) {

@@ -5,13 +5,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/order.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
+import '../../services/orders_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
 import '../../widgets/service_card.dart';
 import '../auth/login_screen.dart';
+import '../orders/order_detail_screen.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/my_reservations_screen.dart';
 import '../spa/my_spa_reservations_screen.dart';
@@ -33,9 +36,13 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminApi _adminApi = AdminApi();
+  final OrdersApi _ordersApi = OrdersApi();
   AdminSummary? _summary;
   bool _isLoading = false;
   Timer? _summaryTimer;
+  bool _isShowingNewOrderDialog = false;
+  final List<Order> _newOrdersQueue = [];
+  final Set<int> _alertedOrderIds = {};
 
   @override
   void initState() {
@@ -79,7 +86,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   void _handleSummaryDelta(AdminSummary? oldSummary, AdminSummary newSummary) {
     if (oldSummary == null) return;
     final messages = <String>[];
-    if (newSummary.ordersPending > oldSummary.ordersPending) {
+    final hasNewOrder = newSummary.ordersPending > oldSummary.ordersPending;
+    if (hasNewOrder) {
+      _enqueueNewOrdersForAlert();
       messages.add('Nouvelle commande Room Service à traiter');
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
@@ -114,6 +123,84 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         duration: const Duration(seconds: 4),
       ),
     );
+  }
+
+  Future<void> _enqueueNewOrdersForAlert() async {
+    try {
+      final result = await _ordersApi.getOrders(
+        status: 'pending',
+        page: 1,
+        perPage: 10,
+      );
+      final orders = result['orders'] as List<Order>;
+      for (final order in orders) {
+        if (!_alertedOrderIds.contains(order.id)) {
+          _alertedOrderIds.add(order.id);
+          try {
+            final detail = await _ordersApi.getOrderDetail(order.id);
+            final combined = Order(
+              id: order.id,
+              orderNumber: order.orderNumber.isNotEmpty
+                  ? order.orderNumber
+                  : detail.orderNumber,
+              status: detail.status.isNotEmpty ? detail.status : order.status,
+              total: detail.total != 0 ? detail.total : order.total,
+              instructions: detail.instructions ?? order.instructions,
+              createdAt: detail.createdAt,
+              deliveryTime: detail.deliveryTime,
+              itemsCount: detail.itemsCount,
+              items: detail.items,
+              roomNumber: order.roomNumber ?? detail.roomNumber,
+              guestName: order.guestName ?? detail.guestName,
+              guestPhone: order.guestPhone ?? detail.guestPhone,
+            );
+            _newOrdersQueue.add(combined);
+          } catch (_) {
+            _newOrdersQueue.add(order);
+          }
+        }
+      }
+      if (!_isShowingNewOrderDialog && _newOrdersQueue.isNotEmpty && mounted) {
+        _showNewOrdersCarousel();
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showNewOrdersCarousel() async {
+    if (!mounted) return;
+    if (_newOrdersQueue.isEmpty) {
+      _isShowingNewOrderDialog = false;
+      return;
+    }
+    _isShowingNewOrderDialog = true;
+    final ordersToShow = List<Order>.from(_newOrdersQueue);
+    _newOrdersQueue.clear();
+
+    await HapticHelper.heavyImpact();
+
+    final selectedOrder = await showDialog<Order?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _NewOrdersCarouselDialog(orders: ordersToShow);
+      },
+    );
+
+    if (!mounted) {
+      _isShowingNewOrderDialog = false;
+      return;
+    }
+    _isShowingNewOrderDialog = false;
+    if (selectedOrder != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => OrderDetailScreen(orderId: selectedOrder.id),
+        ),
+      );
+    }
+    if (_newOrdersQueue.isNotEmpty) {
+      _showNewOrdersCarousel();
+    }
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -653,4 +740,260 @@ class _AdminTile {
     required this.routeKey,
     this.badge = 0,
   });
+}
+
+class _NewOrdersCarouselDialog extends StatefulWidget {
+  const _NewOrdersCarouselDialog({required this.orders});
+
+  final List<Order> orders;
+
+  @override
+  State<_NewOrdersCarouselDialog> createState() =>
+      _NewOrdersCarouselDialogState();
+}
+
+class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
+  static const int _totalSeconds = 60;
+  late int _remainingSeconds;
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = _totalSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _remainingSeconds -= 1;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).maybePop();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress => _remainingSeconds / _totalSeconds;
+
+  Order get _currentOrder => widget.orders[_currentIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final order = _currentOrder;
+    final roomLabel = order.roomNumber != null && order.roomNumber!.isNotEmpty
+        ? 'Chambre ${order.roomNumber}'
+        : 'Chambre';
+    final guestName = order.guestName != null && order.guestName!.isNotEmpty
+        ? order.guestName!
+        : 'Client';
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.room_service_outlined,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Nouvelle commande Room Service',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (order.items != null &&
+              order.items!.isNotEmpty &&
+              order.items!.first.image != null &&
+              order.items!.first.image!.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              height: 90,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: AppTheme.primaryDark.withValues(alpha: 0.6),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: CachedNetworkImage(
+                  imageUrl: order.items!.first.image!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    child: const Center(
+                      child: Icon(
+                        Icons.restaurant,
+                        size: 32,
+                        color: AppTheme.accentGold,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    child: const Center(
+                      child: Icon(
+                        Icons.restaurant,
+                        size: 32,
+                        color: AppTheme.accentGold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (order.orderNumber.isNotEmpty)
+            Text(
+              'Commande ${order.orderNumber}',
+              style: const TextStyle(
+                color: AppTheme.accentGold,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: SizedBox(
+              width: 72,
+              height: 72,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: _progress,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
+                  ),
+                  Text(
+                    '${_remainingSeconds}s',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.orders.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.orders.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.orders.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement dans une minute.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final order = widget.orders[_currentIndex];
+            Navigator.of(context, rootNavigator: true).pop(order);
+          },
+          child: const Text(
+            'Ouvrir la commande',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
 }

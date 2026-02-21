@@ -10,6 +10,7 @@ class Order {
   final List<OrderItem>? items;
   final String? roomNumber;
   final String? guestName;
+  final String? guestPhone;
 
   Order({
     required this.id,
@@ -23,6 +24,7 @@ class Order {
     this.items,
     this.roomNumber,
     this.guestName,
+    this.guestPhone,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -54,6 +56,7 @@ class Order {
           : null,
       roomNumber: _parseStringNullable(json['room_number']),
       guestName: _parseStringNullable(json['guest_name']),
+      guestPhone: _parseStringNullable(json['guest_phone']),
     );
   }
 

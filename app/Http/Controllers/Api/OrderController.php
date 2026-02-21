@@ -122,7 +122,7 @@ class OrderController extends Controller
         $user = $request->user();
         $isStaffOrAdmin = $user->isAdmin() || $user->isStaff();
 
-        $query = Order::with('orderItems.menuItem');
+        $query = Order::with(['orderItems.menuItem', 'room', 'guest']);
 
         if (! $isStaffOrAdmin) {
             $guestIds = $this->guestIdsForUserRoom($user);
@@ -177,6 +177,9 @@ class OrderController extends Controller
                 'special_instructions' => $order->special_instructions,
                 'instructions' => $order->special_instructions,
                 'items' => $itemsWithDetails,
+                'room_number' => $order->room ? $order->room->room_number : null,
+                'guest_name' => $order->guest ? $order->guest->name : null,
+                'guest_phone' => $order->guest ? $order->guest->phone : null,
                 'created_at' => $order->created_at->toISOString(),
                 'updated_at' => $order->updated_at->toISOString(),
             ],
