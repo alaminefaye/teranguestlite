@@ -79,10 +79,10 @@ class ServiceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (badge != null)
+              if (badge != null && badge != '0')
                 Positioned(
-                  top: 10,
-                  right: 10,
+                  top: 4,
+                  right: 4,
                   child: _AnimatedBadge(label: badge!),
                 ),
               if (isLoading)
@@ -162,25 +162,30 @@ class _AnimatedBadgeState extends State<_AnimatedBadge>
           child: Opacity(
             opacity: _opacity.value,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              height: 32,
+              constraints: const BoxConstraints(minWidth: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.redAccent,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white, width: 1),
+                border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.redAccent.withValues(alpha: 0.45),
-                    blurRadius: 8,
+                    color: Colors.black.withValues(alpha: 0.55),
+                    blurRadius: 10,
                     spreadRadius: 1,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
+              alignment: Alignment.center,
               child: Text(
                 widget.label,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),

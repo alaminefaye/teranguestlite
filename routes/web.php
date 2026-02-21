@@ -78,6 +78,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'index'])->name('hotel-infos-security.index');
         Route::put('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'update'])->name('hotel-infos-security.update');
 
+        // Chat invité (messages depuis les tablettes)
+        Route::get('hotel-chat', [\App\Http\Controllers\Dashboard\ChatController::class, 'index'])->name('hotel-chat.index');
+        Route::get('hotel-chat/{conversation}', [\App\Http\Controllers\Dashboard\ChatController::class, 'show'])->name('hotel-chat.show');
+        Route::post('hotel-chat/{conversation}/reply', [\App\Http\Controllers\Dashboard\ChatController::class, 'reply'])->name('hotel-chat.reply');
+
         // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
         Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
         Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');
