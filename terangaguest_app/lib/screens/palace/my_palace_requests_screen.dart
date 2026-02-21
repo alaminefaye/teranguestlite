@@ -134,6 +134,27 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                 final request = provider.requests[index];
                 final detailsText = (request.details ?? '').trim();
                 final hasDetails = detailsText.isNotEmpty;
+                final hasRoomOrGuest =
+                    (request.roomNumber != null &&
+                        request.roomNumber!.isNotEmpty) ||
+                    (request.guestName != null &&
+                        request.guestName!.isNotEmpty);
+                final roomGuestText = () {
+                  final parts = <String>[];
+                  if (request.roomNumber != null &&
+                      request.roomNumber!.isNotEmpty) {
+                    parts.add('Chambre ${request.roomNumber}');
+                  }
+                  if (request.guestName != null &&
+                      request.guestName!.isNotEmpty) {
+                    if (parts.isNotEmpty) {
+                      parts.add('– ${request.guestName}');
+                    } else {
+                      parts.add(request.guestName!);
+                    }
+                  }
+                  return parts.join(' ');
+                }();
                 return Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
@@ -177,7 +198,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                request.serviceName,
+                                request.requestNumber != null &&
+                                        request.requestNumber!.isNotEmpty
+                                    ? request.requestNumber!
+                                    : request.serviceName,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -186,6 +210,20 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              if (request.requestNumber != null &&
+                                  request.requestNumber!.isNotEmpty)
+                                const SizedBox(height: 4),
+                              if (request.requestNumber != null &&
+                                  request.requestNumber!.isNotEmpty)
+                                Text(
+                                  request.serviceName,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppTheme.textGray,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               const SizedBox(height: 8),
                               _buildStatusBadge(context, request.status),
                             ],
@@ -241,12 +279,34 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                   ],
                                 ),
                               ],
+                              if (hasRoomOrGuest) const SizedBox(height: 6),
+                              if (hasRoomOrGuest)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.meeting_room,
+                                      size: 14,
+                                      color: AppTheme.textGray,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        roomGuestText,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textGray,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               if (hasDetails) const SizedBox(height: 6),
                               if (hasDetails)
                                 Row(
                                   children: [
                                     const Icon(
-                                      Icons.meeting_room,
+                                      Icons.notes,
                                       size: 14,
                                       color: AppTheme.textGray,
                                     ),

@@ -4,6 +4,7 @@ class PalaceService {
   final String? description;
   final String? category;
   final bool isAvailable;
+
   /// URL complète de l'image (fournie par le serveur)
   final String? image;
 
@@ -38,7 +39,8 @@ class PalaceService {
   /// True si le service est réservé au module Hotel Infos & Sécurité (médecin, urgence).
   bool get isHotelSecurityOnly {
     final lower = name.toLowerCase();
-    return lower.contains('médecin') || (lower.contains('urgence') && lower.contains('sécurité'));
+    return lower.contains('médecin') ||
+        (lower.contains('urgence') && lower.contains('sécurité'));
   }
 
   /// True si le service est réservé au module EXPLORATION & MOBILITÉ (ne pas afficher dans « Autres services »).
@@ -47,7 +49,10 @@ class PalaceService {
     return lower.contains('transfert') ||
         lower.contains('vtc') ||
         lower.contains('navette') ||
-        (lower.contains('location') && (lower.contains('voiture') || lower.contains('véhicule') || lower.contains('chauffeur'))) ||
+        (lower.contains('location') &&
+            (lower.contains('voiture') ||
+                lower.contains('véhicule') ||
+                lower.contains('chauffeur'))) ||
         lower.contains('visites guidées') ||
         lower.contains('visite guidée');
   }
@@ -66,21 +71,27 @@ class PalaceService {
 
 class PalaceRequest {
   final int id;
+  final String? requestNumber;
   final int serviceId;
   final String serviceName;
   final String? details;
   final String status;
   final DateTime createdAt;
   final DateTime? scheduledTime;
+  final String? roomNumber;
+  final String? guestName;
 
   PalaceRequest({
     required this.id,
+    this.requestNumber,
     required this.serviceId,
     required this.serviceName,
     this.details,
     required this.status,
     required this.createdAt,
     this.scheduledTime,
+    this.roomNumber,
+    this.guestName,
   });
 
   static int _parseInt(dynamic v) {
@@ -93,13 +104,15 @@ class PalaceRequest {
 
   factory PalaceRequest.fromJson(Map<String, dynamic> json) {
     final palaceService = json['palace_service'] as Map<String, dynamic>?;
+    final requestNumber = json['request_number'] as String?;
     final serviceId = palaceService != null
         ? _parseInt(palaceService['id'])
         : _parseInt(json['service_id']);
     final serviceName = palaceService != null
         ? (palaceService['name'] as String? ?? '')
         : (json['service_name'] as String? ?? '');
-    final details = json['description'] as String? ?? json['details'] as String?;
+    final details =
+        json['description'] as String? ?? json['details'] as String?;
     final status = json['status'] as String? ?? 'pending';
     final createdAtRaw = json['created_at'];
     final createdAt = createdAtRaw != null
@@ -109,17 +122,22 @@ class PalaceRequest {
     final scheduledTime = requestedFor != null
         ? DateTime.tryParse(requestedFor as String)
         : (json['scheduled_time'] != null
-            ? DateTime.tryParse(json['scheduled_time'] as String)
-            : null);
+              ? DateTime.tryParse(json['scheduled_time'] as String)
+              : null);
+    final roomNumber = json['room_number'] as String?;
+    final guestName = json['guest_name'] as String?;
 
     return PalaceRequest(
       id: _parseInt(json['id']),
+      requestNumber: requestNumber,
       serviceId: serviceId,
       serviceName: serviceName,
       details: details,
       status: status,
       createdAt: createdAt,
       scheduledTime: scheduledTime,
+      roomNumber: roomNumber,
+      guestName: guestName,
     );
   }
 
@@ -141,12 +159,15 @@ class PalaceRequest {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'request_number': requestNumber,
       'service_id': serviceId,
       'service_name': serviceName,
       'details': details,
       'status': status,
       'created_at': createdAt.toIso8601String(),
       'scheduled_time': scheduledTime?.toIso8601String(),
+      'room_number': roomNumber,
+      'guest_name': guestName,
     };
   }
 }
