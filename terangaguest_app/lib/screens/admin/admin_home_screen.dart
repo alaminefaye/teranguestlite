@@ -25,6 +25,20 @@ import '../hotel_infos/assistance_emergency_screen.dart';
 import '../notifications/notifications_screen.dart';
 import 'admin_chat_conversations_screen.dart';
 
+class _AdminEventAlert {
+  final String title;
+  final String message;
+  final IconData icon;
+  final String? routeKey;
+
+  const _AdminEventAlert({
+    required this.title,
+    required this.message,
+    required this.icon,
+    this.routeKey,
+  });
+}
+
 /// Page d'accueil pour les administrateurs / staff dans l'app mobile.
 /// Affiche des boxes pour accéder aux différents modules de gestion.
 class AdminHomeScreen extends StatefulWidget {
@@ -43,6 +57,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   bool _isShowingNewOrderDialog = false;
   final List<Order> _newOrdersQueue = [];
   final Set<int> _alertedOrderIds = {};
+  bool _isShowingAdminEventDialog = false;
+  final List<_AdminEventAlert> _adminEventQueue = [];
 
   @override
   void initState() {
@@ -83,7 +99,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-  void _handleSummaryDelta(AdminSummary? oldSummary, AdminSummary newSummary) {
+  Future<void> _handleSummaryDelta(
+    AdminSummary? oldSummary,
+    AdminSummary newSummary,
+  ) async {
     if (oldSummary == null) return;
     final messages = <String>[];
     final hasNewOrder = newSummary.ordersPending > oldSummary.ordersPending;
@@ -93,25 +112,81 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
       messages.add('Nouvelle réservation restaurant à traiter');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle réservation restaurant',
+          message: 'Vous avez une nouvelle réservation restaurant à traiter.',
+          icon: Icons.restaurant_menu,
+          routeKey: 'admin-restaurants',
+        ),
+      );
     }
     if (newSummary.spaPending > oldSummary.spaPending) {
       messages.add('Nouvelle réservation Spa & Bien-être à traiter');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle réservation Spa & Bien-être',
+          message: 'Vous avez une nouvelle réservation spa à traiter.',
+          icon: Icons.spa,
+          routeKey: 'admin-spa',
+        ),
+      );
     }
     if (newSummary.excursionsPending > oldSummary.excursionsPending) {
       messages.add('Nouvelle demande Excursions & Activités à traiter');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle demande Excursions & Activités',
+          message: 'Vous avez une nouvelle demande excursions à traiter.',
+          icon: Icons.landscape,
+          routeKey: 'admin-excursions',
+        ),
+      );
     }
     if (newSummary.laundryPending > oldSummary.laundryPending) {
       messages.add('Nouvelle demande Blanchisserie à traiter');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle demande Blanchisserie',
+          message: 'Vous avez une nouvelle demande blanchisserie à traiter.',
+          icon: Icons.local_laundry_service,
+          routeKey: 'admin-laundry',
+        ),
+      );
     }
     if (newSummary.palacePending > oldSummary.palacePending) {
       messages.add('Nouvelle demande Palace / Conciergerie à traiter');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle demande Palace / Conciergerie',
+          message: 'Vous avez une nouvelle demande palace/conciergerie.',
+          icon: Icons.account_balance,
+          routeKey: 'admin-palace',
+        ),
+      );
     }
     if (newSummary.emergencyOpen > oldSummary.emergencyOpen) {
       messages.add('Nouvelle alerte Assistance & Urgence');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouvelle alerte Assistance & Urgence',
+          message: 'Une nouvelle alerte assistance/urgence est ouverte.',
+          icon: Icons.warning_amber_rounded,
+          routeKey: 'admin-emergency',
+        ),
+      );
     }
     if (newSummary.chatUnreadConversations >
         oldSummary.chatUnreadConversations) {
       messages.add('Nouveau message client dans le chat');
+      _adminEventQueue.add(
+        const _AdminEventAlert(
+          title: 'Nouveau message client',
+          message: 'Vous avez un nouveau message client dans le chat.',
+          icon: Icons.chat_bubble_outline,
+          routeKey: 'admin-chat',
+        ),
+      );
     }
     if (messages.isEmpty) return;
     if (!mounted) return;
@@ -122,6 +197,98 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         backgroundColor: AppTheme.accentGold,
         duration: const Duration(seconds: 4),
       ),
+    );
+    await _showAdminEventAlerts();
+  }
+
+  Future<void> _showAdminEventAlerts() async {
+    if (_isShowingAdminEventDialog) return;
+    if (_adminEventQueue.isEmpty) return;
+    _isShowingAdminEventDialog = true;
+    while (_adminEventQueue.isNotEmpty && mounted) {
+      final alert = _adminEventQueue.removeAt(0);
+      final openSection = await showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) {
+          return AlertDialog(
+            backgroundColor: AppTheme.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+            ),
+            title: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppTheme.accentGold.withValues(alpha: 0.15),
+                  ),
+                  child: Icon(alert.icon, color: AppTheme.accentGold),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    alert.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              alert.message,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                },
+                child: const Text(
+                  'Fermer',
+                  style: TextStyle(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (alert.routeKey != null)
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext, rootNavigator: true).pop(true);
+                  },
+                  child: const Text(
+                    'Ouvrir',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+      if (!mounted) break;
+      if (openSection == true && alert.routeKey != null) {
+        _openAdminSection(alert.routeKey!);
+      }
+    }
+    _isShowingAdminEventDialog = false;
+  }
+
+  void _openAdminSection(String routeKey) {
+    final l10n = AppLocalizations.of(context);
+    _handleTileTap(
+      context,
+      _AdminTile(label: '', icon: Icons.circle, routeKey: routeKey),
+      l10n,
     );
   }
 
