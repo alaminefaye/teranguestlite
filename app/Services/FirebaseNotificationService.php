@@ -196,14 +196,14 @@ class FirebaseNotificationService
                     'android' => [
                         'priority' => 'high',
                         'notification' => [
-                            'sound' => 'default',
+                            'sound' => 'notification',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                         ],
                     ],
                     'apns' => [
                         'payload' => [
                             'aps' => [
-                                'sound' => 'default',
+                                'sound' => 'notification.mp3',
                                 'badge' => 1,
                             ],
                         ],
@@ -361,7 +361,7 @@ class FirebaseNotificationService
                     AndroidConfig::fromArray([
                         'priority' => 'high',
                         'notification' => [
-                            'sound' => 'default',
+                            'sound' => 'notification',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                         ],
                     ])
@@ -370,7 +370,7 @@ class FirebaseNotificationService
                     ApnsConfig::fromArray([
                         'payload' => [
                             'aps' => [
-                                'sound' => 'default',
+                                'sound' => 'notification.mp3',
                                 'badge' => 1,
                             ],
                         ],

@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'config/theme.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'screens/auth/splash_screen.dart';
@@ -85,19 +87,50 @@ class _LocalizedApp extends StatefulWidget {
 }
 
 class _LocalizedAppState extends State<_LocalizedApp> {
+  late final AudioPlayer _notificationPlayer;
+  Timer? _notificationSoundTimer;
+
   @override
   void initState() {
     super.initState();
+    _notificationPlayer = AudioPlayer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LocaleProvider>().load();
     });
     _setupFcmListeners();
   }
 
+  @override
+  void dispose() {
+    _notificationSoundTimer?.cancel();
+    _notificationPlayer.dispose();
+    super.dispose();
+  }
+
+  void _startNotificationSoundLoop() {
+    _notificationSoundTimer?.cancel();
+    _notificationPlayer.stop();
+    _notificationPlayer.setReleaseMode(ReleaseMode.loop);
+    _notificationPlayer.play(AssetSource('notification.mp3'));
+    _notificationSoundTimer = Timer(
+      const Duration(minutes: 1),
+      _stopNotificationSound,
+    );
+  }
+
+  void _stopNotificationSound() {
+    _notificationSoundTimer?.cancel();
+    _notificationSoundTimer = null;
+    _notificationPlayer.stop();
+    _notificationPlayer.setReleaseMode(ReleaseMode.stop);
+  }
+
   void _setupFcmListeners() {
     FirebaseMessaging.onMessage.listen((message) {
       final data = message.data;
       if (data['type'] != 'order_status') return;
+
+      _startNotificationSoundLoop();
 
       final ctx = rootNavigatorKey.currentContext;
       if (ctx == null) return;
@@ -149,6 +182,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             actions: [
               TextButton(
                 onPressed: () {
+                  _stopNotificationSound();
                   Navigator.of(dialogContext, rootNavigator: true).pop();
                 },
                 child: Text(
@@ -162,6 +196,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
               if (orderId != null)
                 TextButton(
                   onPressed: () {
+                    _stopNotificationSound();
                     Navigator.of(dialogContext, rootNavigator: true).pop();
                     final navigator = rootNavigatorKey.currentState;
                     if (navigator == null) return;
