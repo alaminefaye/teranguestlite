@@ -73,6 +73,9 @@ class ApiConfig {
   // Admin
   static const String adminSummary = '/admin-summary';
 
+  // Notifications (in-app)
+  static const String notifications = '/notifications';
+
   // FCM Token
   static const String fcmToken = '/fcm-token';
 

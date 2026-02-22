@@ -131,10 +131,15 @@ class ApiService {
   // DELETE request
   Future<Response> delete(
     String endpoint, {
+    dynamic data,
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      return await _dio.delete(endpoint, queryParameters: queryParameters);
+      return await _dio.delete(
+        endpoint,
+        data: data,
+        queryParameters: queryParameters,
+      );
     } catch (e) {
       rethrow;
     }

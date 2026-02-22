@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../services/admin_api.dart';
+import '../../services/notifications_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 
@@ -15,10 +16,12 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final AdminApi _adminApi = AdminApi();
+  final NotificationsApi _notificationsApi = NotificationsApi();
   AdminSummary? _summary;
   bool _isLoading = false;
   String? _error;
   bool _notAvailable = false;
+  bool _updating = false;
 
   @override
   void initState() {
@@ -50,6 +53,68 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               'Impossible de charger les notifications. Veuillez réessayer.';
         }
       });
+    }
+  }
+
+  Future<void> _markAllAsRead() async {
+    if (_updating) return;
+    setState(() {
+      _updating = true;
+    });
+    try {
+      await _notificationsApi.markAllAsRead();
+      if (!mounted) return;
+      setState(() {
+        _summary = null;
+        _error = null;
+        _notAvailable = false;
+        _isLoading = false;
+      });
+      HapticHelper.lightImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notifications masquées comme lues'),
+          backgroundColor: AppTheme.primaryBlue,
+        ),
+      );
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() {
+          _updating = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteAll() async {
+    if (_updating) return;
+    setState(() {
+      _updating = true;
+    });
+    try {
+      await _notificationsApi.cleanupRead();
+      if (!mounted) return;
+      setState(() {
+        _summary = null;
+        _error = null;
+        _notAvailable = false;
+        _isLoading = false;
+      });
+      HapticHelper.lightImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notifications supprimées'),
+          backgroundColor: AppTheme.primaryBlue,
+        ),
+      );
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() {
+          _updating = false;
+        });
+      }
     }
   }
 
@@ -173,12 +238,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: AppTheme.accentGold,
-                      ),
-                      onPressed: _loadSummary,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.done_all_rounded,
+                            color: AppTheme.accentGold,
+                          ),
+                          onPressed: _updating ? null : () => _markAllAsRead(),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_sweep_rounded,
+                            color: AppTheme.accentGold,
+                          ),
+                          onPressed: _updating ? null : () => _deleteAll(),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: AppTheme.accentGold,
+                          ),
+                          onPressed: _updating ? null : _loadSummary,
+                        ),
+                      ],
                     ),
                   ],
                 ),
