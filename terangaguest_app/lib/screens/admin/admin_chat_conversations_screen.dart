@@ -502,9 +502,10 @@ class _AdminChatConversationScreenState
       _recordStartAt = DateTime.now();
       final dir = await getTemporaryDirectory();
       final fileName =
-          'note_vocale_${DateTime.now().millisecondsSinceEpoch}.aac';
+          'note_vocale_${DateTime.now().millisecondsSinceEpoch}.wav';
       final fullPath = '${dir.path}/$fileName';
-      await _audioRecorder.start(const RecordConfig(), path: fullPath);
+      const config = RecordConfig(encoder: AudioEncoder.wav);
+      await _audioRecorder.start(config, path: fullPath);
 
       if (!mounted) return;
       setState(() {

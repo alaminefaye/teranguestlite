@@ -11,7 +11,7 @@
     <!-- Micro pour l’enregistrement de notes vocales -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
-        android:label="terangaguest_app"
+        android:label="Teranguest"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">

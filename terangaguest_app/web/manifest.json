@@ -1,6 +1,6 @@
 {
-    "name": "terangaguest_app",
-    "short_name": "terangaguest_app",
+    "name": "Teranguest",
+    "short_name": "Teranguest",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
