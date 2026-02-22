@@ -29,13 +29,25 @@ class ChatController extends Controller
             ]);
         }
 
+        $conversation->load(['user', 'messages.sender']);
+
+        $guestName = $conversation->user?->name ?: 'Client chambre';
+
         $messages = $conversation->messages()
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(function (HotelMessage $message) {
+            ->map(function (HotelMessage $message) use ($guestName) {
+                $senderName = null;
+                if ($message->sender_type === 'guest') {
+                    $senderName = $guestName;
+                } elseif ($message->sender_type === 'staff') {
+                    $senderName = $message->sender?->name ?: 'Staff hôtel';
+                }
+
                 return [
                     'id' => $message->id,
                     'sender_type' => $message->sender_type,
+                    'sender_name' => $senderName,
                     'message_type' => $message->message_type,
                     'content' => $message->content,
                     'metadata' => $message->metadata,
@@ -135,6 +147,7 @@ class ChatController extends Controller
                 'id' => $message->id,
                 'conversation_id' => $conversation->id,
                 'sender_type' => $message->sender_type,
+                'sender_name' => $user->name ?: 'Client chambre',
                 'message_type' => $message->message_type,
                 'content' => $message->content,
                 'metadata' => $message->metadata,
@@ -349,15 +362,25 @@ class ChatController extends Controller
             ->where('sender_type', 'guest')
             ->update(['read_at' => now()]);
 
-        $conversation->load(['user', 'room']);
+        $conversation->load(['user', 'room', 'messages.sender']);
+
+        $guestName = $conversation->user?->name ?: 'Client chambre';
 
         $messages = $conversation->messages()
             ->orderBy('created_at')
             ->get()
-            ->map(function (HotelMessage $message) {
+            ->map(function (HotelMessage $message) use ($guestName) {
+                $senderName = null;
+                if ($message->sender_type === 'guest') {
+                    $senderName = $guestName;
+                } elseif ($message->sender_type === 'staff') {
+                    $senderName = $message->sender?->name ?: 'Staff hôtel';
+                }
+
                 return [
                     'id' => $message->id,
                     'sender_type' => $message->sender_type,
+                    'sender_name' => $senderName,
                     'message_type' => $message->message_type,
                     'content' => $message->content,
                     'metadata' => $message->metadata,
@@ -477,6 +500,7 @@ class ChatController extends Controller
                 'id' => $message->id,
                 'conversation_id' => $conversation->id,
                 'sender_type' => $message->sender_type,
+                'sender_name' => $user->name ?: 'Staff hôtel',
                 'message_type' => $message->message_type,
                 'content' => $message->content,
                 'metadata' => $message->metadata,

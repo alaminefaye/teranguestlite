@@ -168,7 +168,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     if (messageType == 'image') {
       typeLabel = 'Image';
     } else if (messageType == 'audio') {
-      typeLabel = 'Note vocale';
+      typeLabel = 'Message vocal';
     } else if (messageType == 'text') {
       typeLabel = 'Message texte';
     } else {

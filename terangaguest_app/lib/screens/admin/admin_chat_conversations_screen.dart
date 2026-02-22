@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -348,6 +349,7 @@ class _AdminChatConversationScreenState
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final AudioRecorder _audioRecorder = AudioRecorder();
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _loading = true;
   bool _sending = false;
   bool _sendingMedia = false;
@@ -355,6 +357,10 @@ class _AdminChatConversationScreenState
   DateTime? _recordStartAt;
   Timer? _recordTimer;
   int _recordSeconds = 0;
+  bool _isPlayingAudio = false;
+  int? _playingAudioMessageId;
+  Timer? _audioAnimationTimer;
+  int _audioAnimationTick = 0;
   String? _error;
   List<ChatMessage> _messages = [];
 
@@ -364,6 +370,11 @@ class _AdminChatConversationScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadConversation();
     });
+
+    _audioPlayer.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      _stopAudioPlaybackState();
+    });
   }
 
   @override
@@ -372,6 +383,8 @@ class _AdminChatConversationScreenState
     _scrollController.dispose();
     _audioRecorder.dispose();
     _recordTimer?.cancel();
+    _audioAnimationTimer?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -491,7 +504,7 @@ class _AdminChatConversationScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Autorisez l’accès au micro pour envoyer une note vocale.',
+              'Autorisez l’accès au micro pour envoyer un message vocal.',
             ),
             backgroundColor: Colors.redAccent,
           ),
@@ -724,6 +737,9 @@ class _AdminChatConversationScreenState
     ChatMessage message,
     bool isMe,
   ) {
+    final senderLabel = message.senderName?.trim().isNotEmpty == true
+        ? message.senderName!.trim()
+        : null;
     final time = DateFormat.Hm().format(message.createdAt.toLocal());
     final bgColor = isMe
         ? AppTheme.accentGold
@@ -749,12 +765,18 @@ class _AdminChatConversationScreenState
               : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              message.messageType == 'text'
-                  ? (message.content ?? '')
-                  : '[Message média]',
-              style: TextStyle(color: textColor, fontSize: 16, height: 1.3),
-            ),
+            if (senderLabel != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  senderLabel,
+                  style: TextStyle(
+                    color: textColor.withValues(alpha: 0.8),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            _buildMessageContent(message, textColor),
             const SizedBox(height: 4),
             Text(
               time,
@@ -767,6 +789,154 @@ class _AdminChatConversationScreenState
         ),
       ),
     );
+  }
+
+  Widget _buildMessageContent(ChatMessage message, Color textColor) {
+    if (message.messageType == 'image') {
+      final meta = message.metadata;
+      final url = meta != null ? meta['url'] as String? : null;
+      if (url == null || url.isEmpty) {
+        return Text(
+          message.content?.isNotEmpty == true
+              ? message.content!
+              : '[Image indisponible]',
+          style: TextStyle(color: textColor, fontSize: 16, height: 1.3),
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (message.content != null && message.content!.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                message.content!,
+                style: TextStyle(color: textColor, fontSize: 16, height: 1.3),
+              ),
+            ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              url,
+              fit: BoxFit.cover,
+              width: 220,
+              height: 220,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (message.messageType == 'audio') {
+      final meta = message.metadata;
+      final durationSeconds = meta != null ? meta['duration'] as int? : null;
+      final isPlaying = _isPlayingAudio && _playingAudioMessageId == message.id;
+      final label = durationSeconds != null && durationSeconds > 0
+          ? 'Message vocal ${_formatAudioDuration(durationSeconds)}'
+          : 'Message vocal';
+      final pattern = [6.0, 16.0, 10.0, 18.0, 12.0];
+      final shift = isPlaying ? _audioAnimationTick % pattern.length : 0;
+
+      return InkWell(
+        onTap: () => _togglePlayAudio(message),
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: textColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                color: textColor,
+                size: 26,
+              ),
+              const SizedBox(width: 8),
+              Text(label, style: TextStyle(color: textColor, fontSize: 15)),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 18,
+                child: Row(
+                  children: List.generate(pattern.length, (index) {
+                    final h = pattern[(index + shift) % pattern.length];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                      width: 3,
+                      height: h,
+                      decoration: BoxDecoration(
+                        color: textColor.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Text(
+      message.content ?? '',
+      style: TextStyle(color: textColor, fontSize: 16, height: 1.3),
+    );
+  }
+
+  Future<void> _togglePlayAudio(ChatMessage message) async {
+    final meta = message.metadata;
+    final url = meta != null ? meta['url'] as String? : null;
+    if (url == null || url.isEmpty) return;
+
+    try {
+      if (_isPlayingAudio && _playingAudioMessageId == message.id) {
+        await _audioPlayer.pause();
+        if (!mounted) return;
+        setState(() {
+          _isPlayingAudio = false;
+        });
+        _audioAnimationTimer?.cancel();
+        return;
+      }
+
+      await _audioPlayer.stop();
+      await _audioPlayer.play(UrlSource(url));
+      if (!mounted) return;
+      setState(() {
+        _isPlayingAudio = true;
+        _playingAudioMessageId = message.id;
+      });
+      _audioAnimationTimer?.cancel();
+      _audioAnimationTimer = Timer.periodic(const Duration(milliseconds: 160), (
+        _,
+      ) {
+        if (!mounted) return;
+        setState(() {
+          _audioAnimationTick++;
+        });
+      });
+    } catch (_) {}
+  }
+
+  void _stopAudioPlaybackState() {
+    _audioAnimationTimer?.cancel();
+    _audioAnimationTimer = null;
+    _audioAnimationTick = 0;
+    setState(() {
+      _isPlayingAudio = false;
+      _playingAudioMessageId = null;
+    });
+  }
+
+  String _formatAudioDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 
   Widget _buildInputBar(BuildContext context, AppLocalizations l10n) {

@@ -1,6 +1,7 @@
 class ChatMessage {
   final int id;
   final String senderType;
+  final String? senderName;
   final String messageType;
   final String? content;
   final Map<String, dynamic>? metadata;
@@ -9,6 +10,7 @@ class ChatMessage {
   ChatMessage({
     required this.id,
     required this.senderType,
+    required this.senderName,
     required this.messageType,
     required this.content,
     required this.metadata,
@@ -19,6 +21,7 @@ class ChatMessage {
     return ChatMessage(
       id: json['id'] as int,
       senderType: json['sender_type'] as String? ?? 'guest',
+      senderName: json['sender_name'] as String?,
       messageType: json['message_type'] as String? ?? 'text',
       content: json['content'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,

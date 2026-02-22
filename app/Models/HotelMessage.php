@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class HotelMessage extends Model
 {
@@ -25,5 +26,9 @@ class HotelMessage extends Model
     {
         return $this->belongsTo(HotelConversation::class, 'conversation_id');
     }
-}
 
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+}
