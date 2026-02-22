@@ -13,7 +13,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
   const SpaReservationDetailScreen({super.key, required this.reservation});
 
   static bool canCancel(SpaReservation r) {
-    if (r.status != 'confirmed') return false;
+    if (r.status != 'confirmed' && r.status != 'pending_reschedule') {
+      return false;
+    }
     final parts = r.time.split(':');
     final hour = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 0) : 0;
     final minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
@@ -230,10 +232,58 @@ class SpaReservationDetailScreen extends StatelessWidget {
     AppLocalizations l10n,
     bool canCancelReservation,
   ) {
+    final isPendingReschedule = reservation.status == 'pending_reschedule';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (canCancelReservation) ...[
+        if (isPendingReschedule) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _acceptRescheduledSpaReservation(context),
+              icon: const Icon(
+                Icons.check_circle_outline,
+                size: 22,
+                color: AppTheme.primaryDark,
+              ),
+              label: const Text(
+                'Accepter le nouvel horaire',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentGold,
+                foregroundColor: AppTheme.primaryDark,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (canCancelReservation)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _showCancelDialog(context, reservation),
+                icon: const Icon(
+                  Icons.cancel_outlined,
+                  size: 22,
+                  color: Colors.red,
+                ),
+                label: Text(
+                  '${l10n.cancel} la réservation',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red, width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+        ] else if (canCancelReservation) ...[
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -288,6 +338,66 @@ class SpaReservationDetailScreen extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  Future<void> _acceptRescheduledSpaReservation(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: const Text(
+          'Accepter le nouvel horaire',
+          style: TextStyle(color: AppTheme.accentGold),
+        ),
+        content: const Text(
+          'Confirmer ce nouvel horaire pour votre réservation spa ?',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<SpaProvider>().acceptRescheduledSpaReservation(
+        reservation.id,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.spaReservationConfirmedMessage(reservation.serviceName),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _showCancelDialog(

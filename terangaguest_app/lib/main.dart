@@ -303,15 +303,52 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     final l10n = AppLocalizations.of(ctx);
     final status = data['status'] as String? ?? '';
     final serviceName = data['service_name'] as String? ?? 'Spa';
+    final screen = data['screen'] as String? ?? '';
+    final isStaff = screen == 'AdminSpaReservations';
 
+    String title;
     String message;
-    if (status == 'confirmed') {
-      message = l10n.spaReservationConfirmedMessage(serviceName);
-    } else if (status == 'cancelled') {
-      message = l10n.reservationCancelledMessage;
+
+    if (isStaff) {
+      final date = data['date'] as String? ?? '';
+      final time = data['time'] as String? ?? '';
+      final roomNumber = data['room_number'] as String?;
+      final guestName = data['guest_name'] as String?;
+
+      final detailsParts = <String>[];
+      if (roomNumber != null && roomNumber.isNotEmpty) {
+        detailsParts.add('Chambre $roomNumber');
+      }
+      if (guestName != null && guestName.isNotEmpty) {
+        detailsParts.add(guestName);
+      }
+      final detailsSuffix = detailsParts.isEmpty
+          ? ''
+          : ' (${detailsParts.join(' – ')})';
+
+      if (status == 'confirmed') {
+        title = 'Nouvel horaire spa confirmé';
+        message =
+            'Le client a confirmé le nouvel horaire pour $serviceName le $date à $time$detailsSuffix.';
+      } else if (status == 'cancelled') {
+        title = 'Réservation spa annulée par le client';
+        message =
+            'Le client a annulé la réservation $serviceName prévue le $date à $time$detailsSuffix.';
+      } else {
+        title = 'Réservation spa mise à jour';
+        final label = _spaStatusLabel(l10n, status);
+        message = 'Statut de la réservation spa mis à jour : $label.';
+      }
     } else {
-      final label = _spaStatusLabel(l10n, status);
-      message = 'Statut de la réservation spa : $label';
+      title = 'Réservation spa';
+      if (status == 'confirmed') {
+        message = l10n.spaReservationConfirmedMessage(serviceName);
+      } else if (status == 'cancelled') {
+        message = l10n.reservationCancelledMessage;
+      } else {
+        final label = _spaStatusLabel(l10n, status);
+        message = 'Statut de la réservation spa : $label';
+      }
     }
 
     showDialog(
@@ -324,9 +361,12 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             borderRadius: BorderRadius.circular(16),
             side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
           ),
-          title: const Text(
-            'Réservation spa',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             message,
@@ -356,9 +396,11 @@ class _LocalizedAppState extends State<_LocalizedApp> {
                   NavigationHelper.slideRoute(const MySpaReservationsScreen()),
                 );
               },
-              child: const Text(
-                'Voir les réservations spa',
-                style: TextStyle(
+              child: Text(
+                isStaff
+                    ? 'Voir les réservations spa à traiter'
+                    : 'Voir les réservations spa',
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                 ),

@@ -422,6 +422,7 @@ class SpaServiceController extends Controller
             $dateStr = $reservation->reservation_date->format('d/m/Y');
             $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
             $roomNumber = $reservation->room ? $reservation->room->room_number : null;
+            $guestName = $reservation->guest ? $reservation->guest->name : null;
 
             $body = "Réservation spa {$serviceName} annulée par le client pour le {$dateStr} à {$timeStr}";
             if ($roomNumber) {
@@ -437,6 +438,11 @@ class SpaServiceController extends Controller
                     'reservation_id' => (string) $reservation->id,
                     'status' => $reservation->status,
                     'screen' => 'AdminSpaReservations',
+                    'service_name' => $serviceName,
+                    'date' => $dateStr,
+                    'time' => $timeStr,
+                    'room_number' => $roomNumber,
+                    'guest_name' => $guestName,
                 ]
             );
         } catch (\Exception $e) {
@@ -485,6 +491,7 @@ class SpaServiceController extends Controller
             $dateStr = $reservation->reservation_date->format('d/m/Y');
             $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
             $roomNumber = $reservation->room ? $reservation->room->room_number : null;
+            $guestName = $reservation->guest ? $reservation->guest->name : null;
 
             $body = "Le client a accepté le nouvel horaire pour {$serviceName} le {$dateStr} à {$timeStr}";
             if ($roomNumber) {
@@ -500,6 +507,11 @@ class SpaServiceController extends Controller
                     'reservation_id' => (string) $reservation->id,
                     'status' => $reservation->status,
                     'screen' => 'AdminSpaReservations',
+                    'service_name' => $serviceName,
+                    'date' => $dateStr,
+                    'time' => $timeStr,
+                    'room_number' => $roomNumber,
+                    'guest_name' => $guestName,
                 ]
             );
         } catch (\Exception $e) {

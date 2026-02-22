@@ -135,7 +135,9 @@ class SpaApi {
     }
   }
 
-  Future<SpaReservation> acceptRescheduledSpaReservation(int reservationId) async {
+  Future<SpaReservation> acceptRescheduledSpaReservation(
+    int reservationId,
+  ) async {
     try {
       final response = await _apiService.post(
         '${ApiConfig.mySpaReservations}/$reservationId/accept-reschedule',
