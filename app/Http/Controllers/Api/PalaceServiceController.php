@@ -413,6 +413,11 @@ class PalaceServiceController extends Controller
             ], 403);
         }
 
+        $validated = $request->validate([
+            'action' => 'required|string|in:accept,complete,cancel',
+            'reason' => 'required_if:action,cancel|string|max:255',
+        ]);
+
         $palaceRequest = PalaceRequest::with(['palaceService', 'room', 'guest'])->find($id);
 
         if (! $palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
@@ -422,7 +427,7 @@ class PalaceServiceController extends Controller
             ], 404);
         }
 
-        $action = $request->input('action');
+        $action = $validated['action'];
         $validActions = ['accept', 'complete', 'cancel'];
 
         if (! in_array($action, $validActions, true)) {

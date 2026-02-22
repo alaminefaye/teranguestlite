@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\LaundryServiceController;
 use App\Http\Controllers\Api\PalaceServiceController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\AdminSummaryController;
+use App\Http\Controllers\Api\ChatController as ApiChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -164,5 +165,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
         Route::delete('/cleanup', [NotificationController::class, 'cleanup']);
+    });
+
+    // ==========================================
+    // CHAT INVITÉ / MESSAGES HÔTEL
+    // ==========================================
+    Route::prefix('chat')->group(function () {
+        Route::get('/messages', [ApiChatController::class, 'index']);
+        Route::post('/messages', [ApiChatController::class, 'store']);
+    });
+
+    // ==========================================
+    // CHAT STAFF (Conversations invités)
+    // ==========================================
+    Route::prefix('staff/chat')->group(function () {
+        Route::get('/conversations', [ApiChatController::class, 'staffConversations']);
+        Route::get('/conversations/{conversation}', [ApiChatController::class, 'staffConversationMessages']);
+        Route::post('/conversations/{conversation}/messages', [ApiChatController::class, 'staffReply']);
     });
 });

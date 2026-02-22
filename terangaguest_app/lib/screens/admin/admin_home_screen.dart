@@ -22,6 +22,7 @@ import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../hotel_infos/assistance_emergency_screen.dart';
+import '../hotel_infos/emergency_requests_screen.dart';
 import '../notifications/notifications_screen.dart';
 import 'admin_chat_conversations_screen.dart';
 
@@ -871,7 +872,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         break;
       case 'admin-emergency':
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AssistanceEmergencyScreen()),
+          MaterialPageRoute(builder: (_) => const EmergencyRequestsScreen()),
         );
         break;
       case 'admin-chat':

@@ -18,9 +18,15 @@ class ChatApi {
       return messages
           .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception('Erreur inattendue lors du chargement des messages.');
@@ -40,9 +46,15 @@ class ChatApi {
         );
       }
       return ChatMessage.fromJson(data['data'] as Map<String, dynamic>);
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception('Erreur inattendue lors de l’envoi du message.');
@@ -82,9 +94,15 @@ class ChatApi {
         );
       }
       return ChatMessage.fromJson(data['data'] as Map<String, dynamic>);
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception('Erreur inattendue lors de l’envoi du message.');
@@ -108,9 +126,15 @@ class ChatApi {
             (e) => StaffConversationSummary.fromJson(e as Map<String, dynamic>),
           )
           .toList();
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception(
@@ -143,9 +167,15 @@ class ChatApi {
             .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible de se connecter au serveur. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception(
@@ -170,9 +200,15 @@ class ChatApi {
         );
       }
       return ChatMessage.fromJson(data['data'] as Map<String, dynamic>);
-    } on DioException {
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
       throw Exception(
-        'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
       );
     } catch (_) {
       throw Exception('Erreur inattendue lors de l’envoi du message.');

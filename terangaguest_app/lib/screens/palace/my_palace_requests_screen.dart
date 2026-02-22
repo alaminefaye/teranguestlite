@@ -155,178 +155,181 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                   }
                   return parts.join(' ');
                 }();
-                return Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateX(-0.05)
-                    ..rotateY(0.02),
-                  alignment: Alignment.center,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppTheme.accentGold,
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 10),
+                return GestureDetector(
+                  onTap: () => _showPalaceRequestDetails(request),
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateX(-0.05)
+                      ..rotateY(0.02),
+                    alignment: Alignment.center,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
                         ),
-                        BoxShadow(
-                          color: AppTheme.accentGold.withValues(alpha: 0.1),
-                          blurRadius: 15,
-                          spreadRadius: -2,
-                          offset: const Offset(0, -4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppTheme.accentGold,
+                          width: 1.5,
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                request.requestNumber != null &&
-                                        request.requestNumber!.isNotEmpty
-                                    ? request.requestNumber!
-                                    : request.serviceName,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (request.requestNumber != null &&
-                                  request.requestNumber!.isNotEmpty)
-                                const SizedBox(height: 4),
-                              if (request.requestNumber != null &&
-                                  request.requestNumber!.isNotEmpty)
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 10),
+                          ),
+                          BoxShadow(
+                            color: AppTheme.accentGold.withValues(alpha: 0.1),
+                            blurRadius: 15,
+                            spreadRadius: -2,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  request.serviceName,
+                                  request.requestNumber != null &&
+                                          request.requestNumber!.isNotEmpty
+                                      ? request.requestNumber!
+                                      : request.serviceName,
                                   style: const TextStyle(
-                                    fontSize: 13,
-                                    color: AppTheme.textGray,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.accentGold,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              const SizedBox(height: 8),
-                              _buildStatusBadge(context, request.status),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today,
-                                    size: 14,
-                                    color: AppTheme.textGray,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      DateFormat(
-                                        'dd/MM/yyyy HH:mm',
-                                        'fr_FR',
-                                      ).format(request.createdAt),
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppTheme.textGray,
-                                      ),
+                                if (request.requestNumber != null &&
+                                    request.requestNumber!.isNotEmpty)
+                                  const SizedBox(height: 4),
+                                if (request.requestNumber != null &&
+                                    request.requestNumber!.isNotEmpty)
+                                  Text(
+                                    request.serviceName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppTheme.textGray,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
-                              ),
-                              if (request.scheduledTime != null) ...[
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
+                                _buildStatusBadge(context, request.status),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
                                   children: [
                                     const Icon(
-                                      Icons.schedule,
+                                      Icons.calendar_today,
                                       size: 14,
-                                      color: AppTheme.accentGold,
+                                      color: AppTheme.textGray,
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         DateFormat(
-                                          'dd/MM HH:mm',
+                                          'dd/MM/yyyy HH:mm',
                                           'fr_FR',
-                                        ).format(request.scheduledTime!),
+                                        ).format(request.createdAt),
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppTheme.accentGold,
-                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.textGray,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
+                                if (request.scheduledTime != null) ...[
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.schedule,
+                                        size: 14,
+                                        color: AppTheme.accentGold,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          DateFormat(
+                                            'dd/MM HH:mm',
+                                            'fr_FR',
+                                          ).format(request.scheduledTime!),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppTheme.accentGold,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (hasRoomOrGuest) const SizedBox(height: 6),
+                                if (hasRoomOrGuest)
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.meeting_room,
+                                        size: 14,
+                                        color: AppTheme.textGray,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          roomGuestText,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppTheme.textGray,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if (hasDetails) const SizedBox(height: 6),
+                                if (hasDetails)
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.notes,
+                                        size: 14,
+                                        color: AppTheme.textGray,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          detailsText,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppTheme.textGray,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                _buildStaffActions(request),
                               ],
-                              if (hasRoomOrGuest) const SizedBox(height: 6),
-                              if (hasRoomOrGuest)
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.meeting_room,
-                                      size: 14,
-                                      color: AppTheme.textGray,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        roomGuestText,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textGray,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              if (hasDetails) const SizedBox(height: 6),
-                              if (hasDetails)
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.notes,
-                                      size: 14,
-                                      color: AppTheme.textGray,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        detailsText,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textGray,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              _buildStaffActions(request),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -336,6 +339,14 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _showPalaceRequestDetails(PalaceRequest request) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PalaceRequestDetailScreen(request: request),
+      ),
     );
   }
 
@@ -480,6 +491,8 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
     String title;
     String message;
+    final reasonController = TextEditingController();
+    String? validationError;
 
     if (action == 'accept') {
       title = 'Accepter la demande';
@@ -496,26 +509,67 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.ok,
-              style: const TextStyle(color: AppTheme.accentGold),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif de l'annulation",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setState(() {
+                      validationError = 'Veuillez préciser un motif.';
+                    });
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -525,6 +579,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       await context.read<PalaceProvider>().updatePalaceRequestStatus(
         requestId: request.id,
         action: action,
+        reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -543,5 +598,453 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         ),
       );
     }
+  }
+}
+
+class PalaceRequestDetailScreen extends StatelessWidget {
+  final PalaceRequest request;
+
+  const PalaceRequestDetailScreen({super.key, required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final detailsText = (request.details ?? '').trim();
+    final hasDetails = detailsText.isNotEmpty;
+    final roomGuestParts = <String>[];
+    if (request.roomNumber != null && request.roomNumber!.trim().isNotEmpty) {
+      roomGuestParts.add('Chambre ${request.roomNumber}');
+    }
+    if (request.guestName != null && request.guestName!.trim().isNotEmpty) {
+      roomGuestParts.add(request.guestName!.trim());
+    }
+    final roomGuestText = roomGuestParts.join(' – ');
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            request.requestNumber ?? request.serviceName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Détail de la demande palace / conciergerie',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppTheme.accentGold,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Service palace / conciergerie',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppTheme.textGray,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    request.serviceName,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat(
+                                      'dd/MM/yyyy à HH:mm',
+                                      'fr_FR',
+                                    ).format(request.createdAt),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppTheme.textGray,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            _PalaceStatusBadge(status: request.status),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        if (roomGuestText.isNotEmpty)
+                          _PalaceInfoRow(
+                            icon: Icons.meeting_room,
+                            text: roomGuestText,
+                          ),
+                        if (request.scheduledTime != null) ...[
+                          const SizedBox(height: 8),
+                          _PalaceInfoRow(
+                            icon: Icons.schedule,
+                            text:
+                                'Prévue pour ${DateFormat('dd/MM/yyyy HH:mm', 'fr_FR').format(request.scheduledTime!)}',
+                          ),
+                        ],
+                        if (hasDetails) ...[
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Détails de la demande',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            detailsText,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        _PalaceStaffActionsForDetail(request: request),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PalaceInfoRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _PalaceInfoRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: AppTheme.textGray),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PalaceStatusBadge extends StatelessWidget {
+  final String status;
+
+  const _PalaceStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color border;
+    Color textColor;
+
+    switch (status) {
+      case 'pending':
+        bg = Colors.orange.withValues(alpha: 0.2);
+        border = Colors.orange;
+        textColor = Colors.orange;
+        break;
+      case 'in_progress':
+        bg = Colors.blue.withValues(alpha: 0.2);
+        border = Colors.blue;
+        textColor = Colors.blue;
+        break;
+      case 'completed':
+        bg = Colors.green.withValues(alpha: 0.2);
+        border = Colors.green;
+        textColor = Colors.green;
+        break;
+      case 'cancelled':
+        bg = Colors.red.withValues(alpha: 0.2);
+        border = Colors.red;
+        textColor = Colors.red;
+        break;
+      default:
+        bg = AppTheme.textGray.withValues(alpha: 0.2);
+        border = AppTheme.textGray;
+        textColor = AppTheme.textGray;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border, width: 1),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _PalaceStaffActionsForDetail extends StatelessWidget {
+  final PalaceRequest request;
+
+  const _PalaceStaffActionsForDetail({required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.read<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    if (!isStaffOrAdmin) {
+      return const SizedBox.shrink();
+    }
+
+    final actions = <Map<String, String>>[];
+
+    if (request.status == 'pending') {
+      actions.add({'action': 'accept', 'label': 'Accepter'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    } else if (request.status == 'in_progress') {
+      actions.add({'action': 'complete', 'label': 'Marquer comme terminée'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final l10n = AppLocalizations.of(context);
+
+    Future<void> handleAction(String action) async {
+      String title;
+      String message;
+      final reasonController = TextEditingController();
+      String? validationError;
+
+      if (action == 'accept') {
+        title = 'Accepter la demande';
+        message = 'Accepter cette demande de service palace / conciergerie ?';
+      } else if (action == 'complete') {
+        title = 'Marquer comme terminée';
+        message = 'Marquer cette demande comme terminée ?';
+      } else if (action == 'cancel') {
+        title = l10n.cancel;
+        message = 'Annuler cette demande de service palace ?';
+      } else {
+        return;
+      }
+
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setState) => AlertDialog(
+            backgroundColor: AppTheme.primaryBlue,
+            title: Text(
+              title,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(message, style: const TextStyle(color: Colors.white)),
+                if (action == 'cancel') ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: reasonController,
+                    maxLines: 3,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Motif de l'annulation",
+                      hintStyle: const TextStyle(color: AppTheme.textGray),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: AppTheme.textGray),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: AppTheme.accentGold),
+                      ),
+                      errorText: validationError,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: AppTheme.textGray),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (action == 'cancel') {
+                    final text = reasonController.text.trim();
+                    if (text.isEmpty) {
+                      setState(() {
+                        validationError = 'Veuillez préciser un motif.';
+                      });
+                      return;
+                    }
+                  }
+                  Navigator.pop(ctx, true);
+                },
+                child: Text(
+                  l10n.ok,
+                  style: const TextStyle(color: AppTheme.accentGold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (ok != true) return;
+
+      try {
+        final messenger = ScaffoldMessenger.of(context);
+        final navigator = Navigator.of(context);
+
+        await context.read<PalaceProvider>().updatePalaceRequestStatus(
+          requestId: request.id,
+          action: action,
+          reason: action == 'cancel' ? reasonController.text.trim() : null,
+        );
+
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Statut mis à jour'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        navigator.pop();
+      } catch (e) {
+        final messageError = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.errorPrefix}$messageError'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            for (var i = 0; i < actions.length; i++)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: i == actions.length - 1 ? 0 : 8,
+                  ),
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.red
+                            : AppTheme.accentGold,
+                        foregroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.white
+                            : AppTheme.primaryDark,
+                      ),
+                      onPressed: () => handleAction(actions[i]['action']!),
+                      child: Text(
+                        actions[i]['label']!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 }

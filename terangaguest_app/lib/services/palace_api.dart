@@ -121,11 +121,16 @@ class PalaceApi {
   Future<PalaceRequest> updatePalaceRequestStatus({
     required int requestId,
     required String action,
+    String? reason,
   }) async {
     try {
+      final data = <String, dynamic>{'action': action};
+      if (reason != null && reason.trim().isNotEmpty) {
+        data['reason'] = reason.trim();
+      }
       final response = await _apiService.post(
         '/palace-requests/$requestId/status',
-        data: {'action': action},
+        data: data,
       );
 
       return PalaceRequest.fromJson(

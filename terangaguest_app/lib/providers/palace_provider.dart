@@ -7,11 +7,13 @@ class PalaceProvider with ChangeNotifier {
 
   List<PalaceService> _services = [];
   List<PalaceRequest> _requests = [];
+  List<PalaceRequest> _emergencyRequests = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   List<PalaceService> get services => _services;
   List<PalaceRequest> get requests => _requests;
+  List<PalaceRequest> get emergencyRequests => _emergencyRequests;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -69,6 +71,15 @@ class PalaceProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchEmergencyPalaceRequests() async {
+    try {
+      _emergencyRequests = await _palaceApi.getEmergencyPalaceRequests();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching emergency palace requests: $e');
+    }
+  }
+
   /// Annuler une demande
   Future<void> cancelPalaceRequest(int requestId) async {
     try {
@@ -83,11 +94,13 @@ class PalaceProvider with ChangeNotifier {
   Future<void> updatePalaceRequestStatus({
     required int requestId,
     required String action,
+    String? reason,
   }) async {
     try {
       await _palaceApi.updatePalaceRequestStatus(
         requestId: requestId,
         action: action,
+        reason: reason,
       );
       await fetchMyPalaceRequests();
     } catch (e) {
