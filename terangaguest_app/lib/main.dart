@@ -523,7 +523,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         if (reason != null && reason.isNotEmpty) {
           message += '\nMotif : $reason';
         }
-      } else if (status == 'honored') {
+      } else if (status == 'completed') {
         message =
             'Merci, votre réservation au restaurant $restaurantName a été honorée.';
       } else {
@@ -603,7 +603,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         return l10n.statusConfirmed;
       case 'cancelled':
         return l10n.statusCancelled;
-      case 'honored':
+      case 'completed':
         return l10n.statusCompleted;
       default:
         return status;

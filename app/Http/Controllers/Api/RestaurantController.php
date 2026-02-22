@@ -232,7 +232,7 @@ class RestaurantController extends Controller
         $statusTransitions = [
             'confirm' => ['pending' => 'confirmed'],
             'cancel' => ['pending' => 'cancelled', 'confirmed' => 'cancelled'],
-            'honor' => ['confirmed' => 'honored'],
+            'honor' => ['confirmed' => 'completed'],
         ];
 
         if (!isset($statusTransitions[$action][$reservation->status])) {
@@ -266,7 +266,7 @@ class RestaurantController extends Controller
                 $statusMessages = [
                     'confirmed' => "Votre réservation au restaurant {$restaurantName} a été confirmée pour le {$dateStr} à {$timeStr}.",
                     'cancelled' => "Votre réservation au restaurant {$restaurantName} a été annulée.",
-                    'honored' => "Votre réservation au restaurant {$restaurantName} a été honorée.",
+                    'completed' => "Votre réservation au restaurant {$restaurantName} a été honorée.",
                 ];
 
                 $title = 'Réservation restaurant';

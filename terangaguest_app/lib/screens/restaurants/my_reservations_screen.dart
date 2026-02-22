@@ -710,7 +710,7 @@ class _MyRestaurantReservationsScreenState
         return l10n.statusConfirmed;
       case 'cancelled':
         return l10n.statusCancelled;
-      case 'honored':
+      case 'completed':
         return l10n.statusCompleted;
       default:
         return status;
