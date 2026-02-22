@@ -87,11 +87,25 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      return await _dio.post(
-        endpoint,
-        data: data,
-        queryParameters: queryParameters,
-      );
+      if (data is FormData) {
+        return await _dio.post(
+          endpoint,
+          data: data,
+          queryParameters: queryParameters,
+          options: Options(
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Accept': 'application/json',
+            },
+          ),
+        );
+      } else {
+        return await _dio.post(
+          endpoint,
+          data: data,
+          queryParameters: queryParameters,
+        );
+      }
     } catch (e) {
       rethrow;
     }

@@ -502,9 +502,9 @@ class _AdminChatConversationScreenState
       _recordStartAt = DateTime.now();
       final dir = await getTemporaryDirectory();
       final fileName =
-          'note_vocale_${DateTime.now().millisecondsSinceEpoch}.wav';
+          'note_vocale_${DateTime.now().millisecondsSinceEpoch}.aac';
       final fullPath = '${dir.path}/$fileName';
-      const config = RecordConfig(encoder: AudioEncoder.wav);
+      const config = RecordConfig(encoder: AudioEncoder.aacLc);
       await _audioRecorder.start(config, path: fullPath);
 
       if (!mounted) return;
@@ -555,7 +555,7 @@ class _AdminChatConversationScreenState
 
       final fileName = path.split('/').isNotEmpty
           ? path.split('/').last
-          : 'note_vocale.m4a';
+          : 'note_vocale.aac';
 
       final msg = await _api.sendMediaMessage(
         filePath: path,

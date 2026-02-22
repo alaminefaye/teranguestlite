@@ -192,9 +192,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       _recordStartAt = DateTime.now();
       final dir = await getTemporaryDirectory();
       final fileName =
-          'note_vocale_guest_${DateTime.now().millisecondsSinceEpoch}.wav';
+          'note_vocale_guest_${DateTime.now().millisecondsSinceEpoch}.aac';
       final fullPath = '${dir.path}/$fileName';
-      const config = RecordConfig(encoder: AudioEncoder.wav);
+      const config = RecordConfig(encoder: AudioEncoder.aacLc);
       await _audioRecorder.start(config, path: fullPath);
 
       if (!mounted) return;
@@ -245,7 +245,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       final fileName = path.split('/').isNotEmpty
           ? path.split('/').last
-          : 'note_vocale_guest.m4a';
+          : 'note_vocale_guest.aac';
 
       final msg = await _api.sendMediaMessage(
         filePath: path,
