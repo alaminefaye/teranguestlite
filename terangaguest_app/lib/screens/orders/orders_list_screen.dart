@@ -10,6 +10,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'order_detail_screen.dart';
 
 class OrdersListScreen extends StatefulWidget {
@@ -104,7 +105,14 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () {
               HapticHelper.lightImpact();
-              Navigator.pop(context);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              } else {
+                NavigationHelper.navigateAndRemoveUntil(
+                  context,
+                  const DashboardScreen(),
+                );
+              }
             },
           ),
           const SizedBox(width: 12),

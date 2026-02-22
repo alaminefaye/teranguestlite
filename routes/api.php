@@ -147,6 +147,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/request', [PalaceServiceController::class, 'request']);
     });
     Route::get('/my-palace-requests', [PalaceServiceController::class, 'myRequests']);
+    Route::post('/palace-requests/{id}/cancel', [PalaceServiceController::class, 'cancel']);
+    Route::post('/palace-requests/{id}/status', [PalaceServiceController::class, 'updateRequestStatus']);
 
     // Véhicules (pour formulaire Location)
     Route::get('/vehicles', [VehicleController::class, 'index']);

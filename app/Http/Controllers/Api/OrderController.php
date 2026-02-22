@@ -332,9 +332,46 @@ class OrderController extends Controller
         $order->update(['status' => 'cancelled']);
 
         try {
-            if (! empty($order->room_id)) {
-                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order, $reason);
+            $firebaseService = app(FirebaseNotificationService::class);
+
+            $serviceName = $order->type === 'room_service' ? 'Room Service' : $order->typeName;
+            $statusLabel = $order->statusName;
+            $roomNumber = $order->room ? $order->room->room_number : null;
+            $guestName = $order->guest ? $order->guest->name : null;
+
+            $body = "Commande #{$order->order_number} annulée par le client";
+            if ($roomNumber) {
+                $body .= " (Chambre {$roomNumber})";
             }
+            if ($guestName) {
+                $body .= " – {$guestName}";
+            }
+            if ($reason !== '') {
+                $body .= ' Motif : ' . $reason;
+            }
+
+            $data = [
+                'type' => 'order_status',
+                'order_id' => (string) $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'status_label' => $statusLabel,
+                'service_name' => $serviceName,
+                'screen' => 'AdminOrders',
+                'room_number' => $roomNumber,
+                'guest_name' => $guestName,
+            ];
+
+            if ($reason !== '') {
+                $data['reason'] = $reason;
+            }
+
+            $firebaseService->sendToStaff(
+                $order->enterprise_id ?? $user->enterprise_id,
+                'Commande annulée par le client',
+                $body,
+                $data
+            );
         } catch (\Exception $e) {
             Log::error('Firebase notification error (order cancel API): ' . $e->getMessage(), ['order_id' => $order->id]);
         }

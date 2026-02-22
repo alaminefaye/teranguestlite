@@ -982,6 +982,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
+          scrollable: true,
           title: const Text('Annuler la commande'),
           content: Column(
             mainAxisSize: MainAxisSize.min,

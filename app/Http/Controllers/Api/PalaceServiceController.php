@@ -9,6 +9,7 @@ use App\Models\PalaceRequest;
 use App\Models\Room;
 use App\Models\Vehicle;
 use App\Services\GuestReservationHelper;
+use Illuminate\Support\Facades\Log;
 
 class PalaceServiceController extends Controller
 {
@@ -233,7 +234,7 @@ class PalaceServiceController extends Controller
                 "Nouvelle demande de service : {$service->name}"
             );
         } catch (\Exception $e) {
-            \Log::error('Firebase notification error: ' . $e->getMessage());
+            Log::error('Firebase notification error: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -321,6 +322,171 @@ class PalaceServiceController extends Controller
             'meta' => [
                 'current_page' => $requests->currentPage(),
                 'total' => $requests->total(),
+            ],
+        ], 200);
+    }
+
+    /**
+     * Annuler une demande palace (client ou staff).
+     */
+    public function cancel(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $palaceRequest = PalaceRequest::with(['palaceService', 'room', 'guest'])->find($id);
+
+        if (! $palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande non trouvée',
+            ], 404);
+        }
+
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        if (! $isStaffOrAdmin && $palaceRequest->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (! in_array($palaceRequest->status, ['pending', 'in_progress'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette demande ne peut plus être annulée.',
+            ], 400);
+        }
+
+        $palaceRequest->status = 'cancelled';
+        $palaceRequest->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            if ($palaceRequest->room_id) {
+                $firebaseService->sendToClientOfRoom(
+                    $palaceRequest->room_id,
+                    "Demande palace #{$palaceRequest->request_number}",
+                    'Votre demande palace a été annulée',
+                    [
+                        'type' => 'palace_status',
+                        'request_id' => (string) $palaceRequest->id,
+                        'status' => $palaceRequest->status,
+                        'screen' => 'PalaceRequests',
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (palace cancel): ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Demande annulée',
+            'data' => [
+                'id' => $palaceRequest->id,
+                'request_number' => $palaceRequest->request_number,
+                'status' => $palaceRequest->status,
+                'room_number' => $palaceRequest->room ? $palaceRequest->room->room_number : null,
+                'guest_name' => $palaceRequest->guest ? $palaceRequest->guest->name : null,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Mettre à jour le statut d'une demande palace (staff/admin).
+     */
+    public function updateRequestStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        if (! $isStaffOrAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        $palaceRequest = PalaceRequest::with(['palaceService', 'room', 'guest'])->find($id);
+
+        if (! $palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande non trouvée',
+            ], 404);
+        }
+
+        $action = $request->input('action');
+        $validActions = ['accept', 'complete', 'cancel'];
+
+        if (! in_array($action, $validActions, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action invalide',
+            ], 400);
+        }
+
+        $statusTransitions = [
+            'accept' => ['pending' => 'in_progress'],
+            'complete' => ['in_progress' => 'completed'],
+            'cancel' => [
+                'pending' => 'cancelled',
+                'in_progress' => 'cancelled',
+            ],
+        ];
+
+        if (! isset($statusTransitions[$action][$palaceRequest->status])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transition de statut non autorisée',
+            ], 400);
+        }
+
+        $palaceRequest->status = $statusTransitions[$action][$palaceRequest->status];
+        $palaceRequest->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            if ($palaceRequest->room_id) {
+                $statusMessages = [
+                    'in_progress' => 'Votre demande palace est en cours de traitement',
+                    'completed' => 'Votre demande palace a été terminée',
+                    'cancelled' => 'Votre demande palace a été annulée',
+                ];
+
+                $title = "Demande palace #{$palaceRequest->request_number}";
+                $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande palace mis à jour';
+
+                $firebaseService->sendToClientOfRoom(
+                    $palaceRequest->room_id,
+                    $title,
+                    $body,
+                    [
+                        'type' => 'palace_status',
+                        'request_id' => (string) $palaceRequest->id,
+                        'status' => $palaceRequest->status,
+                        'screen' => 'PalaceRequests',
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (palace status): ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $palaceRequest->id,
+                'request_number' => $palaceRequest->request_number,
+                'status' => $palaceRequest->status,
+                'room_number' => $palaceRequest->room ? $palaceRequest->room->room_number : null,
+                'guest_name' => $palaceRequest->guest ? $palaceRequest->guest->name : null,
             ],
         ], 200);
     }
