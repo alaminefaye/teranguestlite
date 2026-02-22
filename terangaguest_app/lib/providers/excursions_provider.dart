@@ -81,9 +81,15 @@ class ExcursionsProvider with ChangeNotifier {
   }
 
   /// Annuler un booking
-  Future<void> cancelExcursionBooking(int bookingId) async {
+  Future<void> cancelExcursionBooking(
+    int bookingId, {
+    String? reason,
+  }) async {
     try {
-      await _excursionsApi.cancelExcursionBooking(bookingId);
+      await _excursionsApi.cancelExcursionBooking(
+        bookingId,
+        reason: reason,
+      );
       // Rafraîchir la liste
       await fetchMyExcursionBookings();
     } catch (e) {

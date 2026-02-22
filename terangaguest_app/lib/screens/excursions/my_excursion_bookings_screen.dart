@@ -379,9 +379,13 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     String action,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final provider = context.read<ExcursionsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
 
     String title;
     String message;
+    final reasonController = TextEditingController();
+    String? validationError;
 
     if (action == 'confirm') {
       title = 'Confirmer la réservation';
@@ -398,38 +402,79 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.ok,
-              style: const TextStyle(color: AppTheme.accentGold),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif de l'annulation",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setState(() {
+                      validationError = 'Veuillez préciser un motif.';
+                    });
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
     if (ok != true || !mounted) return;
 
     try {
-      await context.read<ExcursionsProvider>().updateExcursionBookingStatus(
+      await provider.updateExcursionBookingStatus(
         bookingId: booking.id,
         action: action,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Statut mis à jour'),
           backgroundColor: Colors.green,
@@ -437,7 +482,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('${l10n.errorPrefix}$e'),
           backgroundColor: Colors.red,

@@ -106,9 +106,19 @@ class ExcursionsApi {
   }
 
   /// Annuler un booking
-  Future<void> cancelExcursionBooking(int bookingId) async {
+  Future<void> cancelExcursionBooking(
+    int bookingId, {
+    String? reason,
+  }) async {
     try {
-      await _apiService.post('/excursion-bookings/$bookingId/cancel');
+      final payload = <String, dynamic>{};
+      if (reason != null && reason.trim().isNotEmpty) {
+        payload['reason'] = reason.trim();
+      }
+      await _apiService.post(
+        '/excursion-bookings/$bookingId/cancel',
+        data: payload.isEmpty ? null : payload,
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

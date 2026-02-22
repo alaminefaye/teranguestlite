@@ -121,11 +121,13 @@ class LaundryProvider with ChangeNotifier {
   Future<void> updateLaundryRequestStatus({
     required int requestId,
     required String action,
+    String? reason,
   }) async {
     try {
       await _laundryApi.updateLaundryRequestStatus(
         requestId: requestId,
         action: action,
+        reason: reason,
       );
       await fetchMyLaundryRequests();
     } catch (e) {

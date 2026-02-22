@@ -94,11 +94,16 @@ class LaundryApi {
   Future<LaundryRequest> updateLaundryRequestStatus({
     required int requestId,
     required String action,
+    String? reason,
   }) async {
     try {
+      final payload = <String, dynamic>{'action': action};
+      if (reason != null && reason.trim().isNotEmpty) {
+        payload['reason'] = reason.trim();
+      }
       final response = await _apiService.post(
         '${ApiConfig.laundryRequests}/$requestId/status',
-        data: {'action': action},
+        data: payload,
       );
 
       return LaundryRequest.fromJson(

@@ -296,7 +296,12 @@ class ExcursionController extends Controller
             ], 404);
         }
 
-        $action = $request->input('action');
+        $validated = $request->validate([
+            'action' => 'required|string|in:confirm,complete,cancel',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $action = $validated['action'];
         $validActions = ['confirm', 'complete', 'cancel'];
 
         if (!in_array($action, $validActions, true)) {

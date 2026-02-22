@@ -244,6 +244,11 @@ class LaundryServiceController extends Controller
             ], 403);
         }
 
+        $validated = $request->validate([
+            'action' => 'required|string|in:pickup,ready,deliver,cancel',
+            'reason' => 'required_if:action,cancel|string|max:255',
+        ]);
+
         $laundryRequest = LaundryRequest::with(['room', 'guest'])->find($id);
 
         if (! $laundryRequest || $laundryRequest->enterprise_id != $user->enterprise_id) {
@@ -253,7 +258,7 @@ class LaundryServiceController extends Controller
             ], 404);
         }
 
-        $action = $request->input('action');
+        $action = $validated['action'];
         $validActions = ['pickup', 'ready', 'deliver', 'cancel'];
 
         if (!in_array($action, $validActions, true)) {
