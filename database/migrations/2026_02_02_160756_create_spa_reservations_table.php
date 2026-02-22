@@ -18,7 +18,7 @@ return new class extends Migration
             $table->time('reservation_time');
             $table->text('special_requests')->nullable();
             $table->decimal('price', 10, 2);
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'pending_reschedule', 'confirmed', 'cancelled', 'completed'])->default('pending');
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
