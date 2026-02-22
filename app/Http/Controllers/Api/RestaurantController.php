@@ -248,6 +248,45 @@ class RestaurantController extends Controller
 
         $reservation->save();
 
+        try {
+            if ($reservation->room_id) {
+                $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+                $restaurantName = $reservation->restaurant->name ?? 'Restaurant';
+                $dateStr = $reservation->reservation_date->format('d/m/Y');
+                $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+
+                $statusMessages = [
+                    'confirmed' => "Votre réservation au restaurant {$restaurantName} a été confirmée pour le {$dateStr} à {$timeStr}.",
+                    'cancelled' => "Votre réservation au restaurant {$restaurantName} a été annulée.",
+                    'honored' => "Votre réservation au restaurant {$restaurantName} a été honorée.",
+                ];
+
+                $title = 'Réservation restaurant';
+                $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation restaurant mis à jour.';
+
+                $data = [
+                    'type' => 'restaurant_reservation_status',
+                    'reservation_id' => (string) $reservation->id,
+                    'status' => $reservation->status,
+                    'screen' => 'MyRestaurantReservations',
+                    'restaurant_name' => $restaurantName,
+                    'date' => $dateStr,
+                    'time' => $timeStr,
+                ];
+
+                $firebaseService->sendToClientOfRoom(
+                    $reservation->room_id,
+                    $title,
+                    $body,
+                    $data
+                );
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (restaurant reservation status): ' . $e->getMessage()
+            );
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -298,6 +337,44 @@ class RestaurantController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+
+            $restaurantName = $reservation->restaurant->name ?? 'Restaurant';
+            $dateStr = $reservation->reservation_date->format('d/m/Y');
+            $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+            $roomNumber = $reservation->room ? $reservation->room->room_number : null;
+            $guestName = $reservation->guest ? $reservation->guest->name : null;
+
+            $body = "Réservation restaurant {$restaurantName} le {$dateStr} à {$timeStr} annulée par le client";
+            if ($roomNumber) {
+                $body .= " (Chambre {$roomNumber})";
+            }
+
+            $data = [
+                'type' => 'restaurant_reservation_status',
+                'reservation_id' => (string) $reservation->id,
+                'status' => $reservation->status,
+                'screen' => 'AdminRestaurantReservations',
+                'restaurant_name' => $restaurantName,
+                'date' => $dateStr,
+                'time' => $timeStr,
+                'room_number' => $roomNumber,
+                'guest_name' => $guestName,
+            ];
+
+            $firebaseService->sendToStaff(
+                $reservation->enterprise_id,
+                'Réservation restaurant annulée par le client',
+                $body,
+                $data
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (restaurant reservation cancel): ' . $e->getMessage()
+            );
+        }
 
         return response()->json([
             'success' => true,

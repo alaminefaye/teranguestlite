@@ -11,6 +11,7 @@ import 'generated/l10n/app_localizations.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/orders/order_detail_screen.dart';
 import 'screens/spa/my_spa_reservations_screen.dart';
+import 'screens/restaurants/my_reservations_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/orders_provider.dart';
@@ -136,6 +137,8 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         _handleSpaRescheduleNotification(data);
       } else if (type == 'spa_reservation_status') {
         _handleSpaStatusNotification(data);
+      } else if (type == 'restaurant_reservation_status') {
+        _handleRestaurantStatusNotification(data);
       }
     });
   }
@@ -461,6 +464,140 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         return l10n.statusCompleted;
       case 'cancelled':
         return l10n.statusCancelled;
+      default:
+        return status;
+    }
+  }
+
+  void _handleRestaurantStatusNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final l10n = AppLocalizations.of(ctx);
+    final status = data['status'] as String? ?? '';
+    final restaurantName = data['restaurant_name'] as String? ?? 'Restaurant';
+    final screen = data['screen'] as String? ?? '';
+    final isStaff = screen == 'AdminRestaurantReservations';
+    final date = data['date'] as String? ?? '';
+    final time = data['time'] as String? ?? '';
+    final roomNumber = data['room_number'] as String?;
+    final guestName = data['guest_name'] as String?;
+
+    String title;
+    String message;
+
+    if (isStaff) {
+      final detailsParts = <String>[];
+      if (roomNumber != null && roomNumber.isNotEmpty) {
+        detailsParts.add('Chambre $roomNumber');
+      }
+      if (guestName != null && guestName.isNotEmpty) {
+        detailsParts.add(guestName);
+      }
+      final detailsSuffix = detailsParts.isEmpty
+          ? ''
+          : ' (${detailsParts.join(' – ')})';
+
+      if (status == 'cancelled') {
+        title = 'Réservation restaurant annulée par le client';
+        message =
+            'Le client a annulé la réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
+      } else {
+        title = 'Réservation restaurant mise à jour';
+        final label = _restaurantStatusLabel(l10n, status);
+        message = 'Statut de la réservation restaurant mis à jour : $label.';
+      }
+    } else {
+      title = 'Réservation restaurant';
+      if (status == 'confirmed') {
+        message =
+            'Votre réservation au restaurant $restaurantName est confirmée pour le $date à $time.';
+      } else if (status == 'cancelled') {
+        message = l10n.reservationCancelledMessage;
+      } else if (status == 'honored') {
+        message =
+            'Merci, votre réservation au restaurant $restaurantName a été honorée.';
+      } else {
+        final label = _restaurantStatusLabel(l10n, status);
+        message = 'Statut de la réservation restaurant : $label';
+      }
+    }
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Fermer',
+                style: TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+                navigator.push(
+                  NavigationHelper.slideRoute(
+                    const MyRestaurantReservationsScreen(),
+                  ),
+                );
+              },
+              child: Text(
+                isStaff
+                    ? 'Voir les réservations restaurants à traiter'
+                    : 'Voir mes réservations restaurants',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _restaurantStatusLabel(AppLocalizations l10n, String status) {
+    switch (status) {
+      case 'pending':
+        return l10n.statusPending;
+      case 'confirmed':
+        return l10n.statusConfirmed;
+      case 'cancelled':
+        return l10n.statusCancelled;
+      case 'honored':
+        return l10n.statusCompleted;
       default:
         return status;
     }

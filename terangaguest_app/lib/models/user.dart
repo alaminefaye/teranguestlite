@@ -117,7 +117,7 @@ class User {
   // Getters utiles
   bool get isGuest => role == 'guest';
   bool get isStaff => role == 'staff';
-  bool get isAdmin => role == 'admin';
+  bool get isAdmin => role == 'admin' || role == 'super_admin';
 
   String get displayRole {
     switch (role) {
