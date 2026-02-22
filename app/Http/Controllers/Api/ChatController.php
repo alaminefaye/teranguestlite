@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\HotelConversation;
 use App\Models\HotelMessage;
+use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {
@@ -124,6 +126,8 @@ class ChatController extends Controller
         $conversation->last_message_at = now();
         $conversation->save();
 
+        $this->notifyStaffNewMessage($conversation, $message);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -136,6 +140,112 @@ class ChatController extends Controller
                 'created_at' => $message->created_at?->toISOString(),
             ],
         ], 201);
+    }
+
+    protected function notifyStaffNewMessage(HotelConversation $conversation, HotelMessage $message): void
+    {
+        try {
+            $guestName = $conversation->user?->name ?: 'Client chambre';
+            $roomLabel = null;
+
+            if ($conversation->room?->room_number) {
+                $roomLabel = 'Chambre ' . $conversation->room->room_number;
+            } elseif ($conversation->user?->room_number) {
+                $roomLabel = 'Chambre ' . $conversation->user->room_number;
+            }
+
+            $preview = $this->buildMessagePreview($message);
+
+            $service = app(FirebaseNotificationService::class);
+            $service->sendToStaff(
+                $conversation->enterprise_id,
+                'Nouveau message client',
+                $preview,
+                [
+                    'type' => 'chat_message',
+                    'conversation_id' => (string) $conversation->id,
+                    'sender_type' => $message->sender_type,
+                    'guest_name' => $guestName,
+                    'room_label' => $roomLabel ?? '',
+                    'message_type' => $message->message_type,
+                    'message_preview' => $preview,
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::error('Chat notification error (staff): ' . $e->getMessage(), [
+                'conversation_id' => $conversation->id,
+                'message_id' => $message->id,
+            ]);
+        }
+    }
+
+    protected function notifyGuestNewMessage(HotelConversation $conversation, HotelMessage $message): void
+    {
+        try {
+            if (!$conversation->room_id) {
+                return;
+            }
+
+            $guestName = $conversation->user?->name ?: 'Client chambre';
+            $roomLabel = null;
+
+            if ($conversation->room?->room_number) {
+                $roomLabel = 'Chambre ' . $conversation->room->room_number;
+            } elseif ($conversation->user?->room_number) {
+                $roomLabel = 'Chambre ' . $conversation->user->room_number;
+            }
+
+            $preview = $this->buildMessagePreview($message);
+
+            $service = app(FirebaseNotificationService::class);
+            $service->sendToClientOfRoom(
+                $conversation->room_id,
+                'Nouveau message du staff',
+                $preview,
+                [
+                    'type' => 'chat_message',
+                    'conversation_id' => (string) $conversation->id,
+                    'sender_type' => $message->sender_type,
+                    'guest_name' => $guestName,
+                    'room_label' => $roomLabel ?? '',
+                    'message_type' => $message->message_type,
+                    'message_preview' => $preview,
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::error('Chat notification error (guest): ' . $e->getMessage(), [
+                'conversation_id' => $conversation->id,
+                'message_id' => $message->id,
+            ]);
+        }
+    }
+
+    protected function buildMessagePreview(HotelMessage $message): string
+    {
+        if ($message->message_type === 'text') {
+            $raw = (string) ($message->content ?? '');
+            $trimmed = trim($raw);
+
+            if ($trimmed === '') {
+                return 'Nouveau message';
+            }
+
+            if (strlen($trimmed) > 80) {
+                return substr($trimmed, 0, 80) . '…';
+            }
+
+            return $trimmed;
+        }
+
+        if ($message->message_type === 'image') {
+            return 'Photo envoyée';
+        }
+
+        if ($message->message_type === 'audio') {
+            return 'Note vocale envoyée';
+        }
+
+        return 'Nouveau message';
     }
 
     public function staffConversations(Request $request)
@@ -357,6 +467,8 @@ class ChatController extends Controller
 
         $conversation->last_message_at = now();
         $conversation->save();
+
+        $this->notifyGuestNewMessage($conversation, $message);
 
         return response()->json([
             'success' => true,

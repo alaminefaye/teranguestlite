@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -344,6 +345,7 @@ class _AdminChatConversationScreenState
   final ScrollController _scrollController = ScrollController();
   bool _loading = true;
   bool _sending = false;
+  bool _sendingMedia = false;
   String? _error;
   List<ChatMessage> _messages = [];
 
@@ -381,7 +383,7 @@ class _AdminChatConversationScreenState
 
   Future<void> _sendMessage() async {
     final raw = _controller.text.trim();
-    if (raw.isEmpty || _sending) return;
+    if (raw.isEmpty || _sending || _sendingMedia) return;
 
     setState(() {
       _sending = true;
@@ -400,6 +402,49 @@ class _AdminChatConversationScreenState
       if (!mounted) return;
       setState(() {
         _sending = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickAndSendMedia(String messageType) async {
+    if (_sending || _sendingMedia) return;
+
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        withData: false,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final file = result.files.single;
+      final path = file.path;
+      if (path == null || path.isEmpty) return;
+
+      setState(() {
+        _sendingMedia = true;
+      });
+
+      final msg = await _api.sendMediaMessage(
+        filePath: path,
+        fileName: file.name,
+        messageType: messageType,
+      );
+      if (!mounted) return;
+      setState(() {
+        _messages = [..._messages, msg];
+        _sendingMedia = false;
+      });
+      HapticHelper.lightImpact();
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _sendingMedia = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -598,6 +643,26 @@ class _AdminChatConversationScreenState
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         child: Row(
           children: [
+            IconButton(
+              onPressed:
+                  (_sending || _sendingMedia) ? null : () => _pickAndSendMedia('image'),
+              icon: Icon(
+                Icons.attach_file,
+                color: (_sending || _sendingMedia)
+                    ? AppTheme.textGray
+                    : AppTheme.accentGold,
+              ),
+            ),
+            IconButton(
+              onPressed:
+                  (_sending || _sendingMedia) ? null : () => _pickAndSendMedia('audio'),
+              icon: Icon(
+                Icons.mic_none_rounded,
+                color: (_sending || _sendingMedia)
+                    ? AppTheme.textGray
+                    : AppTheme.accentGold,
+              ),
+            ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -627,10 +692,12 @@ class _AdminChatConversationScreenState
             ),
             const SizedBox(width: 8),
             IconButton(
-              onPressed: _sending ? null : _sendMessage,
+              onPressed: (_sending || _sendingMedia) ? null : _sendMessage,
               icon: Icon(
                 Icons.send_rounded,
-                color: _sending ? AppTheme.textGray : AppTheme.accentGold,
+                color: (_sending || _sendingMedia)
+                    ? AppTheme.textGray
+                    : AppTheme.accentGold,
               ),
             ),
           ],

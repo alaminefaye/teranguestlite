@@ -24,6 +24,7 @@ import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
 import 'utils/navigation_helper.dart';
+import 'screens/admin/admin_chat_conversations_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -139,8 +140,148 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         _handleSpaStatusNotification(data);
       } else if (type == 'restaurant_reservation_status') {
         _handleRestaurantStatusNotification(data);
+      } else if (type == 'chat_message') {
+        _handleChatMessageNotification(data);
       }
     });
+  }
+
+  void _handleChatMessageNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final l10n = AppLocalizations.of(ctx);
+    final auth = Provider.of<AuthProvider>(ctx, listen: false);
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
+    final conversationIdRaw = data['conversation_id'] as String?;
+    final conversationId = int.tryParse(conversationIdRaw ?? '');
+    final guestName = data['guest_name'] as String? ?? 'Client chambre';
+    final roomLabel = data['room_label'] as String? ?? '';
+    final preview = data['message_preview'] as String? ?? '';
+    final messageType = data['message_type'] as String? ?? 'text';
+
+    String typeLabel;
+    if (messageType == 'image') {
+      typeLabel = 'Image';
+    } else if (messageType == 'audio') {
+      typeLabel = 'Note vocale';
+    } else if (messageType == 'text') {
+      typeLabel = 'Message texte';
+    } else {
+      typeLabel = 'Fichier';
+    }
+
+    String title;
+    String subtitle;
+
+    if (isStaffOrAdmin) {
+      title = 'Nouveau message client';
+      subtitle = roomLabel.isNotEmpty ? '$guestName · $roomLabel' : guestName;
+    } else {
+      title = 'Nouveau message du staff';
+      subtitle = guestName;
+    }
+
+    final body = preview.isNotEmpty
+        ? preview
+        : (isStaffOrAdmin
+              ? 'Vous avez un nouveau message client dans le chat.'
+              : 'Vous avez un nouveau message dans le chat.');
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(color: AppTheme.textGray, fontSize: 13),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Type : $typeLabel',
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                body,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: Text(
+                l10n.close,
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (isStaffOrAdmin && conversationId != null)
+              TextButton(
+                onPressed: () {
+                  _stopNotificationSound();
+                  Navigator.of(dialogContext, rootNavigator: true).pop();
+                  final navigator = rootNavigatorKey.currentState;
+                  if (navigator == null) return;
+                  navigator.push(
+                    NavigationHelper.slideRoute(
+                      AdminChatConversationScreen(
+                        conversationId: conversationId,
+                        guestName: guestName,
+                        roomLabel: roomLabel.isNotEmpty ? roomLabel : null,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Répondre',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   void _handleOrderStatusNotification(Map<String, dynamic> data) {
