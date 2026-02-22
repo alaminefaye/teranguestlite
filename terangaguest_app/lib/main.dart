@@ -25,6 +25,7 @@ import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
+import 'screens/hotel_infos/chatbot_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -272,6 +273,25 @@ class _LocalizedAppState extends State<_LocalizedApp> {
                 },
                 child: const Text(
                   'Répondre',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            else if (!isStaffOrAdmin)
+              TextButton(
+                onPressed: () {
+                  _stopNotificationSound();
+                  Navigator.of(dialogContext, rootNavigator: true).pop();
+                  final navigator = rootNavigatorKey.currentState;
+                  if (navigator == null) return;
+                  navigator.push(
+                    NavigationHelper.slideRoute(const ChatbotScreen()),
+                  );
+                },
+                child: const Text(
+                  'Ouvrir le chat',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
