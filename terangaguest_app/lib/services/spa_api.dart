@@ -135,6 +135,21 @@ class SpaApi {
     }
   }
 
+  Future<SpaReservation> acceptRescheduledSpaReservation(int reservationId) async {
+    try {
+      final response = await _apiService.post(
+        '${ApiConfig.mySpaReservations}/$reservationId/accept-reschedule',
+      );
+      return SpaReservation.fromJson(
+        response.data['data'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error: $e');
+      final message = _messageFromDioException(e);
+      throw Exception(message);
+    }
+  }
+
   Future<SpaReservation> updateSpaReservationStatus({
     required int reservationId,
     required String action,

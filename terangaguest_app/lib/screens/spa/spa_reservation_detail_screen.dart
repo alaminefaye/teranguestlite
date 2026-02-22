@@ -349,6 +349,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
   Map<String, Color> _getStatusColors(String status) {
     switch (status) {
       case 'pending':
+      case 'pending_reschedule':
         return {
           'bg': Colors.orange.withValues(alpha: 0.2),
           'border': Colors.orange,
@@ -385,6 +386,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     switch (status) {
       case 'pending':
+      case 'pending_reschedule':
         return l10n.statusPending;
       case 'confirmed':
         return l10n.statusConfirmed;

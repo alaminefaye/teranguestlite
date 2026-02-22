@@ -157,142 +157,370 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                     ..rotateX(-0.05)
                     ..rotateY(0.02),
                   alignment: Alignment.center,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppTheme.accentGold,
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 10),
+                  child: GestureDetector(
+                    onTap: () => _showLaundryDetails(request),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
                         ),
-                        BoxShadow(
-                          color: AppTheme.accentGold.withValues(alpha: 0.1),
-                          blurRadius: 15,
-                          spreadRadius: -2,
-                          offset: const Offset(0, -4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppTheme.accentGold,
+                          width: 1.5,
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).requestNumber(request.id),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              _buildStatusBadge(context, request.status),
-                            ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 10),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today,
-                                    size: 14,
-                                    color: AppTheme.textGray,
+                          BoxShadow(
+                            color: AppTheme.accentGold.withValues(alpha: 0.1),
+                            blurRadius: 15,
+                            spreadRadius: -2,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).requestNumber(request.id),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.accentGold,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      DateFormat(
-                                        'dd/MM/yyyy',
-                                        'fr_FR',
-                                      ).format(request.createdAt),
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppTheme.textGray,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.shopping_basket,
-                                    size: 14,
-                                    color: AppTheme.textGray,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).articleCount(request.totalItems),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textGray,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (hasRoomOrGuest) const SizedBox(height: 6),
-                              if (hasRoomOrGuest)
+                                ),
+                                const SizedBox(height: 8),
+                                _buildStatusBadge(context, request.status),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
                                   children: [
                                     const Icon(
-                                      Icons.meeting_room,
+                                      Icons.calendar_today,
                                       size: 14,
                                       color: AppTheme.textGray,
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
-                                        roomGuestText,
+                                        DateFormat(
+                                          'dd/MM/yyyy',
+                                          'fr_FR',
+                                        ).format(request.createdAt),
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: AppTheme.textGray,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
                                 ),
-                              const SizedBox(height: 6),
-                              Text(
-                                request.formattedTotalPrice,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold,
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.shopping_basket,
+                                      size: 14,
+                                      color: AppTheme.textGray,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).articleCount(request.totalItems),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppTheme.textGray,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              _buildStaffActions(request),
-                            ],
-                          ),
-                        ],
+                                if (hasRoomOrGuest) const SizedBox(height: 6),
+                                if (hasRoomOrGuest)
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.meeting_room,
+                                        size: 14,
+                                        color: AppTheme.textGray,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          roomGuestText,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppTheme.textGray,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  request.formattedTotalPrice,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.accentGold,
+                                  ),
+                                ),
+                                _buildStaffActions(request),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 );
               },
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showLaundryDetails(LaundryRequest request) async {
+    final l10n = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final items = request.items;
+        final hasItems = items.isNotEmpty;
+        final hasInstructions =
+            request.specialInstructions != null &&
+            request.specialInstructions!.trim().isNotEmpty;
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 16,
+            bottom: MediaQuery.of(ctx).padding.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.laundry,
+                style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                AppLocalizations.of(context).requestNumber(request.id),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.accentGold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: AppTheme.textGray,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    DateFormat(
+                      'dd/MM/yyyy à HH:mm',
+                      'fr_FR',
+                    ).format(request.createdAt),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                  const Spacer(),
+                  _buildStatusBadge(context, request.status),
+                ],
+              ),
+              if (request.roomNumber != null &&
+                  request.roomNumber!.trim().isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.meeting_room,
+                      size: 16,
+                      color: AppTheme.textGray,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Chambre ${request.roomNumber}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (request.guestName != null &&
+                  request.guestName!.trim().isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person,
+                      size: 16,
+                      color: AppTheme.textGray,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        request.guestName!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 16),
+              Text(
+                l10n.articleCount(request.totalItems),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (hasItems)
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: items.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 6),
+                    itemBuilder: (ctx, index) {
+                      final item = items[index];
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${item.quantity} x ${item.serviceName}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            item.formattedSubtotal,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                )
+              else
+                const Text(
+                  'Aucun article trouvé pour cette demande.',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
+                ),
+              if (hasInstructions) ...[
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: AppTheme.accentGold,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        request.specialInstructions!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.total,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                  Text(
+                    request.formattedTotalPrice,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },

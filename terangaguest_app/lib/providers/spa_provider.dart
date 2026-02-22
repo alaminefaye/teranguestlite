@@ -92,6 +92,15 @@ class SpaProvider with ChangeNotifier {
     }
   }
 
+  Future<void> acceptRescheduledSpaReservation(int reservationId) async {
+    try {
+      await _spaApi.acceptRescheduledSpaReservation(reservationId);
+      await fetchMySpaReservations();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   Future<void> updateSpaReservationStatus({
     required int reservationId,
     required String action,

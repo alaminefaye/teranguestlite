@@ -159,6 +159,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
   Widget _buildReservationCard(SpaReservation reservation) {
     final auth = context.read<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final isPendingReschedule = reservation.status == 'pending_reschedule';
     final hasRoomOrGuest =
         reservation.roomNumber != null || reservation.guestName != null;
     final roomGuestText = () {
@@ -303,7 +304,60 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       color: AppTheme.accentGold,
                     ),
                   ),
-                  if (!isStaffOrAdmin &&
+                  if (!isStaffOrAdmin && isPendingReschedule) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _acceptRescheduledSpaReservation(
+                              context,
+                              reservation,
+                            ),
+                            icon: const Icon(
+                              Icons.check_circle_outline,
+                              size: 18,
+                              color: AppTheme.primaryDark,
+                            ),
+                            label: const Text(
+                              'Accepter le nouvel horaire',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.accentGold,
+                              foregroundColor: AppTheme.primaryDark,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () =>
+                                _showCancelSpaDialog(context, reservation),
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            label: Text(
+                              AppLocalizations.of(context).cancel,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.red),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (!isStaffOrAdmin &&
                       _canCancelSpaReservation(reservation)) ...[
                     const SizedBox(height: 12),
                     SizedBox(
@@ -508,7 +562,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
   }
 
   bool _canCancelSpaReservation(SpaReservation r) {
-    if (r.status != 'confirmed') return false;
+    if (r.status != 'confirmed' && r.status != 'pending_reschedule') {
+      return false;
+    }
     final parts = r.time.split(':');
     final hour = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 0) : 0;
     final minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
@@ -522,6 +578,68 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     return reservationDateTime.isAfter(
       DateTime.now().add(const Duration(hours: 24)),
     );
+  }
+
+  Future<void> _acceptRescheduledSpaReservation(
+    BuildContext context,
+    SpaReservation reservation,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: const Text(
+          'Accepter le nouvel horaire',
+          style: TextStyle(color: AppTheme.accentGold),
+        ),
+        content: const Text(
+          'Confirmer ce nouvel horaire pour votre réservation spa ?',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<SpaProvider>().acceptRescheduledSpaReservation(
+        reservation.id,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.spaReservationConfirmedMessage(reservation.serviceName),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _showCancelSpaDialog(
@@ -606,6 +724,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
   Map<String, Color> _getStatusColor(String status) {
     switch (status) {
       case 'pending':
+      case 'pending_reschedule':
         return {
           'bg': Colors.orange.withValues(alpha: 0.2),
           'border': Colors.orange,
@@ -642,6 +761,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     final l10n = AppLocalizations.of(context);
     switch (status) {
       case 'pending':
+      case 'pending_reschedule':
         return l10n.statusPending;
       case 'confirmed':
         return l10n.statusConfirmed;

@@ -274,7 +274,7 @@ class SpaServiceController extends Controller
                 'time' => 'required|date_format:H:i',
             ]);
 
-            if (!in_array($reservation->status, ['pending', 'confirmed'], true)) {
+            if (!in_array($reservation->status, ['pending', 'confirmed', 'pending_reschedule'], true)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La replanification est uniquement possible pour les réservations en attente ou confirmées',
@@ -283,14 +283,7 @@ class SpaServiceController extends Controller
 
             $reservation->reservation_date = $request->input('date');
             $reservation->reservation_time = $request->input('time');
-
-            if ($reservation->status === 'pending') {
-                $reservation->status = 'confirmed';
-            }
-
-            if ($reservation->status === 'confirmed' && ! $reservation->confirmed_at) {
-                $reservation->confirmed_at = now();
-            }
+            $reservation->status = 'pending_reschedule';
 
             $reservation->save();
         } else {
@@ -318,6 +311,56 @@ class SpaServiceController extends Controller
             }
 
             $reservation->save();
+        }
+
+        try {
+            if ($reservation->room_id) {
+                $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+                $serviceName = $reservation->spaService->name ?? 'Spa';
+                $dateStr = $reservation->reservation_date->format('d/m/Y');
+                $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+
+                if ($action === 'reschedule') {
+                    $title = 'Nouvel horaire spa proposé';
+                    $body = "L'horaire demandé pour {$serviceName} n'est plus disponible. "
+                        . "Nous vous proposons le {$dateStr} à {$timeStr}. "
+                        . 'Veuillez confirmer ou annuler depuis vos réservations spa.';
+
+                    $firebaseService->sendToClientOfRoom(
+                        $reservation->room_id,
+                        $title,
+                        $body,
+                        [
+                            'type' => 'spa_reservation_rescheduled',
+                            'reservation_id' => (string) $reservation->id,
+                            'screen' => 'MySpaReservations',
+                        ]
+                    );
+                } else {
+                    $statusMessages = [
+                        'confirmed' => 'Votre réservation spa a été confirmée.',
+                        'cancelled' => 'Votre réservation spa a été annulée.',
+                    ];
+                    $title = 'Réservation spa';
+                    $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation spa mis à jour.';
+
+                    $firebaseService->sendToClientOfRoom(
+                        $reservation->room_id,
+                        $title,
+                        $body,
+                        [
+                            'type' => 'spa_reservation_status',
+                            'reservation_id' => (string) $reservation->id,
+                            'status' => $reservation->status,
+                            'screen' => 'MySpaReservations',
+                        ]
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (spa reservation status): ' . $e->getMessage()
+            );
         }
 
         return response()->json([
@@ -377,6 +420,54 @@ class SpaServiceController extends Controller
             'success' => true,
             'message' => 'Réservation annulée',
             'data' => ['id' => $reservation->id, 'status' => $reservation->status],
+        ], 200);
+    }
+
+    public function acceptRescheduledReservation(Request $request, $id)
+    {
+        $reservation = SpaReservation::with(['spaService', 'room', 'guest'])
+            ->where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (! $reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée',
+            ], 404);
+        }
+
+        if ($reservation->status !== 'pending_reschedule') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun nouvel horaire en attente de confirmation pour cette réservation',
+            ], 400);
+        }
+
+        $reservation->status = 'confirmed';
+        if (! $reservation->confirmed_at) {
+            $reservation->confirmed_at = now();
+        }
+        $reservation->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $reservation->id,
+                'spa_service' => [
+                    'id' => $reservation->spaService->id,
+                    'name' => $reservation->spaService->name,
+                    'duration' => $reservation->spaService->duration,
+                ],
+                'date' => $reservation->reservation_date->format('Y-m-d'),
+                'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                'price' => (float) $reservation->price,
+                'formatted_price' => number_format($reservation->price, 0, '', ' ') . ' FCFA',
+                'status' => $reservation->status,
+                'room_number' => $reservation->room ? $reservation->room->room_number : null,
+                'guest_name' => $reservation->guest ? $reservation->guest->name : null,
+                'created_at' => $reservation->created_at->toISOString(),
+            ],
         ], 200);
     }
 }

@@ -105,6 +105,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-spa-reservations', [SpaServiceController::class, 'myReservations']);
     Route::post('/my-spa-reservations/{id}/cancel', [SpaServiceController::class, 'cancelReservation']);
+    Route::post('/spa-reservations/{id}/status', [SpaServiceController::class, 'updateReservationStatus']);
+    Route::post('/my-spa-reservations/{id}/accept-reschedule', [SpaServiceController::class, 'acceptRescheduledReservation']);
     
     // ==========================================
     // EXCURSIONS
