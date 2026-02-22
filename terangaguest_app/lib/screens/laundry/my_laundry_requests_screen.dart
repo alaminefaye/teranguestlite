@@ -861,6 +861,10 @@ class _StaffActionsForDetail extends StatelessWidget {
     }
 
     final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final laundryProvider = context.read<LaundryProvider>();
+    final errorPrefix = l10n.errorPrefix;
 
     Future<void> handleAction(String action) async {
       String title;
@@ -913,24 +917,22 @@ class _StaffActionsForDetail extends StatelessWidget {
       if (ok != true) return;
 
       try {
-        await context.read<LaundryProvider>().updateLaundryRequestStatus(
+        await laundryProvider.updateLaundryRequestStatus(
           requestId: request.id,
           action: action,
         );
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Statut mis à jour'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
+        navigator.pop();
       } catch (e) {
         final messageError = e.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context).errorPrefix}$messageError',
-            ),
+            content: Text('$errorPrefix$messageError'),
             backgroundColor: Colors.red,
           ),
         );

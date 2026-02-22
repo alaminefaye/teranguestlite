@@ -507,6 +507,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       return;
     }
 
+    final messenger = ScaffoldMessenger.of(context);
+    final palaceProvider = context.read<PalaceProvider>();
+    final errorPrefix = l10n.errorPrefix;
+
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -576,24 +580,22 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
     if (ok != true || !mounted) return;
 
     try {
-      await context.read<PalaceProvider>().updatePalaceRequestStatus(
+      await palaceProvider.updatePalaceRequestStatus(
         requestId: request.id,
         action: action,
         reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Statut mis à jour'),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
-      if (!mounted) return;
       final messageError = e.toString().replaceFirst('Exception: ', '');
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text('${l10n.errorPrefix}$messageError'),
+          content: Text('$errorPrefix$messageError'),
           backgroundColor: Colors.red,
         ),
       );
@@ -608,7 +610,6 @@ class PalaceRequestDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final detailsText = (request.details ?? '').trim();
     final hasDetails = detailsText.isNotEmpty;
     final roomGuestParts = <String>[];
@@ -910,6 +911,11 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
         return;
       }
 
+      final messenger = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
+      final palaceProvider = context.read<PalaceProvider>();
+      final errorPrefix = l10n.errorPrefix;
+
       final ok = await showDialog<bool>(
         context: context,
         builder: (ctx) => StatefulBuilder(
@@ -979,10 +985,7 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
       if (ok != true) return;
 
       try {
-        final messenger = ScaffoldMessenger.of(context);
-        final navigator = Navigator.of(context);
-
-        await context.read<PalaceProvider>().updatePalaceRequestStatus(
+        await palaceProvider.updatePalaceRequestStatus(
           requestId: request.id,
           action: action,
           reason: action == 'cancel' ? reasonController.text.trim() : null,
@@ -998,9 +1001,9 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
         navigator.pop();
       } catch (e) {
         final messageError = e.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('${l10n.errorPrefix}$messageError'),
+            content: Text('$errorPrefix$messageError'),
             backgroundColor: Colors.red,
           ),
         );

@@ -21,7 +21,6 @@ import '../spa/my_spa_reservations_screen.dart';
 import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
-import '../hotel_infos/assistance_emergency_screen.dart';
 import '../hotel_infos/emergency_requests_screen.dart';
 import '../notifications/notifications_screen.dart';
 import 'admin_chat_conversations_screen.dart';
@@ -108,7 +107,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final messages = <String>[];
     final hasNewOrder = newSummary.ordersPending > oldSummary.ordersPending;
     if (hasNewOrder) {
-      _enqueueNewOrdersForAlert();
+      _enqueueNewOrdersForAlert(context);
       messages.add('Nouvelle commande Room Service à traiter');
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
@@ -293,7 +292,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Future<void> _enqueueNewOrdersForAlert() async {
+  Future<void> _enqueueNewOrdersForAlert(BuildContext context) async {
     try {
       final result = await _ordersApi.getOrders(
         status: 'pending',
@@ -328,14 +327,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           }
         }
       }
-      if (!_isShowingNewOrderDialog && _newOrdersQueue.isNotEmpty && mounted) {
-        _showNewOrdersCarousel();
+      if (!_isShowingNewOrderDialog &&
+          _newOrdersQueue.isNotEmpty &&
+          context.mounted) {
+        _showNewOrdersCarousel(context);
       }
     } catch (_) {}
   }
 
-  Future<void> _showNewOrdersCarousel() async {
-    if (!mounted) return;
+  Future<void> _showNewOrdersCarousel(BuildContext context) async {
+    if (!context.mounted) return;
     if (_newOrdersQueue.isEmpty) {
       _isShowingNewOrderDialog = false;
       return;
@@ -344,7 +345,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final ordersToShow = List<Order>.from(_newOrdersQueue);
     _newOrdersQueue.clear();
 
-    await HapticHelper.heavyImpact();
+    final navigator = Navigator.of(context);
+
+    HapticHelper.heavyImpact();
 
     final selectedOrder = await showDialog<Order?>(
       context: context,
@@ -354,20 +357,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       },
     );
 
-    if (!mounted) {
+    if (!context.mounted) {
       _isShowingNewOrderDialog = false;
       return;
     }
     _isShowingNewOrderDialog = false;
     if (selectedOrder != null) {
-      Navigator.of(context).push(
+      navigator.push(
         MaterialPageRoute(
           builder: (_) => OrderDetailScreen(orderId: selectedOrder.id),
         ),
       );
     }
-    if (_newOrdersQueue.isNotEmpty) {
-      _showNewOrdersCarousel();
+    if (_newOrdersQueue.isNotEmpty && context.mounted) {
+      _showNewOrdersCarousel(context);
     }
   }
 
@@ -579,12 +582,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             CachedNetworkImage(
               imageUrl: backgroundImageUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
+              placeholder: (context, url) => Container(
                 decoration: const BoxDecoration(
                   gradient: AppTheme.backgroundGradient,
                 ),
               ),
-              errorWidget: (_, __, ___) => Container(
+              errorWidget: (context, url, error) => Container(
                 decoration: const BoxDecoration(
                   gradient: AppTheme.backgroundGradient,
                 ),
@@ -631,7 +634,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       imageUrl: logoUrl,
                       height: logoSize,
                       fit: BoxFit.contain,
-                      placeholder: (_, __) => SizedBox(
+                      placeholder: (context, url) => SizedBox(
                         height: logoSize,
                         child: Center(
                           child: SizedBox(
@@ -644,7 +647,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           ),
                         ),
                       ),
-                      errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                      errorWidget: (context, url, error) =>
+                          const SizedBox.shrink(),
                     ),
                   if (logoUrl != null && logoUrl.isNotEmpty)
                     SizedBox(height: isVeryCompact ? 12 : 18),

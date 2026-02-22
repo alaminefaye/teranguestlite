@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../screens/admin/admin_chat_conversations_screen.dart';
+import '../../screens/excursions/my_excursion_bookings_screen.dart';
+import '../../screens/hotel_infos/emergency_requests_screen.dart';
+import '../../screens/laundry/my_laundry_requests_screen.dart';
+import '../../screens/orders/orders_list_screen.dart';
+import '../../screens/palace/my_palace_requests_screen.dart';
+import '../../screens/restaurants/my_reservations_screen.dart';
+import '../../screens/spa/my_spa_reservations_screen.dart';
 import '../../services/admin_api.dart';
 import '../../services/notifications_api.dart';
 import '../../utils/haptic_helper.dart';
@@ -118,6 +126,65 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  void _openSection(String routeKey) {
+    switch (routeKey) {
+      case 'admin-room-service':
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const OrdersListScreen()));
+        break;
+      case 'admin-restaurants':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const MyRestaurantReservationsScreen(),
+          ),
+        );
+        break;
+      case 'admin-spa':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MySpaReservationsScreen()),
+        );
+        break;
+      case 'admin-excursions':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MyExcursionBookingsScreen()),
+        );
+        break;
+      case 'admin-laundry':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MyLaundryRequestsScreen()),
+        );
+        break;
+      case 'admin-palace':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MyPalaceRequestsScreen()),
+        );
+        break;
+      case 'admin-emergency':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const EmergencyRequestsScreen()),
+        );
+        break;
+      case 'admin-chat':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const AdminChatConversationsScreen(),
+          ),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Section en préparation pour la version staff mobile.',
+            ),
+            backgroundColor: AppTheme.accentGold,
+            duration: Duration(seconds: 2),
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -132,6 +199,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Commandes Room Service en attente',
             detail:
                 '${summary.ordersPending} commande(s) à traiter pour le room service.',
+            routeKey: 'admin-room-service',
           ),
         );
       }
@@ -142,6 +210,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Réservations Restaurants en attente',
             detail:
                 '${summary.restaurantPending} réservation(s) restaurant à confirmer.',
+            routeKey: 'admin-restaurants',
           ),
         );
       }
@@ -152,6 +221,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Réservations Spa & Bien-être en attente',
             detail:
                 '${summary.spaPending} réservation(s) spa à prendre en charge.',
+            routeKey: 'admin-spa',
           ),
         );
       }
@@ -162,6 +232,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Excursions & Activités en attente',
             detail:
                 '${summary.excursionsPending} demande(s) d’excursions à traiter.',
+            routeKey: 'admin-excursions',
           ),
         );
       }
@@ -172,6 +243,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Demandes Blanchisserie en attente',
             detail:
                 '${summary.laundryPending} demande(s) blanchisserie à prendre en charge.',
+            routeKey: 'admin-laundry',
           ),
         );
       }
@@ -182,6 +254,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Services Palace / Conciergerie en attente',
             detail:
                 '${summary.palacePending} demande(s) palace / conciergerie en cours.',
+            routeKey: 'admin-palace',
           ),
         );
       }
@@ -192,6 +265,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Assistance & Urgence',
             detail:
                 '${summary.emergencyOpen} alerte(s) Assistance & Urgence ouvertes.',
+            routeKey: 'admin-emergency',
           ),
         );
       }
@@ -202,6 +276,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             title: 'Messages / Chat client',
             detail:
                 '${summary.chatUnreadConversations} conversation(s) client non lue(s).',
+            routeKey: 'admin-chat',
           ),
         );
       }
@@ -411,9 +486,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                         itemBuilder: (context, index) {
                           final n = notifications[index];
-                          return _NotificationTile(item: n);
+                          return _NotificationTile(
+                            item: n,
+                            onTap: () {
+                              HapticHelper.lightImpact();
+                              _openSection(n.routeKey);
+                            },
+                          );
                         },
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
                         itemCount: notifications.length,
                       ),
                     );
@@ -432,79 +514,89 @@ class _NotificationItem {
   final IconData icon;
   final String title;
   final String detail;
+  final String routeKey;
 
   const _NotificationItem({
     required this.icon,
     required this.title,
     required this.detail,
+    required this.routeKey,
   });
 }
 
 class _NotificationTile extends StatelessWidget {
   final _NotificationItem item;
+  final VoidCallback onTap;
 
-  const _NotificationTile({required this.item});
+  const _NotificationTile({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withValues(alpha: 0.65),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.5),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.primaryDark.withValues(alpha: 0.8),
-              border: Border.all(
-                color: AppTheme.accentGold.withValues(alpha: 0.6),
-                width: 1,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.65),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.accentGold.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.45),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-            ),
-            child: Icon(item.icon, color: AppTheme.accentGold, size: 22),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.primaryDark.withValues(alpha: 0.8),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.6),
+                    width: 1,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  item.detail,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textGray,
-                    height: 1.4,
-                  ),
+                child: Icon(item.icon, color: AppTheme.accentGold, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.detail,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textGray,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

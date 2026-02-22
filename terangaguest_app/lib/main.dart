@@ -12,6 +12,9 @@ import 'screens/auth/splash_screen.dart';
 import 'screens/orders/order_detail_screen.dart';
 import 'screens/spa/my_spa_reservations_screen.dart';
 import 'screens/restaurants/my_reservations_screen.dart';
+import 'screens/excursions/my_excursion_bookings_screen.dart';
+import 'screens/laundry/my_laundry_requests_screen.dart';
+import 'screens/palace/my_palace_requests_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/orders_provider.dart';
@@ -100,8 +103,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     _notificationPlayer = AudioPlayer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LocaleProvider>().load();
+      _setupFcmListeners();
+      _handleInitialFcmMessage();
     });
-    _setupFcmListeners();
   }
 
   @override
@@ -145,6 +149,17 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         _handleChatMessageNotification(data);
       }
     });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _handleOpenedFromNotification(message.data);
+    });
+  }
+
+  Future<void> _handleInitialFcmMessage() async {
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+    if (message != null) {
+      _handleOpenedFromNotification(message.data);
+    }
   }
 
   void _handleChatMessageNotification(Map<String, dynamic> data) {
@@ -591,6 +606,90 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         );
       },
     );
+  }
+
+  void _handleOpenedFromNotification(Map<String, dynamic> data) {
+    final type = data['type'] as String?;
+    final navigator = rootNavigatorKey.currentState;
+    final ctx = rootNavigatorKey.currentContext;
+    if (navigator == null || ctx == null) return;
+
+    final auth = Provider.of<AuthProvider>(ctx, listen: false);
+    if (!auth.isAuthenticated) return;
+
+    if (type == 'chat_message') {
+      final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+      final conversationIdRaw = data['conversation_id'] as String?;
+      final conversationId = int.tryParse(conversationIdRaw ?? '');
+      final guestName = data['guest_name'] as String? ?? 'Client chambre';
+      final roomLabel = data['room_label'] as String?;
+
+      if (isStaffOrAdmin && conversationId != null) {
+        navigator.push(
+          NavigationHelper.slideRoute(
+            AdminChatConversationScreen(
+              conversationId: conversationId,
+              guestName: guestName,
+              roomLabel: roomLabel != null && roomLabel.isNotEmpty
+                  ? roomLabel
+                  : null,
+            ),
+          ),
+        );
+      } else {
+        navigator.push(NavigationHelper.slideRoute(const ChatbotScreen()));
+      }
+      return;
+    }
+
+    if (type == 'order' || type == 'order_status') {
+      final orderIdRaw = data['order_id'] as String?;
+      final orderId = int.tryParse(orderIdRaw ?? '');
+      if (orderId != null) {
+        navigator.push(
+          NavigationHelper.slideRoute(OrderDetailScreen(orderId: orderId)),
+        );
+      }
+      return;
+    }
+
+    if (type == 'spa_reservation' ||
+        type == 'spa_reservation_status' ||
+        type == 'spa_reservation_rescheduled') {
+      navigator.push(
+        NavigationHelper.slideRoute(const MySpaReservationsScreen()),
+      );
+      return;
+    }
+
+    if (type == 'restaurant_reservation' ||
+        type == 'restaurant_reservation_status') {
+      navigator.push(
+        NavigationHelper.slideRoute(const MyRestaurantReservationsScreen()),
+      );
+      return;
+    }
+
+    if (type == 'excursion_booking') {
+      navigator.push(
+        NavigationHelper.slideRoute(const MyExcursionBookingsScreen()),
+      );
+      return;
+    }
+
+    if (type == 'laundry' || type == 'laundry_status') {
+      navigator.push(
+        NavigationHelper.slideRoute(const MyLaundryRequestsScreen()),
+      );
+      return;
+    }
+
+    if (type == 'palace') {
+      navigator.push(
+        NavigationHelper.slideRoute(const MyPalaceRequestsScreen()),
+      );
+      return;
+    }
   }
 
   String _statusLabel(AppLocalizations l10n, String status) {

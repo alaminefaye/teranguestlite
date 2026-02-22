@@ -9,7 +9,6 @@ use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\AndroidConfig;
 use Kreait\Firebase\Messaging\ApnsConfig;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
 class FirebaseNotificationService
@@ -69,7 +68,6 @@ class FirebaseNotificationService
             $privateKey = $credentials['private_key'];
             $tokenUri = $credentials['token_uri'] ?? 'https://oauth2.googleapis.com/token';
 
-            // Create JWT
             $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
             $now = time();
             $claimSet = json_encode([
@@ -88,26 +86,60 @@ class FirebaseNotificationService
             $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
             $jwt = $signatureInput . '.' . $base64Signature;
 
-            // Exchange JWT for access token
-            $response = Http::asForm()->post($tokenUri, [
+            if (!function_exists('curl_init')) {
+                Log::error('cURL is not available for OAuth2 token request');
+                return null;
+            }
+
+            $postFields = http_build_query([
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
                 'assertion' => $jwt,
             ]);
 
-            if ($response->successful()) {
-                $tokenData = $response->json();
+            $ch = curl_init($tokenUri);
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/x-www-form-urlencoded',
+                ],
+                CURLOPT_POSTFIELDS => $postFields,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10,
+            ]);
+
+            $responseBody = curl_exec($ch);
+            if ($responseBody === false) {
+                $error = curl_error($ch) ?: 'Unknown cURL error';
+                unset($ch);
+                Log::error('Failed to obtain OAuth2 token via cURL: ' . $error);
+                return null;
+            }
+
+            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            unset($ch);
+
+            if ($statusCode >= 200 && $statusCode < 300) {
+                $tokenData = json_decode($responseBody, true);
+                if (!is_array($tokenData)) {
+                    Log::error('Invalid OAuth2 token response JSON');
+                    return null;
+                }
+
                 $accessToken = $tokenData['access_token'] ?? null;
-                $expiresIn = $tokenData['expires_in'] ?? 3600;
+                $expiresIn = isset($tokenData['expires_in']) ? (int) $tokenData['expires_in'] : 3600;
 
                 if ($accessToken) {
-                    // Cache token for 50 minutes (3000 seconds)
-                    Cache::put($cacheKey, $accessToken, intval($expiresIn) - 600);
+                    Cache::put($cacheKey, $accessToken, $expiresIn - 600);
                     Log::info('Firebase OAuth2 token obtained successfully');
                     return $accessToken;
                 }
-            } else {
-                Log::error('Failed to obtain OAuth2 token: ' . $response->body());
+
+                Log::error('OAuth2 token response missing access_token');
+                return null;
             }
+
+            Log::error('Failed to obtain OAuth2 token: HTTP ' . $statusCode . ' body: ' . $responseBody);
         } catch (\Exception $e) {
             Log::error('Exception while getting OAuth2 token: ' . $e->getMessage());
         }
@@ -272,7 +304,7 @@ class FirebaseNotificationService
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
-        curl_close($ch);
+        unset($ch);
 
         if ($curlError) {
             Log::error("cURL error: " . $curlError);
@@ -305,25 +337,58 @@ class FirebaseNotificationService
     protected function sendViaLaravelHttp(string $url, array $payload, string $accessToken, string $fcmToken): bool
     {
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ])->post($url, $payload);
-        
-            if ($response->successful()) {
-                Log::info("Notification sent via HTTP API to token: " . substr($fcmToken, 0, 20) . "...");
-                return true;
-            } else {
-                $errorBody = $response->json() ?? ['error' => $response->body()];
-                Log::error("FCM HTTP API error: " . json_encode($errorBody));
-                        
-                // If it's an auth error, clear the cache to force token refresh
-                if ($response->status() === 401) {
-                    Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
-                }
-                        
+            if (!function_exists('curl_init')) {
+                Log::warning('cURL not available, cannot use HTTP client fallback');
                 return false;
             }
+
+            $ch = curl_init();
+            $jsonPayload = json_encode($payload);
+            $headers = [
+                'Authorization: Bearer ' . $accessToken,
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($jsonPayload),
+            ];
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $jsonPayload,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10,
+            ]);
+
+            $body = curl_exec($ch);
+            if ($body === false) {
+                $error = curl_error($ch) ?: 'Unknown cURL error';
+                unset($ch);
+                Log::error("FCM HTTP API error (fallback): " . $error);
+                return false;
+            }
+
+            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            unset($ch);
+
+            if ($statusCode >= 200 && $statusCode < 300) {
+                Log::info("Notification sent via HTTP API to token: " . substr($fcmToken, 0, 20) . "...");
+                return true;
+            }
+
+            $errorBody = json_decode($body, true);
+            if (!is_array($errorBody)) {
+                $errorBody = ['raw' => $body];
+            }
+            Log::error("FCM HTTP API error (fallback): " . json_encode($errorBody));
+
+            if ($statusCode === 401) {
+                Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
+            }
+
+            return false;
         } catch (\Exception $e) {
             Log::error("Exception in sendViaLaravelHttp: " . $e->getMessage());
             return false;

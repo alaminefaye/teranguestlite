@@ -84,6 +84,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   Future<void> _loadOrderDetail() async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -101,7 +102,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         (_) => _startEntranceAnimations(),
       );
     } catch (e) {
-      final l10n = AppLocalizations.of(context);
       String message = l10n.errorHint;
       if (e is DioException) {
         final status = e.response?.statusCode;

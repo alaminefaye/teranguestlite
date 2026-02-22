@@ -7,7 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../palace/my_palace_requests_screen.dart'
-    show PalaceRequest, PalaceRequestDetailScreen;
+    show PalaceRequestDetailScreen;
 
 class EmergencyRequestsScreen extends StatefulWidget {
   const EmergencyRequestsScreen({super.key});

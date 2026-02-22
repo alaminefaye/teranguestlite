@@ -171,19 +171,29 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                             ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!)
                             : null,
                         onTap: () async {
+                          final ctx = context;
                           final date = await showDatePicker(
-                            context: context,
+                            context: ctx,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            lastDate: DateTime.now()
+                                .add(const Duration(days: 365)),
                           );
-                          if (date == null || !mounted) return;
+                          if (date == null || !ctx.mounted) return;
                           final time = await showTimePicker(
-                            context: context,
+                            context: ctx,
                             initialTime: TimeOfDay.now(),
                           );
-                          if (time == null || !mounted) return;
-                          setState(() => _requestedFor = DateTime(date.year, date.month, date.day, time.hour, time.minute));
+                          if (time == null || !ctx.mounted) return;
+                          setState(
+                            () => _requestedFor = DateTime(
+                              date.year,
+                              date.month,
+                              date.day,
+                              time.hour,
+                              time.minute,
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 16),
