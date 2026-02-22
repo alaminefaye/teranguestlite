@@ -186,12 +186,31 @@ class LaundryServiceController extends Controller
         return response()->json([
             'success' => true,
             'data' => $requests->map(function ($req) {
+                $items = is_array($req->items) ? $req->items : [];
+
                 return [
                     'id' => $req->id,
                     'request_number' => $req->request_number,
                     'total_price' => $req->total_price,
                     'formatted_total' => number_format($req->total_price, 0, '', ' ') . ' FCFA',
-                    'items_count' => count($req->items),
+                    'items' => collect($items)->map(function ($item) {
+                        $serviceId = $item['laundry_service_id'] ?? null;
+                        $serviceName = $item['service_name'] ?? null;
+                        $unitPrice = $item['unit_price'] ?? ($item['price'] ?? 0);
+                        $quantity = $item['quantity'] ?? 0;
+                        $subtotal = $item['subtotal'] ?? ($unitPrice * $quantity);
+
+                        return [
+                            'service' => [
+                                'id' => $serviceId,
+                                'name' => $serviceName,
+                            ],
+                            'quantity' => $quantity,
+                            'unit_price' => $unitPrice,
+                            'subtotal' => $subtotal,
+                        ];
+                    }),
+                    'items_count' => count($items),
                     'pickup_time' => $req->pickup_time,
                     'delivery_time' => $req->delivery_time,
                     'status' => $req->status,

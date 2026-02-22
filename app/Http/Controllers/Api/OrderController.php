@@ -325,6 +325,14 @@ class OrderController extends Controller
 
         $order->update(['status' => 'cancelled']);
 
+        try {
+            if (! empty($order->room_id)) {
+                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+            }
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (order cancel API): ' . $e->getMessage(), ['order_id' => $order->id]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Commande annulée.',

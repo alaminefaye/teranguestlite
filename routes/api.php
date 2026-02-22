@@ -124,6 +124,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/request', [LaundryServiceController::class, 'request']);
     });
     Route::get('/my-laundry-requests', [LaundryServiceController::class, 'myRequests']);
+    Route::post('/laundry-requests/{id}/status', [LaundryServiceController::class, 'updateRequestStatus']);
     
     // ==========================================
     // AMENITIES & CONCIERGERIE (catégories + articles dynamiques)

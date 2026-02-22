@@ -261,14 +261,38 @@ class PalaceServiceController extends Controller
     }
 
     /**
-     * Mes demandes de services palace
+     * Mes demandes de services palace.
+     * - Client (guest) : uniquement ses propres demandes.
+     * - Staff/Admin : toutes les demandes de l'établissement.
+     *   Option emergency=1 : uniquement les demandes type médecin / sécurité encore ouvertes.
      */
     public function myRequests(Request $request)
     {
-        $requests = PalaceRequest::with('palaceService')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(15);
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = PalaceRequest::with(['palaceService', 'room', 'guest'])
+            ->where('enterprise_id', $user->enterprise_id);
+
+        if (! $isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        if ($request->boolean('emergency')) {
+            $query->whereIn('status', ['pending', 'in_progress'])
+                ->where(function ($q) {
+                    $q->where('metadata->type', 'doctor')
+                        ->orWhere('metadata->type', 'security');
+                });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->latest()->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -277,18 +301,20 @@ class PalaceServiceController extends Controller
                     'id' => $req->id,
                     'request_number' => $req->request_number,
                     'palace_service' => [
-                        'id' => $req->palaceService->id,
-                        'name' => $req->palaceService->name,
-                        'category' => $req->palaceService->category,
+                        'id' => $req->palaceService ? $req->palaceService->id : null,
+                        'name' => $req->palaceService ? $req->palaceService->name : null,
+                        'category' => $req->palaceService ? $req->palaceService->category : null,
                     ],
                     'requested_for' => $req->requested_for,
                     'description' => $req->description,
                     'estimated_price' => $req->estimated_price,
-                    'formatted_price' => $req->estimated_price ? 
-                        number_format($req->estimated_price, 0, '', ' ') . ' FCFA' : 
-                        'Prix sur demande',
+                    'formatted_price' => $req->estimated_price
+                        ? number_format($req->estimated_price, 0, '', ' ') . ' FCFA'
+                        : 'Prix sur demande',
                     'status' => $req->status,
                     'metadata' => $req->metadata,
+                    'room_number' => $req->room ? $req->room->room_number : null,
+                    'guest_name' => $req->guest ? $req->guest->name : null,
                     'created_at' => $req->created_at->toISOString(),
                 ];
             }),
