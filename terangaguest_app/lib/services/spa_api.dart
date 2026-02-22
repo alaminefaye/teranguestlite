@@ -124,10 +124,15 @@ class SpaApi {
   }
 
   /// Annuler une réservation spa (si > 24h avant)
-  Future<void> cancelSpaReservation(int reservationId) async {
+  Future<void> cancelSpaReservation(int reservationId, {String? reason}) async {
     try {
+      final payload = <String, dynamic>{};
+      if (reason != null && reason.trim().isNotEmpty) {
+        payload['reason'] = reason.trim();
+      }
       await _apiService.post(
         '${ApiConfig.mySpaReservations}/$reservationId/cancel',
+        data: payload.isEmpty ? null : payload,
       );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
@@ -157,6 +162,7 @@ class SpaApi {
     required String action,
     DateTime? date,
     String? time,
+    String? reason,
   }) async {
     try {
       final data = <String, dynamic>{'action': action};
@@ -167,6 +173,10 @@ class SpaApi {
 
       if (time != null && time.isNotEmpty) {
         data['time'] = time;
+      }
+
+      if (reason != null && reason.trim().isNotEmpty) {
+        data['reason'] = reason.trim();
       }
 
       final response = await _apiService.post(

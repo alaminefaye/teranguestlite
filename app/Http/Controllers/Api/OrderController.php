@@ -297,6 +297,12 @@ class OrderController extends Controller
      */
     public function cancel(Request $request, $id)
     {
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        $reason = trim($validated['reason']);
+
         $user = $request->user();
         $guestIds = $this->guestIdsForUserRoom($user);
         $order = Order::where('id', $id)
@@ -327,7 +333,7 @@ class OrderController extends Controller
 
         try {
             if (! empty($order->room_id)) {
-                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+                app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order, $reason);
             }
         } catch (\Exception $e) {
             Log::error('Firebase notification error (order cancel API): ' . $e->getMessage(), ['order_id' => $order->id]);

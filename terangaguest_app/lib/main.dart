@@ -150,6 +150,10 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     final orderIdRaw = data['order_id'] as String?;
     final orderNumber = data['order_number'] as String? ?? '';
     final status = data['status'] as String? ?? '';
+    final rawReason = data['reason'] as String?;
+    final reason = rawReason != null && rawReason.trim().isNotEmpty
+        ? rawReason.trim()
+        : null;
     final orderId = int.tryParse(orderIdRaw ?? '');
 
     final statusLabel = _statusLabel(l10n, status);
@@ -185,7 +189,10 @@ class _LocalizedAppState extends State<_LocalizedApp> {
                 ),
               const SizedBox(height: 8),
               Text(
-                _statusMessage(l10n, statusLabel),
+                _statusMessage(l10n, statusLabel) +
+                    ((status == 'cancelled' && reason != null)
+                        ? '\nMotif : $reason'
+                        : ''),
                 style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],
@@ -304,6 +311,10 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     final status = data['status'] as String? ?? '';
     final serviceName = data['service_name'] as String? ?? 'Spa';
     final screen = data['screen'] as String? ?? '';
+    final rawReason = data['reason'] as String?;
+    final reason = rawReason != null && rawReason.trim().isNotEmpty
+        ? rawReason.trim()
+        : null;
     final isStaff = screen == 'AdminSpaReservations';
 
     String title;
@@ -334,6 +345,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         title = 'Réservation spa annulée par le client';
         message =
             'Le client a annulé la réservation $serviceName prévue le $date à $time$detailsSuffix.';
+        if (reason != null) {
+          message += '\nMotif : $reason';
+        }
       } else {
         title = 'Réservation spa mise à jour';
         final label = _spaStatusLabel(l10n, status);
@@ -345,6 +359,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         message = l10n.spaReservationConfirmedMessage(serviceName);
       } else if (status == 'cancelled') {
         message = l10n.reservationCancelledMessage;
+        if (reason != null) {
+          message += '\nMotif : $reason';
+        }
       } else {
         final label = _spaStatusLabel(l10n, status);
         message = 'Statut de la réservation spa : $label';

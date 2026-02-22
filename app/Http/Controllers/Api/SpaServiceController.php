@@ -268,6 +268,14 @@ class SpaServiceController extends Controller
             ], 400);
         }
 
+        $reason = trim((string) ($request->input('reason') ?? ''));
+
+        if ($action === 'cancel') {
+            $request->validate([
+                'reason' => 'required|string|max:255',
+            ]);
+        }
+
         if ($action === 'reschedule') {
             $request->validate([
                 'date' => 'required|date|after_or_equal:today',
@@ -344,16 +352,26 @@ class SpaServiceController extends Controller
                     $title = 'Réservation spa';
                     $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation spa mis à jour.';
 
+                    if ($reservation->status === 'cancelled' && $reason !== '') {
+                        $body .= ' Motif : ' . $reason;
+                    }
+
+                    $data = [
+                        'type' => 'spa_reservation_status',
+                        'reservation_id' => (string) $reservation->id,
+                        'status' => $reservation->status,
+                        'screen' => 'MySpaReservations',
+                    ];
+
+                    if ($reason !== '') {
+                        $data['reason'] = $reason;
+                    }
+
                     $firebaseService->sendToClientOfRoom(
                         $reservation->room_id,
                         $title,
                         $body,
-                        [
-                            'type' => 'spa_reservation_status',
-                            'reservation_id' => (string) $reservation->id,
-                            'status' => $reservation->status,
-                            'screen' => 'MySpaReservations',
-                        ]
+                        $data
                     );
                 }
             }
@@ -389,6 +407,12 @@ class SpaServiceController extends Controller
      */
     public function cancelReservation(Request $request, $id)
     {
+        $request->validate([
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $reason = trim((string) ($request->input('reason') ?? ''));
+
         $reservation = SpaReservation::with(['spaService', 'room', 'guest'])
             ->where('id', $id)
             ->where('user_id', $request->user()->id)
@@ -429,21 +453,31 @@ class SpaServiceController extends Controller
                 $body .= " (Chambre {$roomNumber})";
             }
 
+            if ($reason !== '') {
+                $body .= ' Motif : ' . $reason;
+            }
+
+            $data = [
+                'type' => 'spa_reservation_status',
+                'reservation_id' => (string) $reservation->id,
+                'status' => $reservation->status,
+                'screen' => 'AdminSpaReservations',
+                'service_name' => $serviceName,
+                'date' => $dateStr,
+                'time' => $timeStr,
+                'room_number' => $roomNumber,
+                'guest_name' => $guestName,
+            ];
+
+            if ($reason !== '') {
+                $data['reason'] = $reason;
+            }
+
             $firebaseService->sendToStaff(
                 $reservation->enterprise_id,
                 'Réservation spa annulée par le client',
                 $body,
-                [
-                    'type' => 'spa_reservation_status',
-                    'reservation_id' => (string) $reservation->id,
-                    'status' => $reservation->status,
-                    'screen' => 'AdminSpaReservations',
-                    'service_name' => $serviceName,
-                    'date' => $dateStr,
-                    'time' => $timeStr,
-                    'room_number' => $roomNumber,
-                    'guest_name' => $guestName,
-                ]
+                $data
             );
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error(

@@ -405,36 +405,76 @@ class SpaReservationDetailScreen extends StatelessWidget {
     SpaReservation reservation,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final reasonController = TextEditingController();
+    String? validationError;
+
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(
-          l10n.cancel,
-          style: const TextStyle(color: AppTheme.accentGold),
-        ),
-        content: Text(
-          l10n.cancelReservationConfirm,
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            l10n.cancel,
+            style: const TextStyle(color: AppTheme.accentGold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.cancelReservationConfirm,
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Motif de l'annulation",
+                  hintStyle: const TextStyle(color: AppTheme.textGray),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.textGray),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.accentGold),
+                  ),
+                  errorText: validationError,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
+            TextButton(
+              onPressed: () {
+                final text = reasonController.text.trim();
+                if (text.isEmpty) {
+                  setState(() {
+                    validationError = 'Veuillez préciser un motif.';
+                  });
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
       ),
     );
     if (ok != true || !context.mounted) return;
     try {
-      await context.read<SpaProvider>().cancelSpaReservation(reservation.id);
+      await context.read<SpaProvider>().cancelSpaReservation(
+        reservation.id,
+        reason: reasonController.text.trim(),
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

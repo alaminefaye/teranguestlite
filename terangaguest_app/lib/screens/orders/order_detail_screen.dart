@@ -975,28 +975,71 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
   Future<void> _handleCancelOrder() async {
     final l10n = AppLocalizations.of(context);
+    final reasonController = TextEditingController();
+    String? validationError;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Annuler la commande'),
-        content: const Text('Voulez-vous vraiment annuler cette commande ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Annuler la commande'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Voulez-vous vraiment annuler cette commande ?',
+                style: TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Motif de l'annulation",
+                  hintStyle: const TextStyle(color: AppTheme.textGray),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.textGray),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.accentGold),
+                  ),
+                  errorText: validationError,
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Oui, annuler'),
-          ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = reasonController.text.trim();
+                if (text.isEmpty) {
+                  setState(() {
+                    validationError = 'Veuillez préciser un motif.';
+                  });
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Oui, annuler'),
+            ),
+          ],
+        ),
       ),
     );
     if (confirmed != true || !mounted) return;
 
     try {
-      await context.read<OrdersProvider>().cancelOrder(widget.orderId);
+      await context.read<OrdersProvider>().cancelOrder(
+        widget.orderId,
+        reason: reasonController.text.trim(),
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -82,9 +82,9 @@ class SpaProvider with ChangeNotifier {
   }
 
   /// Annuler une réservation spa
-  Future<void> cancelSpaReservation(int reservationId) async {
+  Future<void> cancelSpaReservation(int reservationId, {String? reason}) async {
     try {
-      await _spaApi.cancelSpaReservation(reservationId);
+      await _spaApi.cancelSpaReservation(reservationId, reason: reason);
       // Rafraîchir la liste
       await fetchMySpaReservations();
     } catch (e) {
@@ -106,6 +106,7 @@ class SpaProvider with ChangeNotifier {
     required String action,
     DateTime? date,
     String? time,
+    String? reason,
   }) async {
     try {
       await _spaApi.updateSpaReservationStatus(
@@ -113,6 +114,7 @@ class SpaProvider with ChangeNotifier {
         action: action,
         date: date,
         time: time,
+        reason: reason,
       );
       await fetchMySpaReservations();
     } catch (e) {

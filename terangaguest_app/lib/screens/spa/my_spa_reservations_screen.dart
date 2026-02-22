@@ -425,6 +425,8 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
 
     String title;
     String message;
+    final reasonController = TextEditingController();
+    String? validationError;
 
     if (action == 'confirm') {
       title = 'Confirmer la réservation';
@@ -441,26 +443,67 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.ok,
-              style: const TextStyle(color: AppTheme.accentGold),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif de l'annulation",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setState(() {
+                      validationError = 'Veuillez préciser un motif.';
+                    });
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -472,6 +515,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         action: action,
         date: newDate,
         time: newTime,
+        reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -489,25 +533,6 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
         ),
       );
     }
-  }
-
-  bool _canCancelSpaReservation(SpaReservation r) {
-    if (r.status != 'confirmed' && r.status != 'pending_reschedule') {
-      return false;
-    }
-    final parts = r.time.split(':');
-    final hour = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 0) : 0;
-    final minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
-    final reservationDateTime = DateTime(
-      r.date.year,
-      r.date.month,
-      r.date.day,
-      hour,
-      minute,
-    );
-    return reservationDateTime.isAfter(
-      DateTime.now().add(const Duration(hours: 24)),
-    );
   }
 
   Widget _buildStatusBadge(BuildContext context, String status) {

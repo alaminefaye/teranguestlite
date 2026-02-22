@@ -92,9 +92,15 @@ class OrdersProvider with ChangeNotifier {
   }
 
   /// Annuler une commande
-  Future<void> cancelOrder(int orderId) async {
+  Future<void> cancelOrder(
+    int orderId, {
+    String? reason,
+  }) async {
     try {
-      await _ordersApi.cancelOrder(orderId);
+      await _ordersApi.cancelOrder(
+        orderId,
+        reason: reason,
+      );
       await fetchOrders(status: _selectedStatus);
     } catch (e) {
       throw e.toString();

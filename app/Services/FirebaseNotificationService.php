@@ -537,7 +537,7 @@ class FirebaseNotificationService
     /**
      * Envoyer une notification de changement de statut de commande au client de la chambre.
      */
-    public function sendOrderStatusNotificationToRoom($order): bool
+    public function sendOrderStatusNotificationToRoom($order, ?string $reason = null): bool
     {
         if (empty($order->room_id)) {
             return false;
@@ -552,13 +552,25 @@ class FirebaseNotificationService
         ];
         $title = "Commande #{$order->order_number}";
         $body = $statusMessages[$order->status] ?? "Statut de commande mis à jour";
-        return $this->sendToClientOfRoom($order->room_id, $title, $body, [
+
+        $normalizedReason = $reason !== null ? trim($reason) : '';
+        if ($order->status === 'cancelled' && $normalizedReason !== '') {
+            $body .= ' Motif : ' . $normalizedReason;
+        }
+
+        $data = [
             'type' => 'order_status',
             'order_id' => (string) $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,
             'screen' => 'OrderDetails',
-        ]);
+        ];
+
+        if ($normalizedReason !== '') {
+            $data['reason'] = $normalizedReason;
+        }
+
+        return $this->sendToClientOfRoom($order->room_id, $title, $body, $data);
     }
 
     /**

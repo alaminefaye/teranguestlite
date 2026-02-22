@@ -63,9 +63,19 @@ class OrdersApi {
   }
 
   /// Annuler une commande
-  Future<void> cancelOrder(int orderId) async {
+  Future<void> cancelOrder(
+    int orderId, {
+    String? reason,
+  }) async {
     try {
-      await _apiService.post('${ApiConfig.orders}/$orderId/cancel');
+      final payload = <String, dynamic>{};
+      if (reason != null && reason.trim().isNotEmpty) {
+        payload['reason'] = reason.trim();
+      }
+      await _apiService.post(
+        '${ApiConfig.orders}/$orderId/cancel',
+        data: payload.isEmpty ? null : payload,
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
