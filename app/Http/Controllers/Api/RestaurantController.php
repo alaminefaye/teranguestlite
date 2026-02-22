@@ -221,6 +221,14 @@ class RestaurantController extends Controller
             ], 400);
         }
 
+        $reason = trim((string) ($request->input('reason') ?? ''));
+
+        if ($action === 'cancel') {
+            $request->validate([
+                'reason' => 'required|string|max:255',
+            ]);
+        }
+
         $statusTransitions = [
             'confirm' => ['pending' => 'confirmed'],
             'cancel' => ['pending' => 'cancelled', 'confirmed' => 'cancelled'],
@@ -264,6 +272,10 @@ class RestaurantController extends Controller
                 $title = 'Réservation restaurant';
                 $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation restaurant mis à jour.';
 
+                if ($reservation->status === 'cancelled' && $reason !== '') {
+                    $body .= ' Motif : ' . $reason;
+                }
+
                 $data = [
                     'type' => 'restaurant_reservation_status',
                     'reservation_id' => (string) $reservation->id,
@@ -273,6 +285,10 @@ class RestaurantController extends Controller
                     'date' => $dateStr,
                     'time' => $timeStr,
                 ];
+
+                if ($reason !== '') {
+                    $data['reason'] = $reason;
+                }
 
                 $firebaseService->sendToClientOfRoom(
                     $reservation->room_id,
@@ -311,6 +327,12 @@ class RestaurantController extends Controller
      */
     public function cancelReservation(Request $request, $id)
     {
+        $request->validate([
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $reason = trim((string) ($request->input('reason') ?? ''));
+
         $reservation = RestaurantReservation::where('id', $id)
             ->where('user_id', $request->user()->id)
             ->first();
@@ -352,6 +374,10 @@ class RestaurantController extends Controller
                 $body .= " (Chambre {$roomNumber})";
             }
 
+             if ($reason !== '') {
+                 $body .= ' Motif : ' . $reason;
+             }
+
             $data = [
                 'type' => 'restaurant_reservation_status',
                 'reservation_id' => (string) $reservation->id,
@@ -363,6 +389,10 @@ class RestaurantController extends Controller
                 'room_number' => $roomNumber,
                 'guest_name' => $guestName,
             ];
+
+            if ($reason !== '') {
+                $data['reason'] = $reason;
+            }
 
             $firebaseService->sendToStaff(
                 $reservation->enterprise_id,

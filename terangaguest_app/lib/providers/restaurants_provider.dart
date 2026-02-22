@@ -84,9 +84,15 @@ class RestaurantsProvider with ChangeNotifier {
   }
 
   /// Annuler une réservation
-  Future<void> cancelReservation(int reservationId) async {
+  Future<void> cancelReservation({
+    required int reservationId,
+    required String reason,
+  }) async {
     try {
-      await _restaurantsApi.cancelReservation(reservationId);
+      await _restaurantsApi.cancelReservation(
+        reservationId: reservationId,
+        reason: reason,
+      );
       // Rafraîchir la liste
       await fetchMyReservations();
     } catch (e) {
@@ -97,11 +103,13 @@ class RestaurantsProvider with ChangeNotifier {
   Future<void> updateReservationStatus({
     required int reservationId,
     required String action,
+    String? reason,
   }) async {
     try {
       await _restaurantsApi.updateReservationStatus(
         reservationId: reservationId,
         action: action,
+        reason: reason,
       );
       await fetchMyReservations();
     } catch (e) {

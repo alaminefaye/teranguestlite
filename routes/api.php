@@ -94,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-restaurant-reservations', [RestaurantController::class, 'myReservations']);
     Route::post('/my-restaurant-reservations/{id}/cancel', [RestaurantController::class, 'cancelReservation']);
+    Route::post('/restaurant-reservations/{id}/status', [RestaurantController::class, 'updateReservationStatus']);
     
     // ==========================================
     // SPA & BIEN-ÊTRE

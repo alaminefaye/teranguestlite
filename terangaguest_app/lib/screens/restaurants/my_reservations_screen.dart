@@ -425,9 +425,13 @@ class _MyRestaurantReservationsScreenState
     String action,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final provider = context.read<RestaurantsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
 
     String title;
     String message;
+    final reasonController = TextEditingController();
+    String? validationError;
 
     if (action == 'confirm') {
       title = 'Confirmer la réservation';
@@ -444,38 +448,80 @@ class _MyRestaurantReservationsScreenState
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.ok,
-              style: const TextStyle(color: AppTheme.accentGold),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif de l'annulation",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setState(() {
+                      validationError = 'Veuillez préciser un motif.';
+                    });
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
     if (!mounted || ok != true) return;
 
     try {
-      await context.read<RestaurantsProvider>().updateReservationStatus(
+      await provider.updateReservationStatus(
         reservationId: reservation.id,
         action: action,
+        reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: const Text('Statut mis à jour'),
           backgroundColor: Colors.green,
@@ -514,40 +560,79 @@ class _MyRestaurantReservationsScreenState
     RestaurantReservation reservation,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final provider = context.read<RestaurantsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final reasonController = TextEditingController();
+    String? validationError;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(
-          l10n.cancel,
-          style: const TextStyle(color: AppTheme.accentGold),
-        ),
-        content: Text(
-          l10n.cancelReservationConfirm,
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            l10n.cancel,
+            style: const TextStyle(color: AppTheme.accentGold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.cancelReservationConfirm,
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Motif de l'annulation",
+                  hintStyle: const TextStyle(color: AppTheme.textGray),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.textGray),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.accentGold),
+                  ),
+                  errorText: validationError,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
+            TextButton(
+              onPressed: () {
+                final text = reasonController.text.trim();
+                if (text.isEmpty) {
+                  setState(() {
+                    validationError = 'Veuillez préciser un motif.';
+                  });
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
       ),
     );
     if (ok != true || !context.mounted) return;
     try {
-      await context.read<RestaurantsProvider>().cancelReservation(
-        reservation.id,
+      await provider.cancelReservation(
+        reservationId: reservation.id,
+        reason: reasonController.text.trim(),
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.reservationCancelledMessage),
             backgroundColor: Colors.green,
@@ -732,10 +817,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 const Text(
                   'Détail de la réservation',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textGray,
-                  ),
+                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
                 ),
               ],
             ),
@@ -966,14 +1048,16 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _handleStaffAction(
-    BuildContext context,
-    String action,
-  ) async {
+  Future<void> _handleStaffAction(BuildContext context, String action) async {
     final l10n = AppLocalizations.of(context);
+    final provider = context.read<RestaurantsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     String title;
     String message;
+    final reasonController = TextEditingController();
+    String? validationError;
 
     if (action == 'confirm') {
       title = 'Confirmer la réservation';
@@ -990,47 +1074,89 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.ok,
-              style: const TextStyle(color: AppTheme.accentGold),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif de l'annulation",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setState(() {
+                      validationError = 'Veuillez préciser un motif.';
+                    });
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
-    if (ok != true) return;
+    if (ok != true || !context.mounted) return;
 
     try {
-      await context.read<RestaurantsProvider>().updateReservationStatus(
-            reservationId: reservation.id,
-            action: action,
-          );
+      await provider.updateReservationStatus(
+        reservationId: reservation.id,
+        action: action,
+        reason: action == 'cancel' ? reasonController.text.trim() : null,
+      );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Statut mis à jour'),
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Statut mis à jour'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context, true);
+      navigator.pop(true);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('${l10n.errorPrefix}$e'),
           backgroundColor: Colors.red,
@@ -1039,10 +1165,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildGuestCancelButton(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildGuestCancelButton(BuildContext context, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1077,46 +1200,87 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
     BuildContext context,
     AppLocalizations l10n,
   ) async {
+    final provider = context.read<RestaurantsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final reasonController = TextEditingController();
+    String? validationError;
+
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(
-          l10n.cancel,
-          style: const TextStyle(color: AppTheme.accentGold),
-        ),
-        content: Text(
-          l10n.cancelReservationConfirm,
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: AppTheme.textGray),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            l10n.cancel,
+            style: const TextStyle(color: AppTheme.accentGold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.cancelReservationConfirm,
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Motif de l'annulation",
+                  hintStyle: const TextStyle(color: AppTheme.textGray),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.textGray),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.accentGold),
+                  ),
+                  errorText: validationError,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
+            TextButton(
+              onPressed: () {
+                final text = reasonController.text.trim();
+                if (text.isEmpty) {
+                  setState(() {
+                    validationError = 'Veuillez préciser un motif.';
+                  });
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(l10n.ok, style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
       ),
     );
-    if (ok != true) return;
+    if (ok != true || !context.mounted) return;
     try {
-      await context.read<RestaurantsProvider>().cancelReservation(
-            reservation.id,
-          );
+      await provider.cancelReservation(
+        reservationId: reservation.id,
+        reason: reasonController.text.trim(),
+      );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.reservationCancelledMessage),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context, true);
+      navigator.pop(true);
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

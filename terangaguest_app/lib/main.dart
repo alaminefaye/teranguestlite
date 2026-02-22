@@ -484,6 +484,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     final time = data['time'] as String? ?? '';
     final roomNumber = data['room_number'] as String?;
     final guestName = data['guest_name'] as String?;
+    final reason = data['reason'] as String?;
 
     String title;
     String message;
@@ -504,6 +505,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         title = 'Réservation restaurant annulée par le client';
         message =
             'Le client a annulé la réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
+        if (reason != null && reason.isNotEmpty) {
+          message += '\nMotif : $reason';
+        }
       } else {
         title = 'Réservation restaurant mise à jour';
         final label = _restaurantStatusLabel(l10n, status);
@@ -516,6 +520,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             'Votre réservation au restaurant $restaurantName est confirmée pour le $date à $time.';
       } else if (status == 'cancelled') {
         message = l10n.reservationCancelledMessage;
+        if (reason != null && reason.isNotEmpty) {
+          message += '\nMotif : $reason';
+        }
       } else if (status == 'honored') {
         message =
             'Merci, votre réservation au restaurant $restaurantName a été honorée.';
