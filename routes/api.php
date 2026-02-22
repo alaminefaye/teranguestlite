@@ -118,6 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/book', [ExcursionController::class, 'book']);
     });
     Route::get('/my-excursion-bookings', [ExcursionController::class, 'myBookings']);
+    Route::post('/excursion-bookings/{id}/status', [ExcursionController::class, 'updateBookingStatus']);
     
     // ==========================================
     // BLANCHISSERIE (Laundry)

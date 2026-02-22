@@ -8,6 +8,7 @@ import '../../models/excursion.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
+import '../../utils/navigation_helper.dart';
 
 class MyExcursionBookingsScreen extends StatefulWidget {
   const MyExcursionBookingsScreen({super.key});
@@ -161,137 +162,148 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
       return parts.join(' ');
     }();
 
-    return Transform(
-      transform: Matrix4.identity()
-        ..setEntry(3, 2, 0.001)
-        ..rotateX(-0.05)
-        ..rotateY(0.02),
-      alignment: Alignment.center,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.accentGold, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 20,
-              spreadRadius: 2,
-              offset: const Offset(0, 10),
+    return InkWell(
+      onTap: () async {
+        final updated = await context.navigateTo(
+          ExcursionBookingDetailScreen(booking: booking),
+        );
+        if (updated == true && mounted && context.mounted) {
+          await context.read<ExcursionsProvider>().fetchMyExcursionBookings();
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..rotateX(-0.05)
+          ..rotateY(0.02),
+        alignment: Alignment.center,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
             ),
-            BoxShadow(
-              color: AppTheme.accentGold.withValues(alpha: 0.1),
-              blurRadius: 15,
-              spreadRadius: -2,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    booking.excursionName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentGold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildStatusBadge(context, booking.status),
-                ],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.accentGold, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 10),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 14,
-                        color: AppTheme.textGray,
+              BoxShadow(
+                color: AppTheme.accentGold.withValues(alpha: 0.1),
+                blurRadius: 15,
+                spreadRadius: -2,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking.excursionName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentGold,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          DateFormat(
-                            'dd/MM/yyyy',
-                            'fr_FR',
-                          ).format(booking.date),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textGray,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.people,
-                        size: 14,
-                        color: AppTheme.textGray,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${booking.totalParticipants} ${AppLocalizations.of(context).personsShort}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textGray,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (hasRoomOrGuest) const SizedBox(height: 6),
-                  if (hasRoomOrGuest)
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildStatusBadge(context, booking.status),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
                         const Icon(
-                          Icons.meeting_room,
+                          Icons.calendar_today,
                           size: 14,
                           color: AppTheme.textGray,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            roomGuestText,
+                            DateFormat(
+                              'dd/MM/yyyy',
+                              'fr_FR',
+                            ).format(booking.date),
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppTheme.textGray,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                  const SizedBox(height: 6),
-                  Text(
-                    booking.formattedTotalPrice,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentGold,
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.people,
+                          size: 14,
+                          color: AppTheme.textGray,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${booking.totalParticipants} ${AppLocalizations.of(context).personsShort}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textGray,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  if (isStaffOrAdmin) _buildStaffActions(booking),
-                ],
-              ),
-            ],
+                    if (hasRoomOrGuest) const SizedBox(height: 6),
+                    if (hasRoomOrGuest)
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.meeting_room,
+                            size: 14,
+                            color: AppTheme.textGray,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              roomGuestText,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textGray,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 6),
+                    Text(
+                      booking.formattedTotalPrice,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentGold,
+                      ),
+                    ),
+                    if (isStaffOrAdmin) _buildStaffActions(booking),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -503,6 +515,415 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
         return l10n.statusCancelled;
       default:
         return status;
+    }
+  }
+}
+
+class ExcursionBookingDetailScreen extends StatelessWidget {
+  final ExcursionBooking booking;
+
+  const ExcursionBookingDetailScreen({super.key, required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
+    final roomGuestParts = <String>[];
+    if (booking.roomNumber != null && booking.roomNumber!.isNotEmpty) {
+      roomGuestParts.add('Chambre ${booking.roomNumber}');
+    }
+    if (booking.guestName != null && booking.guestName!.isNotEmpty) {
+      roomGuestParts.add(booking.guestName!);
+    }
+    final roomGuestText = roomGuestParts.isEmpty
+        ? null
+        : roomGuestParts.join(' – ');
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            booking.excursionName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Détail de la réservation',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 10,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildMainCard(context, l10n, roomGuestText),
+                      const SizedBox(height: 24),
+                      if (booking.specialRequests != null &&
+                          booking.specialRequests!.trim().isNotEmpty)
+                        _buildSpecialRequests(),
+                      if (isStaffOrAdmin) _buildStaffActions(context),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    String? roomGuestText,
+  ) {
+    final dateLabel = DateFormat('EEEE d MMMM yyyy', 'fr_FR')
+        .format(booking.date)
+        .replaceFirstMapped(RegExp(r'^\w'), (m) => m.group(0)!.toUpperCase());
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  booking.excursionName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentGold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 12),
+              _buildDetailStatusBadge(context),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(icon: Icons.calendar_today, label: dateLabel),
+          const SizedBox(height: 10),
+          _buildInfoRow(
+            icon: Icons.people,
+            label:
+                '${booking.totalParticipants} ${AppLocalizations.of(context).personsShort}',
+          ),
+          if (roomGuestText != null) const SizedBox(height: 10),
+          if (roomGuestText != null)
+            _buildInfoRow(icon: Icons.meeting_room, label: roomGuestText),
+          const SizedBox(height: 10),
+          _buildInfoRow(
+            icon: Icons.price_check,
+            label: booking.formattedTotalPrice,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailStatusBadge(BuildContext context) {
+    Color bg;
+    Color border;
+    Color text;
+
+    switch (booking.status) {
+      case 'pending':
+        bg = Colors.orange.withValues(alpha: 0.2);
+        border = Colors.orange;
+        text = Colors.orange;
+        break;
+      case 'confirmed':
+        bg = Colors.green.withValues(alpha: 0.2);
+        border = Colors.green;
+        text = Colors.green;
+        break;
+      case 'completed':
+        bg = Colors.blue.withValues(alpha: 0.2);
+        border = Colors.blue;
+        text = Colors.blue;
+        break;
+      case 'cancelled':
+        bg = Colors.red.withValues(alpha: 0.2);
+        border = Colors.red;
+        text = Colors.red;
+        break;
+      default:
+        bg = AppTheme.textGray.withValues(alpha: 0.2);
+        border = AppTheme.textGray;
+        text = AppTheme.textGray;
+        break;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    String label;
+    switch (booking.status) {
+      case 'pending':
+        label = l10n.statusPending;
+        break;
+      case 'confirmed':
+        label = l10n.statusConfirmed;
+        break;
+      case 'completed':
+        label = l10n.statusCompleted;
+        break;
+      case 'cancelled':
+        label = l10n.statusCancelled;
+        break;
+      default:
+        label = booking.status;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border, width: 1),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: text,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({required IconData icon, required String label}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, size: 18, color: AppTheme.textGray),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 15, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpecialRequests() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Demandes spéciales',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.accentGold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.textGray.withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            booking.specialRequests!.trim(),
+            style: const TextStyle(fontSize: 14, color: Colors.white70),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStaffActions(BuildContext context) {
+    final actions = <Map<String, String>>[];
+
+    if (booking.status == 'pending') {
+      actions.add({'action': 'confirm', 'label': 'Confirmer'});
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+    } else if (booking.status == 'confirmed') {
+      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'complete', 'label': 'Marquer réalisée'});
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            for (var i = 0; i < actions.length; i++)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: i == actions.length - 1 ? 0 : 8,
+                  ),
+                  child: SizedBox(
+                    height: 44,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.red
+                            : AppTheme.accentGold,
+                        foregroundColor: actions[i]['action'] == 'cancel'
+                            ? Colors.white
+                            : AppTheme.primaryDark,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () =>
+                          _handleStaffAction(context, actions[i]['action']!),
+                      child: Text(
+                        actions[i]['label']!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleStaffAction(BuildContext context, String action) async {
+    final l10n = AppLocalizations.of(context);
+    final provider = context.read<ExcursionsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    String title;
+    String message;
+
+    if (action == 'confirm') {
+      title = 'Confirmer la réservation';
+      message = 'Confirmer cette réservation excursion ?';
+    } else if (action == 'cancel') {
+      title = l10n.cancel;
+      message = l10n.cancelReservationConfirm;
+    } else if (action == 'complete') {
+      title = 'Marquer comme réalisée';
+      message = 'Marquer cette excursion comme réalisée ?';
+    } else {
+      return;
+    }
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+
+    try {
+      await provider.updateExcursionBookingStatus(
+        bookingId: booking.id,
+        action: action,
+      );
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Statut mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      navigator.pop(true);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${l10n.errorPrefix}$e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }
