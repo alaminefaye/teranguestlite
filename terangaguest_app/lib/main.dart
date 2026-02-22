@@ -10,6 +10,7 @@ import 'config/theme.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/orders/order_detail_screen.dart';
+import 'screens/spa/my_spa_reservations_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/orders_provider.dart';
@@ -128,97 +129,245 @@ class _LocalizedAppState extends State<_LocalizedApp> {
   void _setupFcmListeners() {
     FirebaseMessaging.onMessage.listen((message) {
       final data = message.data;
-      if (data['type'] != 'order_status') return;
+      final type = data['type'] as String?;
+      if (type == 'order_status') {
+        _handleOrderStatusNotification(data);
+      } else if (type == 'spa_reservation_rescheduled') {
+        _handleSpaRescheduleNotification(data);
+      } else if (type == 'spa_reservation_status') {
+        _handleSpaStatusNotification(data);
+      }
+    });
+  }
 
-      _startNotificationSoundLoop();
+  void _handleOrderStatusNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
 
-      final ctx = rootNavigatorKey.currentContext;
-      if (ctx == null) return;
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
 
-      final l10n = AppLocalizations.of(ctx);
-      final orderIdRaw = data['order_id'] as String?;
-      final orderNumber = data['order_number'] as String? ?? '';
-      final status = data['status'] as String? ?? '';
-      final orderId = int.tryParse(orderIdRaw ?? '');
+    final l10n = AppLocalizations.of(ctx);
+    final orderIdRaw = data['order_id'] as String?;
+    final orderNumber = data['order_number'] as String? ?? '';
+    final status = data['status'] as String? ?? '';
+    final orderId = int.tryParse(orderIdRaw ?? '');
 
-      final statusLabel = _statusLabel(l10n, status);
+    final statusLabel = _statusLabel(l10n, status);
 
-      showDialog(
-        context: ctx,
-        barrierDismissible: true,
-        builder: (dialogContext) {
-          return AlertDialog(
-            backgroundColor: AppTheme.primaryBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            l10n.orderDetailTitle,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
-            title: Text(
-              l10n.orderDetailTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (orderNumber.isNotEmpty)
-                  Text(
-                    '${l10n.orderNumberLabel} $orderNumber',
-                    style: const TextStyle(
-                      color: AppTheme.accentGold,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                const SizedBox(height: 8),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (orderNumber.isNotEmpty)
                 Text(
-                  _statusMessage(l10n, statusLabel),
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _stopNotificationSound();
-                  Navigator.of(dialogContext, rootNavigator: true).pop();
-                },
-                child: Text(
-                  l10n.close,
+                  '${l10n.orderNumberLabel} $orderNumber',
                   style: const TextStyle(
                     color: AppTheme.accentGold,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              const SizedBox(height: 8),
+              Text(
+                _statusMessage(l10n, statusLabel),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
-              if (orderId != null)
-                TextButton(
-                  onPressed: () {
-                    _stopNotificationSound();
-                    Navigator.of(dialogContext, rootNavigator: true).pop();
-                    final navigator = rootNavigatorKey.currentState;
-                    if (navigator == null) return;
-                    navigator.push(
-                      NavigationHelper.slideRoute(
-                        OrderDetailScreen(orderId: orderId),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    l10n.orderTracking,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: Text(
+                l10n.close,
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (orderId != null)
+              TextButton(
+                onPressed: () {
+                  _stopNotificationSound();
+                  Navigator.of(dialogContext, rootNavigator: true).pop();
+                  final navigator = rootNavigatorKey.currentState;
+                  if (navigator == null) return;
+                  navigator.push(
+                    NavigationHelper.slideRoute(
+                      OrderDetailScreen(orderId: orderId),
                     ),
+                  );
+                },
+                child: Text(
+                  l10n.orderTracking,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-            ],
-          );
-        },
-      );
-    });
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleSpaRescheduleNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: const Text(
+            'Nouvel horaire spa proposé',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Un nouvel horaire est proposé pour votre réservation spa. '
+            'Ouvrez vos réservations spa pour accepter ou annuler.',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Plus tard',
+                style: TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+                navigator.push(
+                  NavigationHelper.slideRoute(const MySpaReservationsScreen()),
+                );
+              },
+              child: const Text(
+                'Voir mes réservations spa',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleSpaStatusNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final l10n = AppLocalizations.of(ctx);
+    final status = data['status'] as String? ?? '';
+    final serviceName = data['service_name'] as String? ?? 'Spa';
+
+    String message;
+    if (status == 'confirmed') {
+      message = l10n.spaReservationConfirmedMessage(serviceName);
+    } else if (status == 'cancelled') {
+      message = l10n.reservationCancelledMessage;
+    } else {
+      final label = _spaStatusLabel(l10n, status);
+      message = 'Statut de la réservation spa : $label';
+    }
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: const Text(
+            'Réservation spa',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Fermer',
+                style: TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+                navigator.push(
+                  NavigationHelper.slideRoute(const MySpaReservationsScreen()),
+                );
+              },
+              child: const Text(
+                'Voir les réservations spa',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _statusLabel(AppLocalizations l10n, String status) {
@@ -235,6 +384,22 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         return l10n.statusDelivering;
       case 'delivered':
         return l10n.statusDelivered;
+      case 'cancelled':
+        return l10n.statusCancelled;
+      default:
+        return status;
+    }
+  }
+
+  String _spaStatusLabel(AppLocalizations l10n, String status) {
+    switch (status) {
+      case 'pending':
+      case 'pending_reschedule':
+        return l10n.statusPending;
+      case 'confirmed':
+        return l10n.statusConfirmed;
+      case 'completed':
+        return l10n.statusCompleted;
       case 'cancelled':
         return l10n.statusCancelled;
       default:

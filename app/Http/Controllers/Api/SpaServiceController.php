@@ -389,7 +389,8 @@ class SpaServiceController extends Controller
      */
     public function cancelReservation(Request $request, $id)
     {
-        $reservation = SpaReservation::where('id', $id)
+        $reservation = SpaReservation::with(['spaService', 'room', 'guest'])
+            ->where('id', $id)
             ->where('user_id', $request->user()->id)
             ->first();
 
@@ -411,10 +412,38 @@ class SpaServiceController extends Controller
             ], 400);
         }
 
-        $reservation->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-        ]);
+        $reservation->status = 'cancelled';
+        $reservation->cancelled_at = now();
+        $reservation->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $serviceName = $reservation->spaService->name ?? 'Spa';
+            $dateStr = $reservation->reservation_date->format('d/m/Y');
+            $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+            $roomNumber = $reservation->room ? $reservation->room->room_number : null;
+
+            $body = "Réservation spa {$serviceName} annulée par le client pour le {$dateStr} à {$timeStr}";
+            if ($roomNumber) {
+                $body .= " (Chambre {$roomNumber})";
+            }
+
+            $firebaseService->sendToStaff(
+                $reservation->enterprise_id,
+                'Réservation spa annulée par le client',
+                $body,
+                [
+                    'type' => 'spa_reservation_status',
+                    'reservation_id' => (string) $reservation->id,
+                    'status' => $reservation->status,
+                    'screen' => 'AdminSpaReservations',
+                ]
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (spa reservation cancel): ' . $e->getMessage()
+            );
+        }
 
         return response()->json([
             'success' => true,
@@ -449,6 +478,35 @@ class SpaServiceController extends Controller
             $reservation->confirmed_at = now();
         }
         $reservation->save();
+
+        try {
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $serviceName = $reservation->spaService->name ?? 'Spa';
+            $dateStr = $reservation->reservation_date->format('d/m/Y');
+            $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+            $roomNumber = $reservation->room ? $reservation->room->room_number : null;
+
+            $body = "Le client a accepté le nouvel horaire pour {$serviceName} le {$dateStr} à {$timeStr}";
+            if ($roomNumber) {
+                $body .= " (Chambre {$roomNumber})";
+            }
+
+            $firebaseService->sendToStaff(
+                $reservation->enterprise_id,
+                'Réservation spa confirmée par le client',
+                $body,
+                [
+                    'type' => 'spa_reservation_status',
+                    'reservation_id' => (string) $reservation->id,
+                    'status' => $reservation->status,
+                    'screen' => 'AdminSpaReservations',
+                ]
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (spa reservation accept reschedule): ' . $e->getMessage()
+            );
+        }
 
         return response()->json([
             'success' => true,

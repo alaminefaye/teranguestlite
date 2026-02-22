@@ -11,6 +11,9 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/animated_button.dart';
+import '../../utils/navigation_helper.dart';
+import '../../utils/haptic_helper.dart';
+import '../orders/orders_list_screen.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
@@ -148,14 +151,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       padding: const EdgeInsets.all(20.0),
       child: Row(
         children: [
-          // Bouton retour
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              HapticHelper.lightImpact();
+              NavigationHelper.navigateAndRemoveUntil(
+                context,
+                const OrdersListScreen(fromOrderCreation: true),
+              );
+            },
           ),
           const SizedBox(width: 12),
-
-          // Titre
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
