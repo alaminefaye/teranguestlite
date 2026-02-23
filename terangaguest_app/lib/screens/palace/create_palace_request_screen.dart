@@ -756,16 +756,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           Text(
                             AppLocalizations.of(context).demand,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             widget.service.name,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               color: AppTheme.textGray,
                             ),
                             maxLines: 1,
@@ -779,8 +779,8 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 60,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -988,29 +988,42 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
   Widget _buildCanReserveBanner() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.shade900.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 1.5),
+        gradient: const LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.info_outline, color: Colors.orange, size: 24),
+              const Icon(
+                Icons.info_outline,
+                color: AppTheme.accentGold,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          const Divider(color: AppTheme.textGray, height: 1),
+          const SizedBox(height: 16),
           TextField(
             controller: _clientCodeController,
             style: const TextStyle(color: Colors.white, fontSize: 16),
@@ -1020,14 +1033,26 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                 color: AppTheme.textGray.withValues(alpha: 0.8),
               ),
               filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.15),
+              fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.orange),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.accentGold),
               ),
               prefixIcon: const Icon(
                 Icons.person_outline,
-                color: Colors.orange,
+                color: AppTheme.accentGold,
                 size: 22,
               ),
             ),

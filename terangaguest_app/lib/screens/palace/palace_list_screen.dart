@@ -60,17 +60,17 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                         children: [
                           Text(
                             AppLocalizations.of(context).palaceServices,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(context).palaceServicesSubtitle,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               color: AppTheme.textGray,
                             ),
                           ),

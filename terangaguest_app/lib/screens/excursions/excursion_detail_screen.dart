@@ -98,10 +98,10 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
           Expanded(
             child: Text(
               _excursion?.name ?? 'Excursion',
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppTheme.accentGold,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -165,7 +165,10 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+        vertical: 20,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -121,15 +121,16 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                         children: [
                           Text(
                             l10n.guidedToursTitle,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.guidedToursSubtitle,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
                           ),
                         ],
                       ),
@@ -139,39 +140,38 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _dateField(l10n),
-                      const SizedBox(height: 16),
-                      _tourTypeField(l10n),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _guestsController,
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: l10n.numberOfGuests,
-                          hintText: 'Ex: 4',
-                          labelStyle: const TextStyle(color: AppTheme.accentGold),
-                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+                      _buildSection(l10n.date, _dateField(l10n)),
+                      const SizedBox(height: 24),
+                      _buildSection(l10n.tourType, _tourTypeField(l10n)),
+                      const SizedBox(height: 24),
+                      _buildSection(
+                        l10n.numberOfGuests,
+                        TextField(
+                          controller: _guestsController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration(
+                            hint: 'Ex: 4',
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _detailsController,
-                        maxLines: 3,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: l10n.description,
-                          hintText: l10n.describeRequest,
-                          labelStyle: const TextStyle(color: AppTheme.accentGold),
-                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+                      const SizedBox(height: 24),
+                      _buildSection(
+                        l10n.description,
+                        TextField(
+                          controller: _detailsController,
+                          maxLines: 3,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration(
+                            hint: l10n.describeRequest,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -202,6 +202,52 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
     );
   }
 
+  InputDecoration _inputDecoration({String? hint}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+      filled: true,
+      fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.accentGold),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, Widget child) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
   Widget _dateField(AppLocalizations l10n) {
     return InkWell(
       onTap: () async {
@@ -218,12 +264,7 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
       },
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: l10n.date,
-          labelStyle: const TextStyle(color: AppTheme.accentGold),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
-        ),
+        decoration: _inputDecoration(),
         child: Text(
           _requestedFor != null ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!) : '—',
           style: TextStyle(
@@ -241,30 +282,20 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
       ('gastronomic', l10n.tourTypeGastronomic),
       ('historical', l10n.tourTypeHistorical),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.tourType,
-          style: const TextStyle(color: AppTheme.accentGold, fontWeight: FontWeight.w600, fontSize: 14),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: types.map((t) {
-            final selected = _tourType == t.$1;
-            return ChoiceChip(
-              label: Text(t.$2),
-              selected: selected,
-              onSelected: (v) => setState(() => _tourType = t.$1),
-              selectedColor: AppTheme.accentGold.withValues(alpha: 0.3),
-              side: BorderSide(color: AppTheme.accentGold.withValues(alpha: selected ? 1 : 0.5)),
-              labelStyle: TextStyle(color: selected ? AppTheme.accentGold : Colors.white70),
-            );
-          }).toList(),
-        ),
-      ],
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: types.map((t) {
+        final selected = _tourType == t.$1;
+        return ChoiceChip(
+          label: Text(t.$2),
+          selected: selected,
+          onSelected: (v) => setState(() => _tourType = t.$1),
+          selectedColor: AppTheme.accentGold.withValues(alpha: 0.3),
+          side: BorderSide(color: AppTheme.accentGold.withValues(alpha: selected ? 1 : 0.5)),
+          labelStyle: TextStyle(color: selected ? AppTheme.accentGold : Colors.white70),
+        );
+      }).toList(),
     );
   }
 }

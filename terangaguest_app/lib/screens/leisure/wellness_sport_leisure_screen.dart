@@ -158,17 +158,17 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
               children: [
                 Text(
                   l10n.wellnessSportLeisure,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.wellnessSportLeisureSubtitle,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppTheme.textGray,
                   ),
                 ),

@@ -155,16 +155,17 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         children: [
                           Text(
                             l10n.transfersVtcTitle,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.transfersVtcSubtitle,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               color: AppTheme.textGray,
                             ),
                           ),
@@ -176,145 +177,85 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    vertical: 20,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      TextField(
-                        controller: _pickupController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: l10n.pickupPlace,
-                          hintText: 'Ex: Aéroport, Hôtel…',
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                      _buildField(
+                        label: l10n.pickupPlace,
+                        child: TextField(
+                          controller: _pickupController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration(hint: 'Ex: Aéroport, Hôtel…'),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _destinationController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: l10n.destinationPlace,
-                          hintText: 'Ex: Centre-ville, Adresse…',
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                      const SizedBox(height: 24),
+                      _buildField(
+                        label: l10n.destinationPlace,
+                        child: TextField(
+                          controller: _destinationController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration(hint: 'Ex: Centre-ville, Adresse…'),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () async {
-                          final ctx = context;
-                          final date = await showDatePicker(
-                            context: ctx,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
-                            ),
-                          );
-                          if (date == null || !ctx.mounted) return;
-                          final time = await showTimePicker(
-                            context: ctx,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (time == null || !ctx.mounted) return;
-                          setState(
-                            () => _requestedFor = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: l10n.date,
-                            labelStyle: const TextStyle(
-                              color: AppTheme.accentGold,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: AppTheme.accentGold.withValues(
-                                  alpha: 0.4,
-                                ),
+                      const SizedBox(height: 24),
+                      _buildField(
+                        label: l10n.date,
+                        child: InkWell(
+                          onTap: () async {
+                            final ctx = context;
+                            final date = await showDatePicker(
+                              context: ctx,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                            );
+                            if (date == null || !ctx.mounted) return;
+                            final time = await showTimePicker(
+                              context: ctx,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (time == null || !ctx.mounted) return;
+                            setState(
+                              () => _requestedFor = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: _inputDecoration(),
+                            child: Text(
+                              _requestedFor != null
+                                  ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!)
+                                  : '—',
+                              style: TextStyle(
+                                color: _requestedFor != null
+                                    ? Colors.white
+                                    : AppTheme.textGray,
+                                fontSize: 16,
                               ),
                             ),
                           ),
-                          child: Text(
-                            _requestedFor != null
-                                ? DateFormat(
-                                    'dd/MM/yyyy HH:mm',
-                                  ).format(_requestedFor!)
-                                : '—',
-                            style: TextStyle(
-                              color: _requestedFor != null
-                                  ? Colors.white
-                                  : AppTheme.textGray,
-                              fontSize: 16,
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _detailsController,
-                        maxLines: 2,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: l10n.description,
-                          hintText: l10n.describeRequest,
-                          labelStyle: const TextStyle(
-                            color: AppTheme.accentGold,
-                          ),
-                          hintStyle: TextStyle(
-                            color: AppTheme.textGray.withValues(alpha: 0.7),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: AppTheme.accentGold.withValues(alpha: 0.4),
-                            ),
-                          ),
+                      const SizedBox(height: 24),
+                      _buildField(
+                        label: l10n.description,
+                        child: TextField(
+                          controller: _detailsController,
+                          maxLines: 2,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration(hint: l10n.describeRequest),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -351,6 +292,55 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({String? hint}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.8)),
+      filled: true,
+      fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.accentGold),
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
       ),
     );
   }

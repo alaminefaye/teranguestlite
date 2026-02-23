@@ -301,10 +301,10 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
               children: [
                 Text(
                   widget.activity.name,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 if (hasDescription) ...[
@@ -312,7 +312,7 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
                   Text(
                     widget.activity.description!,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       color: AppTheme.textGray,
                     ),
                     maxLines: 2,
