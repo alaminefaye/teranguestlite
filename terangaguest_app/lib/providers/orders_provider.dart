@@ -11,12 +11,14 @@ class OrdersProvider with ChangeNotifier {
   int _currentPage = 1;
   bool _hasMorePages = true;
   String? _selectedStatus;
+  String? _selectedPeriod;
 
   List<Order> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasMorePages => _hasMorePages;
   String? get selectedStatus => _selectedStatus;
+  String? get selectedPeriod => _selectedPeriod;
 
   /// Nombre de commandes en cours (pending, confirmed, preparing, delivering)
   int get inProgressOrdersCount {
@@ -26,22 +28,28 @@ class OrdersProvider with ChangeNotifier {
 
   /// Charge les commandes pour le footer (sans filtre) — appelé au démarrage du dashboard
   Future<void> fetchOrdersForDashboard() async {
-    await fetchOrders(status: null);
+    await fetchOrders(status: null, period: null);
   }
 
   /// Récupère les commandes
-  Future<void> fetchOrders({String? status, bool loadMore = false}) async {
+  Future<void> fetchOrders({
+    String? status,
+    String? period,
+    bool loadMore = false,
+  }) async {
     if (!loadMore) {
       _isLoading = true;
       _errorMessage = null;
       _currentPage = 1;
       _selectedStatus = status;
+      _selectedPeriod = period;
       notifyListeners();
     }
 
     try {
       final result = await _ordersApi.getOrders(
         status: status,
+        period: loadMore ? _selectedPeriod : period,
         page: _currentPage,
       );
 
@@ -69,7 +77,11 @@ class OrdersProvider with ChangeNotifier {
   Future<void> loadMoreOrders() async {
     if (_hasMorePages && !_isLoading) {
       _currentPage++;
-      await fetchOrders(status: _selectedStatus, loadMore: true);
+      await fetchOrders(
+        status: _selectedStatus,
+        period: _selectedPeriod,
+        loadMore: true,
+      );
     }
   }
 
@@ -92,16 +104,10 @@ class OrdersProvider with ChangeNotifier {
   }
 
   /// Annuler une commande
-  Future<void> cancelOrder(
-    int orderId, {
-    String? reason,
-  }) async {
+  Future<void> cancelOrder(int orderId, {String? reason}) async {
     try {
-      await _ordersApi.cancelOrder(
-        orderId,
-        reason: reason,
-      );
-      await fetchOrders(status: _selectedStatus);
+      await _ordersApi.cancelOrder(orderId, reason: reason);
+      await fetchOrders(status: _selectedStatus, period: _selectedPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -113,7 +119,7 @@ class OrdersProvider with ChangeNotifier {
   }) async {
     try {
       await _ordersApi.updateOrderStatus(orderId: orderId, action: action);
-      await fetchOrders(status: _selectedStatus);
+      await fetchOrders(status: _selectedStatus, period: _selectedPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -121,7 +127,7 @@ class OrdersProvider with ChangeNotifier {
 
   /// Rafraîchir les commandes
   Future<void> refreshOrders() async {
-    await fetchOrders(status: _selectedStatus);
+    await fetchOrders(status: _selectedStatus, period: _selectedPeriod);
   }
 
   /// Vide la liste et met en état de chargement (pour forcer un affichage
@@ -131,6 +137,7 @@ class OrdersProvider with ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     _currentPage = 1;
+    _selectedPeriod = null;
     notifyListeners();
   }
 }

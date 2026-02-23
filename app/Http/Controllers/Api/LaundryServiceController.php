@@ -181,7 +181,22 @@ class LaundryServiceController extends Controller
             $query->where('user_id', $user->id);
         }
 
-        $requests = $query->latest()->paginate(15);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $period = $request->input('period');
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $requests = $query->latest()->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -221,6 +236,10 @@ class LaundryServiceController extends Controller
             }),
             'meta' => [
                 'current_page' => $requests->currentPage(),
+                'from' => $requests->firstItem(),
+                'last_page' => $requests->lastPage(),
+                'per_page' => $requests->perPage(),
+                'to' => $requests->lastItem(),
                 'total' => $requests->total(),
             ],
         ], 200);

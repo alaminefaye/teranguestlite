@@ -26,6 +26,7 @@ class OrdersListScreen extends StatefulWidget {
 
 class _OrdersListScreenState extends State<OrdersListScreen> {
   String? _selectedStatus;
+  String _selectedPeriod = 'all';
 
   List<Map<String, String>> _statusFilters(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -36,6 +37,15 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
       {'value': 'preparing', 'label': l10n.filterPreparing},
       {'value': 'delivering', 'label': l10n.filterDelivering},
       {'value': 'delivered', 'label': l10n.filterDelivered},
+    ];
+  }
+
+  List<Map<String, String>> _periodFilters() {
+    return [
+      {'value': 'all', 'label': 'Toutes les dates'},
+      {'value': 'today', 'label': 'Aujourd\'hui'},
+      {'value': 'week', 'label': 'Cette semaine'},
+      {'value': 'month', 'label': 'Ce mois'},
     ];
   }
 
@@ -79,7 +89,6 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               // Header
               _buildHeader(),
 
-              // Filtres
               _buildFilters(),
 
               // Liste des commandes
@@ -150,71 +159,139 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   }
 
   Widget _buildFilters() {
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _statusFilters(context).length,
-        itemBuilder: (context, index) {
-          final filter = _statusFilters(context)[index];
-          final isSelected =
-              _selectedStatus == filter['value'] ||
-              (_selectedStatus == null && filter['value'] == '');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _statusFilters(context).length,
+              itemBuilder: (context, index) {
+                final filter = _statusFilters(context)[index];
+                final isSelected =
+                    _selectedStatus == filter['value'] ||
+                    (_selectedStatus == null && filter['value'] == '');
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedStatus = filter['value']!.isEmpty
-                      ? null
-                      : filter['value'];
-                });
-                context.read<OrdersProvider>().fetchOrders(
-                  status: _selectedStatus,
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedStatus = filter['value']!.isEmpty
+                            ? null
+                            : filter['value'];
+                      });
+                      context.read<OrdersProvider>().fetchOrders(
+                        status: _selectedStatus,
+                        period: _selectedPeriod == 'all'
+                            ? null
+                            : _selectedPeriod,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: isSelected
+                            ? LinearGradient(
+                                colors: [
+                                  AppTheme.accentGold,
+                                  AppTheme.accentGold.withValues(alpha: 0.8),
+                                ],
+                              )
+                            : null,
+                        color: isSelected
+                            ? null
+                            : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppTheme.accentGold
+                              : AppTheme.accentGold.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        filter['label']!,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppTheme.primaryDark
+                              : AppTheme.textGray,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  gradient: isSelected
-                      ? LinearGradient(
-                          colors: [
-                            AppTheme.accentGold,
-                            AppTheme.accentGold.withValues(alpha: 0.8),
-                          ],
-                        )
-                      : null,
-                  color: isSelected
-                      ? null
-                      : AppTheme.primaryBlue.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppTheme.accentGold
-                        : AppTheme.accentGold.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Text(
-                  filter['label']!,
-                  style: TextStyle(
-                    color: isSelected
-                        ? AppTheme.primaryDark
-                        : AppTheme.textGray,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _periodFilters().length,
+              itemBuilder: (context, index) {
+                final filter = _periodFilters()[index];
+                final isSelected = _selectedPeriod == filter['value'];
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedPeriod = filter['value']!;
+                      });
+                      context.read<OrdersProvider>().fetchOrders(
+                        status: _selectedStatus,
+                        period: _selectedPeriod == 'all'
+                            ? null
+                            : _selectedPeriod,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppTheme.accentGold.withValues(alpha: 0.15)
+                            : AppTheme.primaryBlue.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppTheme.accentGold
+                              : AppTheme.accentGold.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        filter['label']!,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppTheme.accentGold
+                              : AppTheme.textGray,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

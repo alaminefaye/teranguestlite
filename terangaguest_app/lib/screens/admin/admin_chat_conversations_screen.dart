@@ -29,8 +29,11 @@ class _AdminChatConversationsScreenState
   final ChatApi _api = ChatApi();
   bool _loading = true;
   bool _refreshing = false;
+  bool _loadingMore = false;
+  bool _hasMorePages = true;
   String? _error;
   List<StaffConversationSummary> _conversations = [];
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -46,11 +49,20 @@ class _AdminChatConversationsScreenState
       _error = null;
     });
     try {
-      final items = await _api.getStaffConversations();
+      final result = await _api.getStaffConversations(page: 1);
+      final items =
+          result['conversations'] as List<StaffConversationSummary>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+      final currentPage =
+          meta['current_page'] is int ? meta['current_page'] as int : 1;
+      final lastPage =
+          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
       if (!mounted) return;
       setState(() {
         _conversations = items;
         _loading = false;
+        _currentPage = currentPage + 1;
+        _hasMorePages = currentPage < lastPage;
       });
     } catch (e) {
       if (!mounted) return;
@@ -67,10 +79,19 @@ class _AdminChatConversationsScreenState
       _refreshing = true;
     });
     try {
-      final items = await _api.getStaffConversations();
+      final result = await _api.getStaffConversations(page: 1);
+      final items =
+          result['conversations'] as List<StaffConversationSummary>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+      final currentPage =
+          meta['current_page'] is int ? meta['current_page'] as int : 1;
+      final lastPage =
+          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
       if (!mounted) return;
       setState(() {
         _conversations = items;
+        _currentPage = currentPage + 1;
+        _hasMorePages = currentPage < lastPage;
       });
     } catch (e) {
       if (!mounted) return;
@@ -81,6 +102,40 @@ class _AdminChatConversationsScreenState
       if (mounted) {
         setState(() {
           _refreshing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_hasMorePages) return;
+    setState(() {
+      _loadingMore = true;
+    });
+    try {
+      final result = await _api.getStaffConversations(page: _currentPage);
+      final items =
+          result['conversations'] as List<StaffConversationSummary>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+      final currentPage =
+          meta['current_page'] is int ? meta['current_page'] as int : _currentPage;
+      final lastPage =
+          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      if (!mounted) return;
+      setState(() {
+        _conversations.addAll(items);
+        _currentPage = currentPage + 1;
+        _hasMorePages = currentPage < lastPage;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceAll('Exception: ', '');
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingMore = false;
         });
       }
     }
@@ -197,15 +252,36 @@ class _AdminChatConversationsScreenState
     return RefreshIndicator(
       color: AppTheme.accentGold,
       onRefresh: _refresh,
-      child: ListView.builder(
-        padding: LayoutHelper.horizontalPadding(
-          context,
-        ).copyWith(top: 8, bottom: 24),
-        itemCount: _conversations.length,
-        itemBuilder: (context, index) {
-          final conv = _conversations[index];
-          return _buildConversationTile(context, conv);
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (scrollInfo.metrics.pixels ==
+              scrollInfo.metrics.maxScrollExtent) {
+            _loadMore();
+          }
+          return false;
         },
+        child: ListView.builder(
+          padding: LayoutHelper.horizontalPadding(
+            context,
+          ).copyWith(top: 8, bottom: 24),
+          itemCount: _conversations.length + (_hasMorePages ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == _conversations.length && _hasMorePages) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
+                  ),
+                ),
+              );
+            }
+            final conv = _conversations[index];
+            return _buildConversationTile(context, conv);
+          },
+        ),
       ),
     );
   }

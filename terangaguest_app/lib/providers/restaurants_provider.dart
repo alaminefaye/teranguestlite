@@ -8,14 +8,19 @@ class RestaurantsProvider with ChangeNotifier {
   List<Restaurant> _restaurants = [];
   List<RestaurantReservation> _reservations = [];
   bool _isLoading = false;
+  bool _hasMoreReservationPages = true;
   String? _errorMessage;
   String? _selectedType;
+  String? _selectedReservationsPeriod;
+  int _currentReservationsPage = 1;
 
   List<Restaurant> get restaurants => _restaurants;
   List<RestaurantReservation> get reservations => _reservations;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get selectedType => _selectedType;
+  bool get hasMoreReservationPages => _hasMoreReservationPages;
+  String? get selectedReservationsPeriod => _selectedReservationsPeriod;
 
   /// Récupère les restaurants
   Future<void> fetchRestaurants({String? type}) async {
@@ -65,7 +70,7 @@ class RestaurantsProvider with ChangeNotifier {
       );
 
       // Rafraîchir les réservations
-      await fetchMyReservations();
+      await fetchMyReservations(period: _selectedReservationsPeriod);
 
       return reservation;
     } catch (e) {
@@ -74,13 +79,68 @@ class RestaurantsProvider with ChangeNotifier {
   }
 
   /// Récupère les réservations de l'utilisateur
-  Future<void> fetchMyReservations() async {
+  Future<void> fetchMyReservations({
+    String? period,
+    bool loadMore = false,
+  }) async {
+    if (!loadMore) {
+      _isLoading = true;
+      _errorMessage = null;
+      _currentReservationsPage = 1;
+      _selectedReservationsPeriod = period;
+      _hasMoreReservationPages = true;
+      notifyListeners();
+    } else {
+      if (!_hasMoreReservationPages || _isLoading) {
+        return;
+      }
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
-      _reservations = await _restaurantsApi.getMyReservations();
+      final effectivePeriod = loadMore
+          ? _selectedReservationsPeriod
+          : (period ?? _selectedReservationsPeriod);
+
+      final result = await _restaurantsApi.getMyReservations(
+        period: effectivePeriod,
+        page: _currentReservationsPage,
+      );
+
+      final newReservations =
+          result['reservations'] as List<RestaurantReservation>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+
+      if (loadMore) {
+        _reservations.addAll(newReservations);
+      } else {
+        _reservations = newReservations;
+      }
+
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : _currentReservationsPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
+
+      _hasMoreReservationPages = currentPage < lastPage;
+      _currentReservationsPage = currentPage + 1;
+
+      _isLoading = false;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching reservations: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> loadMoreReservations() async {
+    await fetchMyReservations(loadMore: true);
   }
 
   /// Annuler une réservation
@@ -94,7 +154,7 @@ class RestaurantsProvider with ChangeNotifier {
         reason: reason,
       );
       // Rafraîchir la liste
-      await fetchMyReservations();
+      await fetchMyReservations(period: _selectedReservationsPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -111,7 +171,7 @@ class RestaurantsProvider with ChangeNotifier {
         action: action,
         reason: reason,
       );
-      await fetchMyReservations();
+      await fetchMyReservations(period: _selectedReservationsPeriod);
     } catch (e) {
       throw e.toString();
     }

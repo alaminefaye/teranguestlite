@@ -19,6 +19,17 @@ class MyExcursionBookingsScreen extends StatefulWidget {
 }
 
 class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
+  String _selectedPeriod = 'all';
+
+  List<Map<String, String>> _periodFilters() {
+    return [
+      {'value': 'all', 'label': 'Toutes les dates'},
+      {'value': 'today', 'label': 'Aujourd\'hui'},
+      {'value': 'week', 'label': 'Cette semaine'},
+      {'value': 'month', 'label': 'Ce mois'},
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -87,7 +98,8 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                   ],
                 ),
               ),
-              Expanded(child: _buildContent()),
+              if (isStaffOrAdmin) _buildFilters(),
+              Expanded(child: _buildContent(isStaffOrAdmin)),
             ],
           ),
         ),
@@ -95,10 +107,70 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _periodFilters().length,
+          itemBuilder: (context, index) {
+            final filter = _periodFilters()[index];
+            final isSelected = _selectedPeriod == filter['value'];
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedPeriod = filter['value']!;
+                  });
+                  context.read<ExcursionsProvider>().fetchMyExcursionBookings(
+                    period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.accentGold.withValues(alpha: 0.15)
+                        : AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.accentGold.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    filter['label']!,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isStaffOrAdmin) {
     return Consumer<ExcursionsProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading && provider.bookings.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
@@ -117,24 +189,52 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
 
         return RefreshIndicator(
           color: AppTheme.accentGold,
-          onRefresh: () => provider.fetchMyExcursionBookings(),
-          child: Padding(
-            padding: LayoutHelper.horizontalPadding(context),
-            child: GridView.builder(
-              padding: EdgeInsets.symmetric(
-                vertical: LayoutHelper.gridSpacing(context),
+          onRefresh: () => provider.fetchMyExcursionBookings(
+            period: isStaffOrAdmin && _selectedPeriod != 'all'
+                ? _selectedPeriod
+                : null,
+          ),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!isStaffOrAdmin) return false;
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
+                provider.loadMoreExcursionBookings();
+              }
+              return false;
+            },
+            child: Padding(
+              padding: LayoutHelper.horizontalPadding(context),
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(
+                  vertical: LayoutHelper.gridSpacing(context),
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
+                ),
+                itemCount:
+                    provider.bookings.length +
+                    (isStaffOrAdmin && provider.hasMoreBookingPages ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (isStaffOrAdmin &&
+                      index == provider.bookings.length &&
+                      provider.hasMoreBookingPages) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final booking = provider.bookings[index];
+                  return _buildBookingCard(context, booking);
+                },
               ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
-                crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                mainAxisSpacing: LayoutHelper.gridSpacing(context),
-              ),
-              itemCount: provider.bookings.length,
-              itemBuilder: (context, index) {
-                final booking = provider.bookings[index];
-                return _buildBookingCard(context, booking);
-              },
             ),
           ),
         );
@@ -168,7 +268,11 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
           ExcursionBookingDetailScreen(booking: booking),
         );
         if (updated == true && mounted && context.mounted) {
-          await context.read<ExcursionsProvider>().fetchMyExcursionBookings();
+          await context.read<ExcursionsProvider>().fetchMyExcursionBookings(
+            period: isStaffOrAdmin && _selectedPeriod != 'all'
+                ? _selectedPeriod
+                : null,
+          );
         }
       },
       borderRadius: BorderRadius.circular(16),

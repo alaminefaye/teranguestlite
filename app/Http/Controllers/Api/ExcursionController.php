@@ -239,7 +239,22 @@ class ExcursionController extends Controller
             $query->where('user_id', $user->id);
         }
 
-        $bookings = $query->latest()->paginate(15);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $period = $request->input('period');
+        if ($period === 'today') {
+            $query->whereDate('booking_date', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('booking_date', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereBetween('booking_date', [now()->startOfMonth(), now()->endOfMonth()]);
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $bookings = $query->latest()->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -264,6 +279,10 @@ class ExcursionController extends Controller
             }),
             'meta' => [
                 'current_page' => $bookings->currentPage(),
+                'from' => $bookings->firstItem(),
+                'last_page' => $bookings->lastPage(),
+                'per_page' => $bookings->perPage(),
+                'to' => $bookings->lastItem(),
                 'total' => $bookings->total(),
             ],
         ], 200);

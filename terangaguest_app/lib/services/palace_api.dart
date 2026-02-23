@@ -78,29 +78,86 @@ class PalaceApi {
     return e.message ?? 'Erreur lors de l\'envoi de la demande.';
   }
 
-  /// Récupère les demandes de l'utilisateur
-  Future<List<PalaceRequest>> getMyPalaceRequests() async {
+  /// Récupère les demandes de l'utilisateur (avec pagination/filtre période)
+  Future<Map<String, dynamic>> getMyPalaceRequests({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
-      final response = await _apiService.get(ApiConfig.myPalaceRequests);
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
 
-      return (response.data['data'] as List)
-          .map((json) => PalaceRequest.fromJson(json as Map<String, dynamic>))
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
+      final response = await _apiService.get(
+        ApiConfig.myPalaceRequests,
+        queryParameters: queryParams,
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final requestsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final requests = requestsJson
+          .map(
+            (json) => PalaceRequest.fromJson(
+              json as Map<String, dynamic>,
+            ),
+          )
           .toList();
+
+      return {
+        'requests': requests,
+        'meta': meta,
+      };
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
     }
   }
 
-  Future<List<PalaceRequest>> getEmergencyPalaceRequests() async {
+  Future<Map<String, dynamic>> getEmergencyPalaceRequests({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
+      final queryParams = <String, dynamic>{
+        'emergency': 1,
+        'page': page,
+        'per_page': perPage,
+      };
+
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
       final response = await _apiService.get(
-        '${ApiConfig.myPalaceRequests}?emergency=1',
+        ApiConfig.myPalaceRequests,
+        queryParameters: queryParams,
       );
 
-      return (response.data['data'] as List)
-          .map((json) => PalaceRequest.fromJson(json as Map<String, dynamic>))
+      final data = response.data as Map<String, dynamic>;
+      final requestsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final requests = requestsJson
+          .map(
+            (json) => PalaceRequest.fromJson(
+              json as Map<String, dynamic>,
+            ),
+          )
           .toList();
+
+      return {
+        'requests': requests,
+        'meta': meta,
+      };
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

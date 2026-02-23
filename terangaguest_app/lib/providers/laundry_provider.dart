@@ -8,7 +8,10 @@ class LaundryProvider with ChangeNotifier {
   List<LaundryService> _services = [];
   List<LaundryRequest> _requests = [];
   bool _isLoading = false;
+  bool _hasMoreRequestPages = true;
   String? _errorMessage;
+  String? _selectedRequestsPeriod;
+  int _currentRequestsPage = 1;
 
   // État pour le formulaire de demande
   final Map<int, int> _selectedItems = {}; // serviceId: quantity
@@ -18,6 +21,8 @@ class LaundryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   Map<int, int> get selectedItems => _selectedItems;
+  bool get hasMoreRequestPages => _hasMoreRequestPages;
+  String? get selectedRequestsPeriod => _selectedRequestsPeriod;
 
   int getQuantityForService(int serviceId) => _selectedItems[serviceId] ?? 0;
 
@@ -87,7 +92,7 @@ class LaundryProvider with ChangeNotifier {
       );
 
       // Rafraîchir les demandes
-      await fetchMyLaundryRequests();
+      await fetchMyLaundryRequests(period: _selectedRequestsPeriod);
 
       // Vider la sélection
       clearSelection();
@@ -99,20 +104,72 @@ class LaundryProvider with ChangeNotifier {
   }
 
   /// Récupère les demandes de l'utilisateur
-  Future<void> fetchMyLaundryRequests() async {
+  Future<void> fetchMyLaundryRequests({
+    String? period,
+    bool loadMore = false,
+  }) async {
+    if (!loadMore) {
+      _isLoading = true;
+      _errorMessage = null;
+      _currentRequestsPage = 1;
+      _selectedRequestsPeriod = period;
+      _hasMoreRequestPages = true;
+      notifyListeners();
+    } else {
+      if (!_hasMoreRequestPages || _isLoading) {
+        return;
+      }
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
-      _requests = await _laundryApi.getMyLaundryRequests();
+      final effectivePeriod =
+          loadMore ? _selectedRequestsPeriod : (period ?? _selectedRequestsPeriod);
+
+      final result = await _laundryApi.getMyLaundryRequests(
+        period: effectivePeriod,
+        page: _currentRequestsPage,
+      );
+
+      final newRequests =
+          result['requests'] as List<LaundryRequest>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+
+      if (loadMore) {
+        _requests.addAll(newRequests);
+      } else {
+        _requests = newRequests;
+      }
+
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : _currentRequestsPage;
+      final lastPage = meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+
+      _hasMoreRequestPages = currentPage < lastPage;
+      _currentRequestsPage = currentPage + 1;
+
+      _isLoading = false;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching laundry requests: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> loadMoreLaundryRequests() async {
+    await fetchMyLaundryRequests(loadMore: true);
   }
 
   /// Annuler une demande
   Future<void> cancelLaundryRequest(int requestId) async {
     try {
       await _laundryApi.cancelLaundryRequest(requestId);
-      await fetchMyLaundryRequests();
+      await fetchMyLaundryRequests(period: _selectedRequestsPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -129,7 +186,7 @@ class LaundryProvider with ChangeNotifier {
         action: action,
         reason: reason,
       );
-      await fetchMyLaundryRequests();
+      await fetchMyLaundryRequests(period: _selectedRequestsPeriod);
     } catch (e) {
       rethrow;
     }

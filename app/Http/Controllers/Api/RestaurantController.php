@@ -163,7 +163,22 @@ class RestaurantController extends Controller
             $query->where('user_id', $user->id);
         }
 
-        $reservations = $query->latest()->paginate(15);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $period = $request->input('period');
+        if ($period === 'today') {
+            $query->whereDate('reservation_date', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('reservation_date', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereBetween('reservation_date', [now()->startOfMonth(), now()->endOfMonth()]);
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $reservations = $query->latest()->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -180,7 +195,14 @@ class RestaurantController extends Controller
                     'created_at' => $res->created_at->toISOString(),
                 ];
             }),
-            'meta' => ['current_page' => $reservations->currentPage(), 'total' => $reservations->total()],
+            'meta' => [
+                'current_page' => $reservations->currentPage(),
+                'from' => $reservations->firstItem(),
+                'last_page' => $reservations->lastPage(),
+                'per_page' => $reservations->perPage(),
+                'to' => $reservations->lastItem(),
+                'total' => $reservations->total(),
+            ],
         ], 200);
     }
 

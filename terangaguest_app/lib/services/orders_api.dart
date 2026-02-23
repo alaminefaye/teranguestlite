@@ -10,6 +10,7 @@ class OrdersApi {
   /// Récupère la liste des commandes
   Future<Map<String, dynamic>> getOrders({
     String? status,
+    String? period,
     int page = 1,
     int perPage = 15,
   }) async {
@@ -18,6 +19,10 @@ class OrdersApi {
 
       if (status != null && status.isNotEmpty) {
         queryParams['status'] = status;
+      }
+
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
       }
 
       final response = await _apiService.get(
@@ -63,10 +68,7 @@ class OrdersApi {
   }
 
   /// Annuler une commande
-  Future<void> cancelOrder(
-    int orderId, {
-    String? reason,
-  }) async {
+  Future<void> cancelOrder(int orderId, {String? reason}) async {
     try {
       final payload = <String, dynamic>{};
       if (reason != null && reason.trim().isNotEmpty) {

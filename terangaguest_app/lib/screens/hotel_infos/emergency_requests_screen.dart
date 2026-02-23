@@ -19,6 +19,16 @@ class EmergencyRequestsScreen extends StatefulWidget {
 
 class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
   bool _loading = false;
+  String _selectedPeriod = 'all';
+
+  List<Map<String, String>> _periodFilters() {
+    return [
+      {'value': 'all', 'label': 'Toutes les dates'},
+      {'value': 'today', 'label': 'Aujourd\'hui'},
+      {'value': 'week', 'label': 'Cette semaine'},
+      {'value': 'month', 'label': 'Ce mois'},
+    ];
+  }
 
   @override
   void initState() {
@@ -29,7 +39,9 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      await context.read<PalaceProvider>().fetchEmergencyPalaceRequests();
+      await context.read<PalaceProvider>().fetchEmergencyPalaceRequests(
+        period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+      );
     } finally {
       if (mounted) {
         setState(() => _loading = false);
@@ -92,20 +104,25 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                   ],
                 ),
               ),
+              if (isStaffOrAdmin) _buildFilters(),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: _load,
                   color: AppTheme.accentGold,
-                  child: _loading
-                      ? const Center(
+                  child: Builder(
+                    builder: (context) {
+                      if (_loading) {
+                        return const Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               AppTheme.accentGold,
                             ),
                           ),
-                        )
-                      : emergencyRequests.isEmpty
-                      ? Padding(
+                        );
+                      }
+
+                      if (emergencyRequests.isEmpty) {
+                        return Padding(
                           padding: LayoutHelper.horizontalPadding(context),
                           child: ListView(
                             padding: EdgeInsets.symmetric(vertical: spacing),
@@ -117,9 +134,22 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                               ),
                             ],
                           ),
-                        )
-                      : Padding(
-                          padding: LayoutHelper.horizontalPadding(context),
+                        );
+                      }
+
+                      return Padding(
+                        padding: LayoutHelper.horizontalPadding(context),
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (ScrollNotification scrollInfo) {
+                            if (!isStaffOrAdmin) return false;
+                            if (scrollInfo.metrics.pixels ==
+                                scrollInfo.metrics.maxScrollExtent) {
+                              context
+                                  .read<PalaceProvider>()
+                                  .loadMoreEmergencyPalaceRequests();
+                            }
+                            return false;
+                          },
                           child: GridView.builder(
                             padding: EdgeInsets.symmetric(vertical: spacing),
                             gridDelegate:
@@ -131,8 +161,25 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                   crossAxisSpacing: spacing,
                                   mainAxisSpacing: spacing,
                                 ),
-                            itemCount: emergencyRequests.length,
+                            itemCount:
+                                emergencyRequests.length +
+                                (isStaffOrAdmin &&
+                                        provider.hasMoreEmergencyPages
+                                    ? 1
+                                    : 0),
                             itemBuilder: (context, index) {
+                              if (isStaffOrAdmin &&
+                                  index == emergencyRequests.length &&
+                                  provider.hasMoreEmergencyPages) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppTheme.accentGold,
+                                    ),
+                                  ),
+                                );
+                              }
+
                               final request = emergencyRequests[index];
                               final roomGuestText = () {
                                 final parts = <String>[];
@@ -337,10 +384,71 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                             },
                           ),
                         ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _periodFilters().length,
+          itemBuilder: (context, index) {
+            final filter = _periodFilters()[index];
+            final isSelected = _selectedPeriod == filter['value'];
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedPeriod = filter['value']!;
+                  });
+                  _load();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.accentGold.withValues(alpha: 0.15)
+                        : AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.accentGold.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    filter['label']!,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

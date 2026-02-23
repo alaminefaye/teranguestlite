@@ -67,12 +67,27 @@ class OrderController extends Controller
             });
         }
 
-        // Filtrer par statut
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Tri
+        $period = $request->input('period');
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);

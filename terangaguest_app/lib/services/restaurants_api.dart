@@ -87,19 +87,36 @@ class RestaurantsApi {
     return e.message ?? 'Erreur lors de la réservation.';
   }
 
-  /// Récupère les réservations de l'utilisateur
-  Future<List<RestaurantReservation>> getMyReservations() async {
+  /// Récupère les réservations de l'utilisateur (avec pagination/filtre période)
+  Future<Map<String, dynamic>> getMyReservations({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
+
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
       final response = await _apiService.get(
         ApiConfig.myRestaurantReservations,
+        queryParameters: queryParams,
       );
 
-      return (response.data['data'] as List)
+      final data = response.data as Map<String, dynamic>;
+      final reservationsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final reservations = reservationsJson
           .map(
             (json) =>
                 RestaurantReservation.fromJson(json as Map<String, dynamic>),
           )
           .toList();
+
+      return {'reservations': reservations, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

@@ -8,12 +8,17 @@ class ExcursionsProvider with ChangeNotifier {
   List<Excursion> _excursions = [];
   List<ExcursionBooking> _bookings = [];
   bool _isLoading = false;
+  bool _hasMoreBookingPages = true;
   String? _errorMessage;
+  String? _selectedBookingsPeriod;
+  int _currentBookingsPage = 1;
 
   List<Excursion> get excursions => _excursions;
   List<ExcursionBooking> get bookings => _bookings;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get hasMoreBookingPages => _hasMoreBookingPages;
+  String? get selectedBookingsPeriod => _selectedBookingsPeriod;
 
   /// Récupère les excursions
   Future<void> fetchExcursions() async {
@@ -62,7 +67,7 @@ class ExcursionsProvider with ChangeNotifier {
       );
 
       // Rafraîchir les bookings
-      await fetchMyExcursionBookings();
+      await fetchMyExcursionBookings(period: _selectedBookingsPeriod);
 
       return booking;
     } catch (e) {
@@ -71,27 +76,75 @@ class ExcursionsProvider with ChangeNotifier {
   }
 
   /// Récupère les bookings de l'utilisateur
-  Future<void> fetchMyExcursionBookings() async {
+  Future<void> fetchMyExcursionBookings({
+    String? period,
+    bool loadMore = false,
+  }) async {
+    if (!loadMore) {
+      _isLoading = true;
+      _errorMessage = null;
+      _currentBookingsPage = 1;
+      _selectedBookingsPeriod = period;
+      _hasMoreBookingPages = true;
+      notifyListeners();
+    } else {
+      if (!_hasMoreBookingPages || _isLoading) {
+        return;
+      }
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
-      _bookings = await _excursionsApi.getMyExcursionBookings();
+      final effectivePeriod = loadMore
+          ? _selectedBookingsPeriod
+          : (period ?? _selectedBookingsPeriod);
+
+      final result = await _excursionsApi.getMyExcursionBookings(
+        period: effectivePeriod,
+        page: _currentBookingsPage,
+      );
+
+      final newBookings = result['bookings'] as List<ExcursionBooking>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+
+      if (loadMore) {
+        _bookings.addAll(newBookings);
+      } else {
+        _bookings = newBookings;
+      }
+
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : _currentBookingsPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
+
+      _hasMoreBookingPages = currentPage < lastPage;
+      _currentBookingsPage = currentPage + 1;
+
+      _isLoading = false;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching excursion bookings: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
+  Future<void> loadMoreExcursionBookings() async {
+    await fetchMyExcursionBookings(loadMore: true);
+  }
+
   /// Annuler un booking
-  Future<void> cancelExcursionBooking(
-    int bookingId, {
-    String? reason,
-  }) async {
+  Future<void> cancelExcursionBooking(int bookingId, {String? reason}) async {
     try {
-      await _excursionsApi.cancelExcursionBooking(
-        bookingId,
-        reason: reason,
-      );
+      await _excursionsApi.cancelExcursionBooking(bookingId, reason: reason);
       // Rafraîchir la liste
-      await fetchMyExcursionBookings();
+      await fetchMyExcursionBookings(period: _selectedBookingsPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -106,7 +159,7 @@ class ExcursionsProvider with ChangeNotifier {
         bookingId: bookingId,
         action: action,
       );
-      await fetchMyExcursionBookings();
+      await fetchMyExcursionBookings(period: _selectedBookingsPeriod);
     } catch (e) {
       throw e.toString();
     }

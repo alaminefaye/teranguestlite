@@ -293,7 +293,18 @@ class PalaceServiceController extends Controller
             $query->where('status', $request->status);
         }
 
-        $requests = $query->latest()->paginate(15);
+        $period = $request->input('period');
+        if ($period === 'today') {
+            $query->whereDate('requested_for', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('requested_for', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereBetween('requested_for', [now()->startOfMonth(), now()->endOfMonth()]);
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $requests = $query->latest()->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -321,6 +332,10 @@ class PalaceServiceController extends Controller
             }),
             'meta' => [
                 'current_page' => $requests->currentPage(),
+                'from' => $requests->firstItem(),
+                'last_page' => $requests->lastPage(),
+                'per_page' => $requests->perPage(),
+                'to' => $requests->lastItem(),
                 'total' => $requests->total(),
             ],
         ], 200);

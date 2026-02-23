@@ -77,14 +77,33 @@ class LaundryApi {
     return e.message ?? 'Erreur lors de la demande de blanchisserie.';
   }
 
-  /// Récupère les demandes de l'utilisateur
-  Future<List<LaundryRequest>> getMyLaundryRequests() async {
+  /// Récupère les demandes de l'utilisateur (avec pagination/filtre période)
+  Future<Map<String, dynamic>> getMyLaundryRequests({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
-      final response = await _apiService.get(ApiConfig.myLaundryRequests);
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
-      return (response.data['data'] as List)
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
+      final response = await _apiService.get(
+        ApiConfig.myLaundryRequests,
+        queryParameters: queryParams,
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final requestsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final requests = requestsJson
           .map((json) => LaundryRequest.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      return {'requests': requests, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

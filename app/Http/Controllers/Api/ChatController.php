@@ -292,7 +292,7 @@ class ChatController extends Controller
             ])
             ->orderByDesc('last_message_at')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->paginate((int) $request->input('per_page', 20));
 
         $data = $conversations->map(function (HotelConversation $conversation) {
             $guestName = $conversation->user?->name ?: 'Client chambre';
@@ -326,6 +326,10 @@ class ChatController extends Controller
                 'conversations' => $data,
                 'meta' => [
                     'current_page' => $conversations->currentPage(),
+                    'from' => $conversations->firstItem(),
+                    'last_page' => $conversations->lastPage(),
+                    'per_page' => $conversations->perPage(),
+                    'to' => $conversations->lastItem(),
                     'total' => $conversations->total(),
                 ],
             ],

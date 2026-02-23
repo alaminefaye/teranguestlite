@@ -127,9 +127,18 @@ class ChatApi {
     }
   }
 
-  Future<List<StaffConversationSummary>> getStaffConversations() async {
+  Future<Map<String, dynamic>> getStaffConversations({
+    int page = 1,
+    int perPage = 20,
+  }) async {
     try {
-      final response = await _api.get('/staff/chat/conversations');
+      final response = await _api.get(
+        '/staff/chat/conversations',
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
+      );
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {
         throw Exception(
@@ -139,11 +148,18 @@ class ChatApi {
       }
       final root = data['data'] as Map<String, dynamic>? ?? {};
       final conversations = root['conversations'] as List? ?? [];
-      return conversations
+      final meta = root['meta'] as Map<String, dynamic>? ?? {};
+      final items = conversations
           .map(
-            (e) => StaffConversationSummary.fromJson(e as Map<String, dynamic>),
+            (e) => StaffConversationSummary.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList();
+      return {
+        'conversations': items,
+        'meta': meta,
+      };
     } on DioException catch (e) {
       final body = e.response?.data;
       final serverMessage = body is Map && body['message'] is String

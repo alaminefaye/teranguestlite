@@ -20,6 +20,17 @@ class MySpaReservationsScreen extends StatefulWidget {
 }
 
 class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
+  String _selectedPeriod = 'all';
+
+  List<Map<String, String>> _periodFilters() {
+    return [
+      {'value': 'all', 'label': 'Toutes les dates'},
+      {'value': 'today', 'label': 'Aujourd\'hui'},
+      {'value': 'week', 'label': 'Cette semaine'},
+      {'value': 'month', 'label': 'Ce mois'},
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +41,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -43,7 +57,8 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(child: _buildContent()),
+              if (isStaffOrAdmin) _buildFilters(),
+              Expanded(child: _buildContent(isStaffOrAdmin)),
             ],
           ),
         ),
@@ -98,10 +113,70 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _periodFilters().length,
+          itemBuilder: (context, index) {
+            final filter = _periodFilters()[index];
+            final isSelected = _selectedPeriod == filter['value'];
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedPeriod = filter['value']!;
+                  });
+                  context.read<SpaProvider>().fetchMySpaReservations(
+                    period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.accentGold.withValues(alpha: 0.15)
+                        : AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.accentGold.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    filter['label']!,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isStaffOrAdmin) {
     return Consumer<SpaProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading && provider.reservations.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
@@ -120,35 +195,69 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
 
         return RefreshIndicator(
           color: AppTheme.accentGold,
-          onRefresh: () => provider.fetchMySpaReservations(),
-          child: Padding(
-            padding: LayoutHelper.horizontalPadding(context),
-            child: GridView.builder(
-              padding: EdgeInsets.symmetric(
-                vertical: LayoutHelper.gridSpacing(context),
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
-                crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                mainAxisSpacing: LayoutHelper.gridSpacing(context),
-              ),
-              itemCount: provider.reservations.length,
-              itemBuilder: (context, index) {
-                final reservation = provider.reservations[index];
-                return InkWell(
-                  onTap: () async {
-                    final updated = await context.navigateTo(
-                      SpaReservationDetailScreen(reservation: reservation),
+          onRefresh: () => provider.fetchMySpaReservations(
+            period: isStaffOrAdmin && _selectedPeriod != 'all'
+                ? _selectedPeriod
+                : null,
+          ),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!isStaffOrAdmin) return false;
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
+                provider.loadMoreSpaReservations();
+              }
+              return false;
+            },
+            child: Padding(
+              padding: LayoutHelper.horizontalPadding(context),
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(
+                  vertical: LayoutHelper.gridSpacing(context),
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
+                ),
+                itemCount:
+                    provider.reservations.length +
+                    (isStaffOrAdmin && provider.hasMoreReservationPages
+                        ? 1
+                        : 0),
+                itemBuilder: (context, index) {
+                  if (isStaffOrAdmin &&
+                      index == provider.reservations.length &&
+                      provider.hasMoreReservationPages) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
+                        ),
+                      ),
                     );
-                    if (updated == true && context.mounted) {
-                      context.read<SpaProvider>().fetchMySpaReservations();
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: _buildReservationCard(reservation),
-                );
-              },
+                  }
+
+                  final reservation = provider.reservations[index];
+                  return InkWell(
+                    onTap: () async {
+                      final updated = await context.navigateTo(
+                        SpaReservationDetailScreen(reservation: reservation),
+                      );
+                      if (updated == true && context.mounted) {
+                        context.read<SpaProvider>().fetchMySpaReservations(
+                          period: isStaffOrAdmin && _selectedPeriod != 'all'
+                              ? _selectedPeriod
+                              : null,
+                        );
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: _buildReservationCard(reservation),
+                  );
+                },
+              ),
             ),
           ),
         );

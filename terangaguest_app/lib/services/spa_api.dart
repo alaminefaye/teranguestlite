@@ -109,14 +109,33 @@ class SpaApi {
     return e.message ?? 'Erreur lors de la réservation.';
   }
 
-  /// Récupère les réservations spa de l'utilisateur
-  Future<List<SpaReservation>> getMySpaReservations() async {
+  /// Récupère les réservations spa de l'utilisateur (avec pagination/filtre période)
+  Future<Map<String, dynamic>> getMySpaReservations({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
-      final response = await _apiService.get(ApiConfig.mySpaReservations);
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
-      return (response.data['data'] as List)
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
+      final response = await _apiService.get(
+        ApiConfig.mySpaReservations,
+        queryParameters: queryParams,
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final reservationsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final reservations = reservationsJson
           .map((json) => SpaReservation.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      return {'reservations': reservations, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

@@ -89,16 +89,35 @@ class ExcursionsApi {
     return e.message ?? 'Erreur lors de la réservation.';
   }
 
-  /// Récupère les bookings de l'utilisateur
-  Future<List<ExcursionBooking>> getMyExcursionBookings() async {
+  /// Récupère les bookings de l'utilisateur (avec pagination/filtre période)
+  Future<Map<String, dynamic>> getMyExcursionBookings({
+    String? period,
+    int page = 1,
+    int perPage = 15,
+  }) async {
     try {
-      final response = await _apiService.get(ApiConfig.myExcursionBookings);
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
-      return (response.data['data'] as List)
+      if (period != null && period.isNotEmpty && period != 'all') {
+        queryParams['period'] = period;
+      }
+
+      final response = await _apiService.get(
+        ApiConfig.myExcursionBookings,
+        queryParameters: queryParams,
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final bookingsJson = data['data'] as List? ?? [];
+      final meta = data['meta'] as Map<String, dynamic>? ?? {};
+
+      final bookings = bookingsJson
           .map(
             (json) => ExcursionBooking.fromJson(json as Map<String, dynamic>),
           )
           .toList();
+
+      return {'bookings': bookings, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
@@ -106,10 +125,7 @@ class ExcursionsApi {
   }
 
   /// Annuler un booking
-  Future<void> cancelExcursionBooking(
-    int bookingId, {
-    String? reason,
-  }) async {
+  Future<void> cancelExcursionBooking(int bookingId, {String? reason}) async {
     try {
       final payload = <String, dynamic>{};
       if (reason != null && reason.trim().isNotEmpty) {

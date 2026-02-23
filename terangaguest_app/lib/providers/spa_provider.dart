@@ -8,14 +8,19 @@ class SpaProvider with ChangeNotifier {
   List<SpaService> _services = [];
   List<SpaReservation> _reservations = [];
   bool _isLoading = false;
+  bool _hasMoreReservationPages = true;
   String? _errorMessage;
   String? _selectedCategory;
+  String? _selectedReservationsPeriod;
+  int _currentReservationsPage = 1;
 
   List<SpaService> get services => _services;
   List<SpaReservation> get reservations => _reservations;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get selectedCategory => _selectedCategory;
+  bool get hasMoreReservationPages => _hasMoreReservationPages;
+  String? get selectedReservationsPeriod => _selectedReservationsPeriod;
 
   /// Récupère les services spa
   Future<void> fetchSpaServices({String? category}) async {
@@ -63,7 +68,7 @@ class SpaProvider with ChangeNotifier {
       );
 
       // Rafraîchir les réservations
-      await fetchMySpaReservations();
+      await fetchMySpaReservations(period: _selectedReservationsPeriod);
 
       return reservation;
     } catch (e) {
@@ -72,13 +77,68 @@ class SpaProvider with ChangeNotifier {
   }
 
   /// Récupère les réservations spa de l'utilisateur
-  Future<void> fetchMySpaReservations() async {
+  Future<void> fetchMySpaReservations({
+    String? period,
+    bool loadMore = false,
+  }) async {
+    if (!loadMore) {
+      _isLoading = true;
+      _errorMessage = null;
+      _currentReservationsPage = 1;
+      _selectedReservationsPeriod = period;
+      _hasMoreReservationPages = true;
+      notifyListeners();
+    } else {
+      if (!_hasMoreReservationPages || _isLoading) {
+        return;
+      }
+      _isLoading = true;
+      notifyListeners();
+    }
+
     try {
-      _reservations = await _spaApi.getMySpaReservations();
+      final effectivePeriod = loadMore
+          ? _selectedReservationsPeriod
+          : (period ?? _selectedReservationsPeriod);
+
+      final result = await _spaApi.getMySpaReservations(
+        period: effectivePeriod,
+        page: _currentReservationsPage,
+      );
+
+      final newReservations =
+          result['reservations'] as List<SpaReservation>? ?? [];
+      final meta = result['meta'] as Map<String, dynamic>? ?? {};
+
+      if (loadMore) {
+        _reservations.addAll(newReservations);
+      } else {
+        _reservations = newReservations;
+      }
+
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : _currentReservationsPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
+
+      _hasMoreReservationPages = currentPage < lastPage;
+      _currentReservationsPage = currentPage + 1;
+
+      _isLoading = false;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching spa reservations: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> loadMoreSpaReservations() async {
+    await fetchMySpaReservations(loadMore: true);
   }
 
   /// Annuler une réservation spa
@@ -86,7 +146,7 @@ class SpaProvider with ChangeNotifier {
     try {
       await _spaApi.cancelSpaReservation(reservationId, reason: reason);
       // Rafraîchir la liste
-      await fetchMySpaReservations();
+      await fetchMySpaReservations(period: _selectedReservationsPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -95,7 +155,7 @@ class SpaProvider with ChangeNotifier {
   Future<void> acceptRescheduledSpaReservation(int reservationId) async {
     try {
       await _spaApi.acceptRescheduledSpaReservation(reservationId);
-      await fetchMySpaReservations();
+      await fetchMySpaReservations(period: _selectedReservationsPeriod);
     } catch (e) {
       throw e.toString();
     }
@@ -116,7 +176,7 @@ class SpaProvider with ChangeNotifier {
         time: time,
         reason: reason,
       );
-      await fetchMySpaReservations();
+      await fetchMySpaReservations(period: _selectedReservationsPeriod);
     } catch (e) {
       throw e.toString();
     }

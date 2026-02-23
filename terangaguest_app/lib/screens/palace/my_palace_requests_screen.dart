@@ -17,6 +17,17 @@ class MyPalaceRequestsScreen extends StatefulWidget {
 }
 
 class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
+  String _selectedPeriod = 'all';
+
+  List<Map<String, String>> _periodFilters() {
+    return [
+      {'value': 'all', 'label': 'Toutes les dates'},
+      {'value': 'today', 'label': 'Aujourd\'hui'},
+      {'value': 'week', 'label': 'Cette semaine'},
+      {'value': 'month', 'label': 'Ce mois'},
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -86,7 +97,8 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                   ],
                 ),
               ),
-              Expanded(child: _buildContent()),
+              if (isStaffOrAdmin) _buildFilters(),
+              Expanded(child: _buildContent(isStaffOrAdmin)),
             ],
           ),
         ),
@@ -94,11 +106,71 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _periodFilters().length,
+          itemBuilder: (context, index) {
+            final filter = _periodFilters()[index];
+            final isSelected = _selectedPeriod == filter['value'];
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedPeriod = filter['value']!;
+                  });
+                  context.read<PalaceProvider>().fetchMyPalaceRequests(
+                    period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.accentGold.withValues(alpha: 0.15)
+                        : AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.accentGold.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    filter['label']!,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppTheme.accentGold
+                          : AppTheme.textGray,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isStaffOrAdmin) {
     final l10n = AppLocalizations.of(context);
     return Consumer<PalaceProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading && provider.requests.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
@@ -116,225 +188,256 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
         return RefreshIndicator(
           color: AppTheme.accentGold,
-          onRefresh: () => provider.fetchMyPalaceRequests(),
-          child: Padding(
-            padding: LayoutHelper.horizontalPadding(context),
-            child: GridView.builder(
-              padding: EdgeInsets.symmetric(
-                vertical: LayoutHelper.gridSpacing(context),
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                childAspectRatio: LayoutHelper.listCellAspectRatio(context),
-                crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                mainAxisSpacing: LayoutHelper.gridSpacing(context),
-              ),
-              itemCount: provider.requests.length,
-              itemBuilder: (context, index) {
-                final request = provider.requests[index];
-                final detailsText = (request.details ?? '').trim();
-                final hasDetails = detailsText.isNotEmpty;
-                final hasRoomOrGuest =
-                    (request.roomNumber != null &&
-                        request.roomNumber!.isNotEmpty) ||
-                    (request.guestName != null &&
-                        request.guestName!.isNotEmpty);
-                final roomGuestText = () {
-                  final parts = <String>[];
-                  if (request.roomNumber != null &&
-                      request.roomNumber!.isNotEmpty) {
-                    parts.add('Chambre ${request.roomNumber}');
-                  }
-                  if (request.guestName != null &&
-                      request.guestName!.isNotEmpty) {
-                    if (parts.isNotEmpty) {
-                      parts.add('– ${request.guestName}');
-                    } else {
-                      parts.add(request.guestName!);
-                    }
-                  }
-                  return parts.join(' ');
-                }();
-                return GestureDetector(
-                  onTap: () => _showPalaceRequestDetails(request),
-                  child: Transform(
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateX(-0.05)
-                      ..rotateY(0.02),
-                    alignment: Alignment.center,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+          onRefresh: () => provider.fetchMyPalaceRequests(
+            period: isStaffOrAdmin && _selectedPeriod != 'all'
+                ? _selectedPeriod
+                : null,
+          ),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!isStaffOrAdmin) return false;
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
+                provider.loadMorePalaceRequests();
+              }
+              return false;
+            },
+            child: Padding(
+              padding: LayoutHelper.horizontalPadding(context),
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(
+                  vertical: LayoutHelper.gridSpacing(context),
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                  mainAxisSpacing: LayoutHelper.gridSpacing(context),
+                ),
+                itemCount:
+                    provider.requests.length +
+                    (isStaffOrAdmin && provider.hasMoreRequestPages ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (isStaffOrAdmin &&
+                      index == provider.requests.length &&
+                      provider.hasMoreRequestPages) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppTheme.accentGold,
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 10),
-                          ),
-                          BoxShadow(
-                            color: AppTheme.accentGold.withValues(alpha: 0.1),
-                            blurRadius: 15,
-                            spreadRadius: -2,
-                            offset: const Offset(0, -4),
-                          ),
-                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  request.requestNumber != null &&
-                                          request.requestNumber!.isNotEmpty
-                                      ? request.requestNumber!
-                                      : request.serviceName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.accentGold,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (request.requestNumber != null &&
-                                    request.requestNumber!.isNotEmpty)
-                                  const SizedBox(height: 4),
-                                if (request.requestNumber != null &&
-                                    request.requestNumber!.isNotEmpty)
+                    );
+                  }
+
+                  final request = provider.requests[index];
+                  final detailsText = (request.details ?? '').trim();
+                  final hasDetails = detailsText.isNotEmpty;
+                  final hasRoomOrGuest =
+                      (request.roomNumber != null &&
+                          request.roomNumber!.isNotEmpty) ||
+                      (request.guestName != null &&
+                          request.guestName!.isNotEmpty);
+                  final roomGuestText = () {
+                    final parts = <String>[];
+                    if (request.roomNumber != null &&
+                        request.roomNumber!.isNotEmpty) {
+                      parts.add('Chambre ${request.roomNumber}');
+                    }
+                    if (request.guestName != null &&
+                        request.guestName!.isNotEmpty) {
+                      if (parts.isNotEmpty) {
+                        parts.add('– ${request.guestName}');
+                      } else {
+                        parts.add(request.guestName!);
+                      }
+                    }
+                    return parts.join(' ');
+                  }();
+                  return GestureDetector(
+                    onTap: () => _showPalaceRequestDetails(request),
+                    child: Transform(
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateX(-0.05)
+                        ..rotateY(0.02),
+                      alignment: Alignment.center,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppTheme.primaryBlue,
+                              AppTheme.primaryDark,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppTheme.accentGold,
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 10),
+                            ),
+                            BoxShadow(
+                              color: AppTheme.accentGold.withValues(alpha: 0.1),
+                              blurRadius: 15,
+                              spreadRadius: -2,
+                              offset: const Offset(0, -4),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    request.serviceName,
+                                    request.requestNumber != null &&
+                                            request.requestNumber!.isNotEmpty
+                                        ? request.requestNumber!
+                                        : request.serviceName,
                                     style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppTheme.textGray,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.accentGold,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                const SizedBox(height: 8),
-                                _buildStatusBadge(context, request.status),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.calendar_today,
-                                      size: 14,
-                                      color: AppTheme.textGray,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        DateFormat(
-                                          'dd/MM/yyyy HH:mm',
-                                          'fr_FR',
-                                        ).format(request.createdAt),
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textGray,
-                                        ),
+                                  if (request.requestNumber != null &&
+                                      request.requestNumber!.isNotEmpty)
+                                    const SizedBox(height: 4),
+                                  if (request.requestNumber != null &&
+                                      request.requestNumber!.isNotEmpty)
+                                    Text(
+                                      request.serviceName,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppTheme.textGray,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
-                                ),
-                                if (request.scheduledTime != null) ...[
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 8),
+                                  _buildStatusBadge(context, request.status),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Row(
                                     children: [
                                       const Icon(
-                                        Icons.schedule,
+                                        Icons.calendar_today,
                                         size: 14,
-                                        color: AppTheme.accentGold,
+                                        color: AppTheme.textGray,
                                       ),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
                                           DateFormat(
-                                            'dd/MM HH:mm',
+                                            'dd/MM/yyyy HH:mm',
                                             'fr_FR',
-                                          ).format(request.scheduledTime!),
+                                          ).format(request.createdAt),
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: AppTheme.accentGold,
-                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.textGray,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
+                                  if (request.scheduledTime != null) ...[
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.schedule,
+                                          size: 14,
+                                          color: AppTheme.accentGold,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            DateFormat(
+                                              'dd/MM HH:mm',
+                                              'fr_FR',
+                                            ).format(request.scheduledTime!),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.accentGold,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                  if (hasRoomOrGuest) const SizedBox(height: 6),
+                                  if (hasRoomOrGuest)
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.meeting_room,
+                                          size: 14,
+                                          color: AppTheme.textGray,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            roomGuestText,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.textGray,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  if (hasDetails) const SizedBox(height: 6),
+                                  if (hasDetails)
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.notes,
+                                          size: 14,
+                                          color: AppTheme.textGray,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            detailsText,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.textGray,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  _buildStaffActions(request),
                                 ],
-                                if (hasRoomOrGuest) const SizedBox(height: 6),
-                                if (hasRoomOrGuest)
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.meeting_room,
-                                        size: 14,
-                                        color: AppTheme.textGray,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          roomGuestText,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.textGray,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                if (hasDetails) const SizedBox(height: 6),
-                                if (hasDetails)
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.notes,
-                                        size: 14,
-                                        color: AppTheme.textGray,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          detailsText,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.textGray,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                _buildStaffActions(request),
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );
