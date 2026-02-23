@@ -30,9 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -50,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => home));
     } else {
-      // Afficher l'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -68,47 +65,88 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _resolveHomeScreen(AuthProvider auth) {
-    if (auth.isAdmin || auth.isStaff) {
-      return const AdminHomeScreen();
-    }
+    if (auth.isAdmin || auth.isStaff) return const AdminHomeScreen();
     return const DashboardScreen();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Mobile si largeur < 600 (portrait téléphone)
+    final isMobile = screenWidth < 600;
+
+    // Valeurs adaptées selon le device
+    final double logoWidth = isMobile ? 160.0 : 220.0;
+    final double titleFontSize = isMobile ? 14.0 : 18.0;
+    final double fieldFontSize = isMobile ? 13.0 : 16.0;
+    final double iconSize = isMobile ? 18.0 : 24.0;
+    final double borderRadius = isMobile ? 10.0 : 12.0;
+    final double buttonHeight = isMobile ? 44.0 : 56.0;
+    final double buttonFontSize = isMobile ? 14.0 : 16.0;
+    final double padding = isMobile ? 24.0 : 32.0;
+    final double spacingLogo = isMobile ? 24.0 : 40.0;
+    final double spacingFields = isMobile ? 14.0 : 20.0;
+    final double spacingRemember = isMobile ? 10.0 : 16.0;
+    final double spacingButton = isMobile ? 20.0 : 32.0;
+    final double checkboxFontSize = isMobile ? 12.0 : 14.0;
+
+    // Conteneur centré avec largeur max sur tablette
+    final double maxWidth = isMobile ? double.infinity : 480.0;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Logo
-                    _buildLogo(),
-                    const SizedBox(height: 50),
+              padding: EdgeInsets.all(padding),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        _buildLogo(logoWidth, titleFontSize),
+                        SizedBox(height: spacingLogo),
 
-                    // Titre
-                    _buildTitle(),
-                    const SizedBox(height: 40),
+                        // Email
+                        _buildEmailField(fieldFontSize, iconSize, borderRadius),
+                        SizedBox(height: spacingFields),
 
-                    // Formulaire
-                    _buildEmailField(),
-                    const SizedBox(height: 20),
-                    _buildPasswordField(),
-                    const SizedBox(height: 16),
+                        // Password
+                        _buildPasswordField(
+                          fieldFontSize,
+                          iconSize,
+                          borderRadius,
+                        ),
+                        SizedBox(height: spacingRemember),
 
-                    // Remember me
-                    _buildRememberMe(),
-                    const SizedBox(height: 32),
+                        // Remember me
+                        _buildRememberMe(checkboxFontSize),
+                        SizedBox(height: spacingButton),
 
-                    // Bouton login
-                    _buildLoginButton(),
-                  ],
+                        // Bouton
+                        _buildLoginButton(buttonHeight, buttonFontSize),
+
+                        SizedBox(height: isMobile ? 24.0 : 36.0),
+
+                        // Mention développeur
+                        Text(
+                          'Développé par Universal Technologies Africa',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isMobile ? 11.0 : 13.0,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -118,92 +156,66 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLogo() {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppTheme.accentGold.withValues(alpha: 0.1),
-        border: Border.all(color: AppTheme.accentGold, width: 2),
-      ),
-      child: const Icon(Icons.hotel, size: 60, color: AppTheme.accentGold),
-    );
-  }
-
-  Widget _buildTitle() {
+  Widget _buildLogo(double logoWidth, double titleFontSize) {
     return Column(
       children: [
-        RichText(
-          text: const TextSpan(
-            children: [
-              TextSpan(
-                text: 'TERAN',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              TextSpan(
-                text: 'GUEST',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
+        Image.asset('assets/logo.png', width: logoWidth),
         const SizedBox(height: 12),
         Text(
           AppLocalizations.of(context).login,
-          style: const TextStyle(fontSize: 18, color: AppTheme.textGray),
+          style: TextStyle(fontSize: titleFontSize, color: AppTheme.textGray),
         ),
       ],
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildEmailField(
+    double fontSize,
+    double iconSize,
+    double borderRadius,
+  ) {
     return TextFormField(
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.white, fontSize: fontSize),
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).email,
-        labelStyle: const TextStyle(color: AppTheme.textGray),
-        prefixIcon: const Icon(Icons.email, color: AppTheme.accentGold),
+        labelStyle: TextStyle(color: AppTheme.textGray, fontSize: fontSize),
+        prefixIcon: Icon(
+          Icons.email,
+          color: AppTheme.accentGold,
+          size: iconSize,
+        ),
         filled: true,
         fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: fontSize * 0.9,
+          horizontal: 12,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(
             color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(
             color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: const BorderSide(color: Colors.red),
         ),
       ),
       validator: (value) {
         final l10n = AppLocalizations.of(context);
-        if (value == null || value.isEmpty) {
-          return l10n.emailRequired;
-        }
+        if (value == null || value.isEmpty) return l10n.emailRequired;
         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
           return l10n.emailInvalid;
         }
@@ -212,20 +224,29 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(
+    double fontSize,
+    double iconSize,
+    double borderRadius,
+  ) {
     final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.white, fontSize: fontSize),
       decoration: InputDecoration(
         labelText: l10n.password,
-        labelStyle: const TextStyle(color: AppTheme.textGray),
-        prefixIcon: const Icon(Icons.lock, color: AppTheme.accentGold),
+        labelStyle: TextStyle(color: AppTheme.textGray, fontSize: fontSize),
+        prefixIcon: Icon(
+          Icons.lock,
+          color: AppTheme.accentGold,
+          size: iconSize,
+        ),
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility : Icons.visibility_off,
             color: AppTheme.textGray,
+            size: iconSize,
           ),
           onPressed: () {
             setState(() {
@@ -235,41 +256,41 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         filled: true,
         fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: fontSize * 0.9,
+          horizontal: 12,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(
             color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(
             color: AppTheme.accentGold.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: const BorderSide(color: Colors.red),
         ),
       ),
       validator: (value) {
         final l10n = AppLocalizations.of(context);
-        if (value == null || value.isEmpty) {
-          return l10n.passwordRequired;
-        }
-        if (value.length < 6) {
-          return l10n.passwordTooShort;
-        }
+        if (value == null || value.isEmpty) return l10n.passwordRequired;
+        if (value.length < 6) return l10n.passwordTooShort;
         return null;
       },
     );
   }
 
-  Widget _buildRememberMe() {
+  Widget _buildRememberMe(double fontSize) {
     return Row(
       children: [
         Checkbox(
@@ -281,16 +302,18 @@ class _LoginScreenState extends State<LoginScreen> {
           },
           activeColor: AppTheme.accentGold,
           checkColor: AppTheme.primaryDark,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
         ),
         Text(
           AppLocalizations.of(context).rememberMe,
-          style: TextStyle(color: AppTheme.textGray, fontSize: 14),
+          style: TextStyle(color: AppTheme.textGray, fontSize: fontSize),
         ),
       ],
     );
   }
 
-  Widget _buildLoginButton() {
+  Widget _buildLoginButton(double height, double fontSize) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         return AnimatedButton(
@@ -298,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: authProvider.isLoading ? null : _handleLogin,
           isLoading: authProvider.isLoading,
           width: double.infinity,
-          height: 56,
+          height: height,
           backgroundColor: AppTheme.accentGold,
           textColor: AppTheme.primaryDark,
         );

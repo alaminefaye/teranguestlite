@@ -109,7 +109,9 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
 
         // Ne pas afficher les services réservés à EXPLORATION & MOBILITÉ ni Hotel Infos & Sécurité (médecin, urgence)
         final servicesForList = provider.services
-            .where((s) => !s.isExplorationMobilityOnly && !s.isHotelSecurityOnly)
+            .where(
+              (s) => !s.isExplorationMobilityOnly && !s.isHotelSecurityOnly,
+            )
             .toList();
 
         if (servicesForList.isEmpty) {

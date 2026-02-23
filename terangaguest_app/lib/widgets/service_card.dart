@@ -19,6 +19,11 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final double iconDisplaySize = isMobile ? 46.0 : 70.0;
+    final double fontSize = isMobile ? 13.0 : 21.0;
+
     return Semantics(
       button: true,
       label: title,
@@ -26,15 +31,15 @@ class ServiceCard extends StatelessWidget {
         onTap: onTap,
         child: Transform(
           transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // Perspective 3D
-            ..rotateX(-0.05) // Légère rotation X
-            ..rotateY(0.02), // Légère rotation Y
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(-0.05)
+            ..rotateY(0.02),
           alignment: Alignment.center,
           child: Stack(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
@@ -56,23 +61,46 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // La Column remplit toute la hauteur de la carte (GridView cell)
+                // et répartit l'espace via Expanded : icône en haut (flex 3),
+                // texte en bas (flex 2) — uniformité garantie quelle que soit
+                // la longueur du titre.
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 62, color: AppTheme.accentGold),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.accentGold,
-                          height: 1.1,
+                    Expanded(
+                      flex: 3,
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Icon(
+                            icon,
+                            size: iconDisplaySize,
+                            color: AppTheme.accentGold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                          child: Text(
+                            title,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.accentGold,
+                              height: 1.1,
+                            ),
+                          ),
                         ),
                       ),
                     ),

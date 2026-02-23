@@ -85,10 +85,7 @@ class PalaceApi {
     int perPage = 15,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
       if (period != null && period.isNotEmpty && period != 'all') {
         queryParams['period'] = period;
@@ -104,17 +101,10 @@ class PalaceApi {
       final meta = data['meta'] as Map<String, dynamic>? ?? {};
 
       final requests = requestsJson
-          .map(
-            (json) => PalaceRequest.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
+          .map((json) => PalaceRequest.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      return {
-        'requests': requests,
-        'meta': meta,
-      };
+      return {'requests': requests, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;
@@ -147,17 +137,10 @@ class PalaceApi {
       final meta = data['meta'] as Map<String, dynamic>? ?? {};
 
       final requests = requestsJson
-          .map(
-            (json) => PalaceRequest.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
+          .map((json) => PalaceRequest.fromJson(json as Map<String, dynamic>))
           .toList();
 
-      return {
-        'requests': requests,
-        'meta': meta,
-      };
+      return {'requests': requests, 'meta': meta};
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

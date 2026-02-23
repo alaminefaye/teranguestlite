@@ -101,10 +101,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               children: [
                 Text(
                   _restaurant?.name ?? AppLocalizations.of(context).restaurant,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -178,7 +178,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+        vertical: 20,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

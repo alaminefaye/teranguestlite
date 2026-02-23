@@ -61,10 +61,12 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                         children: [
                           Text(
                             AppLocalizations.of(context).laundry,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 16
+                                  : 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -283,57 +285,66 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                 child: SafeArea(
                   top: false,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).articleCount(provider.getTotalItems()),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppTheme.textGray,
+                      // Total — prend l'espace restant
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).articleCount(provider.getTotalItems()),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppTheme.textGray,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.accentGold,
+                            Text(
+                              '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.accentGold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedOutlineButton(
-                            text: AppLocalizations.of(context).cancel,
-                            onPressed: () {
-                              HapticHelper.lightImpact();
-                              provider.clearSelection();
-                            },
-                            borderColor: AppTheme.accentGold,
-                            textColor: AppTheme.accentGold,
-                            enableHaptic: false,
-                          ),
-                          const SizedBox(width: 12),
-                          AnimatedButton(
-                            text: AppLocalizations.of(context).confirmRequest,
-                            onPressed: () {
-                              HapticHelper.confirm();
-                              context.navigateTo(
-                                const CreateLaundryRequestScreen(),
-                              );
-                            },
-                            backgroundColor: AppTheme.accentGold,
-                            textColor: AppTheme.primaryDark,
-                            enableHaptic: false,
-                          ),
-                        ],
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 80,
+                        height: 44,
+                        child: AnimatedOutlineButton(
+                          text: AppLocalizations.of(context).cancel,
+                          onPressed: () {
+                            HapticHelper.lightImpact();
+                            provider.clearSelection();
+                          },
+                          borderColor: AppTheme.accentGold,
+                          textColor: AppTheme.accentGold,
+                          enableHaptic: false,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 150,
+                        height: 44,
+                        child: AnimatedButton(
+                          text: 'Valider',
+                          onPressed: () {
+                            HapticHelper.confirm();
+                            context.navigateTo(
+                              const CreateLaundryRequestScreen(),
+                            );
+                          },
+                          backgroundColor: AppTheme.accentGold,
+                          textColor: AppTheme.primaryDark,
+                          enableHaptic: false,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),

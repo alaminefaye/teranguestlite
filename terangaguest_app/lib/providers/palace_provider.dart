@@ -92,16 +92,16 @@ class PalaceProvider with ChangeNotifier {
     }
 
     try {
-      final effectivePeriod =
-          loadMore ? _selectedRequestsPeriod : (period ?? _selectedRequestsPeriod);
+      final effectivePeriod = loadMore
+          ? _selectedRequestsPeriod
+          : (period ?? _selectedRequestsPeriod);
 
       final result = await _palaceApi.getMyPalaceRequests(
         period: effectivePeriod,
         page: _currentRequestsPage,
       );
 
-      final newRequests =
-          result['requests'] as List<PalaceRequest>? ?? [];
+      final newRequests = result['requests'] as List<PalaceRequest>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
 
       if (loadMore) {
@@ -113,7 +113,9 @@ class PalaceProvider with ChangeNotifier {
       final currentPage = meta['current_page'] is int
           ? meta['current_page'] as int
           : _currentRequestsPage;
-      final lastPage = meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
 
       _hasMoreRequestPages = currentPage < lastPage;
       _currentRequestsPage = currentPage + 1;
@@ -149,16 +151,16 @@ class PalaceProvider with ChangeNotifier {
     }
 
     try {
-      final effectivePeriod =
-          loadMore ? _selectedEmergencyPeriod : (period ?? _selectedEmergencyPeriod);
+      final effectivePeriod = loadMore
+          ? _selectedEmergencyPeriod
+          : (period ?? _selectedEmergencyPeriod);
 
       final result = await _palaceApi.getEmergencyPalaceRequests(
         period: effectivePeriod,
         page: _currentEmergencyPage,
       );
 
-      final newRequests =
-          result['requests'] as List<PalaceRequest>? ?? [];
+      final newRequests = result['requests'] as List<PalaceRequest>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
 
       if (loadMore) {
@@ -170,7 +172,9 @@ class PalaceProvider with ChangeNotifier {
       final currentPage = meta['current_page'] is int
           ? meta['current_page'] as int
           : _currentEmergencyPage;
-      final lastPage = meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
 
       _hasMoreEmergencyPages = currentPage < lastPage;
       _currentEmergencyPage = currentPage + 1;

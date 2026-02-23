@@ -12,6 +12,7 @@ import '../../widgets/animated_button.dart';
 import '../../utils/haptic_helper.dart';
 import '../../models/guest_session.dart';
 import '../../utils/navigation_helper.dart';
+import 'categories_screen.dart';
 import 'order_confirmation_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -613,10 +614,10 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 Text(
                   l10n.myCart,
-                  style: const TextStyle(
-                    fontSize: 28,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -649,17 +650,27 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildEmptyCart(BuildContext context, AppLocalizations l10n) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
     return EmptyStateWidget(
       icon: Icons.shopping_cart_outlined,
       title: l10n.emptyCart,
       subtitle: l10n.emptyCartHint,
-      iconSize: 100,
+      iconSize: isMobile ? 70 : 100,
       iconColor: AppTheme.textGray.withValues(alpha: 0.5),
-      action: AnimatedButton(
-        text: l10n.browseMenu,
-        onPressed: () => Navigator.pop(context),
-        backgroundColor: AppTheme.accentGold,
-        textColor: AppTheme.primaryDark,
+      action: SizedBox(
+        width: isMobile ? 200 : 260,
+        height: isMobile ? 44 : 56,
+        child: AnimatedButton(
+          text: l10n.browseMenu,
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              NavigationHelper.slideFadeRoute(const CategoriesScreen()),
+              (route) => route.isFirst,
+            );
+          },
+          backgroundColor: AppTheme.accentGold,
+          textColor: AppTheme.primaryDark,
+        ),
       ),
     );
   }
@@ -1002,6 +1013,8 @@ class _CartScreenState extends State<CartScreen> {
             backgroundColor: Colors.red,
             textColor: Colors.white,
             enableHaptic: false,
+            width: 120,
+            height: 40,
           ),
         ],
       ),

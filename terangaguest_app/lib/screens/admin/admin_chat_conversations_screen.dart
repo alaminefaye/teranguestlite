@@ -53,10 +53,12 @@ class _AdminChatConversationsScreenState
       final items =
           result['conversations'] as List<StaffConversationSummary>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
-      final currentPage =
-          meta['current_page'] is int ? meta['current_page'] as int : 1;
-      final lastPage =
-          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : 1;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
       if (!mounted) return;
       setState(() {
         _conversations = items;
@@ -83,10 +85,12 @@ class _AdminChatConversationsScreenState
       final items =
           result['conversations'] as List<StaffConversationSummary>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
-      final currentPage =
-          meta['current_page'] is int ? meta['current_page'] as int : 1;
-      final lastPage =
-          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : 1;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
       if (!mounted) return;
       setState(() {
         _conversations = items;
@@ -117,10 +121,12 @@ class _AdminChatConversationsScreenState
       final items =
           result['conversations'] as List<StaffConversationSummary>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
-      final currentPage =
-          meta['current_page'] is int ? meta['current_page'] as int : _currentPage;
-      final lastPage =
-          meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final currentPage = meta['current_page'] is int
+          ? meta['current_page'] as int
+          : _currentPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
       if (!mounted) return;
       setState(() {
         _conversations.addAll(items);
@@ -254,8 +260,7 @@ class _AdminChatConversationsScreenState
       onRefresh: _refresh,
       child: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels ==
-              scrollInfo.metrics.maxScrollExtent) {
+          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
             _loadMore();
           }
           return false;

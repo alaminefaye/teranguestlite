@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/weather.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
@@ -10,7 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/orders_provider.dart';
 import '../../widgets/service_card.dart';
-import '../../services/weather_service.dart';
+
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
@@ -36,29 +36,12 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final WeatherService _weatherService = WeatherService();
-  Weather? _currentWeather;
-
   @override
   void initState() {
     super.initState();
-    _loadWeather();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrdersProvider>().fetchOrdersForDashboard();
     });
-  }
-
-  Future<void> _loadWeather() async {
-    try {
-      final weather = await _weatherService.getCurrentWeather();
-      if (mounted) {
-        setState(() {
-          _currentWeather = weather;
-        });
-      }
-    } catch (e) {
-      // Silently fail, keep default weather
-    }
   }
 
   void _handleServiceTap(
@@ -170,10 +153,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
     final pad = LayoutHelper.horizontalPaddingValue(context);
-    final logoSize = isVeryCompact ? 88.0 : (isCompact ? 120.0 : 160.0);
-    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
-    final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 24.0 : 30.0);
-    final iconSize = isVeryCompact ? 22.0 : (isCompact ? 26.0 : 32.0);
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobileWidth = w < 600;
+    final logoSize = isVeryCompact
+        ? 88.0
+        : (isCompact ? 100.0 : (isMobileWidth ? 90.0 : 160.0));
+    final subtitleSize = isVeryCompact
+        ? 10.0
+        : (isCompact ? 12.0 : (isMobileWidth ? 11.0 : 14.0));
+    final nameOnBannerSize = isVeryCompact
+        ? 16.0
+        : (isCompact ? 20.0 : (isMobileWidth ? 18.0 : 30.0));
+    final iconSize = isVeryCompact
+        ? 20.0
+        : (isCompact ? 24.0 : (isMobileWidth ? 22.0 : 32.0));
     final logoUrl = () {
       final p = logoPath;
       if (p == null || p.trim().isEmpty) return null;
@@ -421,7 +414,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       IconButton(
                         onPressed: () {},
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(isMobileWidth ? 4.0 : 8.0),
+                        constraints: isMobileWidth
+                            ? const BoxConstraints()
+                            : null,
                         iconSize: iconSize,
                         icon: Icon(
                           Icons.notifications_none,
@@ -458,7 +454,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       HapticHelper.lightImpact();
                       _showLanguageDialog(context);
                     },
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(isMobileWidth ? 4.0 : 8.0),
+                    constraints: isMobileWidth ? const BoxConstraints() : null,
                     iconSize: iconSize,
                     icon: Icon(
                       Icons.language,
@@ -477,7 +474,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       HapticHelper.lightImpact();
                       context.navigateTo(const ProfileScreen());
                     },
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(isMobileWidth ? 4.0 : 8.0),
+                    constraints: isMobileWidth ? const BoxConstraints() : null,
                     iconSize: iconSize,
                     icon: Icon(
                       Icons.person_outline,
@@ -624,8 +622,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final padV = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 12.0);
     final padH = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 20.0);
     final timeSize = isVeryCompact ? 14.0 : (isCompact ? 16.0 : 20.0);
-    final weatherIconSize = isVeryCompact ? 12.0 : (isCompact ? 14.0 : 18.0);
-    final tempSize = isVeryCompact ? 14.0 : (isCompact ? 16.0 : 20.0);
     final dateSize = isVeryCompact ? 9.0 : (isCompact ? 10.0 : 12.0);
     final badgePadH = isVeryCompact ? 6.0 : (isCompact ? 8.0 : 10.0);
     final badgePadV = isVeryCompact ? 3.0 : (isCompact ? 4.0 : 5.0);
@@ -662,7 +658,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           Icon(
                             Icons.receipt_long,
-                            size: weatherIconSize + 2,
+                            size: isVeryCompact
+                                ? 14.0
+                                : (isCompact ? 16.0 : 20.0),
                             color: Colors.orange,
                           ),
                           SizedBox(width: isCompact ? 6 : 8),
@@ -685,13 +683,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 )
               else
                 const SizedBox.shrink(),
-              // Heure, date, météo
+              // Heure et date
               StreamBuilder(
                 stream: Stream.periodic(const Duration(seconds: 1)),
                 builder: (context, snapshot) {
                   final now = DateTime.now();
-                  final temperature =
-                      _currentWeather?.temperature?.celsius?.round() ?? 25;
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -713,43 +709,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           fontWeight: FontWeight.w400,
                           color: AppTheme.textGray,
                           height: 1.0,
-                        ),
-                      ),
-                      SizedBox(width: isCompact ? 10 : 14),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: badgePadH,
-                          vertical: badgePadV,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accentGold.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppTheme.accentGold,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _currentWeather != null
-                                  ? WeatherService.getWeatherIcon(
-                                      _currentWeather?.weatherMain,
-                                    )
-                                  : '☀️',
-                              style: TextStyle(fontSize: weatherIconSize),
-                            ),
-                            SizedBox(width: isCompact ? 6 : 8),
-                            Text(
-                              '$temperature°',
-                              style: TextStyle(
-                                fontSize: tempSize,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.accentGold,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],

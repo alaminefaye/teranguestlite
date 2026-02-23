@@ -134,10 +134,7 @@ class ChatApi {
     try {
       final response = await _api.get(
         '/staff/chat/conversations',
-        queryParameters: {
-          'page': page,
-          'per_page': perPage,
-        },
+        queryParameters: {'page': page, 'per_page': perPage},
       );
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {
@@ -151,15 +148,10 @@ class ChatApi {
       final meta = root['meta'] as Map<String, dynamic>? ?? {};
       final items = conversations
           .map(
-            (e) => StaffConversationSummary.fromJson(
-              e as Map<String, dynamic>,
-            ),
+            (e) => StaffConversationSummary.fromJson(e as Map<String, dynamic>),
           )
           .toList();
-      return {
-        'conversations': items,
-        'meta': meta,
-      };
+      return {'conversations': items, 'meta': meta};
     } on DioException catch (e) {
       final body = e.response?.data;
       final serverMessage = body is Map && body['message'] is String

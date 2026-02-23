@@ -96,10 +96,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               children: [
                 Text(
                   AppLocalizations.of(context).roomService,
-                  style: const TextStyle(
-                    fontSize: 28,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -152,7 +152,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           padding: EdgeInsets.only(
             left: LayoutHelper.horizontalPaddingValue(context),
             right: LayoutHelper.horizontalPaddingValue(context),
-            top: 24,
+            top: 8,
             bottom: 24,
           ),
           child: GridView.builder(

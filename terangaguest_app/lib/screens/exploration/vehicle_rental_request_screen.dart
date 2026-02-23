@@ -16,13 +16,16 @@ class VehicleRentalRequestScreen extends StatefulWidget {
   const VehicleRentalRequestScreen({super.key, required this.vehicle});
 
   @override
-  State<VehicleRentalRequestScreen> createState() => _VehicleRentalRequestScreenState();
+  State<VehicleRentalRequestScreen> createState() =>
+      _VehicleRentalRequestScreenState();
 }
 
-class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen> {
+class _VehicleRentalRequestScreenState
+    extends State<VehicleRentalRequestScreen> {
   final TextEditingController _detailsController = TextEditingController();
   final TextEditingController _rentalDaysController = TextEditingController();
-  final TextEditingController _rentalDurationController = TextEditingController();
+  final TextEditingController _rentalDurationController =
+      TextEditingController();
   DateTime? _requestedFor;
   bool _sending = false;
   int? _serviceId;
@@ -71,13 +74,19 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     if (_serviceId == null) {
-      _showSnack('Service Location de véhicule non configuré. Contactez l\'établissement.', isError: true);
+      _showSnack(
+        'Service Location de véhicule non configuré. Contactez l\'établissement.',
+        isError: true,
+      );
       return;
     }
     final days = int.tryParse(_rentalDaysController.text.trim());
     final hours = int.tryParse(_rentalDurationController.text.trim());
     if ((days == null || days < 1) && (hours == null || hours < 1)) {
-      _showSnack('Indiquez le nombre de jours ou la durée en heures.', isError: true);
+      _showSnack(
+        'Indiquez le nombre de jours ou la durée en heures.',
+        isError: true,
+      );
       return;
     }
 
@@ -93,11 +102,13 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
       if (hours != null && hours > 0) meta['rental_duration_hours'] = hours;
 
       await context.read<PalaceProvider>().createPalaceRequest(
-            serviceId: _serviceId!,
-            details: _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim(),
-            scheduledTime: _requestedFor,
-            metadata: meta,
-          );
+        serviceId: _serviceId!,
+        details: _detailsController.text.trim().isEmpty
+            ? null
+            : _detailsController.text.trim(),
+        scheduledTime: _requestedFor,
+        metadata: meta,
+      );
       if (mounted) {
         _showSnack(l10n.requestSentMessage);
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -132,7 +143,10 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -151,7 +165,10 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                           ),
                           Text(
                             l10n.requestVehicleRental,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -161,14 +178,19 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _field(
                         label: l10n.rentalDate,
                         value: _requestedFor != null
-                            ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!)
+                            ? DateFormat(
+                                'dd/MM/yyyy HH:mm',
+                              ).format(_requestedFor!)
                             : null,
                         onTap: () async {
                           final ctx = context;
@@ -176,8 +198,9 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                             context: ctx,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now()
-                                .add(const Duration(days: 365)),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
                           );
                           if (date == null || !ctx.mounted) return;
                           final time = await showTimePicker(
@@ -204,10 +227,21 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                         decoration: InputDecoration(
                           labelText: l10n.rentalDays,
                           hintText: 'Ex: 2',
-                          labelStyle: const TextStyle(color: AppTheme.accentGold),
-                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.accentGold,
+                          ),
+                          hintStyle: TextStyle(
+                            color: AppTheme.textGray.withValues(alpha: 0.7),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppTheme.accentGold.withValues(alpha: 0.4),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -218,10 +252,21 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                         decoration: InputDecoration(
                           labelText: l10n.rentalDuration,
                           hintText: 'Ex: 5 (demi-journée)',
-                          labelStyle: const TextStyle(color: AppTheme.accentGold),
-                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.accentGold,
+                          ),
+                          hintStyle: TextStyle(
+                            color: AppTheme.textGray.withValues(alpha: 0.7),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppTheme.accentGold.withValues(alpha: 0.4),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -232,20 +277,41 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
                         decoration: InputDecoration(
                           labelText: l10n.description,
                           hintText: l10n.describeRequest,
-                          labelStyle: const TextStyle(color: AppTheme.accentGold),
-                          hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+                          labelStyle: const TextStyle(
+                            color: AppTheme.accentGold,
+                          ),
+                          hintStyle: TextStyle(
+                            color: AppTheme.textGray.withValues(alpha: 0.7),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppTheme.accentGold.withValues(alpha: 0.4),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
                       FilledButton.icon(
-                        onPressed: _sending ? null : () { HapticHelper.lightImpact(); _submit(); },
+                        onPressed: _sending
+                            ? null
+                            : () {
+                                HapticHelper.lightImpact();
+                                _submit();
+                              },
                         icon: _sending
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.black54)),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.black54,
+                                  ),
+                                ),
                               )
                             : const Icon(Icons.send_outlined, size: 20),
                         label: Text(_sending ? '...' : l10n.sendRequest),
@@ -266,7 +332,11 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
     );
   }
 
-  Widget _field({required String label, String? value, required VoidCallback onTap}) {
+  Widget _field({
+    required String label,
+    String? value,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -275,7 +345,12 @@ class _VehicleRentalRequestScreenState extends State<VehicleRentalRequestScreen>
           labelText: label,
           labelStyle: const TextStyle(color: AppTheme.accentGold),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4))),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: AppTheme.accentGold.withValues(alpha: 0.4),
+            ),
+          ),
         ),
         child: Text(
           value ?? '—',

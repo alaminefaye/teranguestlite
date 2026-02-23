@@ -101,8 +101,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       ),
     );
 
-    // Retourner à l'écran précédent
-    Navigator.pop(context);
+    // Retourner à l'écran précédent après que le snackbar disparaît
+    Future.delayed(const Duration(seconds: 2), () {
+      if (context.mounted) Navigator.pop(context);
+    });
   }
 
   @override
@@ -284,8 +286,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           // Nom
           Text(
             widget.item.name,
-            style: const TextStyle(
-              fontSize: 28,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -321,19 +323,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 const SizedBox(width: 12),
               ],
               if (widget.item.preparationTime > 0) ...[
-                const Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: AppTheme.textGray,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${widget.item.preparationTime} min',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textGray,
-                  ),
-                ),
+                _PrepTimeBadge(minutes: widget.item.preparationTime),
               ],
             ],
           ),
@@ -342,8 +332,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           // Prix
           Text(
             widget.item.formattedPrice,
-            style: const TextStyle(
-              fontSize: 32,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width < 600 ? 22 : 32,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
             ),
@@ -354,8 +344,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           if (widget.item.description != null) ...[
             Text(
               AppLocalizations.of(context).description,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -363,8 +353,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             const SizedBox(height: 12),
             Text(
               widget.item.description!,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width < 600 ? 13 : 15,
                 color: AppTheme.textGray,
                 height: 1.6,
               ),
@@ -373,10 +363,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           ],
 
           // Quantité
-          const Text(
+          Text(
             'Quantité',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -392,8 +382,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           // Instructions spéciales
           Text(
             AppLocalizations.of(context).specialInstructions,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -476,6 +466,101 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         textColor: AppTheme.primaryDark,
         enableHaptic: false, // _addToCart already calls HapticHelper.addToCart
       ),
+    );
+  }
+}
+
+/// Badge animé pulsant pour le temps de préparation
+class _PrepTimeBadge extends StatefulWidget {
+  final int minutes;
+  const _PrepTimeBadge({required this.minutes});
+
+  @override
+  State<_PrepTimeBadge> createState() => _PrepTimeBadgeState();
+}
+
+class _PrepTimeBadgeState extends State<_PrepTimeBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  late Animation<double> _glow;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _scale = Tween<double>(
+      begin: 0.96,
+      end: 1.04,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _glow = Tween<double>(
+      begin: 0.3,
+      end: 0.9,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Transform.scale(
+          scale: _scale.value,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 10 : 14,
+              vertical: isMobile ? 5 : 7,
+            ),
+            decoration: BoxDecoration(
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: AppTheme.accentGold.withValues(alpha: _glow.value),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.accentGold.withValues(
+                    alpha: _glow.value * 0.4,
+                  ),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: isMobile ? 15 : 18,
+                  color: AppTheme.accentGold,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${widget.minutes} min',
+                  style: TextStyle(
+                    fontSize: isMobile ? 13 : 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentGold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
@@ -14,10 +15,57 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+    with TickerProviderStateMixin {
+  late AnimationController _logoController;
+  late AnimationController _contentController;
+  late AnimationController _cardController;
+
+  late Animation<double> _logoFade;
+  late Animation<double> _logoScale;
+  late Animation<double> _contentFade;
+  late Animation<double> _cardFade;
+
+  int _currentServiceIndex = 0;
+  Timer? _serviceTimer;
+
+  final List<_ServiceItem> _services = [
+    _ServiceItem(
+      icon: Icons.hotel,
+      label: 'Chambre & Hébergement',
+      subtitle: 'Votre séjour, notre priorité',
+      color: const Color(0xFFD4AF37),
+    ),
+    _ServiceItem(
+      icon: Icons.restaurant,
+      label: 'Restaurant & Gastronomie',
+      subtitle: 'Saveurs et excellence culinaire',
+      color: const Color(0xFFE8C96A),
+    ),
+    _ServiceItem(
+      icon: Icons.room_service,
+      label: 'Room Service & Commandes',
+      subtitle: 'Livraison directement dans votre chambre',
+      color: const Color(0xFFD4AF37),
+    ),
+    _ServiceItem(
+      icon: Icons.spa,
+      label: 'Spa & Bien-Être',
+      subtitle: 'Relaxation et soin du corps',
+      color: const Color(0xFFE8C96A),
+    ),
+    _ServiceItem(
+      icon: Icons.explore,
+      label: 'Excursions & Découvertes',
+      subtitle: 'Explorez la région à votre rythme',
+      color: const Color(0xFFD4AF37),
+    ),
+    _ServiceItem(
+      icon: Icons.local_laundry_service,
+      label: 'Blanchisserie',
+      subtitle: 'Vêtements propres en toute simplicité',
+      color: const Color(0xFFE8C96A),
+    ),
+  ];
 
   @override
   void initState() {
@@ -27,48 +75,77 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _setupAnimations() {
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    // Logo animation
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: _logoController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       ),
     );
-
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _logoScale = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOutBack),
+        parent: _logoController,
+        curve: const Interval(0.1, 0.8, curve: Curves.easeOutBack),
       ),
     );
 
-    _animationController.forward();
+    // Content animation (bienvenue + cards)
+    _contentController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _contentFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeIn),
+    );
+
+    // Card transition animation
+    _cardController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _cardFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _cardController, curve: Curves.easeInOut),
+    );
+
+    _logoController.forward().then((_) {
+      _contentController.forward();
+      _cardController.forward();
+      _startServiceCycle();
+    });
+  }
+
+  void _startServiceCycle() {
+    _serviceTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!mounted) return;
+      _cardController.reverse().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _currentServiceIndex = (_currentServiceIndex + 1) % _services.length;
+        });
+        _cardController.forward();
+      });
+    });
   }
 
   Future<void> _checkAuth() async {
-    // Attendre la fin de l'animation
-    await Future.delayed(const Duration(milliseconds: 2000));
-
+    await Future.delayed(const Duration(milliseconds: 5000));
     if (!mounted) return;
 
-    // Vérifier l'authentification
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await authProvider.initAuth();
 
     if (!mounted) return;
 
-    // Naviguer selon le statut
     if (authProvider.isAuthenticated) {
       final home = _resolveHomeScreen(authProvider);
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => home));
     } else {
-      // Pas connecté → Login
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
@@ -76,134 +153,256 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Widget _resolveHomeScreen(AuthProvider auth) {
-    if (auth.isAdmin || auth.isStaff) {
-      return const AdminHomeScreen();
-    }
+    if (auth.isAdmin || auth.isStaff) return const AdminHomeScreen();
     return const DashboardScreen();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _serviceTimer?.cancel();
+    _logoController.dispose();
+    _contentController.dispose();
+    _cardController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final service = _services[_currentServiceIndex];
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo animé
-              AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: ScaleTransition(
-                      scale: _scaleAnimation,
-                      child: Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppTheme.accentGold.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: AppTheme.accentGold,
-                            width: 2,
-                          ),
+        child: Stack(
+          children: [
+            // Cercles décoratifs en arrière-plan
+            Positioned(
+              top: -80,
+              right: -80,
+              child: _GlowCircle(size: 260, opacity: 0.06),
+            ),
+            Positioned(
+              bottom: -60,
+              left: -60,
+              child: _GlowCircle(size: 220, opacity: 0.05),
+            ),
+            Positioned(
+              top: 180,
+              left: -40,
+              child: _GlowCircle(size: 120, opacity: 0.04),
+            ),
+
+            // Contenu principal
+            SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+
+                  // Logo
+                  AnimatedBuilder(
+                    animation: _logoController,
+                    builder: (context, _) {
+                      return FadeTransition(
+                        opacity: _logoFade,
+                        child: ScaleTransition(
+                          scale: _logoScale,
+                          child: Image.asset('assets/logo.png', width: 230),
                         ),
-                        child: const Icon(
-                          Icons.hotel,
-                          size: 70,
-                          color: AppTheme.accentGold,
-                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Bienvenue
+                  FadeTransition(
+                    opacity: _contentFade,
+                    child: const Text(
+                      'Bienvenue',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: AppTheme.textGray,
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w300,
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              const SizedBox(height: 40),
+                  const Spacer(flex: 1),
 
-              // Nom de l'app animé
-              AnimatedBuilder(
-                animation: _fadeAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: Column(
-                      children: [
-                        // TERANGUEST
-                        RichText(
-                          text: const TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'TERAN',
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                              TextSpan(
-                                text: 'GUEST',
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.accentGold,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Sous-titre
-                        const Text(
-                          'Bienvenue',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: AppTheme.textGray,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
+                  // Carte service animée
+                  FadeTransition(
+                    opacity: _contentFade,
+                    child: AnimatedBuilder(
+                      animation: _cardFade,
+                      builder: (context, _) {
+                        return Opacity(
+                          opacity: _cardFade.value,
+                          child: _ServiceCard(service: service),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              const SizedBox(height: 60),
+                  const SizedBox(height: 32),
 
-              // Loading indicator
-              AnimatedBuilder(
-                animation: _fadeAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: const SizedBox(
-                      width: 30,
-                      height: 30,
+                  // Indicateurs de points
+                  FadeTransition(
+                    opacity: _contentFade,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_services.length, (i) {
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: i == _currentServiceIndex ? 20 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: i == _currentServiceIndex
+                                ? AppTheme.accentGold
+                                : AppTheme.accentGold.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Loading indicator
+                  FadeTransition(
+                    opacity: _contentFade,
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.accentGold,
+                          AppTheme.accentGold.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
-                  );
-                },
+                  ),
+
+                  const Spacer(flex: 1),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+// --- Carte service ---
+class _ServiceCard extends StatelessWidget {
+  final _ServiceItem service;
+  const _ServiceCard({required this.service});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 36),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withValues(alpha: 0.04),
+        border: Border.all(
+          color: AppTheme.accentGold.withValues(alpha: 0.25),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.accentGold.withValues(alpha: 0.08),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.12),
+              border: Border.all(
+                color: AppTheme.accentGold.withValues(alpha: 0.4),
+                width: 1,
+              ),
+            ),
+            child: Icon(service.icon, color: service.color, size: 26),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  service.label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  service.subtitle,
+                  style: TextStyle(
+                    color: AppTheme.textGray.withValues(alpha: 0.8),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios,
+            color: AppTheme.accentGold.withValues(alpha: 0.5),
+            size: 14,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- Cercle décoratif ---
+class _GlowCircle extends StatelessWidget {
+  final double size;
+  final double opacity;
+  const _GlowCircle({required this.size, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppTheme.accentGold.withValues(alpha: opacity),
+      ),
+    );
+  }
+}
+
+// --- Modèle de service ---
+class _ServiceItem {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+
+  const _ServiceItem({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+  });
 }

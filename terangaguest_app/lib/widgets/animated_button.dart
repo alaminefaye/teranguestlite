@@ -11,6 +11,7 @@ class AnimatedButton extends StatefulWidget {
   final Color? textColor;
   final double? width;
   final double height;
+  final double fontSize;
   final bool isLoading;
   final bool enableHaptic;
 
@@ -23,6 +24,7 @@ class AnimatedButton extends StatefulWidget {
     this.textColor,
     this.width,
     this.height = 56,
+    this.fontSize = 16,
     this.isLoading = false,
     this.enableHaptic = true,
   });
@@ -45,9 +47,10 @@ class _AnimatedButtonState extends State<AnimatedButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -95,83 +98,81 @@ class _AnimatedButtonState extends State<AnimatedButton>
         onTapUp: _handleTapUp,
         onTapCancel: _handleTapCancel,
         onTap: widget.onPressed != null && !widget.isLoading
-          ? () {
-              if (widget.enableHaptic) {
-                HapticHelper.lightImpact();
+            ? () {
+                if (widget.enableHaptic) {
+                  HapticHelper.lightImpact();
+                }
+                widget.onPressed!();
               }
-              widget.onPressed!();
-            }
-          : null,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              width: widget.width,
-              height: widget.height,
-              decoration: BoxDecoration(
-                gradient: isDisabled
-                    ? LinearGradient(
-                        colors: [
-                          AppTheme.textGray.withValues(alpha: 0.3),
-                          AppTheme.textGray.withValues(alpha: 0.2),
-                        ],
-                      )
-                    : LinearGradient(
-                        colors: [
-                          backgroundColor,
-                          backgroundColor.withValues(alpha: 0.8),
-                        ],
-                      ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: isDisabled
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: backgroundColor.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-              ),
-              child: Center(
-                child: widget.isLoading
-                    ? SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(textColor),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.icon != null) ...[
-                            Icon(
-                              widget.icon,
-                              color: textColor,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
+            : null,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Container(
+                width: widget.width,
+                height: widget.height,
+                decoration: BoxDecoration(
+                  gradient: isDisabled
+                      ? LinearGradient(
+                          colors: [
+                            AppTheme.textGray.withValues(alpha: 0.3),
+                            AppTheme.textGray.withValues(alpha: 0.2),
                           ],
-                          Text(
-                            widget.text,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
+                        )
+                      : LinearGradient(
+                          colors: [
+                            backgroundColor,
+                            backgroundColor.withValues(alpha: 0.8),
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: isDisabled
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: backgroundColor.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
                         ],
-                      ),
+                ),
+                child: Center(
+                  child: widget.isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              textColor,
+                            ),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.icon != null) ...[
+                              Icon(widget.icon, color: textColor, size: 20),
+                              const SizedBox(width: 12),
+                            ],
+                            Text(
+                              widget.text,
+                              style: TextStyle(
+                                fontSize: widget.fontSize,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -186,6 +187,7 @@ class AnimatedOutlineButton extends StatefulWidget {
   final Color? textColor;
   final double? width;
   final double height;
+  final double fontSize;
   final bool enableHaptic;
 
   const AnimatedOutlineButton({
@@ -197,6 +199,7 @@ class AnimatedOutlineButton extends StatefulWidget {
     this.textColor,
     this.width,
     this.height = 56,
+    this.fontSize = 16,
     this.enableHaptic = true,
   });
 
@@ -218,9 +221,10 @@ class _AnimatedOutlineButtonState extends State<AnimatedOutlineButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -310,7 +314,7 @@ class _AnimatedOutlineButtonState extends State<AnimatedOutlineButton>
                       Text(
                         widget.text,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: widget.fontSize,
                           fontWeight: FontWeight.bold,
                           color: isDisabled
                               ? AppTheme.textGray.withValues(alpha: 0.3)

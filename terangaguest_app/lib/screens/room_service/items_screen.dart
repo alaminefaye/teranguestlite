@@ -148,10 +148,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
               children: [
                 Text(
                   widget.category.name,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 if (widget.category.description != null) ...[
@@ -260,7 +260,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
           padding: EdgeInsets.only(
             left: LayoutHelper.horizontalPaddingValue(context),
             right: LayoutHelper.horizontalPaddingValue(context),
-            top: 24,
+            top: 8,
             bottom: 24,
           ),
           child: GridView.builder(
