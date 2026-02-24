@@ -124,16 +124,16 @@ class LaundryProvider with ChangeNotifier {
     }
 
     try {
-      final effectivePeriod =
-          loadMore ? _selectedRequestsPeriod : (period ?? _selectedRequestsPeriod);
+      final effectivePeriod = loadMore
+          ? _selectedRequestsPeriod
+          : (period ?? _selectedRequestsPeriod);
 
       final result = await _laundryApi.getMyLaundryRequests(
         period: effectivePeriod,
         page: _currentRequestsPage,
       );
 
-      final newRequests =
-          result['requests'] as List<LaundryRequest>? ?? [];
+      final newRequests = result['requests'] as List<LaundryRequest>? ?? [];
       final meta = result['meta'] as Map<String, dynamic>? ?? {};
 
       if (loadMore) {
@@ -145,7 +145,9 @@ class LaundryProvider with ChangeNotifier {
       final currentPage = meta['current_page'] is int
           ? meta['current_page'] as int
           : _currentRequestsPage;
-      final lastPage = meta['last_page'] is int ? meta['last_page'] as int : currentPage;
+      final lastPage = meta['last_page'] is int
+          ? meta['last_page'] as int
+          : currentPage;
 
       _hasMoreRequestPages = currentPage < lastPage;
       _currentRequestsPage = currentPage + 1;
@@ -190,6 +192,17 @@ class LaundryProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Vide les données utilisateur (appelé lors d'un changement de session).
+  void clearUserData() {
+    _requests = [];
+    _selectedItems.clear();
+    _currentRequestsPage = 1;
+    _hasMoreRequestPages = true;
+    _selectedRequestsPeriod = null;
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Rafraîchir

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import '../models/palace.dart';
 import '../services/palace_api.dart';
 
@@ -22,6 +23,13 @@ class PalaceProvider with ChangeNotifier {
   List<PalaceRequest> get emergencyRequests => _emergencyRequests;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Notifie après le build en cours pour éviter "setState/markNeedsBuild called during build".
+  void _safeNotifyListeners() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (hasListeners) notifyListeners();
+    });
+  }
   bool get hasMoreRequestPages => _hasMoreRequestPages;
   bool get hasMoreEmergencyPages => _hasMoreEmergencyPages;
   String? get selectedRequestsPeriod => _selectedRequestsPeriod;
@@ -141,13 +149,13 @@ class PalaceProvider with ChangeNotifier {
       _currentEmergencyPage = 1;
       _selectedEmergencyPeriod = period;
       _hasMoreEmergencyPages = true;
-      notifyListeners();
+      _safeNotifyListeners();
     } else {
       if (!_hasMoreEmergencyPages || _isLoading) {
         return;
       }
       _isLoading = true;
-      notifyListeners();
+      _safeNotifyListeners();
     }
 
     try {
@@ -224,6 +232,20 @@ class PalaceProvider with ChangeNotifier {
     } catch (e) {
       throw e.toString();
     }
+  }
+
+  /// Vide les données utilisateur (appelé lors d'un changement de session).
+  void clearUserData() {
+    _requests = [];
+    _emergencyRequests = [];
+    _currentRequestsPage = 1;
+    _currentEmergencyPage = 1;
+    _hasMoreRequestPages = true;
+    _hasMoreEmergencyPages = true;
+    _selectedRequestsPeriod = null;
+    _selectedEmergencyPeriod = null;
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Rafraîchir

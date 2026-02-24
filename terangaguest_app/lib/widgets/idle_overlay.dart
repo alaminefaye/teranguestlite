@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../providers/tablet_session_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
+import '../providers/orders_provider.dart';
+import '../providers/restaurants_provider.dart';
+import '../providers/spa_provider.dart';
+import '../providers/excursions_provider.dart';
+import '../providers/laundry_provider.dart';
+import '../providers/palace_provider.dart';
 
 /// Overlay de veille pour tablette en chambre.
 ///
@@ -17,10 +24,15 @@ class IdleOverlay extends StatefulWidget {
   /// Délai avant affichage de l'overlay (1 min pour tests, 1h en prod)
   final Duration idleDuration;
 
+  /// Appelé quand la session est expirée, après nettoyage des données.
+  /// Utiliser pour naviguer vers un écran neutre (ex. DashboardScreen).
+  final VoidCallback? onSessionExpired;
+
   const IdleOverlay({
     super.key,
     required this.child,
     this.idleDuration = const Duration(minutes: 1),
+    this.onSessionExpired,
   });
 
   @override
@@ -89,6 +101,14 @@ class _IdleOverlayState extends State<IdleOverlay>
     if (_isVerifying) return;
 
     final tabletSession = context.read<TabletSessionProvider>();
+    final cartProvider = context.read<CartProvider>();
+    final ordersProvider = context.read<OrdersProvider>();
+    final favoritesProvider = context.read<FavoritesProvider>();
+    final restaurantsProvider = context.read<RestaurantsProvider>();
+    final spaProvider = context.read<SpaProvider>();
+    final excursionsProvider = context.read<ExcursionsProvider>();
+    final laundryProvider = context.read<LaundryProvider>();
+    final palaceProvider = context.read<PalaceProvider>();
 
     // Si pas de session sauvegardée → fermer directement
     if (!tabletSession.hasSession) {
@@ -104,12 +124,22 @@ class _IdleOverlayState extends State<IdleOverlay>
       // Session valide → fermer l'overlay
       if (mounted) _dismissOverlay();
     } catch (_) {
-      // Session expirée (checkout) → nettoyer tout
-      if (mounted) {
-        await tabletSession.clearSession();
-        context.read<CartProvider>().clear();
-        _dismissOverlay();
-      }
+      // Session expirée (checkout) → nettoyer toutes les données utilisateur
+      await tabletSession.clearSession();
+
+      // Vider toutes les données utilisateur
+      cartProvider.clear();
+      ordersProvider.clearOrdersAndSetLoading();
+      await favoritesProvider.clearAll();
+      restaurantsProvider.clearUserData();
+      spaProvider.clearUserData();
+      excursionsProvider.clearUserData();
+      laundryProvider.clearUserData();
+      palaceProvider.clearUserData();
+
+      if (mounted) _dismissOverlay();
+      // Notifier le parent pour naviguer vers un écran neutre
+      widget.onSessionExpired?.call();
     } finally {
       if (mounted) setState(() => _isVerifying = false);
     }
@@ -227,9 +257,22 @@ class _IdleScreenState extends State<_IdleScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isLandscape = size.width > size.height;
-    final timeSize = isLandscape ? 96.0 : 72.0;
-    final logoWidth = isLandscape ? 200.0 : 160.0;
+    final w = size.width;
+    final isLandscape = w > size.height;
+    // Taille de l'heure adaptée au mobile pour éviter le débordement sur Android
+    final double timeSize;
+    final double timeLetterSpacing;
+    if (w < 380) {
+      timeSize = 42.0;
+      timeLetterSpacing = 2.0;
+    } else if (w < 450 || !isLandscape) {
+      timeSize = 52.0;
+      timeLetterSpacing = 4.0;
+    } else {
+      timeSize = 72.0;
+      timeLetterSpacing = 8.0;
+    }
+    final logoWidth = isLandscape ? 200.0 : (w < 380 ? 140.0 : 160.0);
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -267,36 +310,43 @@ class _IdleScreenState extends State<_IdleScreen>
                       // Logo hôtel
                       Image.asset('assets/logo.png', width: logoWidth),
 
-                      const SizedBox(height: 40),
+                      SizedBox(height: w < 380 ? 24 : 40),
 
-                      // Heure
-                      Text(
-                        _formatTime(widget.now),
-                        style: TextStyle(
-                          fontSize: timeSize,
-                          fontWeight: FontWeight.w200,
-                          color: Colors.white,
-                          letterSpacing: 12,
-                          height: 1,
-                          decoration: TextDecoration.none,
+                      // Heure (FittedBox évite tout débordement)
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            _formatTime(widget.now),
+                            style: TextStyle(
+                              fontSize: timeSize,
+                              fontWeight: FontWeight.w200,
+                              color: Colors.white,
+                              letterSpacing: timeLetterSpacing,
+                              height: 1,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      SizedBox(height: w < 380 ? 8 : 12),
 
                       // Date
                       Text(
                         _formatDate(widget.now),
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: w < 380 ? 13 : 16,
                           color: Colors.white,
                           letterSpacing: 1.5,
                           fontWeight: FontWeight.w300,
                           decoration: TextDecoration.none,
                         ),
+                        textAlign: TextAlign.center,
                       ),
 
-                      const SizedBox(height: 52),
+                      SizedBox(height: w < 380 ? 32 : 52),
 
                       // "Appuyez pour continuer" ou loading
                       if (widget.isVerifying)
@@ -313,7 +363,7 @@ class _IdleScreenState extends State<_IdleScreen>
                       else
                         AnimatedBuilder(
                           animation: _pulseAnimation,
-                          builder: (_, __) => Opacity(
+                          builder: (context, child) => Opacity(
                             opacity: _pulseAnimation.value,
                             child: Container(
                               padding: const EdgeInsets.symmetric(

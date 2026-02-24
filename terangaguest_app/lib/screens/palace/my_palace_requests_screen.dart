@@ -41,6 +41,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
 
     return Scaffold(
       body: Container(
@@ -55,7 +59,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -65,7 +69,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isMobile ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,10 +79,10 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                             isStaffOrAdmin
                                 ? 'Services Palace / Conciergerie'
                                 : l10n.myRequests,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -210,7 +214,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  childAspectRatio: _palaceRequestCardAspectRatio(context),
                   crossAxisSpacing: LayoutHelper.gridSpacing(context),
                   mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
@@ -231,6 +235,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                   }
 
                   final request = provider.requests[index];
+                  final w = MediaQuery.sizeOf(context).width;
                   final detailsText = (request.details ?? '').trim();
                   final hasDetails = detailsText.isNotEmpty;
                   final hasRoomOrGuest =
@@ -292,11 +297,12 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                             ),
                           ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                        clipBehavior: Clip.antiAlias,
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.all(w < 600 ? 12.0 : 16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,6 +338,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                   _buildStatusBadge(context, request.status),
                                 ],
                               ),
+                              const SizedBox(height: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -443,6 +450,14 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         );
       },
     );
+  }
+
+  /// Ratio plus bas sur mobile pour éviter "Bottom Overflowed" (cartes plus hautes).
+  double _palaceRequestCardAspectRatio(BuildContext context) {
+    final cols = LayoutHelper.gridCrossAxisCount(context);
+    final ratio = LayoutHelper.listCellAspectRatio(context);
+    if (cols == 2 && LayoutHelper.width(context) < 600) return 0.68;
+    return ratio;
   }
 
   Future<void> _showPalaceRequestDetails(PalaceRequest request) async {
@@ -737,7 +752,7 @@ class PalaceRequestDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0),
                 child: Row(
                   children: [
                     IconButton(
@@ -747,7 +762,7 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -755,10 +770,10 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                         children: [
                           Text(
                             request.requestNumber ?? request.serviceName,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: MediaQuery.sizeOf(context).width < 600 ? 20.0 : 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -913,6 +928,22 @@ class _PalaceStatusBadge extends StatelessWidget {
 
   const _PalaceStatusBadge({required this.status});
 
+  String _label(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    switch (status) {
+      case 'pending':
+        return l10n.statusPending;
+      case 'in_progress':
+        return l10n.statusInProgress;
+      case 'completed':
+        return l10n.statusCompleted;
+      case 'cancelled':
+        return l10n.statusCancelled;
+      default:
+        return status;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Color bg;
@@ -955,7 +986,7 @@ class _PalaceStatusBadge extends StatelessWidget {
         border: Border.all(color: border, width: 1),
       ),
       child: Text(
-        status,
+        _label(context),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,

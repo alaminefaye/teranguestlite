@@ -182,6 +182,16 @@ class SpaProvider with ChangeNotifier {
     }
   }
 
+  /// Vide les données utilisateur (appelé lors d'un changement de session).
+  void clearUserData() {
+    _reservations = [];
+    _currentReservationsPage = 1;
+    _hasMoreReservationPages = true;
+    _selectedReservationsPeriod = null;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshSpaServices() async {
     await fetchSpaServices(category: _selectedCategory);

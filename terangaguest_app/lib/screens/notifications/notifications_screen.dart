@@ -320,7 +320,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Text(
                         l10n.notifications,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -590,7 +590,7 @@ class _NotificationTile extends StatelessWidget {
                     Text(
                       item.title,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -599,7 +599,7 @@ class _NotificationTile extends StatelessWidget {
                     Text(
                       item.detail,
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         color: AppTheme.textGray,
                         height: 1.4,
                       ),

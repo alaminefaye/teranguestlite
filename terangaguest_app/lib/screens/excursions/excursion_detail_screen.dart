@@ -83,8 +83,13 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
   }
 
   Widget _buildHeader() {
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
+
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
           IconButton(
@@ -94,12 +99,12 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
               Navigator.pop(context);
             },
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Text(
               _excursion?.name ?? 'Excursion',
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                fontSize: titleSize,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.accentGold,
               ),

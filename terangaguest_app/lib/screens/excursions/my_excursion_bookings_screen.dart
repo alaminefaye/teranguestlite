@@ -43,6 +43,10 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -56,7 +60,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -66,7 +70,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isMobile ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,10 +80,10 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                             isStaffOrAdmin
                                 ? 'Réservations Excursions & Activités'
                                 : l10n.myExcursionsShort,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -703,7 +707,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0),
                 child: Row(
                   children: [
                     IconButton(
@@ -713,7 +717,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,10 +725,10 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                         children: [
                           Text(
                             booking.excursionName,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: MediaQuery.sizeOf(context).width < 600 ? 20.0 : 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

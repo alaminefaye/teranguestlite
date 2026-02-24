@@ -28,36 +28,57 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
+    final createdAtRaw = _parseString(json['created_at']);
+    final createdAt = createdAtRaw.isNotEmpty
+        ? (DateTime.tryParse(createdAtRaw) ?? DateTime.now())
+        : DateTime.now();
+    final deliveryRaw = json['estimated_delivery'] ?? json['delivery_time'];
+    final deliveryTime = deliveryRaw != null
+        ? DateTime.tryParse(_parseString(deliveryRaw))
+        : null;
+
     return Order(
       id: _parseInt(json['id']),
       orderNumber: _parseString(json['order_number']),
-      status: _parseString(json['status']),
+      status: _parseString(json['status']).isEmpty ? 'pending' : _parseString(json['status']),
       total: _parseDouble(json['total_amount'] ?? json['total']),
       instructions: _parseStringNullable(
         json['special_instructions'] ?? json['instructions'],
       ),
-      createdAt: DateTime.parse(_parseString(json['created_at'])),
-      deliveryTime: () {
-        final raw = json['estimated_delivery'] ?? json['delivery_time'];
-        if (raw == null) return null;
-        return DateTime.tryParse(_parseString(raw));
-      }(),
+      createdAt: createdAt,
+      deliveryTime: deliveryTime,
       itemsCount: _parseInt(json['items_count']),
-      items: json['items'] != null
-          ? (json['items'] as List)
-                .map(
-                  (item) => OrderItem.fromJson(
-                    item is Map<String, dynamic>
-                        ? item
-                        : Map<String, dynamic>.from(item as Map),
-                  ),
-                )
-                .toList()
-          : null,
+      items: _parseOrderItems(json['items'] ?? json['order_items']),
       roomNumber: _parseStringNullable(json['room_number']),
       guestName: _parseStringNullable(json['guest_name']),
       guestPhone: _parseStringNullable(json['guest_phone']),
     );
+  }
+
+  static List<OrderItem>? _parseOrderItems(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is! List || raw.isEmpty) return null;
+    final list = <OrderItem>[];
+    for (final item in raw) {
+      Map<String, dynamic>? map;
+      if (item is Map<String, dynamic>) {
+        map = item;
+      } else if (item is Map) {
+        try {
+          map = Map<String, dynamic>.from(item);
+        } catch (_) {
+          continue;
+        }
+      } else {
+        continue;
+      }
+      try {
+        list.add(OrderItem.fromJson(map));
+      } catch (_) {
+        // skip invalid item
+      }
+    }
+    return list.isEmpty ? null : list;
   }
 
   static String _parseString(dynamic value) {
@@ -87,7 +108,10 @@ class Order {
     return 0;
   }
 
-  String get formattedTotal => '${total.toStringAsFixed(0)} FCFA';
+  String get formattedTotal {
+    if (total.isNaN || !total.isFinite) return '0 FCFA';
+    return '${total.toStringAsFixed(0)} FCFA';
+  }
 
   /// Annulation possible tant que la commande n'est pas "Prête" (ready), en livraison ou livrée.
   bool get canCancel {

@@ -165,6 +165,16 @@ class ExcursionsProvider with ChangeNotifier {
     }
   }
 
+  /// Vide les données utilisateur (appelé lors d'un changement de session).
+  void clearUserData() {
+    _bookings = [];
+    _currentBookingsPage = 1;
+    _hasMoreBookingPages = true;
+    _selectedBookingsPeriod = null;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshExcursions() async {
     await fetchExcursions();

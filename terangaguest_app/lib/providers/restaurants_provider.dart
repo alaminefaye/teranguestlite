@@ -177,6 +177,16 @@ class RestaurantsProvider with ChangeNotifier {
     }
   }
 
+  /// Vide les données utilisateur (appelé lors d'un changement de session).
+  void clearUserData() {
+    _reservations = [];
+    _currentReservationsPage = 1;
+    _hasMoreReservationPages = true;
+    _selectedReservationsPeriod = null;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   /// Rafraîchir la liste
   Future<void> refreshRestaurants() async {
     await fetchRestaurants(type: _selectedType);

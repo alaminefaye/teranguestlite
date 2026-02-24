@@ -316,12 +316,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
-          // 4b) TerangaGuest en haut à gauche (même fond que les icônes)
+          // 4b) Logo TerangaGuest en haut à gauche
           Positioned(
             top: 8,
             left: 8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppTheme.primaryDark.withValues(alpha: 0.65),
                 borderRadius: BorderRadius.circular(28),
@@ -342,43 +342,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'TERAN',
-                      style: TextStyle(
-                        fontSize: isVeryCompact ? 14 : (isCompact ? 16 : 18),
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textWhite,
-                        letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.8),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'GUEST',
-                      style: TextStyle(
-                        fontSize: isVeryCompact ? 14 : (isCompact ? 16 : 18),
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.accentGold,
-                        letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.8),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              child: Image.asset(
+                'assets/logo.png',
+                height: isVeryCompact ? 28 : (isCompact ? 32 : 36),
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -618,11 +585,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildFooter(BuildContext context) {
-    final h = MediaQuery.sizeOf(context).height;
+    final size = MediaQuery.sizeOf(context);
+    final w = size.width;
+    final h = size.height;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
+    // Sur mobile (étroit), masquer date/heure quand il y a des commandes en cours pour éviter l'overflow
+    final isMobile = w < 600;
     final padV = isVeryCompact ? 4.0 : (isCompact ? 6.0 : 12.0);
     final padH = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 20.0);
     final timeSize = isVeryCompact ? 14.0 : (isCompact ? 16.0 : 20.0);
@@ -635,6 +606,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Consumer<OrdersProvider>(
         builder: (context, ordersProvider, _) {
           final inProgressCount = ordersProvider.inProgressOrdersCount;
+          final hideDateTimeOnMobile = isMobile && inProgressCount > 0;
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -687,38 +659,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 )
               else
                 const SizedBox.shrink(),
-              // Heure et date
-              StreamBuilder(
-                stream: Stream.periodic(const Duration(seconds: 1)),
-                builder: (context, snapshot) {
-                  final now = DateTime.now();
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        DateFormat('hh:mm a').format(now).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: timeSize,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
-                          height: 1.0,
+              // Heure et date — masquées sur mobile quand il y a des commandes en cours (évite overflow)
+              if (!hideDateTimeOnMobile)
+                StreamBuilder(
+                  stream: Stream.periodic(const Duration(seconds: 1)),
+                  builder: (context, snapshot) {
+                    final now = DateTime.now();
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('hh:mm a').format(now).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: timeSize,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                            height: 1.0,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: isCompact ? 10 : 14),
-                      Text(
-                        DateFormat('EEEE d MMMM', 'fr_FR').format(now),
-                        style: TextStyle(
-                          fontSize: dateSize,
-                          fontWeight: FontWeight.w400,
-                          color: AppTheme.textGray,
-                          height: 1.0,
+                        SizedBox(width: isCompact ? 10 : 14),
+                        Text(
+                          DateFormat('EEEE d MMMM', 'fr_FR').format(now),
+                          style: TextStyle(
+                            fontSize: dateSize,
+                            fontWeight: FontWeight.w400,
+                            color: AppTheme.textGray,
+                            height: 1.0,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                      ],
+                    );
+                  },
+                )
+              else
+                const SizedBox.shrink(),
             ],
           );
         },

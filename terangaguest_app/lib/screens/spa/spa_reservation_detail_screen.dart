@@ -84,15 +84,20 @@ class SpaReservationDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
+
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () => Navigator.pop(context),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,18 +105,18 @@ class SpaReservationDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   reservation.serviceName,
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: TextStyle(
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Détail de la réservation',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppTheme.textGray,
                   ),
@@ -143,6 +148,22 @@ class SpaReservationDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _buildInfoRow(Icons.access_time, reservation.time),
+          if (reservation.roomNumber != null &&
+              reservation.roomNumber!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              Icons.meeting_room,
+              'Chambre ${reservation.roomNumber}',
+            ),
+          ],
+          if (reservation.guestName != null &&
+              reservation.guestName!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              Icons.person_outline,
+              reservation.guestName!,
+            ),
+          ],
           const SizedBox(height: 10),
           _buildInfoRow(Icons.payments_outlined, reservation.formattedPrice),
           const SizedBox(height: 10),

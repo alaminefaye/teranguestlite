@@ -6,9 +6,11 @@ import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/order.dart';
+import '../../models/laundry.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
 import '../../services/orders_api.dart';
+import '../../services/laundry_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
@@ -51,12 +53,16 @@ class AdminHomeScreen extends StatefulWidget {
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminApi _adminApi = AdminApi();
   final OrdersApi _ordersApi = OrdersApi();
+  final LaundryApi _laundryApi = LaundryApi();
   AdminSummary? _summary;
   bool _isLoading = false;
   Timer? _summaryTimer;
   bool _isShowingNewOrderDialog = false;
   final List<Order> _newOrdersQueue = [];
   final Set<int> _alertedOrderIds = {};
+  bool _isShowingNewLaundryDialog = false;
+  final List<LaundryRequest> _newLaundryQueue = [];
+  final Set<int> _alertedLaundryIds = {};
   bool _isShowingAdminEventDialog = false;
   final List<_AdminEventAlert> _adminEventQueue = [];
 
@@ -144,15 +150,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       );
     }
     if (newSummary.laundryPending > oldSummary.laundryPending) {
+      _enqueueNewLaundryRequestsForAlert(context);
       messages.add('Nouvelle demande Blanchisserie à traiter');
-      _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouvelle demande Blanchisserie',
-          message: 'Vous avez une nouvelle demande blanchisserie à traiter.',
-          icon: Icons.local_laundry_service,
-          routeKey: 'admin-laundry',
-        ),
-      );
     }
     if (newSummary.palacePending > oldSummary.palacePending) {
       messages.add('Nouvelle demande Palace / Conciergerie à traiter');
@@ -365,12 +364,77 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (selectedOrder != null) {
       navigator.push(
         MaterialPageRoute(
-          builder: (_) => OrderDetailScreen(orderId: selectedOrder.id),
+          builder: (_) => OrderDetailScreen(
+            orderId: selectedOrder.id,
+            orderPreview: selectedOrder,
+          ),
         ),
       );
     }
     if (_newOrdersQueue.isNotEmpty && context.mounted) {
       _showNewOrdersCarousel(context);
+    }
+  }
+
+  Future<void> _enqueueNewLaundryRequestsForAlert(BuildContext context) async {
+    try {
+      final result = await _laundryApi.getMyLaundryRequests(
+        period: 'all',
+        page: 1,
+        perPage: 10,
+      );
+      final requests = result['requests'] as List<LaundryRequest>;
+      final pendingRequests = requests.where((r) => r.status == 'pending');
+      for (final request in pendingRequests) {
+        if (!_alertedLaundryIds.contains(request.id)) {
+          _alertedLaundryIds.add(request.id);
+          _newLaundryQueue.add(request);
+        }
+      }
+      if (!_isShowingNewLaundryDialog &&
+          _newLaundryQueue.isNotEmpty &&
+          context.mounted) {
+        _showNewLaundryCarousel(context);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showNewLaundryCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_newLaundryQueue.isEmpty) {
+      _isShowingNewLaundryDialog = false;
+      return;
+    }
+    _isShowingNewLaundryDialog = true;
+    final requestsToShow = List<LaundryRequest>.from(_newLaundryQueue);
+    _newLaundryQueue.clear();
+
+    final navigator = Navigator.of(context);
+
+    HapticHelper.heavyImpact();
+
+    final selectedRequest = await showDialog<LaundryRequest?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _NewLaundryCarouselDialog(requests: requestsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingNewLaundryDialog = false;
+      return;
+    }
+    _isShowingNewLaundryDialog = false;
+    if (selectedRequest != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => LaundryRequestDetailScreen(request: selectedRequest),
+        ),
+      );
+    }
+    if (_newLaundryQueue.isNotEmpty && context.mounted) {
+      _showNewLaundryCarousel(context);
     }
   }
 
@@ -562,14 +626,22 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       return ApiConfig.storageUrl(trimmed);
     }();
     final h = MediaQuery.sizeOf(context).height;
+    final w = MediaQuery.sizeOf(context).width;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final isCompact = isLandscape ? (h < 900) : (h < 600);
     final isVeryCompact = h < 500;
+    final isMobileWidth = w < 600;
     final pad = LayoutHelper.horizontalPaddingValue(context);
-    final logoSize = isVeryCompact ? 88.0 : (isCompact ? 120.0 : 160.0);
-    final subtitleSize = isVeryCompact ? 10.0 : (isCompact ? 12.0 : 14.0);
-    final nameOnBannerSize = isVeryCompact ? 18.0 : (isCompact ? 24.0 : 30.0);
+    final logoSize = isVeryCompact
+        ? 88.0
+        : (isCompact ? 100.0 : (isMobileWidth ? 90.0 : 160.0));
+    final subtitleSize = isVeryCompact
+        ? 10.0
+        : (isCompact ? 12.0 : (isMobileWidth ? 11.0 : 14.0));
+    final nameOnBannerSize = isVeryCompact
+        ? 16.0
+        : (isCompact ? 20.0 : (isMobileWidth ? 18.0 : 30.0));
     final heroHeight = isVeryCompact ? 180.0 : (isCompact ? 220.0 : 260.0);
 
     return SizedBox(
@@ -710,7 +782,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             top: 8,
             left: 8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTheme.primaryDark.withValues(alpha: 0.65),
                 borderRadius: BorderRadius.circular(28),
@@ -735,7 +807,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 'Espace Administrateur',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1162,6 +1234,257 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
           },
           child: const Text(
             'Ouvrir la commande',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewLaundryCarouselDialog extends StatefulWidget {
+  const _NewLaundryCarouselDialog({required this.requests});
+
+  final List<LaundryRequest> requests;
+
+  @override
+  State<_NewLaundryCarouselDialog> createState() =>
+      _NewLaundryCarouselDialogState();
+}
+
+class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
+  static const int _totalSeconds = 60;
+  late int _remainingSeconds;
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = _totalSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _remainingSeconds -= 1;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).maybePop();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress => _remainingSeconds / _totalSeconds;
+
+  LaundryRequest get _currentRequest => widget.requests[_currentIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final request = _currentRequest;
+    final roomLabel =
+        request.roomNumber != null && request.roomNumber!.isNotEmpty
+        ? 'Chambre ${request.roomNumber}'
+        : 'Chambre';
+    final guestName = request.guestName != null && request.guestName!.isNotEmpty
+        ? request.guestName!
+        : 'Client';
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.local_laundry_service_outlined,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Nouvelle demande Blanchisserie',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Demande #${request.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          if (request.specialInstructions != null &&
+              request.specialInstructions!.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      request.specialInstructions!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Center(
+            child: SizedBox(
+              width: 72,
+              height: 72,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: _progress,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
+                  ),
+                  Text(
+                    '${_remainingSeconds}s',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.requests.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.requests.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.requests.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement dans une minute.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final request = widget.requests[_currentIndex];
+            Navigator.of(context, rootNavigator: true).pop(request);
+          },
+          child: const Text(
+            'Ouvrir la demande',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),

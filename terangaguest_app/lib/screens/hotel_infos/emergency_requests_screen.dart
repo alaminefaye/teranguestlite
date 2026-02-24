@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/palace.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../palace/my_palace_requests_screen.dart'
@@ -33,7 +34,10 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    // Éviter "setState/markNeedsBuild called during build" : charger après le 1er frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
   }
 
   Future<void> _load() async {
@@ -57,6 +61,10 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
     final emergencyRequests = provider.emergencyRequests;
     final spacing = LayoutHelper.gridSpacing(context);
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
 
     return Scaffold(
       body: Container(
@@ -65,7 +73,7 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -75,7 +83,7 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isMobile ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,12 +91,13 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                         children: [
                           Text(
                             'Assistance & Urgence',
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             isStaffOrAdmin
                                 ? 'Alertes médecin / sécurité en cours'
@@ -156,8 +165,9 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount:
                                       LayoutHelper.gridCrossAxisCount(context),
-                                  childAspectRatio:
-                                      LayoutHelper.listCellAspectRatio(context),
+                                  childAspectRatio: _emergencyCardAspectRatio(
+                                    context,
+                                  ),
                                   crossAxisSpacing: spacing,
                                   mainAxisSpacing: spacing,
                                 ),
@@ -373,6 +383,82 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                                   ],
                                                 ),
                                               ],
+                                              if (isStaffOrAdmin &&
+                                                  request.status ==
+                                                      'pending') ...[
+                                                const SizedBox(height: 10),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: SizedBox(
+                                                        height: 34,
+                                                        child: ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                AppTheme
+                                                                    .accentGold,
+                                                            foregroundColor:
+                                                                AppTheme
+                                                                    .primaryDark,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  horizontal: 8,
+                                                                ),
+                                                          ),
+                                                          onPressed: () =>
+                                                              _handleCardAction(
+                                                                context,
+                                                                request,
+                                                                'accept',
+                                                              ),
+                                                          child: const Text(
+                                                            'Accepter',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: SizedBox(
+                                                        height: 34,
+                                                        child: ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                Colors.red,
+                                                            foregroundColor:
+                                                                Colors.white,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  horizontal: 8,
+                                                                ),
+                                                          ),
+                                                          onPressed: () =>
+                                                              _handleCardAction(
+                                                                context,
+                                                                request,
+                                                                'cancel',
+                                                              ),
+                                                          child: const Text(
+                                                            'Annuler',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ],
                                           ),
                                         ],
@@ -394,6 +480,130 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
         ),
       ),
     );
+  }
+
+  double _emergencyCardAspectRatio(BuildContext context) {
+    final cols = LayoutHelper.gridCrossAxisCount(context);
+    final ratio = LayoutHelper.listCellAspectRatio(context);
+    if (cols == 2 && LayoutHelper.width(context) < 600) return 0.72;
+    return ratio;
+  }
+
+  Future<void> _handleCardAction(
+    BuildContext context,
+    PalaceRequest request,
+    String action,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final reasonController = TextEditingController();
+    String? validationError;
+
+    String title;
+    String message;
+    if (action == 'accept') {
+      title = 'Accepter la demande';
+      message = 'Accepter cette alerte Assistance & Urgence ?';
+    } else {
+      title = l10n.cancel;
+      message = 'Annuler cette alerte ?';
+    }
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message, style: const TextStyle(color: Colors.white)),
+              if (action == 'cancel') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Motif (optionnel)",
+                    hintStyle: const TextStyle(color: AppTheme.textGray),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.textGray),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: AppTheme.accentGold),
+                    ),
+                    errorText: validationError,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (action == 'cancel') {
+                  final text = reasonController.text.trim();
+                  if (text.isEmpty) {
+                    setDialogState(
+                      () => validationError = 'Veuillez préciser un motif.',
+                    );
+                    return;
+                  }
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(
+                l10n.ok,
+                style: const TextStyle(color: AppTheme.accentGold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (ok != true || !context.mounted) return;
+
+    try {
+      await context.read<PalaceProvider>().updatePalaceRequestStatus(
+        requestId: request.id,
+        action: action,
+        reason: action == 'cancel' ? reasonController.text.trim() : null,
+      );
+      if (!context.mounted) return;
+      await context.read<PalaceProvider>().fetchEmergencyPalaceRequests(
+        period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Statut mis à jour'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n.errorPrefix}${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildFilters() {

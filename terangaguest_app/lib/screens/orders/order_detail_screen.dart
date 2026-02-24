@@ -12,11 +12,18 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/animated_button.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
+  /// Données déjà connues (ex. depuis la liste) : affichées tout de suite, détail API en complément.
+  final Order? orderPreview;
 
-  const OrderDetailScreen({super.key, required this.orderId});
+  const OrderDetailScreen({
+    super.key,
+    required this.orderId,
+    this.orderPreview,
+  });
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -39,7 +46,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   @override
   void initState() {
     super.initState();
-    _loadOrderDetail();
+    if (widget.orderPreview != null) {
+      _order = widget.orderPreview;
+      _isLoading = false;
+    }
+    // Ne jamais utiliser context dans initState (crash côté guest) : charger après le 1er frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_order != null) {
+        try {
+          _startEntranceAnimations();
+        } catch (_) {}
+      }
+      _loadOrderDetail();
+    });
 
     _entranceController = AnimationController(
       vsync: this,
@@ -84,35 +104,56 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   Future<void> _loadOrderDetail() async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    final provider = context.read<OrdersProvider>();
+    final hadPreview = _order != null;
+    if (!hadPreview) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
-      final order = await context.read<OrdersProvider>().fetchOrderDetail(
-        widget.orderId,
-      );
+      final order = await provider.fetchOrderDetail(widget.orderId);
+      if (!mounted) return;
       setState(() {
         _order = order;
         _isLoading = false;
       });
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _startEntranceAnimations(),
-      );
-    } catch (e) {
-      String message = l10n.errorHint;
-      if (e is DioException) {
-        final status = e.response?.statusCode;
-        if (status == 404) {
-          message = l10n.orderNotFoundHint;
-        } else {
-          message = 'Impossible de charger le détail de la commande.';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        try {
+          _startEntranceAnimations();
+        } catch (_) {
+          // ignore animation errors (e.g. controller disposed)
         }
+      });
+    } on DioException catch (e) {
+      String message = l10n.errorHint;
+      final status = e.response?.statusCode;
+      if (status == 404) {
+        message = l10n.orderNotFoundHint;
+      } else {
+        message = 'Impossible de charger le détail de la commande.';
       }
+      if (!mounted) return;
       setState(() {
-        _errorMessage = message;
+        _errorMessage = hadPreview ? null : message;
+        _isLoading = false;
+      });
+    } catch (e, stack) {
+      debugPrint('OrderDetail load error: $e\n$stack');
+      String message = l10n.errorHint;
+      if (e is String && e.isNotEmpty) {
+        message = e;
+      } else if (e is Exception) {
+        message = e.toString();
+      }
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = hadPreview ? null : message;
         _isLoading = false;
       });
     }
@@ -145,8 +186,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   Widget _buildHeader() {
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
           IconButton(
@@ -156,7 +201,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               Navigator.pop(context);
             },
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,10 +209,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               children: [
                 Text(
                   AppLocalizations.of(context).orderDetailTitle,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -212,93 +257,112 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-      child: AnimatedBuilder(
-        animation: _entranceController,
-        builder: (context, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeTransition(
-                opacity: _headerAnim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.15),
-                    end: Offset.zero,
-                  ).animate(_headerAnim),
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 0.96, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: _entranceController,
-                        curve: const Interval(
-                          0.0,
-                          0.25,
-                          curve: Curves.easeOutCubic,
+    // Encadrement pour attraper toute erreur au build (évite crash microtask)
+    return Builder(
+      builder: (context) {
+        try {
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              LayoutHelper.horizontalPaddingValue(context),
+              20,
+              LayoutHelper.horizontalPaddingValue(context),
+              20,
+            ),
+            child: AnimatedBuilder(
+              animation: _entranceController,
+              builder: (context, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FadeTransition(
+                      opacity: _headerAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.15),
+                          end: Offset.zero,
+                        ).animate(_headerAnim),
+                        child: ScaleTransition(
+                          scale: Tween<double>(begin: 0.96, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: _entranceController,
+                              curve: const Interval(
+                                0.0,
+                                0.25,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                          ),
+                          child: _buildOrderHeader(),
                         ),
                       ),
                     ),
-                    child: _buildOrderHeader(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              FadeTransition(
-                opacity: _timelineAnim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.12),
-                    end: Offset.zero,
-                  ).animate(_timelineAnim),
-                  child: _buildTimeline(),
-                ),
-              ),
-              const SizedBox(height: 30),
-              FadeTransition(
-                opacity: _itemsAnim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.1),
-                    end: Offset.zero,
-                  ).animate(_itemsAnim),
-                  child: _buildOrderItems(),
-                ),
-              ),
-              const SizedBox(height: 30),
-              FadeTransition(
-                opacity: _summaryAnim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.08),
-                    end: Offset.zero,
-                  ).animate(_summaryAnim),
-                  child: _buildSummary(),
-                ),
-              ),
-              const SizedBox(height: 30),
-              FadeTransition(
-                opacity: _buttonsAnim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.06),
-                    end: Offset.zero,
-                  ).animate(_buttonsAnim),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildStaffActions(),
-                      if (_order!.status == 'delivered') ...[
-                        const SizedBox(height: 16),
-                        _buildReorderButton(),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    FadeTransition(
+                      opacity: _timelineAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.12),
+                          end: Offset.zero,
+                        ).animate(_timelineAnim),
+                        child: _buildTimeline(),
+                      ),
+                    ),
+                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    FadeTransition(
+                      opacity: _itemsAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.1),
+                          end: Offset.zero,
+                        ).animate(_itemsAnim),
+                        child: _buildOrderItems(),
+                      ),
+                    ),
+                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    FadeTransition(
+                      opacity: _summaryAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.08),
+                          end: Offset.zero,
+                        ).animate(_summaryAnim),
+                        child: _buildSummary(),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    FadeTransition(
+                      opacity: _buttonsAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.06),
+                          end: Offset.zero,
+                        ).animate(_buttonsAnim),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildStaffActions(),
+                            if (_order!.status == 'delivered') ...[
+                              const SizedBox(height: 16),
+                              _buildReorderButton(),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           );
-        },
-      ),
+        } catch (e, st) {
+          debugPrint('OrderDetail build error: $e\n$st');
+          return ErrorStateWidget(
+            message: 'Erreur d\'affichage: ${e.toString()}',
+            hint: AppLocalizations.of(context).errorHint,
+            onRetry: _loadOrderDetail,
+          );
+        }
+      },
     );
   }
 
@@ -308,8 +372,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     final roomNumber = _order!.roomNumber;
     final guestName = _order!.guestName;
     final guestPhone = _order!.guestPhone;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final pad = isMobile ? 14.0 : 20.0;
+    final titleSize = isMobile ? 16.0 : 20.0;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
@@ -318,70 +386,102 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _order!.orderNumber,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentGold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                DateFormat(
-                  'dd/MM/yyyy à HH:mm',
-                  'fr_FR',
-                ).format(_order!.createdAt),
-                style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
-              ),
-              const SizedBox(height: 10),
-              if (roomNumber != null && roomNumber.isNotEmpty)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  'Chambre $roomNumber',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                  _order!.orderNumber,
+                  style: TextStyle(
+                    fontSize: titleSize,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentGold,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-              if (guestName != null && guestName.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    guestName,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textGray,
+                SizedBox(height: isMobile ? 6 : 8),
+                Text(
+                  DateFormat(
+                    'dd/MM/yyyy à HH:mm',
+                    'fr_FR',
+                  ).format(_order!.createdAt),
+                  style: TextStyle(
+                    fontSize: isMobile ? 12 : 13,
+                    color: AppTheme.textGray,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                SizedBox(height: isMobile ? 8 : 10),
+                if (roomNumber != null && roomNumber.isNotEmpty)
+                  Text(
+                    'Chambre $roomNumber',
+                    style: TextStyle(
+                      fontSize: isMobile ? 13 : 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                if (guestName != null && guestName.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      guestName,
+                      style: TextStyle(
+                        fontSize: isMobile ? 12 : 13,
+                        color: AppTheme.textGray,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
-                ),
-              if (guestPhone != null && guestPhone.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    guestPhone,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textGray,
+                if (guestPhone != null && guestPhone.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      guestPhone,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textGray,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
-                ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildStatusBadge(_order!.status),
-              if (_order!.canCancel && !isStaffOrAdmin) ...[
-                const SizedBox(width: 12),
-                _buildCancelButtonInline(),
               ],
-            ],
+            ),
+          ),
+          SizedBox(width: isMobile ? 8 : 12),
+          Flexible(
+            child: isMobile
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildStatusBadge(_order!.status),
+                      if (_order!.canCancel && !isStaffOrAdmin) ...[
+                        const SizedBox(height: 8),
+                        _buildCancelButtonInline(),
+                      ],
+                    ],
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildStatusBadge(_order!.status),
+                      if (_order!.canCancel && !isStaffOrAdmin) ...[
+                        const SizedBox(width: 12),
+                        _buildCancelButtonInline(),
+                      ],
+                    ],
+                  ),
           ),
         ],
       ),
@@ -426,18 +526,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     int currentIndex = statuses.indexWhere((s) => s['key'] == _order!.status);
     if (currentIndex < 0) currentIndex = 0;
 
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.orderTracking,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: isMobile ? 16 : 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 14 : 20),
         ...List.generate(statuses.length, (index) {
           final status = statuses[index];
           final isCompleted = index <= currentIndex;
@@ -549,18 +651,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
   Widget _buildOrderItems() {
     final items = _order!.items ?? [];
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context).orderItems,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: isMobile ? 16 : 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isMobile ? 12 : 16),
         ...List.generate(items.length, (index) {
           final item = items[index];
           final itemAnim = CurvedAnimation(
@@ -579,8 +683,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 end: Offset.zero,
               ).animate(itemAnim),
               child: Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: isMobile ? 10 : 12),
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -597,9 +701,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                   children: [
                     if (item.image != null && item.image!.isNotEmpty)
                       Container(
-                        width: 54,
-                        height: 54,
-                        margin: const EdgeInsets.only(right: 12),
+                        width: isMobile ? 44 : 54,
+                        height: isMobile ? 44 : 54,
+                        margin: EdgeInsets.only(right: isMobile ? 10 : 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: AppTheme.primaryDark.withValues(alpha: 0.6),
@@ -639,20 +743,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             item.name,
-                            style: const TextStyle(
-                              fontSize: 15,
+                            style: TextStyle(
+                              fontSize: isMobile ? 14 : 15,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${AppLocalizations.of(context).quantity} ${item.quantity}',
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: TextStyle(
+                              fontSize: isMobile ? 12 : 13,
                               color: AppTheme.textGray,
                             ),
                           ),
@@ -661,8 +768,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                     ),
                     Text(
                       item.formattedSubtotal,
-                      style: const TextStyle(
-                        fontSize: 15,
+                      style: TextStyle(
+                        fontSize: isMobile ? 14 : 15,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.accentGold,
                       ),
@@ -678,8 +785,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   Widget _buildSummary() {
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isMobile ? 14 : 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
@@ -799,9 +908,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
   Widget _buildStatusBadge(String status) {
     final statusColors = _getStatusColor(status);
-
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 12,
+        vertical: isMobile ? 5 : 6,
+      ),
       decoration: BoxDecoration(
         color: statusColors['bg'],
         borderRadius: BorderRadius.circular(12),
@@ -810,10 +923,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       child: Text(
         _order!.statusLabel,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: isMobile ? 11 : 12,
           fontWeight: FontWeight.bold,
           color: statusColors['text'],
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       ),
     );
   }

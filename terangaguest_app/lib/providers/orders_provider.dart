@@ -43,7 +43,7 @@ class OrdersProvider with ChangeNotifier {
       _currentPage = 1;
       _selectedStatus = status;
       _selectedPeriod = period;
-      notifyListeners();
+      _safeNotifyListeners();
     }
 
     try {
@@ -69,7 +69,15 @@ class OrdersProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    try {
       notifyListeners();
+    } catch (_) {
+      // Évite qu'une exception dans un listener (ex. rebuild) fasse crasher l'app
     }
   }
 
@@ -87,11 +95,7 @@ class OrdersProvider with ChangeNotifier {
 
   /// Récupère le détail d'une commande
   Future<Order> fetchOrderDetail(int orderId) async {
-    try {
-      return await _ordersApi.getOrderDetail(orderId);
-    } catch (e) {
-      throw e.toString();
-    }
+    return await _ordersApi.getOrderDetail(orderId);
   }
 
   /// Recommander une commande
@@ -138,6 +142,6 @@ class OrdersProvider with ChangeNotifier {
     _errorMessage = null;
     _currentPage = 1;
     _selectedPeriod = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 }

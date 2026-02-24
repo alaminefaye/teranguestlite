@@ -42,6 +42,10 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
 
     return Scaffold(
       body: Container(
@@ -56,7 +60,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -66,7 +70,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isMobile ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,10 +80,10 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                             isStaffOrAdmin
                                 ? 'Demandes Blanchisserie'
                                 : l10n.myRequests,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -716,7 +720,9 @@ class LaundryRequestDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(
+                  MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0,
+                ),
                 child: Row(
                   children: [
                     IconButton(
@@ -726,7 +732,9 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12,
+                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,10 +744,12 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                             AppLocalizations.of(
                               context,
                             ).requestNumber(request.id),
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: MediaQuery.sizeOf(context).width < 600
+                                  ? 20.0
+                                  : 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -877,25 +887,40 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                           ),
                         if (hasInstructions) ...[
                           const SizedBox(height: 16),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.info_outline,
-                                size: 18,
-                                color: AppTheme.accentGold,
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryDark.withValues(
+                                alpha: 0.5,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  request.specialInstructions!,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white,
-                                  ),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppTheme.accentGold.withValues(
+                                  alpha: 0.3,
                                 ),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  size: 18,
+                                  color: AppTheme.accentGold,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    request.specialInstructions!,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                         const SizedBox(height: 16),

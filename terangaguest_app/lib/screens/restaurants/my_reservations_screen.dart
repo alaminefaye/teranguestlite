@@ -70,16 +70,20 @@ class _MyRestaurantReservationsScreenState
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
 
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () => Navigator.pop(context),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,10 +93,10 @@ class _MyRestaurantReservationsScreenState
                   isStaffOrAdmin
                       ? 'Réservations Restaurants'
                       : l10n.myReservations,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -217,7 +221,7 @@ class _MyRestaurantReservationsScreenState
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                  childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                  childAspectRatio: _reservationCardAspectRatio(context),
                   crossAxisSpacing: LayoutHelper.gridSpacing(context),
                   mainAxisSpacing: LayoutHelper.gridSpacing(context),
                 ),
@@ -265,6 +269,14 @@ class _MyRestaurantReservationsScreenState
         );
       },
     );
+  }
+
+  /// Ratio plus bas sur mobile pour éviter "Bottom Overflowed" (cartes plus hautes).
+  double _reservationCardAspectRatio(BuildContext context) {
+    final cols = LayoutHelper.gridCrossAxisCount(context);
+    final ratio = LayoutHelper.listCellAspectRatio(context);
+    if (cols == 2 && LayoutHelper.width(context) < 600) return 0.72;
+    return ratio;
   }
 
   Widget _buildReservationCard(RestaurantReservation reservation) {
@@ -317,11 +329,14 @@ class _MyRestaurantReservationsScreenState
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        clipBehavior: Clip.antiAlias,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(
+            LayoutHelper.width(context) < 600 ? 12.0 : 16.0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Restaurant + Badge
               Column(
@@ -341,6 +356,7 @@ class _MyRestaurantReservationsScreenState
                   _buildStatusBadge(context, reservation.status),
                 ],
               ),
+              const SizedBox(height: 10),
 
               // Date et heure
               Column(
@@ -899,15 +915,20 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
+
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () => Navigator.pop(context),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -915,10 +936,10 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   reservation.restaurantName,
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: TextStyle(
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

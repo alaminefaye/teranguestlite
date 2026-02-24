@@ -54,22 +54,38 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final provider = context.read<OrdersProvider>();
-      // Toujours vider et afficher le chargement pour forcer une liste à jour
-      // (évite d'afficher un cache sans la commande venant d'être créée).
-      provider.clearOrdersAndSetLoading();
-      final delay = widget.fromOrderCreation
-          ? const Duration(milliseconds: 500)
-          : Duration.zero;
-      if (delay == Duration.zero) {
-        provider.refreshOrders();
-      } else {
-        Future.delayed(delay, () {
-          if (!mounted) return;
-          provider.refreshOrders();
-        });
+      OrdersProvider? provider;
+      try {
+        provider = context.read<OrdersProvider>();
+      } catch (_) {
+        return;
       }
+      _loadOrders(provider);
     });
+  }
+
+  Future<void> _loadOrders(OrdersProvider provider) async {
+    if (widget.fromOrderCreation) {
+      provider.clearOrdersAndSetLoading();
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      context.read<OrdersProvider>().refreshOrders();
+    } else {
+      _safeFetchOrders(
+        status: _selectedStatus,
+        period: _selectedPeriod == 'all' ? null : _selectedPeriod,
+      );
+    }
+  }
+
+  void _safeFetchOrders({String? status, String? period}) {
+    if (!mounted) return;
+    try {
+      context.read<OrdersProvider>().fetchOrders(
+        status: status,
+        period: period,
+      );
+    } catch (_) {}
   }
 
   @override
@@ -104,12 +120,16 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    // Même style que l'écran Détail Commande : titre or, tailles uniformes
+    final titleSize = isMobile ? 20.0 : 24.0;
+    final pad = isMobile ? 12.0 : 20.0;
 
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(pad),
       child: Row(
         children: [
-          // Bouton retour
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
             onPressed: () {
@@ -124,9 +144,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               }
             },
           ),
-          const SizedBox(width: 12),
-
-          // Titre
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,10 +152,10 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               children: [
                 Text(
                   isStaffOrAdmin ? 'Commandes Room Service' : l10n.myOrders,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -184,7 +202,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                             ? null
                             : filter['value'];
                       });
-                      context.read<OrdersProvider>().fetchOrders(
+                      _safeFetchOrders(
                         status: _selectedStatus,
                         period: _selectedPeriod == 'all'
                             ? null
@@ -250,7 +268,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                       setState(() {
                         _selectedPeriod = filter['value']!;
                       });
-                      context.read<OrdersProvider>().fetchOrders(
+                      _safeFetchOrders(
                         status: _selectedStatus,
                         period: _selectedPeriod == 'all'
                             ? null
@@ -330,7 +348,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
         return RefreshIndicator(
           color: AppTheme.accentGold,
-          onRefresh: provider.refreshOrders,
+          onRefresh: () async {
+            try {
+              await provider.refreshOrders();
+            } catch (_) {}
+          },
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
               if (scrollInfo.metrics.pixels ==
@@ -363,13 +385,26 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   }
 
                   final order = provider.orders[index];
-                  return OrderCard(
-                    order: order,
-                    onTap: () {
-                      HapticHelper.lightImpact();
-                      context.navigateTo(OrderDetailScreen(orderId: order.id));
-                    },
-                  );
+                  try {
+                    return OrderCard(
+                      order: order,
+                      onTap: () {
+                        HapticHelper.lightImpact();
+                        // Navigator racine pour éviter crash côté guest (Mes Commandes)
+                        final rootNav = Navigator.maybeOf(context, rootNavigator: true);
+                        rootNav?.push(
+                          NavigationHelper.slideFadeRoute(
+                            OrderDetailScreen(
+                              orderId: order.id,
+                              orderPreview: order,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } catch (_) {
+                    return const SizedBox.shrink();
+                  }
                 },
               ),
             ),

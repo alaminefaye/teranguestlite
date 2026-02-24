@@ -49,10 +49,30 @@ class OrdersApi {
   Future<Order> getOrderDetail(int orderId) async {
     try {
       final response = await _apiService.get('${ApiConfig.orders}/$orderId');
-
-      return Order.fromJson(response.data['data'] as Map<String, dynamic>);
+      final data = response.data;
+      final Map<String, dynamic>? orderMap;
+      if (data is Map<String, dynamic>) {
+        if (data['data'] is Map<String, dynamic>) {
+          orderMap = data['data'] as Map<String, dynamic>;
+        } else if (data['data'] == null && data['id'] != null) {
+          orderMap = data;
+        } else {
+          orderMap = null;
+        }
+      } else if (data is Map) {
+        orderMap = Map<String, dynamic>.from(data);
+      } else {
+        orderMap = null;
+      }
+      if (orderMap == null) {
+        throw Exception('Réponse détail commande invalide');
+      }
+      return Order.fromJson(orderMap);
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
+      rethrow;
+    } catch (e, stack) {
+      debugPrint('❌ Order detail parse error: $e\n$stack');
       rethrow;
     }
   }

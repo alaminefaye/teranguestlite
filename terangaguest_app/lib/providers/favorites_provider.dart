@@ -21,7 +21,8 @@ class FavoritesProvider with ChangeNotifier {
         _items = [];
       } else {
         final list = jsonDecode(raw) as List<dynamic>?;
-        _items = list
+        _items =
+            list
                 ?.map((e) => FavoriteItem.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             [];
@@ -69,5 +70,16 @@ class FavoritesProvider with ChangeNotifier {
     } else {
       await add(item);
     }
+  }
+
+  /// Efface tous les favoris (à appeler lors d'un changement de client).
+  Future<void> clearAll() async {
+    _items = [];
+    _loaded = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyFavorites);
+    } catch (_) {}
+    notifyListeners();
   }
 }
