@@ -148,6 +148,55 @@
                     @enderror
                 </div>
 
+                <!-- Horaires d'ouverture -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Horaires d'ouverture
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        @php
+                            $days = [
+                                'monday' => 'Lundi',
+                                'tuesday' => 'Mardi',
+                                'wednesday' => 'Mercredi',
+                                'thursday' => 'Jeudi',
+                                'friday' => 'Vendredi',
+                                'saturday' => 'Samedi',
+                                'sunday' => 'Dimanche'
+                            ];
+                            // Les horaires actuels (décodés depuis JSON si nécessaire par le modèle)
+                            $currentHours = is_array($restaurant->opening_hours) ? $restaurant->opening_hours : [];
+                        @endphp
+                        @foreach($days as $key => $label)
+                            @php
+                                $isEnabled = old("opening_hours.{$key}.enabled", isset($currentHours[$key]));
+                                $openTime = old("opening_hours.{$key}.open", $currentHours[$key]['open'] ?? '');
+                                $closeTime = old("opening_hours.{$key}.close", $currentHours[$key]['close'] ?? '');
+                            @endphp
+                            <div
+                                class="flex flex-col gap-2 p-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label }}</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="opening_hours[{{ $key }}][enabled]" value="1"
+                                            class="sr-only peer" {{ $isEnabled ? 'checked' : '' }}>
+                                        <div
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:peer-focus:ring-brand-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-500">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="time" name="opening_hours[{{ $key }}][open]" value="{{ $openTime }}"
+                                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                                    <span>-</span>
+                                    <input type="time" name="opening_hours[{{ $key }}][close]" value="{{ $closeTime }}"
+                                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Features -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
