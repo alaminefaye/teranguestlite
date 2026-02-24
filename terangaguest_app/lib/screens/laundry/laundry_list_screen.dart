@@ -132,7 +132,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                    childAspectRatio: LayoutHelper.listCellAspectRatio(context),
+                    childAspectRatio: _laundryCardAspectRatio(context),
                     crossAxisSpacing: LayoutHelper.gridSpacing(context),
                     mainAxisSpacing: LayoutHelper.gridSpacing(context),
                   ),
@@ -178,22 +178,27 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 12,
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
                                     _iconForLaundryService(service),
-                                    size: 48,
+                                    size: 40,
                                     color: AppTheme.accentGold,
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 6),
                                   Text(
                                     service.name,
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.accentGold,
                                     ),
@@ -201,18 +206,23 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 4),
                                   Text(
                                     service.formattedPrice,
                                     style: const TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 11,
                                       color: AppTheme.textGray,
                                     ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 8),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     onPressed: quantity > 0
@@ -225,12 +235,16 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                       Icons.remove_circle_outline,
                                     ),
                                     color: AppTheme.accentGold,
-                                    iconSize: 28,
+                                    iconSize: 24,
+                                    style: IconButton.styleFrom(
+                                      minimumSize: const Size(36, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
                                   ),
                                   Container(
-                                    width: 50,
+                                    width: 44,
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
+                                      vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppTheme.accentGold.withValues(
@@ -245,7 +259,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                       '$quantity',
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.accentGold,
                                       ),
@@ -260,7 +274,11 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                         : null,
                                     icon: const Icon(Icons.add_circle_outline),
                                     color: AppTheme.accentGold,
-                                    iconSize: 28,
+                                    iconSize: 24,
+                                    style: IconButton.styleFrom(
+                                      minimumSize: const Size(36, 36),
+                                      padding: EdgeInsets.zero,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -333,7 +351,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                         width: 150,
                         height: 44,
                         child: AnimatedButton(
-                          text: 'Valider',
+                          text: AppLocalizations.of(context).validate,
                           onPressed: () {
                             HapticHelper.confirm();
                             context.navigateTo(
@@ -354,6 +372,21 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
         );
       },
     );
+  }
+
+  /// Ratio largeur/hauteur des cartes blanchisserie (cellules un peu plus hautes pour éviter le bottom overflow).
+  static double _laundryCardAspectRatio(BuildContext context) {
+    final cols = LayoutHelper.gridCrossAxisCount(context);
+    switch (cols) {
+      case 4:
+        return 0.82;
+      case 3:
+        return 0.78;
+      case 2:
+        return 0.72;
+      default:
+        return 0.75;
+    }
   }
 
   /// Icône spécifique selon le type de service blanchisserie (vêtements et linge)

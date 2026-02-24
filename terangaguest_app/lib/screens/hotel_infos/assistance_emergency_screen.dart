@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 
 /// Assistance & Urgence : boutons Médecin et Urgence sécurité (chambre identifiée).
 class AssistanceEmergencyScreen extends StatefulWidget {
@@ -139,16 +140,17 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                         children: [
                           Text(
                             l10n.assistanceEmergency,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.assistanceEmergencyDesc,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               color: AppTheme.textGray,
                             ),
                           ),
@@ -171,53 +173,55 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                 ),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    children: [
-                      if (doctorEnabled)
-                        _actionCard(
-                          context,
-                          icon: Icons.medical_services_outlined,
-                          title: l10n.requestDoctor,
-                          loading: _sendingDoctor,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            _sendRequest('doctor');
-                          },
-                        ),
-                      if (doctorEnabled && securityEnabled)
-                        const SizedBox(height: 16),
-                      if (securityEnabled)
-                        _actionCard(
-                          context,
-                          icon: Icons.security_outlined,
-                          title: l10n.reportSecurityEmergency,
-                          loading: _sendingSecurity,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            _sendRequest('security');
-                          },
-                        ),
-                      if (!doctorEnabled && !securityEnabled)
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Text(
-                              l10n.comingSoon,
-                              style: const TextStyle(
-                                color: AppTheme.textGray,
-                                fontSize: 16,
+                child: doctorEnabled || securityEnabled
+                    ? Padding(
+                        padding: LayoutHelper.horizontalPadding(context),
+                        child: GridView.count(
+                          crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                          mainAxisSpacing: LayoutHelper.gridSpacing(context),
+                          crossAxisSpacing: LayoutHelper.gridSpacing(context),
+                          childAspectRatio: LayoutHelper.dashboardCellAspectRatio(context),
+                          padding: EdgeInsets.symmetric(
+                            vertical: LayoutHelper.gridSpacing(context),
+                          ),
+                          children: [
+                            if (doctorEnabled)
+                              _buildBoxCard(
+                                context,
+                                icon: Icons.medical_services_outlined,
+                                title: l10n.requestDoctor,
+                                loading: _sendingDoctor,
+                                onTap: () {
+                                  HapticHelper.lightImpact();
+                                  _sendRequest('doctor');
+                                },
                               ),
+                            if (securityEnabled)
+                              _buildBoxCard(
+                                context,
+                                icon: Icons.security_outlined,
+                                title: l10n.reportSecurityEmergency,
+                                loading: _sendingSecurity,
+                                onTap: () {
+                                  HapticHelper.lightImpact();
+                                  _sendRequest('security');
+                                },
+                              ),
+                          ],
+                        ),
+                      )
+                    : Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            l10n.comingSoon,
+                            style: const TextStyle(
+                              color: AppTheme.textGray,
+                              fontSize: 16,
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                ),
+                      ),
               ),
             ],
           ),
@@ -226,60 +230,85 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     );
   }
 
-  Widget _actionCard(
+  /// Carte style « boîte » comme sur Hotel Infos & Sécurité : icône au-dessus, titre en dessous.
+  Widget _buildBoxCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required bool loading,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: loading ? null : onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppTheme.accentGold.withValues(alpha: 0.5),
-            ),
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final iconSize = isMobile ? 46.0 : 70.0;
+    final fontSize = isMobile ? 13.0 : 21.0;
+
+    return GestureDetector(
+      onTap: loading ? null : onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: AppTheme.accentGold, size: 40),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              if (loading)
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppTheme.accentGold,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.accentGold, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 20,
+              spreadRadius: 2,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: AppTheme.accentGold.withValues(alpha: 0.1),
+              blurRadius: 15,
+              spreadRadius: -2,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (loading)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
+                        ),
+                      ),
+                    ),
+                  )
+                else ...[
+                  Icon(icon, size: iconSize, color: AppTheme.accentGold),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.accentGold,
+                      ),
                     ),
                   ),
-                )
-              else
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppTheme.accentGold,
-                  size: 18,
-                ),
-            ],
-          ),
+                ],
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -436,8 +436,8 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Demandes spéciales (optionnel)',
+          Text(
+            AppLocalizations.of(context).specialRequestsOptional,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

@@ -385,5 +385,9 @@
   "vehicleTypeSuv": "SUV",
   "vehicleTypeMinibus": "Minibus",
   "vehicleTypeVan": "Van",
-  "vehicleTypeOther": "Autre"
+  "vehicleTypeOther": "Autre",
+  "validate": "Valider",
+  "clientCode": "Code client",
+  "clientCodeHint": "Code client (ex: 123456)",
+  "specialRequests": "Demandes spéciales"
 }

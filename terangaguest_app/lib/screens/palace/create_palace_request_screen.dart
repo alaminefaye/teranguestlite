@@ -1028,7 +1028,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             controller: _clientCodeController,
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
+              hintText: AppLocalizations.of(context).clientCodeHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.8),
               ),
@@ -1067,7 +1067,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     final hasCode = _clientCodeController.text.trim().isNotEmpty;
     final canSubmit = hasCode;
     return AnimatedButton(
-      text: 'Envoyer la demande',
+      text: AppLocalizations.of(context).sendRequest,
       onPressed: canSubmit ? _handleConfirmRequest : null,
       width: double.infinity,
       height: 56,

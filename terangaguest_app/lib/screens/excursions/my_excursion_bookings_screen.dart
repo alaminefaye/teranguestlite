@@ -756,7 +756,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       if (booking.specialRequests != null &&
                           booking.specialRequests!.trim().isNotEmpty)
-                        _buildSpecialRequests(),
+                        _buildSpecialRequests(context),
                       if (isStaffOrAdmin) _buildStaffActions(context),
                     ],
                   ),
@@ -917,12 +917,12 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpecialRequests() {
+  Widget _buildSpecialRequests(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Demandes spéciales',
+        Text(
+          AppLocalizations.of(context).specialRequests,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

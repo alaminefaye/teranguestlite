@@ -332,7 +332,9 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
           ),
           const SizedBox(height: 30),
           AnimatedButton(
-            text: _excursion!.isAvailable ? 'Réserver' : 'Indisponible',
+            text: _excursion!.isAvailable
+                ? AppLocalizations.of(context).book
+                : AppLocalizations.of(context).unavailable,
             onPressed: _excursion!.isAvailable
                 ? () {
                     HapticHelper.confirm();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../providers/auth_provider.dart';
 import '../../screens/admin/admin_chat_conversations_screen.dart';
 import '../../screens/excursions/my_excursion_bookings_screen.dart';
 import '../../screens/hotel_infos/emergency_requests_screen.dart';
@@ -43,6 +45,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _error = null;
       _notAvailable = false;
     });
+    // L’API admin-summary est réservée au staff : les invités (guests) voient un état « bientôt disponible » au lieu d’une erreur.
+    final isAdmin = context.read<AuthProvider>().isAdmin;
+    if (!isAdmin) {
+      if (!mounted) return;
+      setState(() {
+        _notAvailable = true;
+        _isLoading = false;
+      });
+      return;
+    }
     try {
       final data = await _adminApi.getSummary();
       if (!mounted) return;
@@ -54,7 +66,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        if (e is DioException && e.response?.statusCode == 404) {
+        if (e is DioException &&
+            (e.response?.statusCode == 404 || e.response?.statusCode == 403)) {
           _notAvailable = true;
         } else {
           _error =
@@ -430,7 +443,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text('Réessayer'),
+                                child: Text(l10n.retry),
                               ),
                             ],
                           ),

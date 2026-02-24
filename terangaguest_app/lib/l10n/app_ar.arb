@@ -327,5 +327,9 @@
   "service": "الخدمة",
   "duration": "المدة",
   "reservationCancelledMessage": "تم إلغاء الحجز.",
-  "cancelReservationConfirm": "إلغاء هذا الحجز؟"
+  "cancelReservationConfirm": "إلغاء هذا الحجز؟",
+  "validate": "تحقق",
+  "clientCode": "رمز العميل",
+  "clientCodeHint": "رمز العميل (مثال: 123456)",
+  "specialRequests": "طلبات خاصة"
 }

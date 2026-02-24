@@ -2291,6 +2291,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Autre'**
   String get vehicleTypeOther;
+
+  /// No description provided for @validate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
+
+  /// No description provided for @clientCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code client'**
+  String get clientCode;
+
+  /// No description provided for @clientCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code client (ex: 123456)'**
+  String get clientCodeHint;
+
+  /// No description provided for @specialRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes spéciales'**
+  String get specialRequests;
 }
 
 class _AppLocalizationsDelegate

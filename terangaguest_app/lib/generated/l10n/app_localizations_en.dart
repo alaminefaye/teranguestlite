@@ -1173,4 +1173,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vehicleTypeOther => 'Other';
+
+  @override
+  String get validate => 'Validate';
+
+  @override
+  String get clientCode => 'Client code';
+
+  @override
+  String get clientCodeHint => 'Client code (e.g. 123456)';
+
+  @override
+  String get specialRequests => 'Special requests';
 }

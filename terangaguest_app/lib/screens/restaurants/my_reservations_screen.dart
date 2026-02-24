@@ -869,7 +869,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
                       if (reservation.specialRequests != null &&
                           reservation.specialRequests!.isNotEmpty) ...[
                         Text(
-                          'Demandes spéciales',
+                          l10n.specialRequests,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

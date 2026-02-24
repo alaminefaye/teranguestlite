@@ -138,9 +138,9 @@ class ProfileScreen extends StatelessWidget {
         Text(
           AppLocalizations.of(context).myProfile,
           style: const TextStyle(
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppTheme.accentGold,
           ),
         ),
       ],
@@ -149,7 +149,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildUserInfo(dynamic user) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -169,8 +169,8 @@ class ProfileScreen extends StatelessWidget {
         children: [
           // Avatar
           Container(
-            width: 100,
-            height: 100,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppTheme.accentGold.withValues(alpha: 0.2),
@@ -183,48 +183,50 @@ class ProfileScreen extends StatelessWidget {
               child: Text(
                 user.name.substring(0, 1).toUpperCase(),
                 style: const TextStyle(
-                  fontSize: 40,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.accentGold,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
           // Nom
           Text(
             user.name,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
           // Email
           Text(
             user.email,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 13,
               color: AppTheme.textGray,
             ),
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
           // Infos supplémentaires
           if (user.roomNumber != null && (user.roomNumber ?? '').isNotEmpty) ...[
-            const Divider(color: AppTheme.textGray, height: 32),
+            const Divider(color: AppTheme.textGray, height: 24),
             _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber ?? ''),
           ],
           if (user.enterprise != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             _buildInfoRow(Icons.business, 'Hôtel', user.enterprise?.name ?? ''),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
         ],
       ),
@@ -234,12 +236,12 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: AppTheme.accentGold),
-        const SizedBox(width: 12),
+        Icon(icon, size: 18, color: AppTheme.accentGold),
+        const SizedBox(width: 10),
         Text(
           '$label: ',
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             color: AppTheme.textGray,
           ),
         ),
@@ -247,11 +249,13 @@ class ProfileScreen extends StatelessWidget {
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
             textAlign: TextAlign.right,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

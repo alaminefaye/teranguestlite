@@ -110,10 +110,10 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
@@ -121,7 +121,7 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       color: AppTheme.textGray,
                     ),
                     maxLines: 2,

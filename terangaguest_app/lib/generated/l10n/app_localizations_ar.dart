@@ -1158,4 +1158,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vehicleTypeOther => 'Autre';
+
+  @override
+  String get validate => 'تحقق';
+
+  @override
+  String get clientCode => 'رمز العميل';
+
+  @override
+  String get clientCodeHint => 'رمز العميل (مثال: 123456)';
+
+  @override
+  String get specialRequests => 'طلبات خاصة';
 }

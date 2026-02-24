@@ -327,5 +327,9 @@
   "service": "Servicio",
   "duration": "Duración",
   "reservationCancelledMessage": "Reserva cancelada.",
-  "cancelReservationConfirm": "¿Cancelar esta reserva?"
+  "cancelReservationConfirm": "¿Cancelar esta reserva?",
+  "validate": "Validar",
+  "clientCode": "Código de cliente",
+  "clientCodeHint": "Código de cliente (ej: 123456)",
+  "specialRequests": "Solicitudes especiales"
 }

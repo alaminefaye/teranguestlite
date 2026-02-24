@@ -26,6 +26,7 @@ import '../exploration/exploration_mobility_screen.dart';
 import '../excursions/excursions_list_screen.dart';
 import '../hotel_infos/hotel_infos_security_screen.dart';
 import '../laundry/laundry_list_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../palace/palace_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -413,7 +414,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          HapticHelper.lightImpact();
+                          context.navigateTo(const NotificationsScreen());
+                        },
                         padding: EdgeInsets.all(isMobileWidth ? 4.0 : 8.0),
                         constraints: isMobileWidth
                             ? const BoxConstraints()

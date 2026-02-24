@@ -204,8 +204,8 @@ class _CartScreenState extends State<CartScreen> {
 
             return AlertDialog(
               backgroundColor: AppTheme.primaryBlue,
-              title: const Text(
-                'Code client',
+              title: Text(
+                _l10n(context).clientCode,
                 style: TextStyle(color: AppTheme.accentGold),
               ),
               content: SingleChildScrollView(
@@ -228,7 +228,7 @@ class _CartScreenState extends State<CartScreen> {
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
                           border: const OutlineInputBorder(),
-                          hintText: 'ex: 101',
+                          hintText: _l10n(context).clientCodeHint,
                         ),
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
@@ -373,7 +373,7 @@ class _CartScreenState extends State<CartScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Valider'),
+                      : Text(_l10n(context).validate),
                 ),
               ],
             );

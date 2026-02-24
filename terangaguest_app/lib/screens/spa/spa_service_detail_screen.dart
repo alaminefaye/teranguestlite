@@ -280,7 +280,9 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
 
   Widget _buildReserveButton() {
     return AnimatedButton(
-      text: _service!.isAvailable ? 'Réserver' : 'Indisponible',
+      text: _service!.isAvailable
+          ? AppLocalizations.of(context).book
+          : AppLocalizations.of(context).unavailable,
       onPressed: _service!.isAvailable
           ? () {
               HapticHelper.confirm();

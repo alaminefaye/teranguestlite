@@ -113,9 +113,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Réserver',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).book,
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -319,9 +319,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Demandes spéciales (optionnel)',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).specialRequestsOptional,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,

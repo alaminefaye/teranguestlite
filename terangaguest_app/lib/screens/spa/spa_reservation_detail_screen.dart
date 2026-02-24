@@ -62,7 +62,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       if (reservation.specialRequests != null &&
                           reservation.specialRequests!.isNotEmpty) ...[
-                        _buildSectionTitle(context, 'Demandes spéciales'),
+                        _buildSectionTitle(context, AppLocalizations.of(context).specialRequests),
                         const SizedBox(height: 8),
                         _buildInfoChip(
                           context,

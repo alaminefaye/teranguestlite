@@ -46,15 +46,16 @@ class HotelInfosScreen extends StatelessWidget {
                         children: [
                           Text(
                             l10n.hotelInfos,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.hotelInfosDesc,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
+                            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
                           ),
                         ],
                       ),
@@ -207,10 +208,12 @@ class HotelInfosScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 170,
             child: Text(
               '$label :',
               style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           Expanded(
