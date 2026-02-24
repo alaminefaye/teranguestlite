@@ -160,12 +160,18 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         _handleSpaRescheduleNotification(data);
       } else if (type == 'spa_reservation_status') {
         _handleSpaStatusNotification(data);
-      } else if (type == 'restaurant_reservation_status') {
+      } else if (type == 'restaurant_reservation_status' ||
+          type == 'restaurant_reservation') {
         _handleRestaurantStatusNotification(data);
       } else if (type == 'chat_message') {
         _handleChatMessageNotification(data);
       } else if (type == 'laundry_status') {
         _handleLaundryStatusNotification(data);
+      } else if (type == 'palace_request_status' ||
+          type == 'palace_status' ||
+          type == 'palace' ||
+          type == 'palace_request') {
+        _handlePalaceStatusNotification(data);
       }
     });
 
@@ -781,7 +787,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     }
   }
 
-  void _handleLaundryStatusNotification(Map<String, dynamic> data) {
+  Future<void> _handleLaundryStatusNotification(
+    Map<String, dynamic> data,
+  ) async {
     _startNotificationSoundLoop();
 
     final ctx = rootNavigatorKey.currentContext;
@@ -830,13 +838,49 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             'Statut de la demande #$requestNumber mis à jour : $label$detailsSuffix.';
       }
     } else {
+      final laundryProvider = Provider.of<LaundryProvider>(ctx, listen: false);
+      final intRequestNumber = int.tryParse(requestNumber);
+
+      String generatedItemsDesc = 'votre linge';
+      if (intRequestNumber != null) {
+        var foundRequestList = laundryProvider.requests.where(
+          (r) => r.id == intRequestNumber,
+        );
+
+        if (foundRequestList.isEmpty) {
+          try {
+            await laundryProvider.fetchMyLaundryRequests();
+            foundRequestList = laundryProvider.requests.where(
+              (r) => r.id == intRequestNumber,
+            );
+          } catch (_) {}
+        }
+
+        if (foundRequestList.isNotEmpty) {
+          final foundRequest = foundRequestList.first;
+          if (foundRequest.items.isNotEmpty) {
+            generatedItemsDesc = foundRequest.items
+                .map((e) {
+                  if (e.quantity > 1) {
+                    return '${e.quantity}x ${e.serviceName}';
+                  }
+                  return 'votre ${e.serviceName.toLowerCase()}';
+                })
+                .join(', ');
+          }
+        }
+      }
+
       title = 'Demande de blanchisserie';
       if (status == 'picked_up') {
-        message = 'Votre linge pour la demande #$requestNumber a été récupéré.';
+        message =
+            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber a été récupéré.';
       } else if (status == 'ready') {
-        message = 'Votre linge pour la demande #$requestNumber est prêt.';
+        message =
+            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber est prêt.';
       } else if (status == 'delivered') {
-        message = 'Votre linge pour la demande #$requestNumber a été livré.';
+        message =
+            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber a été livré.';
       } else if (status == 'cancelled') {
         message = 'La demande de blanchisserie #$requestNumber a été annulée.';
         if (reason != null) {
@@ -847,6 +891,22 @@ class _LocalizedAppState extends State<_LocalizedApp> {
         message = 'Statut de la demande #$requestNumber : $label';
       }
     }
+
+    final itemsDesc = data['items'] as String?;
+    final specialInstructions = data['special_instructions'] as String?;
+
+    if (itemsDesc != null && itemsDesc.trim().isNotEmpty) {
+      message += '\n\nLinge : $itemsDesc';
+    }
+    if (specialInstructions != null && specialInstructions.trim().isNotEmpty) {
+      if (itemsDesc == null || itemsDesc.trim().isEmpty) {
+        message += '\n\nInstructions : $specialInstructions';
+      } else {
+        message += '\nInstructions : $specialInstructions';
+      }
+    }
+
+    if (!ctx.mounted) return;
 
     showDialog(
       context: ctx,
@@ -939,7 +999,11 @@ class _LocalizedAppState extends State<_LocalizedApp> {
           ? ''
           : ' (${detailsParts.join(' – ')})';
 
-      if (status == 'cancelled') {
+      if (status == 'pending') {
+        title = 'Nouvelle réservation restaurant';
+        message =
+            'Nouvelle réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
+      } else if (status == 'cancelled') {
         title = 'Réservation restaurant annulée par le client';
         message =
             'Le client a annulé la réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
@@ -1098,6 +1162,183 @@ class _LocalizedAppState extends State<_LocalizedApp> {
               );
             },
           ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handlePalaceStatusNotification(
+    Map<String, dynamic> data,
+  ) async {
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final status = data['status'] as String? ?? '';
+    final requestIdRaw = data['request_id'] as String?;
+    final requestNumber =
+        data['request_number'] as String? ?? requestIdRaw ?? '';
+    final screen = data['screen'] as String? ?? '';
+    final rawReason = data['reason'] as String?;
+    final reason = rawReason != null && rawReason.trim().isNotEmpty
+        ? rawReason.trim()
+        : null;
+    final isStaff = screen == 'AdminPalaceRequests';
+
+    // If a guest receives a notification with an unrecognized or 'pending' status,
+    // it usually means they just created the request themselves or it's an automatic ack.
+    // Only show popups for actual admin updates.
+    if (!isStaff &&
+        ![
+          'in_progress',
+          'accepted',
+          'confirmed',
+          'completed',
+          'cancelled',
+        ].contains(status)) {
+      return;
+    }
+
+    _startNotificationSoundLoop();
+
+    String title;
+    String message;
+
+    if (isStaff) {
+      final roomNumber = data['room_number'] as String?;
+      final guestName = data['guest_name'] as String?;
+
+      final detailsParts = <String>[];
+      if (roomNumber != null && roomNumber.isNotEmpty) {
+        detailsParts.add('Chambre $roomNumber');
+      }
+      if (guestName != null && guestName.isNotEmpty) {
+        detailsParts.add(guestName);
+      }
+      final detailsSuffix = detailsParts.isEmpty
+          ? ''
+          : ' (${detailsParts.join(' – ')})';
+
+      if (status == 'cancelled') {
+        title = 'Demande Palace annulée par le client';
+        message =
+            'Le client a annulé la demande Palace #$requestNumber$detailsSuffix.';
+        if (reason != null && reason.isNotEmpty) {
+          message += '\nMotif : $reason';
+        }
+      } else {
+        title = 'Demande Palace mise à jour';
+        message =
+            'Statut de la demande Palace #$requestNumber mis à jour : $status$detailsSuffix.';
+      }
+    } else {
+      final palaceProvider = Provider.of<PalaceProvider>(ctx, listen: false);
+      final intRequestId = int.tryParse(requestIdRaw ?? '');
+
+      String generatedItemDesc = 'votre demande Palace / Conciergerie';
+      if (intRequestId != null) {
+        var foundRequestList = palaceProvider.requests.where(
+          (r) => r.id == intRequestId,
+        );
+
+        if (foundRequestList.isEmpty) {
+          try {
+            await palaceProvider.fetchMyPalaceRequests();
+            foundRequestList = palaceProvider.requests.where(
+              (r) => r.id == intRequestId,
+            );
+          } catch (_) {}
+        }
+
+        if (foundRequestList.isNotEmpty) {
+          final foundRequest = foundRequestList.first;
+          if (foundRequest.serviceName.isNotEmpty) {
+            generatedItemDesc = foundRequest.serviceName;
+          }
+        }
+      }
+
+      title = 'Demande Palace / Conciergerie';
+      if (status == 'in_progress' ||
+          status == 'accepted' ||
+          status == 'confirmed') {
+        message =
+            'Votre demande "$generatedItemDesc" (#$requestNumber) est en cours de traitement.';
+      } else if (status == 'completed') {
+        message =
+            'Votre demande "$generatedItemDesc" (#$requestNumber) est terminée.';
+      } else if (status == 'cancelled') {
+        message =
+            'Votre demande "$generatedItemDesc" (#$requestNumber) a été annulée.';
+        if (reason != null) {
+          message += '\nMotif : $reason';
+        }
+      } else {
+        message =
+            'Statut de votre demande "$generatedItemDesc" (#$requestNumber) mis à jour.';
+      }
+    }
+
+    if (!ctx.mounted) return;
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Fermer',
+                style: TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+
+                if (isStaff) {
+                  // No staff routing to specific yet
+                } else {
+                  navigator.push(
+                    NavigationHelper.slideRoute(const MyPalaceRequestsScreen()),
+                  );
+                }
+              },
+              child: Text(
+                isStaff ? 'Ouvrir' : 'Voir mes demandes',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

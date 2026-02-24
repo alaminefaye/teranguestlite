@@ -89,7 +89,7 @@ class RestaurantController extends Controller
 
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
-        if (! $stay) {
+        if (!$stay) {
             $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
                 ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
                 : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
@@ -109,7 +109,7 @@ class RestaurantController extends Controller
             'reservation_time' => $request->time,
             'number_of_guests' => $request->guests,
             'special_requests' => $request->special_requests,
-            'status' => 'confirmed',
+            'status' => 'pending',
         ]);
 
         try {
@@ -129,7 +129,13 @@ class RestaurantController extends Controller
                 [
                     'type' => 'restaurant_reservation',
                     'reservation_id' => (string) $reservation->id,
+                    'status' => 'pending',
                     'screen' => 'AdminRestaurantReservations',
+                    'restaurant_name' => $restaurant->name,
+                    'date' => $reservation->reservation_date->format('d/m/Y'),
+                    'time' => \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
+                    'room_number' => $stay['room_number'] ?? null,
+                    'guest_name' => $stay['guest_name'] ?? $user->name,
                 ]
             );
         } catch (\Exception $e) {
@@ -159,7 +165,7 @@ class RestaurantController extends Controller
 
         $query = RestaurantReservation::with(['restaurant', 'room', 'guest']);
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             $query->where('user_id', $user->id);
         }
 
@@ -396,9 +402,9 @@ class RestaurantController extends Controller
                 $body .= " (Chambre {$roomNumber})";
             }
 
-             if ($reason !== '') {
-                 $body .= ' Motif : ' . $reason;
-             }
+            if ($reason !== '') {
+                $body .= ' Motif : ' . $reason;
+            }
 
             $data = [
                 'type' => 'restaurant_reservation_status',

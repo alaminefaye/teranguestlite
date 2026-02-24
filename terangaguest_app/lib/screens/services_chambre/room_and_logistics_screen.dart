@@ -20,28 +20,30 @@ class RoomAndLogisticsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     final subServices = [
-      (l10n.roomServiceRestauration, Icons.room_service_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const CategoriesScreen());
-      }),
-      (l10n.laundry, Icons.local_laundry_service_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const LaundryListScreen());
-      }),
-      (l10n.amenitiesConcierge, Icons.bedroom_child_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const AmenitiesConciergeScreen());
-      }),
-      (l10n.minibarIntelligent, Icons.liquor_outlined, () {
-        HapticHelper.lightImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.comingSoon),
-            backgroundColor: AppTheme.accentGold,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }),
+      (
+        l10n.roomServiceRestauration,
+        Icons.room_service_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const CategoriesScreen());
+        },
+      ),
+      (
+        l10n.laundry,
+        Icons.local_laundry_service_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const LaundryListScreen());
+        },
+      ),
+      (
+        l10n.amenitiesConcierge,
+        Icons.bedroom_child_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const AmenitiesConciergeScreen());
+        },
+      ),
     ];
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
@@ -50,9 +52,7 @@ class RoomAndLogisticsScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -97,7 +97,10 @@ class RoomAndLogisticsScreen extends StatelessWidget {
               HapticHelper.lightImpact();
               Navigator.of(context).pop();
             },
-            icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.accentGold),
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: AppTheme.accentGold,
+            ),
           ),
           Expanded(
             child: Text(

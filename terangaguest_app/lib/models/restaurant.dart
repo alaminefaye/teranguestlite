@@ -118,21 +118,23 @@ class RestaurantReservation {
   factory RestaurantReservation.fromJson(Map<String, dynamic> json) {
     final restaurant = json['restaurant'] as Map<String, dynamic>?;
     return RestaurantReservation(
-      id: json['id'] as int,
+      id: json['id'] as int? ?? 0,
       restaurantId: restaurant != null
-          ? (restaurant['id'] as int)
+          ? (restaurant['id'] as int? ?? 0)
           : (json['restaurant_id'] as int? ?? 0),
       restaurantName: restaurant != null
-          ? (restaurant['name'] as String)
-          : (json['restaurant_name'] as String? ?? ''),
-      date: DateTime.parse(json['date'] as String),
-      time: json['time'] as String,
+          ? (restaurant['name']?.toString() ?? '')
+          : (json['restaurant_name']?.toString() ?? ''),
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      time: json['time']?.toString() ?? '',
       guests: _parseInt(json['guests']) ?? 1,
-      status: json['status'] as String,
-      specialRequests: json['special_requests'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      roomNumber: json['room_number'] as String?,
-      guestName: json['guest_name'] as String?,
+      status: json['status']?.toString() ?? 'pending',
+      specialRequests: json['special_requests']?.toString(),
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      roomNumber: json['room_number']?.toString(),
+      guestName: json['guest_name']?.toString(),
     );
   }
 

@@ -108,11 +108,49 @@ class PalaceRequest {
     final serviceId = palaceService != null
         ? _parseInt(palaceService['id'])
         : _parseInt(json['service_id']);
-    final serviceName = palaceService != null
+    var parsedServiceName = palaceService != null
         ? (palaceService['name'] as String? ?? '')
         : (json['service_name'] as String? ?? '');
-    final details =
+    var parsedDetails =
         json['description'] as String? ?? json['details'] as String?;
+
+    // --- Amenities & Concierge Fix ---
+    // If the backend didn't have a "concierge" category, it might have fallen back
+    // to another service (like "Assistance médecin"). But we saved the real
+    // amenity label in the first line of the details. Let's extract it.
+    if (parsedDetails != null && parsedDetails.isNotEmpty) {
+      final lines = parsedDetails.split('\n');
+      final firstLine = lines.first.trim().toLowerCase();
+      final knownLabels = [
+        'articles de toilette',
+        'toiletries',
+        'oreillers',
+        'pillows',
+        'kit de rasage',
+        'shaving kit',
+        'autre',
+        'other',
+        'amenities',
+      ];
+
+      final isKnown = knownLabels.any((l) => firstLine.contains(l));
+
+      // Also if dynamic categories were loaded, they might not match knownLabels.
+      // A strong heuristic: if details contains " x1" or similar on the second line...
+      bool containsQuantity = false;
+      if (lines.length > 1) {
+        final secondLine = lines[1].trim();
+        containsQuantity =
+            RegExp(r'\bx\d+').hasMatch(secondLine) ||
+            RegExp(r'\d+\s*[xX]\b').hasMatch(secondLine);
+      }
+
+      if (isKnown || containsQuantity) {
+        parsedServiceName = lines.first.trim();
+        parsedDetails = lines.skip(1).join('\n').trim();
+      }
+    }
+
     final status = json['status'] as String? ?? 'pending';
     final createdAtRaw = json['created_at'];
     final createdAt = createdAtRaw != null
@@ -131,8 +169,8 @@ class PalaceRequest {
       id: _parseInt(json['id']),
       requestNumber: requestNumber,
       serviceId: serviceId,
-      serviceName: serviceName,
-      details: details,
+      serviceName: parsedServiceName,
+      details: parsedDetails,
       status: status,
       createdAt: createdAt,
       scheduledTime: scheduledTime,

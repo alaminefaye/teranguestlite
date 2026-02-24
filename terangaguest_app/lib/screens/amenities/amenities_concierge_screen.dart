@@ -65,7 +65,10 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
   }
 
   /// Retourne la liste des articles (libellés) selon la catégorie d'amenity.
-  List<String> _getItemsForCategory(AppLocalizations l10n, String categoryLabel) {
+  List<String> _getItemsForCategory(
+    AppLocalizations l10n,
+    String categoryLabel,
+  ) {
     if (categoryLabel == l10n.amenityToiletries) {
       return [
         l10n.amenityItemSoap,
@@ -141,7 +144,9 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
             backgroundColor: AppTheme.primaryBlue,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+              side: BorderSide(
+                color: AppTheme.accentGold.withValues(alpha: 0.5),
+              ),
             ),
             title: Text(
               label,
@@ -181,11 +186,16 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
                             minQuantity: 0,
                             maxQuantity: maxQty,
                             onIncrement: () {
-                              setState(() => quantities[itemLabel] = (quantities[itemLabel] ?? 0) + 1);
+                              setState(
+                                () => quantities[itemLabel] =
+                                    (quantities[itemLabel] ?? 0) + 1,
+                              );
                             },
                             onDecrement: () {
                               final v = quantities[itemLabel] ?? 0;
-                              if (v > 0) setState(() => quantities[itemLabel] = v - 1);
+                              if (v > 0) {
+                                setState(() => quantities[itemLabel] = v - 1);
+                              }
                             },
                           ),
                         ],
@@ -198,7 +208,10 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: AppTheme.textGray),
+                ),
               ),
               FilledButton(
                 onPressed: () {
@@ -255,10 +268,7 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
         ),
-        title: Text(
-          label,
-          style: const TextStyle(color: AppTheme.accentGold),
-        ),
+        title: Text(label, style: const TextStyle(color: AppTheme.accentGold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -266,10 +276,7 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
             children: [
               Text(
                 l10n.amenityOtherDetailsHint,
-                style: const TextStyle(
-                  color: AppTheme.textGray,
-                  fontSize: 13,
-                ),
+                style: const TextStyle(color: AppTheme.textGray, fontSize: 13),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -277,12 +284,16 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: l10n.describeRequest,
-                  hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.textGray.withValues(alpha: 0.7),
+                  ),
                   filled: true,
                   fillColor: AppTheme.primaryDark.withValues(alpha: 0.6),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+                    borderSide: BorderSide(
+                      color: AppTheme.accentGold.withValues(alpha: 0.4),
+                    ),
                   ),
                 ),
                 style: const TextStyle(color: Colors.white),
@@ -292,20 +303,35 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+            onPressed: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              await Future.delayed(const Duration(milliseconds: 50));
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+              }
+            },
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textGray),
+            ),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               final details = detailsController.text.trim();
-              Navigator.of(ctx).pop();
-              _sendAmenityRequest(
-                context: context,
-                serviceId: serviceId,
-                label: label,
-                details: details.isEmpty ? label : details,
-                l10n: l10n,
-              );
+              FocusManager.instance.primaryFocus?.unfocus();
+              await Future.delayed(const Duration(milliseconds: 50));
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+              }
+              if (context.mounted) {
+                _sendAmenityRequest(
+                  context: context,
+                  serviceId: serviceId,
+                  label: label,
+                  details: details.isEmpty ? label : details,
+                  l10n: l10n,
+                );
+              }
             },
             style: FilledButton.styleFrom(
               backgroundColor: AppTheme.accentGold,
@@ -329,9 +355,9 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
 
     try {
       await context.read<PalaceProvider>().createPalaceRequest(
-            serviceId: serviceId,
-            details: description,
-          );
+        serviceId: serviceId,
+        details: description,
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -358,13 +384,16 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
 
-    final useDynamic = _dynamicCategories != null && _dynamicCategories!.isNotEmpty;
+    final useDynamic =
+        _dynamicCategories != null && _dynamicCategories!.isNotEmpty;
     final List<(String title, IconData icon, List<String>? itemLabels)> options;
     if (useDynamic) {
       options = _dynamicCategories!.asMap().entries.map((e) {
         final i = e.key;
         final cat = e.value;
-        final icon = i < _categoryIcons.length ? _categoryIcons[i] : _categoryIcons.last;
+        final icon = i < _categoryIcons.length
+            ? _categoryIcons[i]
+            : _categoryIcons.last;
         final itemLabels = cat.items.map((item) => item.name).toList();
         return (cat.name, icon, itemLabels);
       }).toList();
@@ -379,9 +408,7 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -390,19 +417,22 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
                 child: _loadingCategories
                     ? const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
                         ),
                       )
                     : Padding(
                         padding: LayoutHelper.horizontalPadding(context),
                         child: GridView.builder(
                           padding: EdgeInsets.symmetric(vertical: spacing),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: spacing,
-                            mainAxisSpacing: spacing,
-                            childAspectRatio: aspectRatio,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
                           itemCount: options.length,
                           itemBuilder: (context, index) {
                             final (title, icon, itemLabels) = options[index];

@@ -7,10 +7,14 @@ import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/order.dart';
 import '../../models/laundry.dart';
+import '../../models/palace.dart';
+import '../../models/restaurant.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
 import '../../services/orders_api.dart';
 import '../../services/laundry_api.dart';
+import '../../services/palace_api.dart';
+import '../../services/restaurants_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
@@ -54,6 +58,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminApi _adminApi = AdminApi();
   final OrdersApi _ordersApi = OrdersApi();
   final LaundryApi _laundryApi = LaundryApi();
+  final PalaceApi _palaceApi = PalaceApi();
+  final RestaurantsApi _restaurantsApi = RestaurantsApi();
   AdminSummary? _summary;
   bool _isLoading = false;
   Timer? _summaryTimer;
@@ -63,6 +69,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   bool _isShowingNewLaundryDialog = false;
   final List<LaundryRequest> _newLaundryQueue = [];
   final Set<int> _alertedLaundryIds = {};
+  bool _isShowingNewPalaceDialog = false;
+  final List<PalaceRequest> _newPalaceQueue = [];
+  final Set<int> _alertedPalaceIds = {};
+  bool _isShowingNewRestaurantDialog = false;
+  final List<RestaurantReservation> _newRestaurantQueue = [];
+  final Set<int> _alertedRestaurantIds = {};
   bool _isShowingAdminEventDialog = false;
   final List<_AdminEventAlert> _adminEventQueue = [];
 
@@ -117,15 +129,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       messages.add('Nouvelle commande Room Service à traiter');
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
+      _enqueueNewRestaurantReservationsForAlert(context);
       messages.add('Nouvelle réservation restaurant à traiter');
-      _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouvelle réservation restaurant',
-          message: 'Vous avez une nouvelle réservation restaurant à traiter.',
-          icon: Icons.restaurant_menu,
-          routeKey: 'admin-restaurants',
-        ),
-      );
     }
     if (newSummary.spaPending > oldSummary.spaPending) {
       messages.add('Nouvelle réservation Spa & Bien-être à traiter');
@@ -154,15 +159,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       messages.add('Nouvelle demande Blanchisserie à traiter');
     }
     if (newSummary.palacePending > oldSummary.palacePending) {
+      _enqueueNewPalaceRequestsForAlert(context);
       messages.add('Nouvelle demande Palace / Conciergerie à traiter');
-      _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouvelle demande Palace / Conciergerie',
-          message: 'Vous avez une nouvelle demande palace/conciergerie.',
-          icon: Icons.account_balance,
-          routeKey: 'admin-palace',
-        ),
-      );
     }
     if (newSummary.emergencyOpen > oldSummary.emergencyOpen) {
       messages.add('Nouvelle alerte Assistance & Urgence');
@@ -435,6 +433,149 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (_newLaundryQueue.isNotEmpty && context.mounted) {
       _showNewLaundryCarousel(context);
+    }
+  }
+
+  Future<void> _enqueueNewPalaceRequestsForAlert(BuildContext context) async {
+    try {
+      final result = await _palaceApi.getMyPalaceRequests(
+        period: 'all',
+        page: 1,
+      );
+      final requests = result['requests'] as List<PalaceRequest>;
+      final pendingRequests = requests.where((r) => r.status == 'pending');
+      for (final request in pendingRequests) {
+        if (!_alertedPalaceIds.contains(request.id)) {
+          _alertedPalaceIds.add(request.id);
+          _newPalaceQueue.add(request);
+        }
+      }
+      if (!_isShowingNewPalaceDialog &&
+          _newPalaceQueue.isNotEmpty &&
+          context.mounted) {
+        _showNewPalaceCarousel(context);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showNewPalaceCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_newPalaceQueue.isEmpty) {
+      _isShowingNewPalaceDialog = false;
+      return;
+    }
+    _isShowingNewPalaceDialog = true;
+    final requestsToShow = List<PalaceRequest>.from(_newPalaceQueue);
+    _newPalaceQueue.clear();
+
+    final navigator = Navigator.of(context);
+
+    HapticHelper.heavyImpact();
+
+    final selectedRequest = await showDialog<PalaceRequest?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _NewPalaceCarouselDialog(requests: requestsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingNewPalaceDialog = false;
+      return;
+    }
+    _isShowingNewPalaceDialog = false;
+    if (selectedRequest != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => PalaceRequestDetailScreen(request: selectedRequest),
+        ),
+      );
+    }
+    if (_newPalaceQueue.isNotEmpty && context.mounted) {
+      _showNewPalaceCarousel(context);
+    }
+  }
+
+  Future<void> _enqueueNewRestaurantReservationsForAlert(
+    BuildContext context,
+  ) async {
+    try {
+      final result = await _restaurantsApi.getMyReservations(
+        period: 'all',
+        page: 1,
+        perPage: 10,
+      );
+      final reservations =
+          result['reservations'] as List<RestaurantReservation>;
+      final pendingReservations = reservations.where(
+        (r) => r.status == 'pending',
+      );
+      for (final reservation in pendingReservations) {
+        if (!_alertedRestaurantIds.contains(reservation.id)) {
+          _alertedRestaurantIds.add(reservation.id);
+          _newRestaurantQueue.add(reservation);
+        }
+      }
+      if (!_isShowingNewRestaurantDialog &&
+          _newRestaurantQueue.isNotEmpty &&
+          context.mounted) {
+        _showNewRestaurantCarousel(context);
+      }
+    } catch (e) {
+      debugPrint('🔥 ERROR ENQUEUE RESTAURANT: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showNewRestaurantCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_newRestaurantQueue.isEmpty) {
+      _isShowingNewRestaurantDialog = false;
+      return;
+    }
+    _isShowingNewRestaurantDialog = true;
+    final reservationsToShow = List<RestaurantReservation>.from(
+      _newRestaurantQueue,
+    );
+    _newRestaurantQueue.clear();
+
+    final navigator = Navigator.of(context);
+
+    HapticHelper.heavyImpact();
+
+    final selectedReservation = await showDialog<RestaurantReservation?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _NewRestaurantCarouselDialog(reservations: reservationsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingNewRestaurantDialog = false;
+      return;
+    }
+    _isShowingNewRestaurantDialog = false;
+    if (selectedReservation != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => RestaurantReservationDetailScreen(
+            reservation: selectedReservation,
+          ),
+        ),
+      );
+    }
+    if (_newRestaurantQueue.isNotEmpty && context.mounted) {
+      _showNewRestaurantCarousel(context);
     }
   }
 
@@ -1358,6 +1499,47 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
             guestName,
             style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
           ),
+          if (request.items.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: request.items.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${item.quantity}x',
+                          style: const TextStyle(
+                            color: AppTheme.accentGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            item.serviceName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
           if (request.specialInstructions != null &&
               request.specialInstructions!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -1485,6 +1667,550 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
           },
           child: const Text(
             'Ouvrir la demande',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewPalaceCarouselDialog extends StatefulWidget {
+  final List<PalaceRequest> requests;
+
+  const _NewPalaceCarouselDialog({required this.requests});
+
+  @override
+  State<_NewPalaceCarouselDialog> createState() =>
+      _NewPalaceCarouselDialogState();
+}
+
+class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
+  int _currentIndex = 0;
+  Timer? _timer;
+  int _remainingSeconds = 60;
+  final int _totalSeconds = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _remainingSeconds--;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).maybePop();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress => _remainingSeconds / _totalSeconds;
+
+  PalaceRequest get _currentRequest => widget.requests[_currentIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final request = _currentRequest;
+    final roomLabel =
+        request.roomNumber != null && request.roomNumber!.isNotEmpty
+        ? 'Chambre ${request.roomNumber}'
+        : 'Chambre';
+    final guestName = request.guestName != null && request.guestName!.isNotEmpty
+        ? request.guestName!
+        : 'Client';
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.workspace_premium_outlined,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Nouvelle demande Palace / Conciergerie',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            request.requestNumber != null && request.requestNumber!.isNotEmpty
+                ? 'Demande #${request.requestNumber}'
+                : 'Demande #${request.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    request.serviceName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (request.details != null &&
+              request.details!.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      request.details!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Center(
+            child: SizedBox(
+              width: 72,
+              height: 72,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: _progress,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.accentGold,
+                    ),
+                  ),
+                  Text(
+                    '${_remainingSeconds}s',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.requests.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.requests.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.requests.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement dans une minute.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final request = widget.requests[_currentIndex];
+            Navigator.of(context, rootNavigator: true).pop(request);
+          },
+          child: const Text(
+            'Ouvrir la demande',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewRestaurantCarouselDialog extends StatefulWidget {
+  const _NewRestaurantCarouselDialog({required this.reservations});
+
+  final List<RestaurantReservation> reservations;
+
+  @override
+  State<_NewRestaurantCarouselDialog> createState() =>
+      _NewRestaurantCarouselDialogState();
+}
+
+class _NewRestaurantCarouselDialogState
+    extends State<_NewRestaurantCarouselDialog> {
+  static const int _totalSeconds = 60;
+  late int _remainingSeconds;
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = _totalSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _remainingSeconds -= 1;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).maybePop();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress => _remainingSeconds / _totalSeconds;
+
+  RestaurantReservation get _currentReservation =>
+      widget.reservations[_currentIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final reservation = _currentReservation;
+    final roomLabel =
+        reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
+        ? 'Chambre ${reservation.roomNumber}'
+        : 'Chambre non spécifiée';
+    final guestName =
+        reservation.guestName != null && reservation.guestName!.isNotEmpty
+        ? reservation.guestName!
+        : 'Client inconnu';
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.restaurant_menu_outlined,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Nouvelle réservation restaurant',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Réservation #${reservation.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    reservation.restaurantName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (reservation.specialRequests != null &&
+              reservation.specialRequests!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentGold.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.format_quote,
+                      color: AppTheme.accentGold.withValues(alpha: 0.5),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        reservation.specialRequests!,
+                        style: const TextStyle(
+                          color: AppTheme.accentGold,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _progress,
+              backgroundColor: AppTheme.textGray.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.accentGold,
+              ),
+              minHeight: 4,
+            ),
+          ),
+          if (widget.reservations.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.reservations.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.reservations.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement dans une minute.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final reservation = widget.reservations[_currentIndex];
+            Navigator.of(context, rootNavigator: true).pop(reservation);
+          },
+          child: const Text(
+            'Ouvrir',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
