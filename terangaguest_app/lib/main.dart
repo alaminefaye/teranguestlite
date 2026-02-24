@@ -29,6 +29,7 @@ import 'providers/tablet_session_provider.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
 import 'screens/hotel_infos/chatbot_screen.dart';
+import 'widgets/idle_overlay.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -901,7 +902,10 @@ class _LocalizedAppState extends State<_LocalizedApp> {
                     textDirection: isRtl
                         ? TextDirection.rtl
                         : TextDirection.ltr,
-                    child: child,
+                    child: IdleOverlay(
+                      idleDuration: const Duration(minutes: 1), // → 1h en prod
+                      child: child,
+                    ),
                   );
                 },
                 home: const SplashScreen(),
