@@ -145,7 +145,17 @@ class PalaceRequest {
             RegExp(r'\d+\s*[xX]\b').hasMatch(secondLine);
       }
 
-      if (isKnown || containsQuantity) {
+      // NEW HEURISTIC: Leisure request mappings
+      // e.g "Sport & Fitness - Réservation coach personnel"
+      // e.g "Tennis - Court de tennis"
+      final isLeisure =
+          firstLine.contains(' - réservation') ||
+          firstLine.contains(' - demande') ||
+          firstLine.contains(' - tee-time') ||
+          firstLine.contains(' - équipement') ||
+          firstLine.contains(' - court');
+
+      if (isKnown || containsQuantity || isLeisure) {
         parsedServiceName = lines.first.trim();
         parsedDetails = lines.skip(1).join('\n').trim();
       }

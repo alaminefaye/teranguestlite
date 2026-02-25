@@ -716,7 +716,9 @@ class _LocalizedAppState extends State<_LocalizedApp> {
       return;
     }
 
-    if (type == 'palace' || type == 'palace_request') {
+    if (type == 'palace' ||
+        type == 'palace_request' ||
+        type == 'palace_status') {
       navigator.push(
         NavigationHelper.slideRoute(const MyPalaceRequestsScreen()),
       );
@@ -1231,30 +1233,34 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             'Statut de la demande Palace #$requestNumber mis à jour : $status$detailsSuffix.';
       }
     } else {
-      final palaceProvider = Provider.of<PalaceProvider>(ctx, listen: false);
-      final intRequestId = int.tryParse(requestIdRaw ?? '');
-
       String generatedItemDesc = 'votre demande Palace / Conciergerie';
-      if (intRequestId != null) {
-        var foundRequestList = palaceProvider.requests.where(
-          (r) => r.id == intRequestId,
-        );
 
-        if (foundRequestList.isEmpty) {
-          try {
-            await palaceProvider.fetchMyPalaceRequests();
-            foundRequestList = palaceProvider.requests.where(
-              (r) => r.id == intRequestId,
-            );
-          } catch (_) {}
-        }
+      try {
+        final palaceProvider = Provider.of<PalaceProvider>(ctx, listen: false);
+        final intRequestId = int.tryParse(requestIdRaw ?? '');
 
-        if (foundRequestList.isNotEmpty) {
-          final foundRequest = foundRequestList.first;
-          if (foundRequest.serviceName.isNotEmpty) {
-            generatedItemDesc = foundRequest.serviceName;
+        if (intRequestId != null) {
+          var foundRequestList = palaceProvider.requests.where(
+            (r) => r.id == intRequestId,
+          );
+
+          if (foundRequestList.isEmpty) {
+            // Fetch silently without awaiting strictly
+            palaceProvider
+                .fetchMyPalaceRequests()
+                .then((_) {
+                  // Background refresh, no big deal for the dialog
+                })
+                .catchError((_) {});
+          } else {
+            final foundRequest = foundRequestList.first;
+            if (foundRequest.serviceName.isNotEmpty) {
+              generatedItemDesc = foundRequest.serviceName;
+            }
           }
         }
+      } catch (_) {
+        // Fallback to default desc if provider lookup fails
       }
 
       title = 'Demande Palace / Conciergerie';
@@ -1268,7 +1274,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
             'Votre demande "$generatedItemDesc" (#$requestNumber) est terminée.';
       } else if (status == 'cancelled') {
         message =
-            'Votre demande "$generatedItemDesc" (#$requestNumber) a été annulée.';
+            'Votre demande "$generatedItemDesc" (#$requestNumber) a été refusée ou annulée.';
         if (reason != null) {
           message += '\nMotif : $reason';
         }
@@ -1278,11 +1284,14 @@ class _LocalizedAppState extends State<_LocalizedApp> {
       }
     }
 
-    if (!ctx.mounted) return;
+    // Try to get the most recent context
+    final validCtx = rootNavigatorKey.currentContext;
+    if (validCtx == null || !validCtx.mounted) return;
 
     showDialog(
-      context: ctx,
+      context: validCtx,
       barrierDismissible: true,
+      useRootNavigator: true,
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: AppTheme.primaryBlue,

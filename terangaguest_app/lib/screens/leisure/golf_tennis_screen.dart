@@ -8,6 +8,8 @@ import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import '../../providers/palace_provider.dart';
 import '../../models/palace.dart';
+import '../../main.dart'; // import for rootNavigatorKey
+import '../palace/my_palace_requests_screen.dart';
 
 /// Golf ou Tennis : chaque sport a sa propre page (Tee-time + matériel pour Golf, Court + matériel pour Tennis).
 class GolfTennisScreen extends StatefulWidget {
@@ -30,15 +32,35 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
   }
 
   PalaceService? _getConciergeService(List<PalaceService> services) {
-    final concierge = services
-        .where((s) => s.isAvailable && (s.category == 'concierge'))
+    // 1. Try to find a service explicitly in 'sport_loisir' category
+    final sportServices = services
+        .where((s) => s.isAvailable && s.category == 'sport_loisir')
         .toList();
-    if (concierge.isNotEmpty) return concierge.first;
+    if (sportServices.isNotEmpty) return sportServices.first;
+
+    // 2. Fall back to 'concierge' if no 'sport_loisir' exists
+    final concierge = services
+        .where((s) => s.isAvailable && s.category == 'concierge')
+        .toList();
+    // Try to avoid "Assistance médecin" specifically by favoring others.
+    if (concierge.isNotEmpty) {
+      final fallback = concierge
+          .where((s) => !s.name.toLowerCase().contains('médecin'))
+          .toList();
+      if (fallback.isNotEmpty) return fallback.first;
+      return concierge.first;
+    }
+
+    // 3. Any available service as a last resort
     final available = services.where((s) => s.isAvailable).toList();
     return available.isNotEmpty ? available.first : null;
   }
 
-  void _onOptionTap(BuildContext context, String optionKey, String optionLabel) {
+  void _onOptionTap(
+    BuildContext context,
+    String optionKey,
+    String optionLabel,
+  ) {
     HapticHelper.lightImpact();
     final l10n = AppLocalizations.of(context);
     final provider = context.read<PalaceProvider>();
@@ -66,7 +88,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
             backgroundColor: AppTheme.primaryBlue,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+              side: BorderSide(
+                color: AppTheme.accentGold.withValues(alpha: 0.5),
+              ),
             ),
             title: Text(
               optionLabel,
@@ -81,10 +105,16 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                     title: Text(
                       selectedDate == null
                           ? l10n.selectDate
-                          : DateFormat('EEEE d MMMM', 'fr_FR').format(selectedDate!),
+                          : DateFormat(
+                              'EEEE d MMMM',
+                              'fr_FR',
+                            ).format(selectedDate!),
                       style: const TextStyle(color: Colors.white),
                     ),
-                    trailing: const Icon(Icons.calendar_today, color: AppTheme.accentGold),
+                    trailing: const Icon(
+                      Icons.calendar_today,
+                      color: AppTheme.accentGold,
+                    ),
                     onTap: () async {
                       final date = await showDatePicker(
                         context: context,
@@ -102,7 +132,10 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                           : '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
                       style: const TextStyle(color: Colors.white),
                     ),
-                    trailing: const Icon(Icons.access_time, color: AppTheme.accentGold),
+                    trailing: const Icon(
+                      Icons.access_time,
+                      color: AppTheme.accentGold,
+                    ),
                     onTap: () async {
                       final time = await showTimePicker(
                         context: context,
@@ -117,12 +150,16 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                     maxLines: 2,
                     decoration: InputDecoration(
                       hintText: l10n.describeRequest,
-                      hintStyle: TextStyle(color: AppTheme.textGray.withValues(alpha: 0.7)),
+                      hintStyle: TextStyle(
+                        color: AppTheme.textGray.withValues(alpha: 0.7),
+                      ),
                       filled: true,
                       fillColor: AppTheme.primaryDark.withValues(alpha: 0.6),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+                        borderSide: BorderSide(
+                          color: AppTheme.accentGold.withValues(alpha: 0.4),
+                        ),
                       ),
                     ),
                     style: const TextStyle(color: Colors.white),
@@ -133,39 +170,154 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: AppTheme.textGray),
+                ),
               ),
               FilledButton(
                 onPressed: () async {
-                  final prefix = widget.sportType == 'tennis' ? 'Tennis' : 'Golf';
+                  final prefix = widget.sportType == 'tennis'
+                      ? 'Tennis'
+                      : 'Golf';
                   final parts = <String>['$prefix - $optionLabel'];
                   if (selectedDate != null) {
-                    parts.add('Date: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}');
+                    parts.add(
+                      'Date: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}',
+                    );
                   }
                   if (selectedTime != null) {
-                    parts.add('Heure: ${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}');
+                    parts.add(
+                      'Heure: ${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                    );
                   }
                   final notes = notesController.text.trim();
                   if (notes.isNotEmpty) parts.add(notes);
                   final description = parts.join('\n');
 
+                  // Extract dependencies BEFORE popping the dialog context
+                  final palaceProvider = context.read<PalaceProvider>();
+                  final localScaffoldMessenger = ScaffoldMessenger.of(context);
+
+                  // Use the global navigator key to show dialogs safely after context is popped
+                  final navigator = rootNavigatorKey.currentState;
+
+                  // Close the form dialog
                   Navigator.of(ctx).pop();
+
+                  if (navigator == null) return;
+
+                  // Show the loading dialog using the global navigator
+                  showDialog(
+                    context: navigator.context,
+                    barrierDismissible: false,
+                    useRootNavigator: true,
+                    builder: (c) => const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
+                        ),
+                      ),
+                    ),
+                  );
+
                   try {
-                    await context.read<PalaceProvider>().createPalaceRequest(
+                    await palaceProvider
+                        .createPalaceRequest(
                           serviceId: service.id,
                           details: description,
+                        )
+                        .timeout(
+                          const Duration(seconds: 25),
+                          onTimeout: () => throw Exception(
+                            'Délai dépassé. Vérifiez votre connexion.',
+                          ),
                         );
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.requestSent),
-                        backgroundColor: AppTheme.accentGold,
-                        duration: const Duration(seconds: 2),
+
+                    // Pop the loading dialog safely
+                    navigator.pop();
+
+                    // Show success dialog safely
+                    showDialog(
+                      context: navigator.context,
+                      useRootNavigator: true,
+                      builder: (dialogContext) => AlertDialog(
+                        backgroundColor: AppTheme.primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(
+                            color: AppTheme.accentGold,
+                            width: 2,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 32,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                l10n.requestSent,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        content: Text(
+                          l10n.requestSentMessage,
+                          style: const TextStyle(color: AppTheme.textGray),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(
+                              dialogContext,
+                              rootNavigator: true,
+                            ).pop(),
+                            child: Text(
+                              l10n.ok,
+                              style: const TextStyle(
+                                color: AppTheme.textGray,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(
+                                dialogContext,
+                                rootNavigator: true,
+                              ).pop();
+                              final nav = rootNavigatorKey.currentState;
+                              if (nav != null) {
+                                nav.push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const MyPalaceRequestsScreen(),
+                                  ),
+                                );
+                              }
+                            },
+                            child: const Text(
+                              'Voir mes demandes',
+                              style: TextStyle(
+                                color: AppTheme.accentGold,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    // Pop the loading dialog safely if an error occurs
+                    navigator.pop();
+                    localScaffoldMessenger.showSnackBar(
                       SnackBar(
                         content: Text('${l10n.errorPrefix}$e'),
                         backgroundColor: Colors.red,
@@ -206,9 +358,7 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [

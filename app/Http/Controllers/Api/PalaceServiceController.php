@@ -167,7 +167,7 @@ class PalaceServiceController extends Controller
 
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
-        if (! $stay) {
+        if (!$stay) {
             $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
                 ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
                 : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
@@ -227,11 +227,32 @@ class PalaceServiceController extends Controller
                     ['type' => 'palace', 'request_id' => (string) $palaceRequest->id, 'screen' => 'PalaceRequests']
                 );
             }
+            // Extract a cleaner service name if the description contains headers
+            $staffPushTitle = $service->name;
+            if (!empty($description)) {
+                $lines = explode("\n", $description);
+                $firstLine = trim($lines[0]);
+                $lowerFirst = strtolower($firstLine);
+                $isLeisureOverride = str_contains($lowerFirst, ' - réservation') ||
+                    str_contains($lowerFirst, ' - demande') ||
+                    str_contains($lowerFirst, ' - tee-time') ||
+                    str_contains($lowerFirst, ' - équipement') ||
+                    str_contains($lowerFirst, ' - court');
+                $isAmenityOverride = str_contains($lowerFirst, 'articles de toilette') ||
+                    str_contains($lowerFirst, 'oreillers') ||
+                    str_contains($lowerFirst, 'kit de rasage') ||
+                    str_contains($lowerFirst, 'autre');
+
+                if ($isLeisureOverride || $isAmenityOverride) {
+                    $staffPushTitle = $firstLine;
+                }
+            }
+
             // Notifier le staff
             $firebaseService->sendToStaff(
                 $request->user()->enterprise_id,
                 'Nouvelle demande palace',
-                "Nouvelle demande de service : {$service->name}"
+                "Nouvelle demande de service : {$staffPushTitle}"
             );
         } catch (\Exception $e) {
             Log::error('Firebase notification error: ' . $e->getMessage());
@@ -251,8 +272,8 @@ class PalaceServiceController extends Controller
                 'requested_for' => $palaceRequest->requested_for,
                 'description' => $palaceRequest->description,
                 'estimated_price' => $palaceRequest->estimated_price,
-                'formatted_price' => $palaceRequest->estimated_price ? 
-                    number_format($palaceRequest->estimated_price, 0, '', ' ') . ' FCFA' : 
+                'formatted_price' => $palaceRequest->estimated_price ?
+                    number_format($palaceRequest->estimated_price, 0, '', ' ') . ' FCFA' :
                     'Prix sur demande',
                 'price_on_request' => $service->price_on_request,
                 'status' => $palaceRequest->status,
@@ -277,7 +298,7 @@ class PalaceServiceController extends Controller
         $query = PalaceRequest::with(['palaceService', 'room', 'guest'])
             ->where('enterprise_id', $user->enterprise_id);
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             $query->where('user_id', $user->id);
         }
 
@@ -350,7 +371,7 @@ class PalaceServiceController extends Controller
 
         $palaceRequest = PalaceRequest::with(['palaceService', 'room', 'guest'])->find($id);
 
-        if (! $palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
+        if (!$palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Demande non trouvée',
@@ -361,14 +382,14 @@ class PalaceServiceController extends Controller
             ? ($user->isAdmin() || $user->isStaff())
             : false;
 
-        if (! $isStaffOrAdmin && $palaceRequest->user_id !== $user->id) {
+        if (!$isStaffOrAdmin && $palaceRequest->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès non autorisé',
             ], 403);
         }
 
-        if (! in_array($palaceRequest->status, ['pending', 'in_progress'], true)) {
+        if (!in_array($palaceRequest->status, ['pending', 'in_progress'], true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cette demande ne peut plus être annulée.',
@@ -388,6 +409,7 @@ class PalaceServiceController extends Controller
                     [
                         'type' => 'palace_status',
                         'request_id' => (string) $palaceRequest->id,
+                        'request_number' => $palaceRequest->request_number,
                         'status' => $palaceRequest->status,
                         'screen' => 'PalaceRequests',
                     ]
@@ -421,7 +443,7 @@ class PalaceServiceController extends Controller
             ? ($user->isAdmin() || $user->isStaff())
             : false;
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès réservé au staff de l’hôtel',
@@ -435,7 +457,7 @@ class PalaceServiceController extends Controller
 
         $palaceRequest = PalaceRequest::with(['palaceService', 'room', 'guest'])->find($id);
 
-        if (! $palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
+        if (!$palaceRequest || $palaceRequest->enterprise_id != $user->enterprise_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Demande non trouvée',
@@ -445,7 +467,7 @@ class PalaceServiceController extends Controller
         $action = $validated['action'];
         $validActions = ['accept', 'complete', 'cancel'];
 
-        if (! in_array($action, $validActions, true)) {
+        if (!in_array($action, $validActions, true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Action invalide',
@@ -461,7 +483,7 @@ class PalaceServiceController extends Controller
             ],
         ];
 
-        if (! isset($statusTransitions[$action][$palaceRequest->status])) {
+        if (!isset($statusTransitions[$action][$palaceRequest->status])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Transition de statut non autorisée',
@@ -474,14 +496,36 @@ class PalaceServiceController extends Controller
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
             if ($palaceRequest->room_id) {
+                // Determine a precise title from the description header if it exists
+                $staffPushTitle = "Service Palace / Conciergerie";
+                $desc = $palaceRequest->description;
+                if (!empty($desc)) {
+                    $lines = explode("\n", $desc);
+                    $firstLine = trim($lines[0]);
+                    $lowerFirst = strtolower($firstLine);
+                    $isLeisureOverride = str_contains($lowerFirst, ' - réservation') ||
+                        str_contains($lowerFirst, ' - demande') ||
+                        str_contains($lowerFirst, ' - tee-time') ||
+                        str_contains($lowerFirst, ' - équipement') ||
+                        str_contains($lowerFirst, ' - court');
+                    $isAmenityOverride = str_contains($lowerFirst, 'articles de toilette') ||
+                        str_contains($lowerFirst, 'oreillers') ||
+                        str_contains($lowerFirst, 'kit de rasage') ||
+                        str_contains($lowerFirst, 'autre');
+
+                    if ($isLeisureOverride || $isAmenityOverride) {
+                        $staffPushTitle = $firstLine;
+                    }
+                }
+
                 $statusMessages = [
-                    'in_progress' => 'Votre demande palace est en cours de traitement',
-                    'completed' => 'Votre demande palace a été terminée',
-                    'cancelled' => 'Votre demande palace a été annulée',
+                    'in_progress' => 'Votre demande a été acceptée et est en cours de traitement.',
+                    'completed' => 'Votre demande a été terminée.',
+                    'cancelled' => 'Votre demande a été annulée / refusée.',
                 ];
 
-                $title = "Demande palace #{$palaceRequest->request_number}";
-                $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande palace mis à jour';
+                $title = "{$staffPushTitle} #{$palaceRequest->request_number}";
+                $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande mis à jour';
 
                 $firebaseService->sendToClientOfRoom(
                     $palaceRequest->room_id,
@@ -490,6 +534,7 @@ class PalaceServiceController extends Controller
                     [
                         'type' => 'palace_status',
                         'request_id' => (string) $palaceRequest->id,
+                        'request_number' => $palaceRequest->request_number,
                         'status' => $palaceRequest->status,
                         'screen' => 'PalaceRequests',
                     ]
@@ -568,7 +613,7 @@ class PalaceServiceController extends Controller
         $date = now()->format('Ymd');
         $lastRequest = PalaceRequest::whereDate('created_at', today())->latest()->first();
         $sequence = $lastRequest ? (intval(substr($lastRequest->request_number, -3)) + 1) : 1;
-        
+
         return 'PAL-' . $date . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 }
