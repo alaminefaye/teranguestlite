@@ -71,8 +71,10 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
               _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 60,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -115,17 +117,17 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
               children: [
                 Text(
                   AppLocalizations.of(context).book,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.service.name,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppTheme.textGray,
                   ),
                   maxLines: 1,
@@ -250,56 +252,70 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: _availableTimes.map((time) {
-              final isSelected = _selectedTime == time;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedTime = time;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? LinearGradient(
-                            colors: [
-                              AppTheme.accentGold,
-                              AppTheme.accentGold.withValues(alpha: 0.8),
-                            ],
-                          )
-                        : null,
-                    color: isSelected
-                        ? null
-                        : AppTheme.primaryBlue.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppTheme.accentGold
-                          : AppTheme.accentGold.withValues(alpha: 0.3),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 10.0;
+              const countPerLine = 5;
+              final itemWidth =
+                  (constraints.maxWidth - (countPerLine - 1) * spacing) /
+                  countPerLine;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: _availableTimes.map((time) {
+                  final isSelected = _selectedTime == time;
+                  return SizedBox(
+                    width: itemWidth,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedTime = time;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: isSelected
+                              ? LinearGradient(
+                                  colors: [
+                                    AppTheme.accentGold,
+                                    AppTheme.accentGold.withValues(alpha: 0.8),
+                                  ],
+                                )
+                              : null,
+                          color: isSelected
+                              ? null
+                              : AppTheme.primaryBlue.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppTheme.accentGold
+                                : AppTheme.accentGold.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          time,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppTheme.primaryDark
+                                : AppTheme.textGray,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    time,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: isSelected
-                          ? AppTheme.primaryDark
-                          : AppTheme.textGray,
-                    ),
-                  ),
-                ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
         ],
       ),

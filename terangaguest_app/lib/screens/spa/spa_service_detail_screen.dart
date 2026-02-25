@@ -101,10 +101,10 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
               children: [
                 Text(
                   _service?.name ?? 'Service Spa',
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -113,7 +113,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
                 Text(
                   _service?.category ?? '',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppTheme.textGray,
                   ),
                 ),
@@ -175,7 +175,10 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+        vertical: 20,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

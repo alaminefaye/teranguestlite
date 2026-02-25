@@ -119,7 +119,7 @@ class SpaServiceController extends Controller
 
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
-        if (! $stay) {
+        if (!$stay) {
             $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
                 ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
                 : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
@@ -198,7 +198,7 @@ class SpaServiceController extends Controller
 
         $query = SpaReservation::with(['spaService', 'room', 'guest']);
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             $query->where('user_id', $user->id);
         }
 
@@ -224,16 +224,17 @@ class SpaServiceController extends Controller
             'data' => $reservations->map(function ($res) {
                 return [
                     'id' => $res->id,
-                    'spa_service' => [
+                    'spa_service' => $res->spaService ? [
                         'id' => $res->spaService->id,
                         'name' => $res->spaService->name,
                         'duration' => $res->spaService->duration,
-                    ],
+                    ] : null,
                     'date' => $res->reservation_date->format('Y-m-d'),
                     'time' => \Carbon\Carbon::parse($res->reservation_time)->format('H:i'),
                     'price' => (float) $res->price,
                     'formatted_price' => number_format($res->price, 0, '', ' ') . ' FCFA',
                     'status' => $res->status,
+                    'special_requests' => $res->special_requests,
                     'room_number' => $res->room ? $res->room->room_number : null,
                     'guest_name' => $res->guest ? $res->guest->name : null,
                     'created_at' => $res->created_at->toISOString(),
@@ -270,7 +271,7 @@ class SpaServiceController extends Controller
 
         $reservation = SpaReservation::with(['spaService', 'room', 'guest'])->find($id);
 
-        if (! $reservation || $reservation->enterprise_id != $user->enterprise_id) {
+        if (!$reservation || $reservation->enterprise_id != $user->enterprise_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Réservation non trouvée',
@@ -329,11 +330,11 @@ class SpaServiceController extends Controller
             $nextStatus = $statusTransitions[$action][$reservation->status];
             $reservation->status = $nextStatus;
 
-            if ($nextStatus === 'confirmed' && ! $reservation->confirmed_at) {
+            if ($nextStatus === 'confirmed' && !$reservation->confirmed_at) {
                 $reservation->confirmed_at = now();
             }
 
-            if ($nextStatus === 'cancelled' && ! $reservation->cancelled_at) {
+            if ($nextStatus === 'cancelled' && !$reservation->cancelled_at) {
                 $reservation->cancelled_at = now();
             }
 
@@ -518,7 +519,7 @@ class SpaServiceController extends Controller
             ->where('user_id', $request->user()->id)
             ->first();
 
-        if (! $reservation) {
+        if (!$reservation) {
             return response()->json([
                 'success' => false,
                 'message' => 'Réservation non trouvée',
@@ -533,7 +534,7 @@ class SpaServiceController extends Controller
         }
 
         $reservation->status = 'confirmed';
-        if (! $reservation->confirmed_at) {
+        if (!$reservation->confirmed_at) {
             $reservation->confirmed_at = now();
         }
         $reservation->save();

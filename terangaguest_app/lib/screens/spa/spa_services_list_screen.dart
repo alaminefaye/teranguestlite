@@ -74,22 +74,23 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
             },
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Spa & Bien-être',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.accentGold,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Détente et relaxation',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
+                  style: TextStyle(fontSize: 14, color: AppTheme.textGray),
                 ),
               ],
             ),
