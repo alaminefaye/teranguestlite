@@ -544,21 +544,17 @@ class FirebaseNotificationService
         $user = User::where('enterprise_id', $room->enterprise_id)
             ->where('role', 'guest')
             ->where('room_id', $room->id)
-            ->whereNotNull('fcm_token')
-            ->where('fcm_token', '!=', '')
             ->first();
 
         if (!$user) {
             $user = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
-                ->whereNotNull('fcm_token')
-                ->where('fcm_token', '!=', '')
                 ->first();
         }
 
         if (!$user) {
-            Log::warning("getUserForRoom: no guest user with FCM token for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account at least once to register the token.");
+            Log::warning("getUserForRoom: no guest user found for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account.");
         }
 
         return $user;
