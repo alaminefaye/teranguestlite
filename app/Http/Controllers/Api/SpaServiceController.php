@@ -433,10 +433,20 @@ class SpaServiceController extends Controller
 
         $reason = trim((string) ($request->input('reason') ?? ''));
 
-        $reservation = SpaReservation::with(['spaService', 'room', 'guest'])
+        $user = $request->user();
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
+
+        $query = SpaReservation::with(['spaService', 'room', 'guest'])
             ->where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
+            ->where('enterprise_id', $user->enterprise_id);
+
+        if (!$isStaffOrAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        $reservation = $query->first();
 
         if (!$reservation) {
             return response()->json(['success' => false, 'message' => 'Réservation non trouvée'], 404);
@@ -449,7 +459,7 @@ class SpaServiceController extends Controller
         $reservationDateTime = \Carbon\Carbon::parse(
             $reservation->reservation_date->format('Y-m-d') . ' ' . $reservation->reservation_time
         );
-        if ($reservationDateTime->lte(now()->addHours(24))) {
+        if (!$isStaffOrAdmin && $reservationDateTime->lte(now()->addHours(24))) {
             return response()->json([
                 'success' => false,
                 'message' => 'L\'annulation n\'est possible que plus de 24h avant la réservation',
