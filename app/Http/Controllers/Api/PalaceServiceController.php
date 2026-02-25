@@ -496,36 +496,14 @@ class PalaceServiceController extends Controller
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
             if ($palaceRequest->room_id) {
-                // Determine a precise title from the description header if it exists
-                $staffPushTitle = "Service Palace / Conciergerie";
-                $desc = $palaceRequest->description;
-                if (!empty($desc)) {
-                    $lines = explode("\n", $desc);
-                    $firstLine = trim($lines[0]);
-                    $lowerFirst = strtolower($firstLine);
-                    $isLeisureOverride = str_contains($lowerFirst, ' - réservation') ||
-                        str_contains($lowerFirst, ' - demande') ||
-                        str_contains($lowerFirst, ' - tee-time') ||
-                        str_contains($lowerFirst, ' - équipement') ||
-                        str_contains($lowerFirst, ' - court');
-                    $isAmenityOverride = str_contains($lowerFirst, 'articles de toilette') ||
-                        str_contains($lowerFirst, 'oreillers') ||
-                        str_contains($lowerFirst, 'kit de rasage') ||
-                        str_contains($lowerFirst, 'autre');
-
-                    if ($isLeisureOverride || $isAmenityOverride) {
-                        $staffPushTitle = $firstLine;
-                    }
-                }
-
                 $statusMessages = [
-                    'in_progress' => 'Votre demande a été acceptée et est en cours de traitement.',
-                    'completed' => 'Votre demande a été terminée.',
-                    'cancelled' => 'Votre demande a été annulée / refusée.',
+                    'in_progress' => 'Votre demande palace est en cours de traitement',
+                    'completed' => 'Votre demande palace a été terminée',
+                    'cancelled' => 'Votre demande palace a été annulée',
                 ];
 
-                $title = "{$staffPushTitle} #{$palaceRequest->request_number}";
-                $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande mis à jour';
+                $title = "Demande palace #{$palaceRequest->request_number}";
+                $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande palace mis à jour';
 
                 $firebaseService->sendToClientOfRoom(
                     $palaceRequest->room_id,

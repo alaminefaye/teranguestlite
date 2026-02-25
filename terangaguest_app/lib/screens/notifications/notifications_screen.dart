@@ -14,7 +14,6 @@ import '../../screens/restaurants/my_reservations_screen.dart';
 import '../../screens/spa/my_spa_reservations_screen.dart';
 import '../../services/admin_api.dart';
 import '../../services/notifications_api.dart';
-import '../../providers/notifications_provider.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 
@@ -86,7 +85,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await _notificationsApi.markAllAsRead();
       if (!mounted) return;
-      context.read<NotificationsProvider>().markAllRead();
       setState(() {
         _summary = null;
         _error = null;
@@ -118,7 +116,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await _notificationsApi.cleanupRead();
       if (!mounted) return;
-      context.read<NotificationsProvider>().markAllRead();
       setState(() {
         _summary = null;
         _error = null;

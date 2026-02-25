@@ -152,10 +152,8 @@ class FirebaseNotificationService
      */
     public function sendToUser(User $user, string $title, string $body, array $data = [])
     {
-        // Even if there is no FCM token, we still want to store it for in-app polling
         if (empty($user->fcm_token)) {
-            Log::warning("User {$user->id} has no FCM token. Storing notification for in-app polling only.");
-            $this->storeForInAppPolling($user, $title, $body, $data);
+            Log::warning("User {$user->id} has no FCM token");
             return false;
         }
 
@@ -544,17 +542,21 @@ class FirebaseNotificationService
         $user = User::where('enterprise_id', $room->enterprise_id)
             ->where('role', 'guest')
             ->where('room_id', $room->id)
+            ->whereNotNull('fcm_token')
+            ->where('fcm_token', '!=', '')
             ->first();
 
         if (!$user) {
             $user = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
                 ->first();
         }
 
         if (!$user) {
-            Log::warning("getUserForRoom: no guest user found for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account.");
+            Log::warning("getUserForRoom: no guest user with FCM token for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account at least once to register the token.");
         }
 
         return $user;

@@ -9,7 +9,6 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/orders_provider.dart';
-import '../../providers/notifications_provider.dart';
 import '../../widgets/service_card.dart';
 
 import '../../utils/navigation_helper.dart';
@@ -43,7 +42,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrdersProvider>().fetchOrdersForDashboard();
-      context.read<NotificationsProvider>().startPolling();
     });
   }
 
@@ -404,27 +402,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ],
                         ),
                       ),
-                      Consumer<NotificationsProvider>(
-                        builder: (context, notificationsProvider, _) {
-                          if (notificationsProvider.unreadCount == 0)
-                            return const SizedBox.shrink();
-                          return Positioned(
-                            right: 6,
-                            top: 6,
-                            child: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppTheme.primaryDark,
-                                  width: 1,
-                                ),
-                              ),
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.primaryDark,
+                              width: 1,
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
                     ],
                   ),
