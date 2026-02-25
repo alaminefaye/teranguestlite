@@ -54,12 +54,12 @@ class TestFirebaseCredentials extends Command
         // Test OAuth2 token generation
         $this->info('Test de génération du token OAuth2...');
         $service = app(FirebaseNotificationService::class);
-        
+
         // Use reflection to call protected method
         $reflection = new \ReflectionMethod($service, 'getAccessToken');
         $reflection->setAccessible(true);
         $accessToken = $reflection->invoke($service);
-        
+
         if (!$accessToken) {
             $this->error('Échec de la génération du token OAuth2.');
             $this->line('Vérifiez les logs pour plus de détails: tail -f storage/logs/laravel.log');
@@ -74,13 +74,14 @@ class TestFirebaseCredentials extends Command
         $userId = $this->option('user');
         if ($userId) {
             $user = User::find($userId);
-            if (! $user || empty($user->fcm_token)) {
+            if (!$user || !$user->fcmTokens()->exists()) {
                 $this->warn("User {$userId} non trouvé ou sans fcm_token. Utilisez un ID d'utilisateur qui a un token (ex. compte tablette connecté).");
                 return 1;
             }
+            $firstToken = $user->fcmTokens()->first()->token;
             $this->info("Envoi d'une notification test à l'utilisateur {$user->id} ({$user->name})...");
-            $this->info("FCM Token: " . substr($user->fcm_token, 0, 30) . "...");
-            
+            $this->info("FCM Token (1er): " . substr($firstToken, 0, 30) . "...");
+
             try {
                 $sent = $service->sendToUser(
                     $user,
@@ -182,11 +183,11 @@ class TestFirebaseCredentials extends Command
         $deviceToken = null;
         if ($userId) {
             $user = User::find($userId);
-            if ($user && ! empty($user->fcm_token)) {
-                $deviceToken = $user->fcm_token;
+            if ($user && $user->fcmTokens()->exists()) {
+                $deviceToken = $user->fcmTokens()->first()->token;
             }
         }
-        if (! $deviceToken) {
+        if (!$deviceToken) {
             $deviceToken = '<COLLER_ICI_LE_FCM_TOKEN_DEVICE>';
         }
 

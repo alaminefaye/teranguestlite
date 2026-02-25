@@ -17,7 +17,7 @@ class CheckRoomFcmToken extends Command
     {
         $roomIdOrNumber = $this->argument('room_id');
 
-        if (! $roomIdOrNumber) {
+        if (!$roomIdOrNumber) {
             $this->listRoomsWithTokens();
             return 0;
         }
@@ -26,7 +26,7 @@ class CheckRoomFcmToken extends Command
             ? Room::withoutGlobalScope('enterprise')->find($roomIdOrNumber)
             : Room::withoutGlobalScope('enterprise')->where('room_number', $roomIdOrNumber)->first();
 
-        if (! $room) {
+        if (!$room) {
             $this->error("Chambre non trouvée : {$roomIdOrNumber}");
             return 1;
         }
@@ -37,7 +37,7 @@ class CheckRoomFcmToken extends Command
             ->first();
 
         $userByRoomNumber = null;
-        if (! $userByRoomId) {
+        if (!$userByRoomId) {
             $userByRoomNumber = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
@@ -49,7 +49,7 @@ class CheckRoomFcmToken extends Command
         $this->info("Chambre : {$room->room_number} (id={$room->id}), entreprise_id={$room->enterprise_id}");
         $this->newLine();
 
-        if (! $user) {
+        if (!$user) {
             $this->warn('Aucun compte tablette (role=guest) lié à cette chambre.');
             $this->line('→ Créez un accès tablette pour cette chambre (Dashboard > Accès tablettes).');
             return 0;
@@ -58,10 +58,11 @@ class CheckRoomFcmToken extends Command
         $this->line("Compte tablette : {$user->name} (user_id={$user->id})");
         $this->line("  room_id    : " . ($user->room_id ?? 'null'));
         $this->line("  room_number: " . ($user->room_number ?? 'null'));
-        $this->line("  fcm_token  : " . (strlen($user->fcm_token ?? '') > 0 ? '***enregistré***' : 'null / vide'));
-        $this->line("  fcm_token_updated_at : " . ($user->fcm_token_updated_at?->toDateTimeString() ?? 'null'));
+        $hasToken = $user->fcmTokens()->exists();
+        $this->line("  fcm_token_count: " . $user->fcmTokens()->count());
+        $this->line("  fcmTokens      : " . ($hasToken ? '***enregistré(s)***' : 'aucun'));
 
-        if (empty($user->fcm_token)) {
+        if (!$hasToken) {
             $this->newLine();
             $this->warn('Aucun token FCM. La tablette doit se connecter avec ce compte au moins une fois pour enregistrer le token.');
             $this->line('→ Sur la tablette : connexion avec le compte « ' . $user->name . ' » (email du compte chambre).');
@@ -75,22 +76,25 @@ class CheckRoomFcmToken extends Command
 
     private function listRoomsWithTokens(): void
     {
-        $users = User::where('role', 'guest')
-            ->whereNotNull('fcm_token')
-            ->where('fcm_token', '!=', '')
+        $usersWithToken = User::where('role', 'guest')
+            ->has('fcmTokens')
             ->with('room')
             ->get();
 
-        if ($users->isEmpty()) {
+        if ($usersWithToken->isEmpty()) {
             $this->warn('Aucun compte tablette avec token FCM enregistré.');
             $this->line('→ Connectez les tablettes avec leurs comptes chambre pour enregistrer les tokens.');
             return;
         }
 
-        $this->info('Comptes tablette avec token FCM :');
-        foreach ($users as $u) {
-            $roomInfo = $u->room ? "chambre {$u->room->room_number}" : ($u->room_number ? "room_number {$u->room_number}" : 'chambre non liée');
-            $this->line("  - {$u->name} (user_id={$u->id}) — {$roomInfo}");
+        $this->info("=== Comptes Tablettes avec Token FCM ({$usersWithToken->count()}) ===");
+
+        $headers = ['User ID', 'Nom Compte', 'Room ID', 'Chambre N°'];
+        $rows = [];
+
+        foreach ($usersWithToken as $user) {
+            $roomInfo = $user->room ? "chambre {$user->room->room_number}" : ($user->room_number ? "room_number {$user->room_number}" : 'chambre non liée');
+            $this->line("  - {$user->name} (user_id={$user->id}) — {$roomInfo}");
         }
     }
 }

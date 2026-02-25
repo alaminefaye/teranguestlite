@@ -144,5 +144,10 @@ class User extends Authenticatable
     {
         return $query->where('role', 'guest');
     }
+
+    public function fcmTokens()
+    {
+        return $this->hasMany(UserFcmToken::class);
+    }
 }
 

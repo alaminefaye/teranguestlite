@@ -152,23 +152,35 @@ class FirebaseNotificationService
      */
     public function sendToUser(User $user, string $title, string $body, array $data = [])
     {
-        if (empty($user->fcm_token)) {
-            Log::warning("User {$user->id} has no FCM token");
+        $tokens = $user->fcmTokens()->pluck('token')->toArray();
+
+        if (empty($tokens)) {
+            Log::warning("User {$user->id} has no FCM tokens");
+            // If FCM fails due to hosting restrictions, store for in-app polling
+            Log::warning("FCM failed, storing notification for in-app polling for user {$user->id}");
+            $this->storeForInAppPolling($user, $title, $body, $data);
             return false;
         }
 
-        // Try direct HTTP API first (more reliable on shared hosting)
-        $result = $this->sendViaHttpApi($user->fcm_token, $title, $body, $data);
-        if ($result) {
-            return true;
+        $success = false;
+        foreach ($tokens as $token) {
+            // Try direct HTTP API first (more reliable on shared hosting)
+            $result = $this->sendViaHttpApi($token, $title, $body, $data);
+            if ($result) {
+                $success = true;
+            }
         }
 
-        // If FCM fails due to hosting restrictions, store for in-app polling
-        Log::warning("FCM failed, storing notification for in-app polling for user {$user->id}");
-        $this->storeForInAppPolling($user, $title, $body, $data);
+        if (!$success) {
+            // If FCM fails entirely, store for in-app polling
+            Log::warning("FCM failed for all tokens, storing notification for in-app polling for user {$user->id}");
+            $this->storeForInAppPolling($user, $title, $body, $data);
+        }
 
-        // Fallback to SDK method (will likely also fail but try anyway)
-        return $this->sendViaSdk($user, $title, $body, $data);
+        // Fallback to SDK method (legacy)
+        $this->sendViaSdk($user, $title, $body, $data);
+
+        return $success;
     }
 
     /**
@@ -418,34 +430,47 @@ class FirebaseNotificationService
                 return false;
             }
 
-            $message = CloudMessage::new()
-                ->withToken($user->fcm_token)
-                ->withNotification(Notification::create($title, $body))
-                ->withData($data)
-                ->withAndroidConfig(
-                    AndroidConfig::fromArray([
-                        'priority' => 'high',
-                        'notification' => [
-                            'sound' => 'notification',
-                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                        ],
-                    ])
-                )
-                ->withApnsConfig(
-                    ApnsConfig::fromArray([
-                        'payload' => [
-                            'aps' => [
-                                'sound' => 'notification.mp3',
-                                'badge' => 1,
+            $tokens = $user->fcmTokens()->pluck('token')->toArray();
+            if (empty($tokens)) {
+                return false;
+            }
+
+            $success = false;
+            foreach ($tokens as $token) {
+                $message = CloudMessage::new()
+                    ->withToken($token)
+                    ->withNotification(Notification::create($title, $body))
+                    ->withData($data)
+                    ->withAndroidConfig(
+                        AndroidConfig::fromArray([
+                            'priority' => 'high',
+                            'notification' => [
+                                'sound' => 'notification',
+                                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                             ],
-                        ],
-                    ])
-                );
+                        ])
+                    )
+                    ->withApnsConfig(
+                        ApnsConfig::fromArray([
+                            'payload' => [
+                                'aps' => [
+                                    'sound' => 'notification.mp3',
+                                    'badge' => 1,
+                                ],
+                            ],
+                        ])
+                    );
 
-            $this->messaging->send($message);
+                try {
+                    $this->messaging->send($message);
+                    Log::info("Notification sent successfully via SDK to token: " . substr($token, 0, 20) . "...");
+                    $success = true;
+                } catch (\Exception $e) {
+                    Log::error("Failed to send notification via SDK to token: " . substr($token, 0, 20) . "...: " . $e->getMessage());
+                }
+            }
 
-            Log::info("Notification sent via SDK to user {$user->id}: {$title}");
-            return true;
+            return $success;
         } catch (\Exception $e) {
             Log::error("Failed to send notification via SDK to user {$user->id}: " . $e->getMessage());
             return false;
@@ -455,21 +480,23 @@ class FirebaseNotificationService
     /**
      * Envoyer une notification push à plusieurs utilisateurs
      */
-    public function sendToMultipleUsers(array $users, string $title, string $body, array $data = [])
+    public function sendToMultipleUsers($users, string $title, string $body, array $data = [])
     {
         $tokens = collect($users)
-            ->filter(function ($user) {
-                if (is_array($user)) {
-                    return !empty($user['fcm_token']);
+            ->flatMap(function ($user) {
+                if (is_array($user) && isset($user['id'])) {
+                    // It's an array representation of a model, we need to load relations or refetch
+                    // The easiest approach here is just to extract tokens if attached, but usually they aren't.
+                    // Instead, look up the user by ID
+                    $model = \App\Models\User::with('fcmTokens')->find($user['id']);
+                    return $model ? $model->fcmTokens->pluck('token') : [];
                 } elseif (is_object($user)) {
-                    return !empty($user->fcm_token);
+                    return $user->fcmTokens ? $user->fcmTokens->pluck('token') : [];
                 }
-                return false;
-            })
-            ->map(function ($user) {
-                return is_array($user) ? $user['fcm_token'] : (is_object($user) ? $user->fcm_token : null);
+                return [];
             })
             ->filter()
+            ->unique()
             ->toArray();
 
         if (empty($tokens)) {
@@ -526,7 +553,7 @@ class FirebaseNotificationService
     public function sendToEnterprise($enterpriseId, string $title, string $body, array $data = [])
     {
         $users = User::where('enterprise_id', $enterpriseId)
-            ->whereNotNull('fcm_token')
+            ->has('fcmTokens')
             ->get();
 
         if ($users->isEmpty()) {
@@ -552,16 +579,14 @@ class FirebaseNotificationService
         $user = User::where('enterprise_id', $room->enterprise_id)
             ->where('role', 'guest')
             ->where('room_id', $room->id)
-            ->whereNotNull('fcm_token')
-            ->where('fcm_token', '!=', '')
+            ->has('fcmTokens')
             ->first();
 
         if (!$user) {
             $user = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
-                ->whereNotNull('fcm_token')
-                ->where('fcm_token', '!=', '')
+                ->has('fcmTokens')
                 ->first();
         }
 
@@ -727,7 +752,7 @@ class FirebaseNotificationService
     {
         $staff = User::where('enterprise_id', $enterpriseId)
             ->whereIn('role', ['admin', 'staff'])
-            ->whereNotNull('fcm_token')
+            ->has('fcmTokens')
             ->get();
 
         if ($staff->isEmpty()) {

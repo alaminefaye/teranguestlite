@@ -18,7 +18,7 @@ class FcmTokenController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -26,9 +26,9 @@ class FcmTokenController extends Controller
             ], 401);
         }
 
-        $user->update([
-            'fcm_token' => $request->fcm_token,
-            'fcm_token_updated_at' => now(),
+        // Add token if it doesn't already exist for this user
+        $user->fcmTokens()->firstOrCreate([
+            'token' => $request->fcm_token,
         ]);
 
         return response()->json([
@@ -43,7 +43,7 @@ class FcmTokenController extends Controller
     public function destroy(Request $request)
     {
         $user = Auth::user();
-        
+
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -51,10 +51,18 @@ class FcmTokenController extends Controller
             ], 401);
         }
 
-        $user->update([
-            'fcm_token' => null,
-            'fcm_token_updated_at' => now(),
+        $request->validate([
+            'fcm_token' => 'sometimes|string',
         ]);
+
+        if ($request->has('fcm_token') && !empty($request->fcm_token)) {
+            // Delete specific device
+            $user->fcmTokens()->where('token', $request->fcm_token)->delete();
+        } else {
+            // If none provided, clear all tokens for security (optional legacy behavior)
+            // or just respond with error
+            $user->fcmTokens()->delete();
+        }
 
         return response()->json([
             'success' => true,
