@@ -349,8 +349,8 @@ class SpaServiceController extends Controller
                 $roomText = $roomNumber ? " (Chambre $roomNumber)" : "";
 
                 if ($action === 'cancel') {
-                    $firebaseService->sendToTopics(
-                        ["admin_{$reservation->enterprise_id}", "staff_{$reservation->enterprise_id}"],
+                    $firebaseService->sendToStaff(
+                        $reservation->enterprise_id,
                         'Annulation Spa',
                         "$guestName$roomText a annulé sa réservation pour $serviceName.",
                         [
@@ -359,8 +359,8 @@ class SpaServiceController extends Controller
                         ]
                     );
                 } elseif ($action === 'reschedule') {
-                    $firebaseService->sendToTopics(
-                        ["admin_{$reservation->enterprise_id}", "staff_{$reservation->enterprise_id}"],
+                    $firebaseService->sendToStaff(
+                        $reservation->enterprise_id,
                         'Modification Spa',
                         "$guestName$roomText a demandé à replanifier sa réservation pour $serviceName au $dateStr à $timeStr.",
                         [
