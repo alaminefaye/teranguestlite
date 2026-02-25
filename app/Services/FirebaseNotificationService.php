@@ -458,8 +458,18 @@ class FirebaseNotificationService
     public function sendToMultipleUsers(array $users, string $title, string $body, array $data = [])
     {
         $tokens = collect($users)
-            ->filter(fn($user) => !empty($user->fcm_token))
-            ->pluck('fcm_token')
+            ->filter(function ($user) {
+                if (is_array($user)) {
+                    return !empty($user['fcm_token']);
+                } elseif (is_object($user)) {
+                    return !empty($user->fcm_token);
+                }
+                return false;
+            })
+            ->map(function ($user) {
+                return is_array($user) ? $user['fcm_token'] : (is_object($user) ? $user->fcm_token : null);
+            })
+            ->filter()
             ->toArray();
 
         if (empty($tokens)) {

@@ -892,6 +892,28 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                             ),
                           ),
                         ],
+                        if (request.status == 'cancelled' &&
+                            request.cancellationReason != null &&
+                            request.cancellationReason!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Motif d\'annulation',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            request.cancellationReason!,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.white,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         _PalaceStaffActionsForDetail(request: request),
                       ],

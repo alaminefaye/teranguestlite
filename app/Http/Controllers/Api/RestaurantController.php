@@ -278,8 +278,13 @@ class RestaurantController extends Controller
             $reservation->confirmed_at = now();
         }
 
-        if ($nextStatus === 'cancelled' && !$reservation->cancelled_at) {
-            $reservation->cancelled_at = now();
+        if ($nextStatus === 'cancelled') {
+            if (!$reservation->cancelled_at) {
+                $reservation->cancelled_at = now();
+            }
+            if ($reason !== '') {
+                $reservation->cancellation_reason = $reason;
+            }
         }
 
         $reservation->save();
@@ -345,6 +350,7 @@ class RestaurantController extends Controller
                 'status' => $reservation->status,
                 'room_number' => $reservation->room ? $reservation->room->room_number : null,
                 'guest_name' => $reservation->guest ? $reservation->guest->name : null,
+                'cancellation_reason' => $reservation->cancellation_reason,
                 'created_at' => $reservation->created_at->toISOString(),
             ],
         ], 200);
@@ -386,6 +392,7 @@ class RestaurantController extends Controller
         $reservation->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
+            'cancellation_reason' => $reason,
         ]);
 
         try {
@@ -437,7 +444,7 @@ class RestaurantController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Réservation annulée',
-            'data' => ['id' => $reservation->id, 'status' => $reservation->status],
+            'data' => ['id' => $reservation->id, 'status' => $reservation->status, 'cancellation_reason' => $reservation->cancellation_reason],
         ], 200);
     }
 }

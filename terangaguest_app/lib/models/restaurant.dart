@@ -100,6 +100,7 @@ class RestaurantReservation {
   final DateTime createdAt;
   final String? roomNumber;
   final String? guestName;
+  final String? cancellationReason;
 
   RestaurantReservation({
     required this.id,
@@ -113,6 +114,7 @@ class RestaurantReservation {
     required this.createdAt,
     this.roomNumber,
     this.guestName,
+    this.cancellationReason,
   });
 
   factory RestaurantReservation.fromJson(Map<String, dynamic> json) {
@@ -135,6 +137,7 @@ class RestaurantReservation {
           DateTime.now(),
       roomNumber: json['room_number']?.toString(),
       guestName: json['guest_name']?.toString(),
+      cancellationReason: json['cancellation_reason']?.toString(),
     );
   }
 

@@ -80,6 +80,7 @@ class PalaceRequest {
   final DateTime? scheduledTime;
   final String? roomNumber;
   final String? guestName;
+  final String? cancellationReason;
 
   PalaceRequest({
     required this.id,
@@ -92,6 +93,7 @@ class PalaceRequest {
     this.scheduledTime,
     this.roomNumber,
     this.guestName,
+    this.cancellationReason,
   });
 
   static int _parseInt(dynamic v) {
@@ -174,6 +176,7 @@ class PalaceRequest {
               : null);
     final roomNumber = json['room_number'] as String?;
     final guestName = json['guest_name'] as String?;
+    final cancellationReason = json['cancellation_reason'] as String?;
 
     return PalaceRequest(
       id: _parseInt(json['id']),
@@ -186,6 +189,7 @@ class PalaceRequest {
       scheduledTime: scheduledTime,
       roomNumber: roomNumber,
       guestName: guestName,
+      cancellationReason: cancellationReason,
     );
   }
 

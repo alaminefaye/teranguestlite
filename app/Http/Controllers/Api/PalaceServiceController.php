@@ -520,6 +520,7 @@ class PalaceServiceController extends Controller
                         'request_id' => (string) $palaceRequest->id,
                         'request_number' => $palaceRequest->request_number,
                         'status' => $palaceRequest->status,
+                        'reason' => $palaceRequest->cancellation_reason,
                         'screen' => 'PalaceRequests',
                     ]
                 );

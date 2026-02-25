@@ -1003,6 +1003,15 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
             _buildInfoRow(Icons.meeting_room, roomGuestText),
           ],
+          if (reservation.status == 'cancelled' &&
+              reservation.cancellationReason != null &&
+              reservation.cancellationReason!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              Icons.cancel_outlined,
+              'Motif : ${reservation.cancellationReason}',
+            ),
+          ],
         ],
       ),
     );
