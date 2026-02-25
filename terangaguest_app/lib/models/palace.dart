@@ -194,7 +194,7 @@ class PalaceRequest {
       case 'pending':
         return 'En attente';
       case 'in_progress':
-        return 'En cours';
+        return 'Acceptée';
       case 'completed':
         return 'Terminée';
       case 'cancelled':

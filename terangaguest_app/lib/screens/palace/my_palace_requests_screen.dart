@@ -551,9 +551,9 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
     if (request.status == 'pending') {
       actions.add({'action': 'accept', 'label': 'Accepter'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'cancel', 'label': 'Refuser'});
     } else if (request.status == 'in_progress') {
-      actions.add({'action': 'complete', 'label': 'Marquer comme terminée'});
+      actions.add({'action': 'complete', 'label': 'Clôturer'});
       actions.add({'action': 'cancel', 'label': 'Annuler'});
     }
 
@@ -616,11 +616,13 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       title = 'Accepter la demande';
       message = 'Accepter cette demande de service palace / conciergerie ?';
     } else if (action == 'complete') {
-      title = 'Marquer comme terminée';
-      message = 'Marquer cette demande comme terminée ?';
+      title = 'Clôturer la demande';
+      message = 'Clôturer cette demande ?';
     } else if (action == 'cancel') {
-      title = l10n.cancel;
-      message = 'Annuler cette demande de service palace ?';
+      title = request.status == 'pending' ? 'Refuser la demande' : l10n.cancel;
+      message = request.status == 'pending'
+          ? 'Refuser cette demande de service palace ?'
+          : 'Annuler cette demande de service palace ?';
     } else {
       return;
     }
@@ -752,7 +754,9 @@ class PalaceRequestDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0),
+                padding: EdgeInsets.all(
+                  MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0,
+                ),
                 child: Row(
                   children: [
                     IconButton(
@@ -762,7 +766,9 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    SizedBox(width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12,
+                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -771,7 +777,9 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                           Text(
                             request.requestNumber ?? request.serviceName,
                             style: TextStyle(
-                              fontSize: MediaQuery.sizeOf(context).width < 600 ? 20.0 : 24.0,
+                              fontSize: MediaQuery.sizeOf(context).width < 600
+                                  ? 20.0
+                                  : 24.0,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -929,16 +937,15 @@ class _PalaceStatusBadge extends StatelessWidget {
   const _PalaceStatusBadge({required this.status});
 
   String _label(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     switch (status) {
       case 'pending':
-        return l10n.statusPending;
+        return 'En attente';
       case 'in_progress':
-        return l10n.statusInProgress;
+        return 'Acceptée';
       case 'completed':
-        return l10n.statusCompleted;
+        return 'Terminée';
       case 'cancelled':
-        return l10n.statusCancelled;
+        return 'Annulée';
       default:
         return status;
     }
@@ -1014,9 +1021,9 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
 
     if (request.status == 'pending') {
       actions.add({'action': 'accept', 'label': 'Accepter'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'cancel', 'label': 'Refuser'});
     } else if (request.status == 'in_progress') {
-      actions.add({'action': 'complete', 'label': 'Marquer comme terminée'});
+      actions.add({'action': 'complete', 'label': 'Clôturer'});
       actions.add({'action': 'cancel', 'label': 'Annuler'});
     }
 
@@ -1036,11 +1043,15 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
         title = 'Accepter la demande';
         message = 'Accepter cette demande de service palace / conciergerie ?';
       } else if (action == 'complete') {
-        title = 'Marquer comme terminée';
-        message = 'Marquer cette demande comme terminée ?';
+        title = 'Clôturer la demande';
+        message = 'Clôturer cette demande ?';
       } else if (action == 'cancel') {
-        title = l10n.cancel;
-        message = 'Annuler cette demande de service palace ?';
+        title = request.status == 'pending'
+            ? 'Refuser la demande'
+            : l10n.cancel;
+        message = request.status == 'pending'
+            ? 'Refuser cette demande de service palace ?'
+            : 'Annuler cette demande de service palace ?';
       } else {
         return;
       }

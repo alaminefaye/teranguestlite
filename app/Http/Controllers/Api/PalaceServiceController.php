@@ -491,6 +491,12 @@ class PalaceServiceController extends Controller
         }
 
         $palaceRequest->status = $statusTransitions[$action][$palaceRequest->status];
+        if ($action === 'cancel' && !empty($validated['reason'])) {
+            $palaceRequest->cancellation_reason = $validated['reason'];
+            $palaceRequest->cancelled_at = now();
+        } elseif ($action === 'accept') {
+            $palaceRequest->confirmed_at = now();
+        }
         $palaceRequest->save();
 
         try {
@@ -528,6 +534,7 @@ class PalaceServiceController extends Controller
                 'id' => $palaceRequest->id,
                 'request_number' => $palaceRequest->request_number,
                 'status' => $palaceRequest->status,
+                'cancellation_reason' => $palaceRequest->cancellation_reason,
                 'room_number' => $palaceRequest->room ? $palaceRequest->room->room_number : null,
                 'guest_name' => $palaceRequest->guest ? $palaceRequest->guest->name : null,
             ],
