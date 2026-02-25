@@ -477,27 +477,33 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        Row(
           children: actions.map((a) {
             final isCancel = a['action'] == 'cancel';
-            return SizedBox(
-              height: 34,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isCancel ? Colors.red : AppTheme.accentGold,
-                  foregroundColor: isCancel
-                      ? Colors.white
-                      : AppTheme.primaryDark,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                ),
-                onPressed: () => _handleAction(reservation, a['action']!),
-                child: Text(
-                  a['label']!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+            final isLast = a == actions.last;
+            return Expanded(
+              child: Container(
+                height: 34,
+                margin: EdgeInsets.only(right: isLast ? 0 : 8),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isCancel
+                        ? Colors.red
+                        : AppTheme.accentGold,
+                    foregroundColor: isCancel
+                        ? Colors.white
+                        : AppTheme.primaryDark,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
+                  onPressed: () => _handleAction(reservation, a['action']!),
+                  child: Text(
+                    a['label']!,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
