@@ -439,7 +439,10 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       ),
                     ),
                   ],
-                  if (isStaffOrAdmin) _buildStaffActions(reservation),
+                  if (isStaffOrAdmin ||
+                      reservation.status == 'pending' ||
+                      reservation.status == 'confirmed')
+                    _buildActions(reservation),
                 ],
               ),
             ],
@@ -449,17 +452,16 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     );
   }
 
-  Widget _buildStaffActions(SpaReservation reservation) {
+  Widget _buildActions(SpaReservation reservation) {
     final auth = context.read<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
-    if (!isStaffOrAdmin) {
-      return const SizedBox.shrink();
-    }
 
     final actions = <Map<String, String>>[];
 
     if (reservation.status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer'});
+      if (isStaffOrAdmin) {
+        actions.add({'action': 'confirm', 'label': 'Confirmer'});
+      }
       actions.add({'action': 'cancel', 'label': 'Annuler'});
       actions.add({'action': 'reschedule', 'label': 'Replanifier'});
     } else if (reservation.status == 'confirmed') {
@@ -490,7 +492,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                       : AppTheme.primaryDark,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                 ),
-                onPressed: () => _handleStaffAction(reservation, a['action']!),
+                onPressed: () => _handleAction(reservation, a['action']!),
                 child: Text(
                   a['label']!,
                   style: const TextStyle(
@@ -506,10 +508,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
     );
   }
 
-  Future<void> _handleStaffAction(
-    SpaReservation reservation,
-    String action,
-  ) async {
+  Future<void> _handleAction(SpaReservation reservation, String action) async {
     final l10n = AppLocalizations.of(context);
 
     DateTime? newDate;

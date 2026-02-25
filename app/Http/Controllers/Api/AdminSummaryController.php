@@ -63,6 +63,10 @@ class AdminSummaryController extends Controller
             'today' => SpaReservation::where('enterprise_id', $enterpriseId)
                 ->whereDate('reservation_date', today())
                 ->count(),
+            'cancelled_today' => SpaReservation::where('enterprise_id', $enterpriseId)
+                ->where('status', 'cancelled')
+                ->whereDate('updated_at', today())
+                ->count(),
         ];
 
         $excursionBookings = [

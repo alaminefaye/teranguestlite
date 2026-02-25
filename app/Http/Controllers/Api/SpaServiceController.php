@@ -254,20 +254,9 @@ class SpaServiceController extends Controller
     public function updateReservationStatus(Request $request, $id)
     {
         $user = $request->user();
-
-        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Accès non autorisé',
-            ], 403);
-        }
-
-        if (!($user->isAdmin() || $user->isStaff())) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Accès réservé au staff de l’hôtel',
-            ], 403);
-        }
+        $isStaffOrAdmin = method_exists($user, 'isAdmin') && method_exists($user, 'isStaff')
+            ? ($user->isAdmin() || $user->isStaff())
+            : false;
 
         $reservation = SpaReservation::with(['spaService', 'room', 'guest'])->find($id);
 
@@ -276,6 +265,13 @@ class SpaServiceController extends Controller
                 'success' => false,
                 'message' => 'Réservation non trouvée',
             ], 404);
+        }
+
+        if (!$isStaffOrAdmin && $reservation->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
         }
 
         $action = $request->input('action');
@@ -311,7 +307,7 @@ class SpaServiceController extends Controller
 
             $reservation->reservation_date = $request->input('date');
             $reservation->reservation_time = $request->input('time');
-            $reservation->status = 'pending_reschedule';
+            $reservation->status = $isStaffOrAdmin ? 'pending_reschedule' : 'pending';
 
             $reservation->save();
         } else {
@@ -342,57 +338,85 @@ class SpaServiceController extends Controller
         }
 
         try {
-            if ($reservation->room_id) {
-                $firebaseService = app(\App\Services\FirebaseNotificationService::class);
-                $serviceName = $reservation->spaService->name ?? 'Spa';
-                $dateStr = $reservation->reservation_date->format('d/m/Y');
-                $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
+            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $serviceName = $reservation->spaService->name ?? 'Spa';
+            $dateStr = $reservation->reservation_date->format('d/m/Y');
+            $timeStr = \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i');
 
-                if ($action === 'reschedule') {
-                    $title = 'Nouvel horaire spa proposé';
-                    $body = "L'horaire demandé pour {$serviceName} n'est plus disponible. "
-                        . "Nous vous proposons le {$dateStr} à {$timeStr}. "
-                        . 'Veuillez confirmer ou annuler depuis vos réservations spa.';
+            if (!$isStaffOrAdmin) {
+                $guestName = $reservation->guest->name ?? 'Un client';
+                $roomNumber = $reservation->room->room_number ?? '';
+                $roomText = $roomNumber ? " (Chambre $roomNumber)" : "";
 
-                    $firebaseService->sendToClientOfRoom(
-                        $reservation->room_id,
-                        $title,
-                        $body,
+                if ($action === 'cancel') {
+                    $firebaseService->sendToTopics(
+                        ["admin_{$reservation->enterprise_id}", "staff_{$reservation->enterprise_id}"],
+                        'Annulation Spa',
+                        "$guestName$roomText a annulé sa réservation pour $serviceName.",
                         [
-                            'type' => 'spa_reservation_rescheduled',
+                            'type' => 'spa_cancelled',
                             'reservation_id' => (string) $reservation->id,
-                            'screen' => 'MySpaReservations',
                         ]
                     );
-                } else {
-                    $statusMessages = [
-                        'confirmed' => 'Votre réservation spa a été confirmée.',
-                        'cancelled' => 'Votre réservation spa a été annulée.',
-                    ];
-                    $title = 'Réservation spa';
-                    $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation spa mis à jour.';
-
-                    if ($reservation->status === 'cancelled' && $reason !== '') {
-                        $body .= ' Motif : ' . $reason;
-                    }
-
-                    $data = [
-                        'type' => 'spa_reservation_status',
-                        'reservation_id' => (string) $reservation->id,
-                        'status' => $reservation->status,
-                        'screen' => 'MySpaReservations',
-                    ];
-
-                    if ($reason !== '') {
-                        $data['reason'] = $reason;
-                    }
-
-                    $firebaseService->sendToClientOfRoom(
-                        $reservation->room_id,
-                        $title,
-                        $body,
-                        $data
+                } elseif ($action === 'reschedule') {
+                    $firebaseService->sendToTopics(
+                        ["admin_{$reservation->enterprise_id}", "staff_{$reservation->enterprise_id}"],
+                        'Modification Spa',
+                        "$guestName$roomText a demandé à replanifier sa réservation pour $serviceName au $dateStr à $timeStr.",
+                        [
+                            'type' => 'spa_new',
+                            'reservation_id' => (string) $reservation->id,
+                        ]
                     );
+                }
+            } else {
+                if ($reservation->room_id) {
+                    if ($action === 'reschedule') {
+                        $title = 'Nouvel horaire spa proposé';
+                        $body = "L'horaire demandé pour {$serviceName} n'est plus disponible. "
+                            . "Nous vous proposons le {$dateStr} à {$timeStr}. "
+                            . 'Veuillez confirmer ou annuler depuis vos réservations spa.';
+
+                        $firebaseService->sendToClientOfRoom(
+                            $reservation->room_id,
+                            $title,
+                            $body,
+                            [
+                                'type' => 'spa_reservation_rescheduled',
+                                'reservation_id' => (string) $reservation->id,
+                                'screen' => 'MySpaReservations',
+                            ]
+                        );
+                    } else {
+                        $statusMessages = [
+                            'confirmed' => 'Votre réservation spa a été confirmée.',
+                            'cancelled' => 'Votre réservation spa a été annulée.',
+                        ];
+                        $title = 'Réservation spa';
+                        $body = $statusMessages[$reservation->status] ?? 'Statut de votre réservation spa mis à jour.';
+
+                        if ($reservation->status === 'cancelled' && $reason !== '') {
+                            $body .= ' Motif : ' . $reason;
+                        }
+
+                        $data = [
+                            'type' => 'spa_reservation_status',
+                            'reservation_id' => (string) $reservation->id,
+                            'status' => $reservation->status,
+                            'screen' => 'MySpaReservations',
+                        ];
+
+                        if ($reason !== '') {
+                            $data['reason'] = $reason;
+                        }
+
+                        $firebaseService->sendToClientOfRoom(
+                            $reservation->room_id,
+                            $title,
+                            $body,
+                            $data
+                        );
+                    }
                 }
             }
         } catch (\Exception $e) {

@@ -11,6 +11,7 @@ class AdminSummary {
   final int restaurantToday;
   final int spaPending;
   final int spaRescheduledConfirmed;
+  final int spaCancelledToday;
   final int spaToday;
   final int excursionsPending;
   final int excursionsToday;
@@ -32,6 +33,7 @@ class AdminSummary {
     required this.restaurantToday,
     required this.spaPending,
     required this.spaRescheduledConfirmed,
+    required this.spaCancelledToday,
     required this.spaToday,
     required this.excursionsPending,
     required this.excursionsToday,
@@ -71,6 +73,7 @@ class AdminSummary {
       restaurantToday: toInt(restaurants, 'today'),
       spaPending: toInt(spa, 'pending'),
       spaRescheduledConfirmed: toInt(spa, 'rescheduled_confirmed'),
+      spaCancelledToday: toInt(spa, 'cancelled_today'),
       spaToday: toInt(spa, 'today'),
       excursionsPending: toInt(excursions, 'pending'),
       excursionsToday: toInt(excursions, 'today'),

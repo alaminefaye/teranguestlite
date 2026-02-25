@@ -153,7 +153,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _enqueueNewSpaReservationsForAlert(context);
       messages.add('Nouvelle réservation Spa & Bien-être à traiter');
     }
-    if (newSummary.spaPending < oldSummary.spaPending) {
+    if (newSummary.spaCancelledToday > oldSummary.spaCancelledToday) {
       _enqueueCancelledSpaReservationsForAlert(context);
     }
     if (newSummary.spaRescheduledConfirmed >
@@ -2741,311 +2741,224 @@ class _CancelledSpaCarouselDialogState
     super.dispose();
   }
 
+  double get _progress => _secondsRemaining / 20;
+
   @override
   Widget build(BuildContext context) {
     if (widget.reservations.isEmpty) return const SizedBox.shrink();
     if (_currentIndex >= widget.reservations.length) {
       _currentIndex = 0; // fallback if list size changes unexpectedly
     }
-    final currentReservation = widget.reservations[_currentIndex];
-    final roomStr =
-        currentReservation.roomNumber != null &&
-            currentReservation.roomNumber!.isNotEmpty
-        ? "Chambre ${currentReservation.roomNumber}"
-        : "Chambre inconnue";
-    final guestStr =
-        currentReservation.guestName != null &&
-            currentReservation.guestName!.isNotEmpty
-        ? currentReservation.guestName
-        : "Client inconnu";
-    final isMulti = widget.reservations.length > 1;
+    final reservation = widget.reservations[_currentIndex];
+    final roomLabel =
+        reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
+        ? 'Chambre ${reservation.roomNumber}'
+        : 'Chambre non spécifiée';
+    final guestName =
+        reservation.guestName != null && reservation.guestName!.isNotEmpty
+        ? reservation.guestName!
+        : 'Client inconnu';
 
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 480,
-          decoration: BoxDecoration(
-            color: AppTheme.primaryDark,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.errorRed, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 30,
-                spreadRadius: 10,
-              ),
-            ],
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.cancel_outlined,
+              color: AppTheme.accentGold,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.errorRed.withValues(alpha: 0.15),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(22),
-                    topRight: Radius.circular(22),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Réservation Spa annulée',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Réservation #${reservation.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    reservation.serviceName.isNotEmpty
+                        ? reservation.serviceName
+                        : 'Service Spa',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: 24,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.errorRed.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.cancel,
-                        color: AppTheme.errorRed,
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Réservation Spa Annulée",
-                            style: TextStyle(
-                              color: AppTheme.errorRed,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            isMulti
-                                ? "${_currentIndex + 1} sur ${widget.reservations.length}"
-                                : "Une annulation récente",
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              ],
+            ),
+          ),
+          if (reservation.specialRequests != null &&
+              reservation.specialRequests!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.3),
                 ),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 180,
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                      _secondsRemaining = 20;
-                    });
-                  },
-                  itemCount: widget.reservations.length,
-                  itemBuilder: (context, index) {
-                    final res = widget.reservations[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person,
-                                color: AppTheme.textGray,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  guestStr!,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.meeting_room,
-                                color: AppTheme.textGray,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                roomStr,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.spa,
-                                color: AppTheme.textGray,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                res.serviceName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (res.specialRequests != null &&
-                              res.specialRequests!.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.info_outline,
-                                  color: AppTheme.textGray,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    "Motif : ${res.specialRequests!}",
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 15,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              if (isMulti)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(widget.reservations.length, (index) {
-                    final isSelected = _currentIndex == index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: isSelected ? 24 : 8,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppTheme.errorRed
-                            : Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    );
-                  }),
-                ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context, rootNavigator: true).pop(null);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Fermer',
-                          style: TextStyle(
-                            color: AppTheme.textGray,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(
-                            context,
-                            rootNavigator: true,
-                          ).pop(currentReservation);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.errorRed,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Ouvrir',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Stack(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 4,
-                    width: double.infinity,
-                    color: Colors.white.withValues(alpha: 0.05),
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppTheme.accentGold,
+                    size: 20,
                   ),
-                  AnimatedContainer(
-                    duration: const Duration(seconds: 1),
-                    curve: Curves.linear,
-                    height: 4,
-                    width: (480 * (_secondsRemaining / 20)),
-                    decoration: BoxDecoration(
-                      color: AppTheme.errorRed.withValues(alpha: 0.5),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Motif : ${reservation.specialRequests!}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _progress,
+              backgroundColor: AppTheme.textGray.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.accentGold,
+              ),
+              minHeight: 4,
+            ),
+          ),
+          if (widget.reservations.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.reservations.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.reservations.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop(reservation);
+          },
+          child: const Text(
+            'Voir détails',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -3098,259 +3011,216 @@ class _RescheduledSpaCarouselDialogState
     super.dispose();
   }
 
+  double get _progress => _secondsLeft / 15;
+
   @override
   Widget build(BuildContext context) {
     if (widget.reservations.isEmpty) return const SizedBox.shrink();
 
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: const BoxConstraints(maxWidth: 450),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryDark,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.blue,
-              width: 2,
-            ), // Blue border for "updated/rescheduled" info
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withValues(alpha: 0.3),
-                blurRadius: 24,
-                spreadRadius: 8,
-              ),
-            ],
+    final reservation = widget.reservations[_currentIndex];
+    final roomLabel =
+        reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
+        ? 'Chambre ${reservation.roomNumber}'
+        : 'Chambre non spécifiée';
+    final guestName =
+        reservation.guestName != null && reservation.guestName!.isNotEmpty
+        ? reservation.guestName!
+        : 'Client inconnu';
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(Icons.update_rounded, color: AppTheme.accentGold),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: 24,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(22),
-                    topRight: Radius.circular(22),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.update_rounded,
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Spa : Horaire Accepté',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Réservation #${reservation.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    reservation.serviceName.isNotEmpty
+                        ? reservation.serviceName
+                        : 'Service Spa',
+                    style: const TextStyle(
                       color: Colors.white,
-                      size: 32,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Spa : Horaire Accepté',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (widget.reservations.length > 1) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              '${_currentIndex + 1} sur ${widget.reservations.length}',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 180,
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                      _secondsLeft = 15; // Reset timer on swipe
-                    });
-                  },
-                  itemCount: widget.reservations.length,
-                  itemBuilder: (context, index) {
-                    final res = widget.reservations[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (res.guestName != null) ...[
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.person,
-                                  color: AppTheme.accentGold,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    res.guestName!,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          if (res.roomNumber != null) ...[
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.meeting_room,
-                                  color: AppTheme.textGray,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Chambre ${res.roomNumber!}',
-                                  style: const TextStyle(
-                                    color: AppTheme.textGray,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.spa_outlined,
-                                color: AppTheme.textGray,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  res.serviceName.isNotEmpty
-                                      ? res.serviceName
-                                      : 'Service Spa',
-                                  style: const TextStyle(
-                                    color: AppTheme.textGray,
-                                    fontSize: 15,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today,
-                                color: Colors.blue,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Nouvel horaire confirmé',
-                                  style: const TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              if (widget.reservations.length > 1) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    widget.reservations.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _currentIndex == index
-                            ? Colors.blue
-                            : AppTheme.textGray.withValues(alpha: 0.3),
-                      ),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
               ],
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: Row(
-                  children: [
-                    Text(
-                      'Fermeture dans ${_secondsLeft}s',
-                      style: TextStyle(
-                        color: AppTheme.textGray.withValues(alpha: 0.7),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(), // -> null
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.textGray,
-                      ),
-                      child: const Text('Fermer'),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: () {
-                        // Return the currently viewed reservation
-                        Navigator.of(
-                          context,
-                        ).pop(widget.reservations[_currentIndex]);
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Voir détails'),
-                    ),
-                  ],
-                ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryDark.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.accentGold.withValues(alpha: 0.3),
               ),
-            ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  color: AppTheme.accentGold,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Nouvel horaire confirmé',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _progress,
+              backgroundColor: AppTheme.textGray.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.accentGold,
+              ),
+              minHeight: 4,
+            ),
+          ),
+          if (widget.reservations.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.reservations.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.reservations.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop(reservation);
+          },
+          child: const Text(
+            'Voir détails',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
     );
   }
 }
