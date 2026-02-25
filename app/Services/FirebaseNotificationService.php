@@ -50,7 +50,7 @@ class FirebaseNotificationService
         }
 
         $cacheKey = 'firebase_oauth_token_' . md5($this->credentialsPath);
-        
+
         // Check cache first (token valid for 1 hour, we cache for 50 minutes)
         $cachedToken = Cache::get($cacheKey);
         if ($cachedToken) {
@@ -152,21 +152,23 @@ class FirebaseNotificationService
      */
     public function sendToUser(User $user, string $title, string $body, array $data = [])
     {
+        // Even if there is no FCM token, we still want to store it for in-app polling
         if (empty($user->fcm_token)) {
-            Log::warning("User {$user->id} has no FCM token");
+            Log::warning("User {$user->id} has no FCM token. Storing notification for in-app polling only.");
+            $this->storeForInAppPolling($user, $title, $body, $data);
             return false;
         }
-    
+
         // Try direct HTTP API first (more reliable on shared hosting)
         $result = $this->sendViaHttpApi($user->fcm_token, $title, $body, $data);
         if ($result) {
             return true;
         }
-    
+
         // If FCM fails due to hosting restrictions, store for in-app polling
         Log::warning("FCM failed, storing notification for in-app polling for user {$user->id}");
         $this->storeForInAppPolling($user, $title, $body, $data);
-    
+
         // Fallback to SDK method (will likely also fail but try anyway)
         return $this->sendViaSdk($user, $title, $body, $data);
     }
@@ -190,7 +192,7 @@ class FirebaseNotificationService
             Log::error("Failed to store notification for polling: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Send notification via direct HTTP API call with explicit OAuth2 token
      */
@@ -202,21 +204,21 @@ class FirebaseNotificationService
                 Log::error('Cannot send notification: failed to obtain OAuth2 access token');
                 return false;
             }
-        
+
             if (!$this->projectId) {
                 Log::error('Cannot send notification: FIREBASE_PROJECT_ID not configured');
                 return false;
             }
-    
+
             $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
-    
+
             // Build message payload - data must be a map (object), not a list
             $messageData = $this->convertDataValuesToString($data);
             // Ensure data is never empty - add a default field if needed
             if (empty($messageData)) {
                 $messageData = ['type' => 'notification'];
             }
-        
+
             $messagePayload = [
                 'message' => [
                     'token' => $fcmToken,
@@ -242,13 +244,13 @@ class FirebaseNotificationService
                     ],
                 ],
             ];
-    
+
             // Try cURL first (bypasses Laravel HTTP client proxy issues)
             $result = $this->sendViaCurl($url, $messagePayload, $accessToken);
             if ($result) {
                 return true;
             }
-    
+
             // Fallback to Laravel HTTP client
             return $this->sendViaLaravelHttp($url, $messagePayload, $accessToken, $fcmToken);
         } catch (\Exception $e) {
@@ -256,7 +258,7 @@ class FirebaseNotificationService
             return false;
         }
     }
-    
+
     /**
      * Send notification using raw cURL (bypasses proxy issues with Laravel HTTP client).
      * Uses options to avoid proxy stripping Authorization and to resend auth on redirects.
@@ -330,7 +332,7 @@ class FirebaseNotificationService
 
         return false;
     }
-    
+
     /**
      * Send notification using Laravel HTTP client (fallback)
      */
@@ -394,7 +396,7 @@ class FirebaseNotificationService
             return false;
         }
     }
-    
+
     /**
      * Convert data array values to strings (FCM requirement)
      */
@@ -406,7 +408,7 @@ class FirebaseNotificationService
         }
         return $result;
     }
-    
+
     /**
      * Send notification via Firebase SDK (fallback method)
      */
@@ -417,7 +419,7 @@ class FirebaseNotificationService
                 Log::error('Firebase messaging not initialized');
                 return false;
             }
-    
+
             $message = CloudMessage::new()
                 ->withToken($user->fcm_token)
                 ->withNotification(Notification::create($title, $body))
@@ -441,9 +443,9 @@ class FirebaseNotificationService
                         ],
                     ])
                 );
-    
+
             $this->messaging->send($message);
-    
+
             Log::info("Notification sent via SDK to user {$user->id}: {$title}");
             return true;
         } catch (\Exception $e) {
@@ -481,7 +483,7 @@ class FirebaseNotificationService
         }
 
         Log::info("Multicast notification: {$successCount} succeeded, {$failCount} failed out of " . count($tokens) . " total");
-        
+
         return $successCount > 0;
     }
 
@@ -501,7 +503,7 @@ class FirebaseNotificationService
                 ->withData($data);
 
             $this->messaging->sendMulticast($message, $tokens);
-            
+
             Log::info("Notification sent via SDK multicast to " . count($tokens) . " users: {$title}");
             return true;
         } catch (\Exception $e) {
@@ -534,7 +536,7 @@ class FirebaseNotificationService
     public function getUserForRoom(int $roomId): ?User
     {
         $room = Room::withoutGlobalScope('enterprise')->find($roomId);
-        if (! $room) {
+        if (!$room) {
             Log::warning("getUserForRoom: room_id {$roomId} not found");
             return null;
         }
@@ -546,7 +548,7 @@ class FirebaseNotificationService
             ->where('fcm_token', '!=', '')
             ->first();
 
-        if (! $user) {
+        if (!$user) {
             $user = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
@@ -555,7 +557,7 @@ class FirebaseNotificationService
                 ->first();
         }
 
-        if (! $user) {
+        if (!$user) {
             Log::warning("getUserForRoom: no guest user with FCM token for room_id={$roomId}, room_number={$room->room_number}, enterprise_id={$room->enterprise_id}. The tablet must be logged in with the room account at least once to register the token.");
         }
 
@@ -568,7 +570,7 @@ class FirebaseNotificationService
     public function sendToClientOfRoom(int $roomId, string $title, string $body, array $data = []): bool
     {
         $user = $this->getUserForRoom($roomId);
-        if (! $user) {
+        if (!$user) {
             Log::warning("sendToClientOfRoom: no recipient for room_id={$roomId}. Connect the tablet with the room account (Client Chambre XXX) and ensure notifications are allowed.");
             return false;
         }
@@ -659,7 +661,7 @@ class FirebaseNotificationService
     {
         $title = "Nouvelle commande #{$order->order_number}";
         $body = "Votre commande d'un montant de {$order->formatted_total} a été reçue.";
-        
+
         return $this->sendToUser($user, $title, $body, [
             'type' => 'order',
             'order_id' => (string) $order->id,
@@ -684,7 +686,7 @@ class FirebaseNotificationService
 
         $title = "Commande #{$order->order_number}";
         $body = $statusMessages[$order->status] ?? "Statut de commande mis à jour";
-        
+
         return $this->sendToUser($user, $title, $body, [
             'type' => 'order_status',
             'order_id' => (string) $order->id,
@@ -701,7 +703,7 @@ class FirebaseNotificationService
     {
         $title = "Réservation confirmée";
         $body = "Votre réservation #{$reservation->reservation_number} a été confirmée.";
-        
+
         return $this->sendToUser($user, $title, $body, [
             'type' => 'reservation',
             'reservation_id' => (string) $reservation->id,

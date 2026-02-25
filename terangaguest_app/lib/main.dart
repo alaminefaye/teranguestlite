@@ -27,6 +27,7 @@ import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
+import 'providers/notifications_provider.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
 import 'screens/hotel_infos/chatbot_screen.dart';
@@ -94,6 +95,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
       child: const _LocalizedApp(),
     );
