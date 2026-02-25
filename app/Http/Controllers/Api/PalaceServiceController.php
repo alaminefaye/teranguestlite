@@ -511,18 +511,23 @@ class PalaceServiceController extends Controller
                 $title = "Demande palace #{$palaceRequest->request_number}";
                 $body = $statusMessages[$palaceRequest->status] ?? 'Statut de votre demande palace mis à jour';
 
+                $data = [
+                    'type' => 'palace_status',
+                    'request_id' => (string) $palaceRequest->id,
+                    'request_number' => $palaceRequest->request_number,
+                    'status' => $palaceRequest->status,
+                    'screen' => 'PalaceRequests',
+                ];
+
+                if (!empty($palaceRequest->cancellation_reason)) {
+                    $data['reason'] = $palaceRequest->cancellation_reason;
+                }
+
                 $firebaseService->sendToClientOfRoom(
                     $palaceRequest->room_id,
                     $title,
                     $body,
-                    [
-                        'type' => 'palace_status',
-                        'request_id' => (string) $palaceRequest->id,
-                        'request_number' => $palaceRequest->request_number,
-                        'status' => $palaceRequest->status,
-                        'reason' => $palaceRequest->cancellation_reason,
-                        'screen' => 'PalaceRequests',
-                    ]
+                    $data
                 );
             }
         } catch (\Exception $e) {

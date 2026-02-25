@@ -414,7 +414,9 @@ class FirebaseNotificationService
     {
         $result = [];
         foreach ($data as $key => $value) {
-            $result[$key] = (string) $value;
+            if ($value !== null) {
+                $result[$key] = (string) $value;
+            }
         }
         return $result;
     }
@@ -435,12 +437,14 @@ class FirebaseNotificationService
                 return false;
             }
 
+            $safeData = $this->convertDataValuesToString($data);
+
             $success = false;
             foreach ($tokens as $token) {
                 $message = CloudMessage::new()
                     ->withToken($token)
                     ->withNotification(Notification::create($title, $body))
-                    ->withData($data)
+                    ->withData($safeData)
                     ->withAndroidConfig(
                         AndroidConfig::fromArray([
                             'priority' => 'high',
