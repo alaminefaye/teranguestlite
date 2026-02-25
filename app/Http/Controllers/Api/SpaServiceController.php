@@ -478,7 +478,7 @@ class SpaServiceController extends Controller
             $roomNumber = $reservation->room ? $reservation->room->room_number : null;
             $guestName = $reservation->guest ? $reservation->guest->name : null;
 
-            $body = "Réservation spa {$serviceName} annulée par le client pour le {$dateStr} à {$timeStr}";
+            $body = "Réservation spa {$serviceName} annulée pour le {$dateStr} à {$timeStr}";
             if ($roomNumber) {
                 $body .= " (Chambre {$roomNumber})";
             }
@@ -491,7 +491,6 @@ class SpaServiceController extends Controller
                 'type' => 'spa_reservation_status',
                 'reservation_id' => (string) $reservation->id,
                 'status' => $reservation->status,
-                'screen' => 'AdminSpaReservations',
                 'service_name' => $serviceName,
                 'date' => $dateStr,
                 'time' => $timeStr,
@@ -503,12 +502,31 @@ class SpaServiceController extends Controller
                 $data['reason'] = $reason;
             }
 
-            $firebaseService->sendToStaff(
-                $reservation->enterprise_id,
-                'Réservation spa annulée par le client',
-                $body,
-                $data
-            );
+            if ($isStaffOrAdmin) {
+                // Admin a annulé -> notifier le client
+                $data['screen'] = 'MySpaReservations';
+                $clientBody = "Votre réservation spa pour {$serviceName} le {$dateStr} à {$timeStr} a été annulée.";
+                if ($reason !== '') {
+                    $clientBody .= ' Motif : ' . $reason;
+                }
+                if ($reservation->room_id) {
+                    $firebaseService->sendToClientOfRoom(
+                        $reservation->room_id,
+                        'Réservation spa annulée',
+                        $clientBody,
+                        $data
+                    );
+                }
+            } else {
+                // Client a annulé -> notifier le staff
+                $data['screen'] = 'AdminSpaReservations';
+                $firebaseService->sendToStaff(
+                    $reservation->enterprise_id,
+                    'Réservation spa annulée par le client',
+                    $body,
+                    $data
+                );
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error(
                 'Firebase notification error (spa reservation cancel): ' . $e->getMessage()
