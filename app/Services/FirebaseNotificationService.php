@@ -492,7 +492,7 @@ class FirebaseNotificationService
                     // It's an array representation of a model, we need to load relations or refetch
                     // The easiest approach here is just to extract tokens if attached, but usually they aren't.
                     // Instead, look up the user by ID
-                    $model = \App\Models\User::with('fcmTokens')->find($user['id']);
+                    $model = User::with('fcmTokens')->find($user['id']);
                     return $model ? $model->fcmTokens->pluck('token') : [];
                 } elseif (is_object($user)) {
                     return $user->fcmTokens ? $user->fcmTokens->pluck('token') : [];

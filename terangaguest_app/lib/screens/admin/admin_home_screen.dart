@@ -84,6 +84,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final List<SpaReservation> _newSpaQueue = [];
   final Set<int> _alertedSpaIds = {};
 
+  bool _isShowingCancelledSpaDialog = false;
+  final List<SpaReservation> _cancelledSpaQueue = [];
+  final Set<int> _alertedCancelledSpaIds = {};
+
   bool _isShowingAdminEventDialog = false;
   final List<_AdminEventAlert> _adminEventQueue = [];
 
@@ -144,6 +148,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (newSummary.spaPending > oldSummary.spaPending) {
       _enqueueNewSpaReservationsForAlert(context);
       messages.add('Nouvelle réservation Spa & Bien-être à traiter');
+    }
+    if (newSummary.spaPending < oldSummary.spaPending) {
+      _enqueueCancelledSpaReservationsForAlert(context);
     }
     if (newSummary.excursionsPending > oldSummary.excursionsPending) {
       messages.add('Nouvelle demande Excursions & Activités à traiter');
@@ -644,6 +651,75 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (_newSpaQueue.isNotEmpty && context.mounted) {
       _showNewSpaCarousel(context);
     }
+  }
+
+  void _showCancelledSpaCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_cancelledSpaQueue.isEmpty) {
+      _isShowingCancelledSpaDialog = false;
+      return;
+    }
+    _isShowingCancelledSpaDialog = true;
+    final reservationsToShow = List<SpaReservation>.from(_cancelledSpaQueue);
+    _cancelledSpaQueue.clear();
+
+    final navigator = Navigator.of(context);
+    HapticHelper.heavyImpact();
+
+    final selectedReservation = await showDialog<SpaReservation?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _CancelledSpaCarouselDialog(reservations: reservationsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingCancelledSpaDialog = false;
+      return;
+    }
+    _isShowingCancelledSpaDialog = false;
+    if (selectedReservation != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) =>
+              SpaReservationDetailScreen(reservation: selectedReservation),
+        ),
+      );
+    }
+    if (_cancelledSpaQueue.isNotEmpty && context.mounted) {
+      _showCancelledSpaCarousel(context);
+    }
+  }
+
+  Future<void> _enqueueCancelledSpaReservationsForAlert(
+    BuildContext context,
+  ) async {
+    try {
+      final result = await _spaApi.getMySpaReservations(
+        period: 'today', // we only care about recent cancellations today
+        page: 1,
+        perPage: 20,
+      );
+      final reservations = result['reservations'] as List<SpaReservation>;
+      final cancelledReservations = reservations.where(
+        (r) => r.status == 'cancelled',
+      );
+      for (final reservation in cancelledReservations) {
+        // Prevent alerting old cancellations that were loaded initially
+        if (!_alertedCancelledSpaIds.contains(reservation.id)) {
+          _alertedCancelledSpaIds.add(reservation.id);
+          // Only alert if we've seen the app running for a bit, or checking timestamp would be better
+          // but relying on delta triggers is usually enough.
+          _cancelledSpaQueue.add(reservation);
+        }
+      }
+      if (!_isShowingCancelledSpaDialog &&
+          _cancelledSpaQueue.isNotEmpty &&
+          context.mounted) {
+        _showCancelledSpaCarousel(context);
+      }
+    } catch (_) {}
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -2537,6 +2613,364 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CancelledSpaCarouselDialog extends StatefulWidget {
+  final List<SpaReservation> reservations;
+  const _CancelledSpaCarouselDialog({required this.reservations});
+
+  @override
+  State<_CancelledSpaCarouselDialog> createState() =>
+      _CancelledSpaCarouselDialogState();
+}
+
+class _CancelledSpaCarouselDialogState
+    extends State<_CancelledSpaCarouselDialog> {
+  late PageController _pageController;
+  int _currentIndex = 0;
+  Timer? _timer;
+  int _secondsRemaining = 20;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_secondsRemaining > 0) {
+          _secondsRemaining--;
+        } else {
+          timer.cancel();
+          Navigator.of(context, rootNavigator: true).pop(null);
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    if (_pageController.hasClients) {
+      _pageController.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.reservations.isEmpty) return const SizedBox.shrink();
+    if (_currentIndex >= widget.reservations.length) {
+      _currentIndex = 0; // fallback if list size changes unexpectedly
+    }
+    final currentReservation = widget.reservations[_currentIndex];
+    final roomStr =
+        currentReservation.roomNumber != null &&
+            currentReservation.roomNumber!.isNotEmpty
+        ? "Chambre ${currentReservation.roomNumber}"
+        : "Chambre inconnue";
+    final guestStr =
+        currentReservation.guestName != null &&
+            currentReservation.guestName!.isNotEmpty
+        ? currentReservation.guestName
+        : "Client inconnu";
+    final isMulti = widget.reservations.length > 1;
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 480,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryDark,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.errorRed, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 30,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.errorRed.withValues(alpha: 0.15),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(22),
+                    topRight: Radius.circular(22),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 24,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.errorRed.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.cancel,
+                        color: AppTheme.errorRed,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Réservation Spa Annulée",
+                            style: TextStyle(
+                              color: AppTheme.errorRed,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isMulti
+                                ? "${_currentIndex + 1} sur ${widget.reservations.length}"
+                                : "Une annulation récente",
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 180,
+                child: PageView.builder(
+                  controller: _pageController,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                      _secondsRemaining = 20;
+                    });
+                  },
+                  itemCount: widget.reservations.length,
+                  itemBuilder: (context, index) {
+                    final res = widget.reservations[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.person,
+                                color: AppTheme.textGray,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  guestStr!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.meeting_room,
+                                color: AppTheme.textGray,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                roomStr,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.spa,
+                                color: AppTheme.textGray,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                res.serviceName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (res.specialRequests != null &&
+                              res.specialRequests!.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: AppTheme.textGray,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Motif : ${res.specialRequests!}",
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 15,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (isMulti)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(widget.reservations.length, (index) {
+                    final isSelected = _currentIndex == index;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: isSelected ? 24 : 8,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppTheme.errorRed
+                            : Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  }),
+                ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context, rootNavigator: true).pop(null);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Fermer',
+                          style: TextStyle(
+                            color: AppTheme.textGray,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).pop(currentReservation);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.errorRed,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Ouvrir',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Stack(
+                children: [
+                  Container(
+                    height: 4,
+                    width: double.infinity,
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.linear,
+                    height: 4,
+                    width: (480 * (_secondsRemaining / 20)),
+                    decoration: BoxDecoration(
+                      color: AppTheme.errorRed.withValues(alpha: 0.5),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

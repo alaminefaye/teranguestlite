@@ -237,6 +237,8 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                     // Pop the loading dialog safely
                     navigator.pop();
 
+                    if (!mounted) return;
+
                     // Show success dialog safely
                     showDialog(
                       context: navigator.context,

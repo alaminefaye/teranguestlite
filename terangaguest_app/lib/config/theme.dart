@@ -9,6 +9,7 @@ class AppTheme {
   static const Color textWhite = Color(0xFFFFFFFF);
   static const Color textGray = Color(0xFFB0B8C1);
   static const Color cardBorder = Color(0xFF2A3F54);
+  static const Color errorRed = Color(0xFFE53935);
 
   // Gradient background
   static const LinearGradient backgroundGradient = LinearGradient(

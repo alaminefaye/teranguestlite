@@ -229,6 +229,8 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
                     // Pop the loading dialog safely
                     navigator.pop();
 
+                    if (!mounted) return;
+
                     // Show success dialog safely
                     showDialog(
                       context: navigator.context,

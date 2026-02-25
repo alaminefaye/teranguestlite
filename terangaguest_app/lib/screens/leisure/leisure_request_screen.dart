@@ -230,6 +230,8 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
                     // Pop the loading dialog safely
                     navigator.pop();
 
+                    if (!mounted) return;
+
                     // Show success dialog safely
                     showDialog(
                       context: navigator.context,
