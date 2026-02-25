@@ -590,7 +590,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       );
       final reservations = result['reservations'] as List<SpaReservation>;
       final pendingReservations = reservations.where(
-        (r) => r.status == 'pending',
+        (r) => r.status == 'pending' || r.status == 'confirmed',
       );
       for (final reservation in pendingReservations) {
         if (!_alertedSpaIds.contains(reservation.id)) {
