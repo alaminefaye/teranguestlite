@@ -88,6 +88,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final List<SpaReservation> _cancelledSpaQueue = [];
   final Set<int> _alertedCancelledSpaIds = {};
 
+  bool _isShowingRescheduledSpaDialog = false;
+  final List<SpaReservation> _rescheduledSpaQueue = [];
+  final Set<int> _alertedRescheduledSpaIds = {};
+
   bool _isShowingAdminEventDialog = false;
   final List<_AdminEventAlert> _adminEventQueue = [];
 
@@ -151,6 +155,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (newSummary.spaPending < oldSummary.spaPending) {
       _enqueueCancelledSpaReservationsForAlert(context);
+    }
+    if (newSummary.spaRescheduledConfirmed >
+        oldSummary.spaRescheduledConfirmed) {
+      _enqueueRescheduledSpaReservationsForAlert(context);
     }
     if (newSummary.excursionsPending > oldSummary.excursionsPending) {
       messages.add('Nouvelle demande Excursions & Activités à traiter');
@@ -720,6 +728,73 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         _showCancelledSpaCarousel(context);
       }
     } catch (_) {}
+  }
+
+  Future<void> _enqueueRescheduledSpaReservationsForAlert(
+    BuildContext context,
+  ) async {
+    try {
+      final result = await _spaApi.getMySpaReservations(
+        period:
+            'all', // Need to fetch all to find recently confirmed reschedules
+        page: 1,
+        perPage: 20,
+      );
+      final reservations = result['reservations'] as List<SpaReservation>;
+      final rescheduledReservations = reservations.where(
+        (r) => r.status == 'confirmed',
+      );
+      for (final reservation in rescheduledReservations) {
+        if (!_alertedRescheduledSpaIds.contains(reservation.id)) {
+          _alertedRescheduledSpaIds.add(reservation.id);
+          _rescheduledSpaQueue.add(reservation);
+        }
+      }
+      if (!_isShowingRescheduledSpaDialog &&
+          _rescheduledSpaQueue.isNotEmpty &&
+          context.mounted) {
+        _showRescheduledSpaCarousel(context);
+      }
+    } catch (_) {}
+  }
+
+  void _showRescheduledSpaCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_rescheduledSpaQueue.isEmpty) {
+      _isShowingRescheduledSpaDialog = false;
+      return;
+    }
+    _isShowingRescheduledSpaDialog = true;
+    final reservationsToShow = List<SpaReservation>.from(_rescheduledSpaQueue);
+    _rescheduledSpaQueue.clear();
+
+    final navigator = Navigator.of(context);
+    HapticHelper.heavyImpact();
+
+    final selectedReservation = await showDialog<SpaReservation?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _RescheduledSpaCarouselDialog(reservations: reservationsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingRescheduledSpaDialog = false;
+      return;
+    }
+    _isShowingRescheduledSpaDialog = false;
+    if (selectedReservation != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) =>
+              SpaReservationDetailScreen(reservation: selectedReservation),
+        ),
+      );
+    }
+    if (_rescheduledSpaQueue.isNotEmpty && context.mounted) {
+      _showRescheduledSpaCarousel(context);
+    }
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -2966,6 +3041,311 @@ class _CancelledSpaCarouselDialogState
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RescheduledSpaCarouselDialog extends StatefulWidget {
+  final List<SpaReservation> reservations;
+
+  const _RescheduledSpaCarouselDialog({required this.reservations});
+
+  @override
+  State<_RescheduledSpaCarouselDialog> createState() =>
+      _RescheduledSpaCarouselDialogState();
+}
+
+class _RescheduledSpaCarouselDialogState
+    extends State<_RescheduledSpaCarouselDialog> {
+  late PageController _pageController;
+  int _currentIndex = 0;
+  Timer? _autoCloseTimer;
+  int _secondsLeft = 15;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _autoCloseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_secondsLeft > 0) {
+          _secondsLeft--;
+        } else {
+          timer.cancel();
+          Navigator.of(context).pop(); // Auto-close
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _autoCloseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.reservations.isEmpty) return const SizedBox.shrink();
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: const BoxConstraints(maxWidth: 450),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryDark,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.blue,
+              width: 2,
+            ), // Blue border for "updated/rescheduled" info
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withValues(alpha: 0.3),
+                blurRadius: 24,
+                spreadRadius: 8,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 24,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(22),
+                    topRight: Radius.circular(22),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.update_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Spa : Horaire Accepté',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (widget.reservations.length > 1) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_currentIndex + 1} sur ${widget.reservations.length}',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 180,
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                      _secondsLeft = 15; // Reset timer on swipe
+                    });
+                  },
+                  itemCount: widget.reservations.length,
+                  itemBuilder: (context, index) {
+                    final res = widget.reservations[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (res.guestName != null) ...[
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.person,
+                                  color: AppTheme.accentGold,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    res.guestName!,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          if (res.roomNumber != null) ...[
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.meeting_room,
+                                  color: AppTheme.textGray,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Chambre ${res.roomNumber!}',
+                                  style: const TextStyle(
+                                    color: AppTheme.textGray,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.spa_outlined,
+                                color: AppTheme.textGray,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  res.serviceName.isNotEmpty
+                                      ? res.serviceName
+                                      : 'Service Spa',
+                                  style: const TextStyle(
+                                    color: AppTheme.textGray,
+                                    fontSize: 15,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today,
+                                color: Colors.blue,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Nouvel horaire confirmé',
+                                  style: const TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (widget.reservations.length > 1) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    widget.reservations.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _currentIndex == index
+                            ? Colors.blue
+                            : AppTheme.textGray.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Row(
+                  children: [
+                    Text(
+                      'Fermeture dans ${_secondsLeft}s',
+                      style: TextStyle(
+                        color: AppTheme.textGray.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), // -> null
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.textGray,
+                      ),
+                      child: const Text('Fermer'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: () {
+                        // Return the currently viewed reservation
+                        Navigator.of(
+                          context,
+                        ).pop(widget.reservations[_currentIndex]);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Voir détails'),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

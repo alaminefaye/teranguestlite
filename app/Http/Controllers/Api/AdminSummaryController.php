@@ -18,14 +18,14 @@ class AdminSummaryController extends Controller
     {
         $user = $request->user();
 
-        if (! method_exists($user, 'isAdmin') || ! method_exists($user, 'isStaff')) {
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès non autorisé',
             ], 403);
         }
 
-        if (! ($user->isAdmin() || $user->isStaff())) {
+        if (!($user->isAdmin() || $user->isStaff())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès réservé au staff de l’hôtel',
@@ -55,6 +55,10 @@ class AdminSummaryController extends Controller
         $spaReservations = [
             'pending' => SpaReservation::where('enterprise_id', $enterpriseId)
                 ->whereIn('status', ['pending', 'confirmed'])
+                ->count(),
+            'rescheduled_confirmed' => SpaReservation::where('enterprise_id', $enterpriseId)
+                ->where('status', 'confirmed')
+                ->whereNotNull('confirmed_at')
                 ->count(),
             'today' => SpaReservation::where('enterprise_id', $enterpriseId)
                 ->whereDate('reservation_date', today())
