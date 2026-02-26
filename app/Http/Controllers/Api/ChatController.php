@@ -520,7 +520,8 @@ class ChatController extends Controller
                 'required',
                 'file',
                 'max:10240',
-                'mimetypes:image/jpeg,image/png,image/webp,image/heic,audio/mpeg,audio/mp4,audio/x-m4a,audio/aac,audio/wav,audio/ogg',
+                // Extensions acceptées (plus fiable que mimetypes selon l’envoi client)
+                'mimes:jpeg,jpg,png,webp,heic,mp3,m4a,aac,wav,ogg',
             ];
         }
 

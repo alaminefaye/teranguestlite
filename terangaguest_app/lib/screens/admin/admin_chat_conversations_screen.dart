@@ -445,12 +445,14 @@ class _AdminChatConversationScreenState
   int _audioAnimationTick = 0;
   String? _error;
   List<ChatMessage> _messages = [];
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadConversation();
+      _startPolling();
     });
 
     _audioPlayer.onPlayerComplete.listen((_) {
@@ -459,8 +461,17 @@ class _AdminChatConversationScreenState
     });
   }
 
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || _loading || _sending || _sendingMedia) return;
+      _pollConversation();
+    });
+  }
+
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     _audioRecorder.dispose();
@@ -468,6 +479,32 @@ class _AdminChatConversationScreenState
     _audioAnimationTimer?.cancel();
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  /// Rafraîchissement silencieux pour afficher les nouveaux messages en quasi temps réel.
+  Future<void> _pollConversation() async {
+    if (_loading || _sending || _sendingMedia || !mounted) return;
+    try {
+      final detail = await _api.getStaffConversationDetail(
+        widget.conversationId,
+      );
+      if (!mounted) return;
+      final items = detail.messages;
+      final prevCount = _messages.length;
+      final prevLastId = _messages.isNotEmpty ? _messages.last.id : null;
+      final newLastId = items.isNotEmpty ? items.last.id : null;
+      if (items.length != prevCount || prevLastId != newLastId) {
+        final wasNearBottom = _scrollController.hasClients &&
+            _scrollController.offset >=
+                _scrollController.position.maxScrollExtent - 80;
+        setState(() {
+          _messages = items;
+        });
+        if (wasNearBottom) _scrollToBottom();
+      }
+    } catch (_) {
+      // Ignorer les erreurs de polling pour ne pas perturber l'utilisateur
+    }
   }
 
   Future<void> _loadConversation() async {
@@ -542,7 +579,8 @@ class _AdminChatConversationScreenState
         _sendingMedia = true;
       });
 
-      final msg = await _api.sendMediaMessage(
+      final msg = await _api.sendStaffMediaMessage(
+        widget.conversationId,
         filePath: path,
         fileName: file.name,
         messageType: messageType,
@@ -696,7 +734,8 @@ class _AdminChatConversationScreenState
           ? path.split('/').last
           : 'note_vocale.aac';
 
-      final msg = await _api.sendMediaMessage(
+      final msg = await _api.sendStaffMediaMessage(
+        widget.conversationId,
         filePath: path,
         fileName: fileName,
         messageType: 'audio',

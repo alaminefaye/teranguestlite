@@ -40,6 +40,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   int _audioAnimationTick = 0;
   String? _error;
   List<ChatMessage> _messages = [];
+  Timer? _pollTimer;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     FcmService().registerTokenIfNeeded();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMessages();
+      _startPolling();
     });
 
     _audioPlayer.onPlayerComplete.listen((_) {
@@ -55,8 +57,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
   }
 
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || _loading || _sending || _sendingMedia) return;
+      _pollMessages();
+    });
+  }
+
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     _audioRecorder.dispose();
@@ -64,6 +75,29 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     _audioAnimationTimer?.cancel();
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  /// Rafraîchissement silencieux pour afficher les nouveaux messages en quasi temps réel.
+  Future<void> _pollMessages() async {
+    if (_loading || _sending || _sendingMedia || !mounted) return;
+    try {
+      final items = await _api.getMessages();
+      if (!mounted) return;
+      final prevCount = _messages.length;
+      final prevLastId = _messages.isNotEmpty ? _messages.last.id : null;
+      final newLastId = items.isNotEmpty ? items.last.id : null;
+      if (items.length != prevCount || prevLastId != newLastId) {
+        final wasNearBottom = _scrollController.hasClients &&
+            _scrollController.offset >=
+                _scrollController.position.maxScrollExtent - 80;
+        setState(() {
+          _messages = items;
+        });
+        if (wasNearBottom) _scrollToBottom();
+      }
+    } catch (_) {
+      // Ignorer les erreurs de polling pour ne pas perturber l'utilisateur
+    }
   }
 
   Future<void> _loadMessages() async {

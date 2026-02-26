@@ -240,6 +240,76 @@ class ChatApi {
       throw Exception('Erreur inattendue lors de l’envoi du message.');
     }
   }
+
+  /// Envoyer un média (image ou note vocale) dans la conversation staff ↔ client (pas dans le chat perso).
+  Future<ChatMessage> sendStaffMediaMessage(
+    int conversationId, {
+    required String filePath,
+    required String fileName,
+    required String messageType,
+    String? content,
+    int? durationSeconds,
+  }) async {
+    try {
+      final Map<String, dynamic> payload = {'message_type': messageType};
+
+      if (content != null && content.trim().isNotEmpty) {
+        payload['content'] = content.trim();
+      }
+
+      if (durationSeconds != null && durationSeconds > 0) {
+        payload['duration'] = durationSeconds;
+      }
+
+      MediaType? contentType;
+      final lowerName = fileName.toLowerCase();
+      if (messageType == 'audio') {
+        if (lowerName.endsWith('.aac')) {
+          contentType = MediaType('audio', 'aac');
+        } else if (lowerName.endsWith('.m4a')) {
+          contentType = MediaType('audio', 'mp4');
+        } else if (lowerName.endsWith('.mp3')) {
+          contentType = MediaType('audio', 'mpeg');
+        } else if (lowerName.endsWith('.wav')) {
+          contentType = MediaType('audio', 'wav');
+        } else if (lowerName.endsWith('.ogg')) {
+          contentType = MediaType('audio', 'ogg');
+        }
+      }
+
+      payload['file'] = await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+        contentType: contentType,
+      );
+
+      final formData = FormData.fromMap(payload);
+
+      final response = await _api.post(
+        '/staff/chat/conversations/$conversationId/messages',
+        data: formData,
+      );
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] != true) {
+        throw Exception(
+          data['message'] ?? 'Erreur lors de l’envoi du message.',
+        );
+      }
+      return ChatMessage.fromJson(data['data'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
+      throw Exception(
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible d’envoyer le message. Vérifiez la connexion internet ou réessayez plus tard.',
+      );
+    } catch (_) {
+      throw Exception('Erreur inattendue lors de l’envoi du message.');
+    }
+  }
 }
 
 class StaffConversationSummary {
