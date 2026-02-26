@@ -20,12 +20,14 @@ class ChatbotScreen extends StatefulWidget {
   State<ChatbotScreen> createState() => _ChatbotScreenState();
 }
 
-class _ChatbotScreenState extends State<ChatbotScreen> {
+class _ChatbotScreenState extends State<ChatbotScreen>
+    with WidgetsBindingObserver {
   final ChatApi _api = ChatApi();
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final AudioRecorder _audioRecorder = AudioRecorder();
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final FcmService _fcmService = FcmService();
   bool _loading = true;
   bool _sending = false;
   bool _sendingMedia = false;
@@ -45,7 +47,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void initState() {
     super.initState();
-    FcmService().registerTokenIfNeeded();
+    WidgetsBinding.instance.addObserver(this);
+    _fcmService.registerTokenIfNeeded();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMessages();
       _startPolling();
@@ -57,16 +60,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
   }
 
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!mounted || _loading || _sending || _sendingMedia) return;
-      _pollMessages();
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _fcmService.registerTokenIfNeeded();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
@@ -77,7 +81,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     super.dispose();
   }
 
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || _loading || _sending || _sendingMedia) return;
+      _pollMessages();
+    });
+  }
+
   /// Rafraîchissement silencieux pour afficher les nouveaux messages en quasi temps réel.
+  /// Si un nouveau message vient du staff, on affiche une alerte (fallback si la push n’arrive pas).
   Future<void> _pollMessages() async {
     if (_loading || _sending || _sendingMedia || !mounted) return;
     try {
@@ -86,7 +99,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       final prevCount = _messages.length;
       final prevLastId = _messages.isNotEmpty ? _messages.last.id : null;
       final newLastId = items.isNotEmpty ? items.last.id : null;
+      final newLastIsFromStaff = items.isNotEmpty && items.last.senderType == 'staff';
       if (items.length != prevCount || prevLastId != newLastId) {
+        final hadNewStaffMessage = newLastIsFromStaff && (prevLastId != newLastId);
         final wasNearBottom = _scrollController.hasClients &&
             _scrollController.offset >=
                 _scrollController.position.maxScrollExtent - 80;
@@ -94,6 +109,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           _messages = items;
         });
         if (wasNearBottom) _scrollToBottom();
+        if (hadNewStaffMessage && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Nouveau message du staff'),
+              backgroundColor: AppTheme.accentGold,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
     } catch (_) {
       // Ignorer les erreurs de polling pour ne pas perturber l'utilisateur

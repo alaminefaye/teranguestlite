@@ -210,9 +210,10 @@ class _LocalizedAppState extends State<_LocalizedApp>
   void _handleChatMessageNotification(Map<String, dynamic> data, {int retryCount = 0}) {
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null) {
-      if (retryCount < 2) {
+      if (retryCount < 5) {
+        final delays = [400, 600, 1000, 1500, 2000];
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Future.delayed(Duration(milliseconds: retryCount == 0 ? 300 : 500), () {
+          Future.delayed(Duration(milliseconds: delays[retryCount.clamp(0, 4)]), () {
             _handleChatMessageNotification(data, retryCount: retryCount + 1);
           });
         });

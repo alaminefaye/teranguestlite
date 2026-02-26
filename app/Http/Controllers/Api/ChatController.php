@@ -255,6 +255,12 @@ class ChatController extends Controller
 
             // Priorité : envoyer au client de la conversation (celui qui a ouvert le chat)
             if ($conversation->user) {
+                $tokenCount = $conversation->user->fcmTokens()->count();
+                Log::info('Chat: notifying guest (conversation user)', [
+                    'conversation_id' => $conversation->id,
+                    'guest_user_id' => $conversation->user->id,
+                    'fcm_tokens_count' => $tokenCount,
+                ]);
                 $sent = $service->sendToUser(
                     $conversation->user,
                     'Nouveau message du staff',
