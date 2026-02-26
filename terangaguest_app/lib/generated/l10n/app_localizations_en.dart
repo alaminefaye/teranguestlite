@@ -308,6 +308,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteConversation => 'Delete conversation';
 
   @override
+  String get messageDeleted => 'Message deleted';
+
+  @override
+  String get reply => 'Reply';
+
+  @override
+  String get deleteMessage => 'Delete message';
+
+  @override
   String get chatbotComingSoon => 'Coming soon';
 
   @override

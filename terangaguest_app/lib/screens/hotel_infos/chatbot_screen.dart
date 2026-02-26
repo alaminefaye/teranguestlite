@@ -199,14 +199,16 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     final raw = _controller.text.trim();
     if (raw.isEmpty || _sending || _sendingMedia) return;
 
+    final replyToId = _replyingTo?.id;
     setState(() {
       _sending = true;
     });
     try {
-      final msg = await _api.sendMessage(raw);
+      final msg = await _api.sendMessage(raw, replyToId: replyToId);
       if (!mounted) return;
       setState(() {
         _controller.clear();
+        _replyingTo = null;
         _messages = [..._messages, msg];
         _sending = false;
       });
@@ -588,6 +590,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                           ),
                         ),
                       if (_unreadCountBelow > 0) _buildScrollToBottomBadge(),
+                      if (_replyingTo != null) _buildReplyBar(context, l10n),
                       _buildInputBar(context, l10n),
                     ],
                   ),
@@ -1006,6 +1009,61 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     final m = seconds ~/ 60;
     final s = seconds % 60;
     return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildReplyBar(BuildContext context, AppLocalizations l10n) {
+    if (_replyingTo == null) return const SizedBox.shrink();
+    final msg = _replyingTo!;
+    final preview = msg.isDeleted
+        ? l10n.messageDeleted
+        : (msg.content ?? '').replaceAll('\n', ' ').trim();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (msg.senderName != null && msg.senderName!.isNotEmpty)
+                  Text(
+                    msg.senderName!,
+                    style: TextStyle(
+                      color: Colors.blue.shade300,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                Text(
+                  preview.isEmpty ? l10n.messageDeleted : preview,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: AppTheme.accentGold),
+            onPressed: () => setState(() => _replyingTo = null),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildInputBar(BuildContext context, AppLocalizations l10n) {

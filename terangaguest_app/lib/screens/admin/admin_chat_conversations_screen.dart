@@ -549,6 +549,7 @@ class _AdminChatConversationScreenState
   List<ChatMessage> _messages = [];
   Timer? _pollTimer;
   int _unreadCountBelow = 0;
+  ChatMessage? _replyingTo;
 
   @override
   void initState() {
@@ -660,14 +661,20 @@ class _AdminChatConversationScreenState
     final raw = _controller.text.trim();
     if (raw.isEmpty || _sending || _sendingMedia) return;
 
+    final replyToId = _replyingTo?.id;
     setState(() {
       _sending = true;
     });
     try {
-      final msg = await _api.sendStaffTextMessage(widget.conversationId, raw);
+      final msg = await _api.sendStaffTextMessage(
+        widget.conversationId,
+        raw,
+        replyToId: replyToId,
+      );
       if (!mounted) return;
       setState(() {
         _controller.clear();
+        _replyingTo = null;
         _messages = [..._messages, msg];
         _sending = false;
       });
@@ -1029,6 +1036,7 @@ class _AdminChatConversationScreenState
                           ),
                         ),
                       if (_unreadCountBelow > 0) _buildScrollToBottomBadge(),
+                      if (_replyingTo != null) _buildReplyBar(context, l10n),
                       _buildInputBar(context, l10n),
                     ],
                   ),
@@ -1037,6 +1045,61 @@ class _AdminChatConversationScreenState
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildReplyBar(BuildContext context, AppLocalizations l10n) {
+    if (_replyingTo == null) return const SizedBox.shrink();
+    final msg = _replyingTo!;
+    final preview = msg.isDeleted
+        ? l10n.messageDeleted
+        : (msg.content ?? '').replaceAll('\n', ' ').trim();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (msg.senderName != null && msg.senderName!.isNotEmpty)
+                  Text(
+                    msg.senderName!,
+                    style: TextStyle(
+                      color: Colors.blue.shade300,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                Text(
+                  preview.isEmpty ? l10n.messageDeleted : preview,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: AppTheme.accentGold),
+            onPressed: () => setState(() => _replyingTo = null),
+          ),
+        ],
       ),
     );
   }
@@ -1136,6 +1199,98 @@ class _AdminChatConversationScreenState
     );
   }
 
+  void _showMessageOptions(ChatMessage message) {
+    HapticHelper.lightImpact();
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppTheme.primaryBlue,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.reply, color: AppTheme.accentGold),
+                title: Text(l10n.reply, style: const TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() => _replyingTo = message);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                title: Text(l10n.deleteMessage, style: const TextStyle(color: Colors.white)),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  try {
+                    await _api.deleteStaffMessage(widget.conversationId, message.id);
+                    if (!mounted) return;
+                    setState(() {
+                      final i = _messages.indexWhere((m) => m.id == message.id);
+                      if (i >= 0) _messages[i] = message.copyWith(isDeleted: true, content: null);
+                    });
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.redAccent),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildReplyQuote(ReplyTo replyTo, Color textColor) {
+    final l10n = AppLocalizations.of(context);
+    final preview = replyTo.isDeleted
+        ? l10n.messageDeleted
+        : (replyTo.content ?? '').replaceAll('\n', ' ').trim();
+    if (preview.isEmpty && !replyTo.isDeleted) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(left: 10, top: 6, bottom: 6, right: 8),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: Colors.blue, width: 3)),
+        borderRadius: BorderRadius.circular(6),
+        color: textColor.withValues(alpha: 0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (replyTo.senderName != null && replyTo.senderName!.isNotEmpty)
+            Text(
+              replyTo.senderName!,
+              style: TextStyle(
+                color: Colors.blue.shade700,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          Text(
+            preview,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.85),
+              fontSize: 14,
+              fontStyle: replyTo.isDeleted ? FontStyle.italic : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMessageBubble(
     BuildContext context,
     ChatMessage message,
@@ -1152,50 +1307,64 @@ class _AdminChatConversationScreenState
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.all(12),
-        constraints: const BoxConstraints(maxWidth: 480),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(16).copyWith(
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+      child: GestureDetector(
+        onLongPress: () => _showMessageOptions(message),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.all(12),
+          constraints: const BoxConstraints(maxWidth: 480),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(16).copyWith(
+              bottomLeft: Radius.circular(isMe ? 16 : 4),
+              bottomRight: Radius.circular(isMe ? 4 : 16),
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (senderLabel != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  senderLabel,
-                  style: TextStyle(
-                    color: textColor.withValues(alpha: 0.8),
-                    fontSize: 12,
+          child: Column(
+            crossAxisAlignment: isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (message.replyTo != null) _buildReplyQuote(message.replyTo!, textColor),
+              if (senderLabel != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    senderLabel,
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.8),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
+              _buildMessageContent(message, textColor),
+              const SizedBox(height: 4),
+              Text(
+                time,
+                style: TextStyle(
+                  color: textColor.withValues(alpha: 0.8),
+                  fontSize: 12,
+                ),
               ),
-            _buildMessageContent(message, textColor),
-            const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                color: textColor.withValues(alpha: 0.8),
-                fontSize: 12,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildMessageContent(ChatMessage message, Color textColor) {
+    if (message.isDeleted) {
+      return Text(
+        AppLocalizations.of(context).messageDeleted,
+        style: TextStyle(
+          color: textColor.withValues(alpha: 0.7),
+          fontSize: 15,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+    }
     if (message.messageType == 'image') {
       final meta = message.metadata;
       final url = meta != null ? meta['url'] as String? : null;

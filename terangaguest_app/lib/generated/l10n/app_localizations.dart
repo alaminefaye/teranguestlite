@@ -672,6 +672,24 @@ abstract class AppLocalizations {
   /// **'Supprimer la conversation'**
   String get deleteConversation;
 
+  /// No description provided for @messageDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message supprimé'**
+  String get messageDeleted;
+
+  /// No description provided for @reply.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répondre'**
+  String get reply;
+
+  /// No description provided for @deleteMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le message'**
+  String get deleteMessage;
+
   /// No description provided for @chatbotComingSoon.
   ///
   /// In fr, this message translates to:
