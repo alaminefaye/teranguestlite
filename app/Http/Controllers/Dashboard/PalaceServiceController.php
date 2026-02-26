@@ -43,9 +43,24 @@ class PalaceServiceController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('pages.dashboard.palace-services.create', ['title' => 'Créer un service palace']);
+        $preset = $request->query('preset');
+        $defaults = [];
+        if ($preset === 'guided_tours') {
+            $defaults = [
+                'name' => 'Visites guidées personnalisées',
+                'category' => 'concierge',
+                'description' => 'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.',
+                'status' => 'available',
+                'price_on_request' => true,
+                'display_order' => 0,
+            ];
+        }
+        return view('pages.dashboard.palace-services.create', [
+            'title' => 'Créer un service palace',
+            'defaults' => $defaults,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

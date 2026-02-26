@@ -8,6 +8,9 @@ class PalaceService {
   /// URL complète de l'image (fournie par le serveur)
   final String? image;
 
+  /// Indique si ce service est « Visites guidées » (défini par le backend ou déduit du nom).
+  final bool isGuidedTours;
+
   PalaceService({
     required this.id,
     required this.name,
@@ -15,16 +18,22 @@ class PalaceService {
     this.category,
     required this.isAvailable,
     this.image,
-  });
+    bool? isGuidedTours,
+  }) : isGuidedTours = isGuidedTours ?? false;
 
   factory PalaceService.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as String? ?? '';
+    final fromApi = json['is_guided_tours'] as bool?;
+    final fromName = name.toLowerCase().contains('visites guidées') ||
+        name.toLowerCase().contains('visite guidée');
     return PalaceService(
       id: json['id'] as int,
-      name: json['name'] as String,
+      name: name,
       description: json['description'] as String?,
       category: json['category'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
       image: json['image'] as String?,
+      isGuidedTours: fromApi ?? fromName,
     );
   }
 

@@ -29,4 +29,11 @@ class PalaceService extends Model
             || str_contains($lower, 'chauffeur')
             || str_contains($lower, 'location');
     }
+
+    /** True si le service est « Visites guidées » (utilisé par l’app mobile). */
+    public function isGuidedToursService(): bool
+    {
+        $lower = strtolower($this->name ?? '');
+        return str_contains($lower, 'visites guidées') || str_contains($lower, 'visite guidée');
+    }
 }

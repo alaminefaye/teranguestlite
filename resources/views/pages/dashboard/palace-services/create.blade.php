@@ -17,7 +17,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
                 <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom <span class="text-error-500">*</span></label>
-                <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                <input type="text" name="name" id="name" value="{{ old('name', $defaults['name'] ?? '') }}" required
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('name')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
@@ -25,7 +25,7 @@
             <div>
                 <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Catégorie <span class="text-error-500">*</span></label>
                 <select name="category" id="category" required class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    <option value="concierge" {{ old('category') == 'concierge' ? 'selected' : '' }}>Conciergerie</option>
+                    <option value="concierge" {{ old('category', $defaults['category'] ?? '') == 'concierge' ? 'selected' : '' }}>Conciergerie</option>
                     <option value="transport" {{ old('category') == 'transport' ? 'selected' : '' }}>Transport</option>
                     <option value="vip" {{ old('category') == 'vip' ? 'selected' : '' }}>VIP</option>
                     <option value="butler" {{ old('category') == 'butler' ? 'selected' : '' }}>Butler</option>
@@ -41,7 +41,7 @@
             </div>
 
             <div class="flex items-center">
-                <input type="checkbox" name="price_on_request" id="price_on_request" value="1" {{ old('price_on_request') ? 'checked' : '' }}
+                <input type="checkbox" name="price_on_request" id="price_on_request" value="1" {{ old('price_on_request', $defaults['price_on_request'] ?? false) ? 'checked' : '' }}
                     class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
                 <label for="price_on_request" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Prix sur demande</label>
             </div>
@@ -49,7 +49,7 @@
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Statut <span class="text-error-500">*</span></label>
                 <select name="status" id="status" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    <option value="available" {{ old('status', 'available') == 'available' ? 'selected' : '' }}>Disponible</option>
+                    <option value="available" {{ old('status', $defaults['status'] ?? 'available') == 'available' ? 'selected' : '' }}>Disponible</option>
                     <option value="unavailable" {{ old('status') == 'unavailable' ? 'selected' : '' }}>Indisponible</option>
                 </select>
                 @error('status')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
@@ -57,7 +57,7 @@
 
             <div>
                 <label for="display_order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ordre d'affichage</label>
-                <input type="number" name="display_order" id="display_order" value="{{ old('display_order', 0) }}" min="0"
+                <input type="number" name="display_order" id="display_order" value="{{ old('display_order', $defaults['display_order'] ?? 0) }}" min="0"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('display_order')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
@@ -70,7 +70,7 @@
 
             <div class="md:col-span-2">
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
-                <textarea name="description" id="description" rows="3" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">{{ old('description') }}</textarea>
+                <textarea name="description" id="description" rows="3" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">{{ old('description', $defaults['description'] ?? '') }}</textarea>
                 @error('description')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
 

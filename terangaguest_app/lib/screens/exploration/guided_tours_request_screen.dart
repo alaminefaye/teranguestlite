@@ -36,10 +36,20 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
       final services = await api.getPalaceServices();
       PalaceService? found;
       for (final s in services) {
-        final n = s.name.toLowerCase();
-        if (n.contains('visite') || n.contains('guide') || n.contains('guidée')) {
+        if (!s.isAvailable) continue;
+        if (s.isGuidedTours) {
           found = s;
           break;
+        }
+      }
+      if (found == null) {
+        for (final s in services) {
+          if (!s.isAvailable) continue;
+          final n = s.name.toLowerCase();
+          if (n.contains('visites guidées') || n.contains('visite guidée')) {
+            found = s;
+            break;
+          }
         }
       }
       if (found != null && mounted) setState(() => _serviceId = found!.id);
@@ -63,7 +73,10 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     if (_serviceId == null) {
-      _showSnack('Service Visites guidées non configuré. Contactez l\'établissement.', isError: true);
+      _showSnack(
+        'Visites guidées non configurées. Demandez à l\'établissement d\'ajouter le service « Visites guidées » dans le tableau de bord (Services Palace).',
+        isError: true,
+      );
       return;
     }
     setState(() => _sending = true);
@@ -174,6 +187,30 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                           ),
                         ),
                       ),
+                      if (_serviceId == null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange, width: 1),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.orange, size: 22),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Visites guidées non configurées. L\'établissement doit ajouter le service « Visites guidées personnalisées » dans le tableau de bord (Services Palace).',
+                                  style: TextStyle(color: Colors.orange.shade100, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       FilledButton.icon(
                         onPressed: _sending ? null : () { HapticHelper.lightImpact(); _submit(); },

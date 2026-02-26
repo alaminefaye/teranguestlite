@@ -57,6 +57,7 @@ class PalaceServiceController extends Controller
                     'image' => $service->image ? asset('storage/' . $service->image) : null,
                     'is_premium' => $service->is_premium,
                     'is_available' => $service->is_available,
+                    'is_guided_tours' => $service->isGuidedToursService(),
                 ];
             }),
         ], 200);
@@ -90,6 +91,7 @@ class PalaceServiceController extends Controller
                 'image' => $service->image ? asset('storage/' . $service->image) : null,
                 'is_premium' => $service->is_premium,
                 'is_available' => $service->is_available,
+                'is_guided_tours' => $service->isGuidedToursService(),
             ],
         ], 200);
     }
