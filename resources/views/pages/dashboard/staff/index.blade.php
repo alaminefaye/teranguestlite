@@ -6,6 +6,9 @@
         <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Staff</h1>
         <p class="text-gray-600 dark:text-gray-400">Personnel de l'hôtel</p>
     </div>
+    <a href="{{ route('dashboard.staff.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700">
+        Ajouter un membre
+    </a>
 </div>
 
 @if(session('success'))
@@ -29,16 +32,14 @@
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, email ou département..."
                 class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
         </div>
-        @if($departments->isNotEmpty())
-            <div class="min-w-[180px]">
-                <select name="department" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
-                    <option value="">Tous les départements</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}" {{ request('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
+        <div class="min-w-[180px]">
+            <select name="department" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <option value="">Tous les départements</option>
+                @foreach($departmentOptions ?? [] as $dept)
+                    <option value="{{ $dept }}" {{ request('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                @endforeach
+            </select>
+        </div>
         <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
             Filtrer
         </button>
@@ -60,6 +61,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Nom</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Département</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
@@ -68,6 +70,15 @@
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $user->email }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $user->department ?? '—' }}</td>
+                            <td class="px-6 py-4 text-sm text-right">
+                                <a href="{{ route('dashboard.staff.edit', $user->id) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">Modifier</a>
+                                <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                                <form action="{{ route('dashboard.staff.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer ce membre du staff ?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-error-600 hover:text-error-700 dark:text-error-400 dark:hover:text-error-300">Supprimer</button>
+                                </form>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -85,7 +96,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
             </svg>
             <h3 class="mt-4 text-lg font-medium text-gray-800 dark:text-white/90">Aucun staff</h3>
-            <p class="mt-2 text-gray-500 dark:text-gray-400">Les comptes staff de cet hôtel sont gérés depuis la plateforme (super admin).</p>
+            <p class="mt-2 text-gray-500 dark:text-gray-400">Ajoutez des membres du personnel avec le bouton ci-dessus.</p>
+            <a href="{{ route('dashboard.staff.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Ajouter un membre</a>
         </div>
     @endif
 </div>

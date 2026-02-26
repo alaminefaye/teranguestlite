@@ -124,6 +124,11 @@ Route::middleware(['auth'])->group(function () {
         
         // Staff (personnel de l'hôtel)
         Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');
+        Route::get('staff/create', [\App\Http\Controllers\Dashboard\StaffController::class, 'create'])->name('staff.create');
+        Route::post('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'store'])->name('staff.store');
+        Route::get('staff/{id}/edit', [\App\Http\Controllers\Dashboard\StaffController::class, 'edit'])->name('staff.edit')->whereNumber('id');
+        Route::put('staff/{id}', [\App\Http\Controllers\Dashboard\StaffController::class, 'update'])->name('staff.update')->whereNumber('id');
+        Route::delete('staff/{id}', [\App\Http\Controllers\Dashboard\StaffController::class, 'destroy'])->name('staff.destroy')->whereNumber('id');
 
         // Accès tablettes : comptes "Client Chambre XXX" (User role=guest) — gérant de l'hôtel
         Route::get('tablet-accesses', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'index'])->name('tablet-accesses.index');
