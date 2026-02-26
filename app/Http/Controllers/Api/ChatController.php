@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\HotelConversation;
 use App\Models\HotelMessage;
+use App\Models\Room;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -204,8 +205,28 @@ class ChatController extends Controller
     protected function notifyGuestNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
-            if (!$conversation->room_id) {
+            $conversation->loadMissing(['user', 'room']);
+
+            $roomId = $conversation->room_id ?? $conversation->user?->room_id;
+
+            if (!$roomId && $conversation->user?->room_number) {
+                $room = Room::withoutGlobalScope('enterprise')
+                    ->where('enterprise_id', $conversation->enterprise_id)
+                    ->where('room_number', $conversation->user->room_number)
+                    ->first();
+                $roomId = $room?->id;
+            }
+
+            if (!$roomId) {
+                Log::warning('Chat: cannot notify guest — no room_id on conversation or guest user', [
+                    'conversation_id' => $conversation->id,
+                    'user_id' => $conversation->user_id,
+                ]);
                 return;
+            }
+
+            if (!$conversation->room_id) {
+                $conversation->update(['room_id' => $roomId]);
             }
 
             $guestName = $conversation->user?->name ?: 'Client chambre';
@@ -220,8 +241,8 @@ class ChatController extends Controller
             $preview = $this->buildMessagePreview($message);
 
             $service = app(FirebaseNotificationService::class);
-            $service->sendToClientOfRoom(
-                $conversation->room_id,
+            $sent = $service->sendToClientOfRoom(
+                $roomId,
                 'Nouveau message du staff',
                 $preview,
                 [
@@ -234,6 +255,13 @@ class ChatController extends Controller
                     'message_preview' => $preview,
                 ]
             );
+
+            if (!$sent) {
+                Log::warning('Chat: sendToClientOfRoom returned false (no FCM token for room?)', [
+                    'conversation_id' => $conversation->id,
+                    'room_id' => $roomId,
+                ]);
+            }
         } catch (\Throwable $e) {
             Log::error('Chat notification error (guest): ' . $e->getMessage(), [
                 'conversation_id' => $conversation->id,
