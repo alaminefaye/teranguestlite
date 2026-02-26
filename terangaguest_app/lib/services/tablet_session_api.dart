@@ -55,13 +55,20 @@ class TabletSessionApi {
     }
   }
 
-  /// Récupère le livret d'accueil (Wi‑Fi, règlement, etc.) pour la chambre concernée.
-  /// Utilisé par la tablette en session pour afficher les infos de la chambre (Wi‑Fi chambre si renseigné).
-  Future<HotelInfos> getHotelInfos(int roomId) async {
+  /// Récupère le livret d'accueil (Wi‑Fi, règlement, etc.) pour la chambre de la session.
+  /// Envoie la session (guest_id, room_id, reservation_id) pour que le serveur ne renvoie
+  /// les infos que pour ce séjour → isolation entre entreprises.
+  Future<HotelInfos> getHotelInfos(GuestSession session) async {
     try {
-      final response = await _api.get(
+      final response = await _api.post(
         ApiConfig.tabletHotelInfos,
-        queryParameters: {'room_id': roomId},
+        data: {
+          'guest_id': session.guestId,
+          'room_id': session.roomId,
+          'reservation_id': session.reservationId,
+          if (session.validatedAt != null && session.validatedAt!.isNotEmpty)
+            'validated_at': session.validatedAt,
+        },
       );
       final data = response.data as Map<String, dynamic>?;
       if (data == null || data['success'] != true) {

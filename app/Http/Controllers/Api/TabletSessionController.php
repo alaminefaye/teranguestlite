@@ -18,21 +18,58 @@ use Illuminate\Http\Request;
 class TabletSessionController extends Controller
 {
     /**
-     * Livret d'accueil pour la chambre (tablette en session : room_id depuis la session).
-     * GET /api/tablet/hotel-infos?room_id=1
+     * Livret d'accueil pour la chambre (tablette en session).
+     * POST /api/tablet/hotel-infos — Body: guest_id, room_id, reservation_id [, validated_at]
+     * Valide la session (même logique que validate-session) pour ne renvoyer les infos que
+     * pour la chambre du séjour en cours → isolation entre entreprises (pas de room_id arbitraire).
      */
     public function hotelInfos(Request $request): JsonResponse
     {
         $request->validate([
+            'guest_id' => 'required|exists:guests,id',
             'room_id' => 'required|exists:rooms,id',
+            'reservation_id' => 'required|exists:reservations,id',
+            'validated_at' => 'nullable|string|date',
         ]);
 
+        $guest = Guest::withoutGlobalScope('enterprise')->find($request->guest_id);
         $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
-        if (!$room || !$room->enterprise) {
+        if (!$guest || !$room || $room->enterprise_id !== $guest->enterprise_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chambre non trouvée.',
-            ], 404);
+                'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ], 403);
+        }
+
+        $validatedAt = $request->input('validated_at');
+        if ($validatedAt !== null && $validatedAt !== '') {
+            try {
+                $validatedAtCarbon = \Carbon\Carbon::parse($validatedAt);
+                if ($guest->updated_at->gt($validatedAtCarbon)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Code client régénéré ou modifié. Entrez à nouveau votre code.',
+                    ], 403);
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('id', $request->reservation_id)
+            ->where('guest_id', $guest->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Séjour invalide ou expiré. Entrez à nouveau votre code.',
+            ], 403);
         }
 
         $infos = $room->enterprise->getHotelInfosForRoom($room);

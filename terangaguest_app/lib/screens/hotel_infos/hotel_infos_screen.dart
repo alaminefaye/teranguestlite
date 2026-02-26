@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/guest_session.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/tablet_session_provider.dart';
@@ -29,22 +30,22 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
     super.didChangeDependencies();
     final session = context.read<TabletSessionProvider>().session;
     if (session != null && session.roomId != _lastFetchedRoomId && !_loadingTablet) {
-      _loadTabletInfos(session.roomId);
+      _loadTabletInfos(session);
     }
   }
 
-  Future<void> _loadTabletInfos(int roomId) async {
+  Future<void> _loadTabletInfos(GuestSession session) async {
     if (_loadingTablet) return;
     setState(() {
       _loadingTablet = true;
       _tabletError = null;
     });
     try {
-      final infos = await _tabletApi.getHotelInfos(roomId);
+      final infos = await _tabletApi.getHotelInfos(session);
       if (mounted) {
         setState(() {
           _tabletInfos = infos;
-          _lastFetchedRoomId = roomId;
+          _lastFetchedRoomId = session.roomId;
         });
       }
     } catch (e) {
@@ -162,7 +163,7 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
               TextButton(
                 onPressed: () {
                   final session = context.read<TabletSessionProvider>().session;
-                  if (session != null) _loadTabletInfos(session.roomId);
+                  if (session != null) _loadTabletInfos(session);
                 },
                 child: const Text('Réessayer', style: TextStyle(color: AppTheme.accentGold)),
               ),
