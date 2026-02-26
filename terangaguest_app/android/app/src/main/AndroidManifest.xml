@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <!-- Micro pour l’enregistrement de notes vocales -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Notifications push (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="Teranguest"
         android:name="${applicationName}"

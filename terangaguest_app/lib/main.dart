@@ -27,6 +27,7 @@ import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
+import 'services/fcm_service.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
 import 'screens/hotel_infos/chatbot_screen.dart';
@@ -107,13 +108,16 @@ class _LocalizedApp extends StatefulWidget {
   State<_LocalizedApp> createState() => _LocalizedAppState();
 }
 
-class _LocalizedAppState extends State<_LocalizedApp> {
+class _LocalizedAppState extends State<_LocalizedApp>
+    with WidgetsBindingObserver {
   late final AudioPlayer _notificationPlayer;
   Timer? _notificationSoundTimer;
+  final FcmService _fcmService = FcmService();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _notificationPlayer = AudioPlayer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LocaleProvider>().load();
@@ -127,9 +131,18 @@ class _LocalizedAppState extends State<_LocalizedApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _notificationSoundTimer?.cancel();
     _notificationPlayer.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _fcmService.registerTokenIfNeeded();
+    }
   }
 
   void _startNotificationSoundLoop() {
@@ -166,7 +179,7 @@ class _LocalizedAppState extends State<_LocalizedApp> {
       } else if (type == 'excursion_booking_status' || type == 'excursion_booking') {
         _handleExcursionStatusNotification(data);
       } else if (type == 'chat_message') {
-        _handleChatMessageNotification(data);
+        _handleChatMessageNotification(data, retryCount: 0);
       } else if (type == 'laundry_status') {
         _handleLaundryStatusNotification(data);
       } else if (type == 'palace_request_status' ||
@@ -194,9 +207,18 @@ class _LocalizedAppState extends State<_LocalizedApp> {
     }
   }
 
-  void _handleChatMessageNotification(Map<String, dynamic> data) {
+  void _handleChatMessageNotification(Map<String, dynamic> data, {int retryCount = 0}) {
     final ctx = rootNavigatorKey.currentContext;
-    if (ctx == null) return;
+    if (ctx == null) {
+      if (retryCount < 2) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.delayed(Duration(milliseconds: retryCount == 0 ? 300 : 500), () {
+            _handleChatMessageNotification(data, retryCount: retryCount + 1);
+          });
+        });
+      }
+      return;
+    }
 
     final auth = Provider.of<AuthProvider>(ctx, listen: false);
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;

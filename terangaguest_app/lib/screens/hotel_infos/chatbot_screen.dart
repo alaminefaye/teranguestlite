@@ -10,6 +10,7 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_api.dart';
+import '../../services/fcm_service.dart';
 import '../../utils/haptic_helper.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -43,6 +44,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void initState() {
     super.initState();
+    FcmService().registerTokenIfNeeded();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMessages();
     });
