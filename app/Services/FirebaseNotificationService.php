@@ -242,6 +242,7 @@ class FirebaseNotificationService
                         'notification' => [
                             'sound' => 'notification',
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            'default_notification_channel_id' => 'high_importance_channel',
                         ],
                     ],
                     'apns' => [

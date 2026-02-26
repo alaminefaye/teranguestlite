@@ -45,6 +45,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // quand l'utilisateur ouvrira l'app en cliquant sur la notification.
 }
 
+/// Message initial capturé au démarrage (app ouverte en tapant sur une notif). Sur Android
+/// il faut le lire le plus tôt possible, d'où la capture dans main().
+RemoteMessage? _pendingInitialFcmMessage;
+
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -56,6 +60,9 @@ void main() async {
 
   // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Sur Android, capturer le message initial dès que possible (tap sur notif = app lancée)
+  _pendingInitialFcmMessage = await FirebaseMessaging.instance.getInitialMessage();
 
   // Initialiser le locale français pour les dates
   await initializeDateFormatting('fr_FR', null);
@@ -139,6 +146,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
           .read<TabletSessionProvider>()
           .load(); // ← charge la session invité depuis SharedPreferences
       _setupFcmListeners();
+      // Enregistrer le token FCM dès le premier lancement (Android : crée le canal et permet les notifs app fermée)
+      _fcmService.registerTokenIfNeeded();
       _handleInitialFcmMessage();
     });
   }
@@ -215,16 +224,19 @@ class _LocalizedAppState extends State<_LocalizedApp>
   }
 
   Future<void> _handleInitialFcmMessage() async {
-    final message = await FirebaseMessaging.instance.getInitialMessage();
+    // Utiliser le message capturé dans main() (Android) ou le récupérer maintenant
+    final message = _pendingInitialFcmMessage ?? await FirebaseMessaging.instance.getInitialMessage();
+    _pendingInitialFcmMessage = null;
     if (message == null) return;
     final data = message.data;
     if (data.isEmpty) return;
 
-    // Laisser le temps au Splash de terminer (navigation vers Dashboard ou Login)
-    await Future.delayed(const Duration(milliseconds: 1800));
-    // Puis attendre que le navigator et l'auth soient prêts
-    const maxAttempts = 20;
-    const interval = Duration(milliseconds: 350);
+    // Le Splash attend 5s puis fait pushReplacement vers Dashboard/Login. On attend que ce soit fait
+    // pour pousser l'écran cible (détail commande, chat, etc.) au-dessus du bon écran.
+    await Future.delayed(const Duration(milliseconds: 5500));
+    // Puis attendre que le navigator et l'auth soient prêts (au cas où initAuth serait un peu lent)
+    const maxAttempts = 15;
+    const interval = Duration(milliseconds: 400);
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
       await Future.delayed(interval);
       final ctx = rootNavigatorKey.currentContext;
@@ -1317,7 +1329,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
                         ? TextDirection.rtl
                         : TextDirection.ltr,
                     child: IdleOverlay(
-                      idleDuration: const Duration(minutes: 1), // → 1h en prod
+                      idleDuration: const Duration(minutes: 10),
                       onSessionExpired: () {
                         // Session expirée → retour à l'accueil pour le prochain client
                         rootNavigatorKey.currentState?.pushAndRemoveUntil(

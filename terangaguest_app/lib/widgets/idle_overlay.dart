@@ -31,7 +31,7 @@ class IdleOverlay extends StatefulWidget {
   const IdleOverlay({
     super.key,
     required this.child,
-    this.idleDuration = const Duration(minutes: 1),
+    this.idleDuration = const Duration(minutes: 10),
     this.onSessionExpired,
   });
 
