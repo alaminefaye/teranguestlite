@@ -251,14 +251,10 @@ class ChatController extends Controller
             ];
 
             $service = app(FirebaseNotificationService::class);
-            $sent = $service->sendToClientOfRoom(
-                $roomId,
-                'Nouveau message du staff',
-                $preview,
-                $payload
-            );
+            $sent = false;
 
-            if (!$sent && $conversation->user) {
+            // Priorité : envoyer au client de la conversation (celui qui a ouvert le chat)
+            if ($conversation->user) {
                 $sent = $service->sendToUser(
                     $conversation->user,
                     'Nouveau message du staff',
@@ -266,15 +262,31 @@ class ChatController extends Controller
                     $payload
                 );
                 if ($sent) {
-                    Log::info('Chat: guest notified via conversation user (fallback)', [
+                    Log::info('Chat: guest notified (conversation user)', [
                         'conversation_id' => $conversation->id,
                         'user_id' => $conversation->user->id,
                     ]);
                 }
             }
 
+            // Sinon essayer via la chambre (user lié à room_id / room_number)
             if (!$sent) {
-                Log::warning('Chat: could not notify guest (no FCM token for room or conversation user)', [
+                $sent = $service->sendToClientOfRoom(
+                    $roomId,
+                    'Nouveau message du staff',
+                    $preview,
+                    $payload
+                );
+                if ($sent) {
+                    Log::info('Chat: guest notified via room (fallback)', [
+                        'conversation_id' => $conversation->id,
+                        'room_id' => $roomId,
+                    ]);
+                }
+            }
+
+            if (!$sent) {
+                Log::warning('Chat: could not notify guest (no FCM token for conversation user or room)', [
                     'conversation_id' => $conversation->id,
                     'room_id' => $roomId,
                     'user_id' => $conversation->user_id,
