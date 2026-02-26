@@ -62,6 +62,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final pad = isMobile ? 12.0 : 20.0;
+    final titleSize = isMobile ? 20.0 : 24.0;
 
     return Scaffold(
       body: Container(
@@ -76,7 +80,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -94,10 +98,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                         children: [
                           Text(
                             l10n.vehicleRentalTitle,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
                           const SizedBox(height: 4),

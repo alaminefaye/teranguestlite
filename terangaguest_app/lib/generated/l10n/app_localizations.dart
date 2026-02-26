@@ -2178,6 +2178,12 @@ abstract class AppLocalizations {
   /// **'Nombre de jours'**
   String get rentalDays;
 
+  /// No description provided for @estimatedPrice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix estimé'**
+  String get estimatedPrice;
+
   /// No description provided for @guidedToursTitle.
   ///
   /// In fr, this message translates to:

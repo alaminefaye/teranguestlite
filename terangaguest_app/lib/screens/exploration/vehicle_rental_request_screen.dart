@@ -8,6 +8,7 @@ import '../../models/vehicle.dart';
 import '../../providers/palace_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 
 /// Formulaire de demande de location pour un véhicule choisi.
 class VehicleRentalRequestScreen extends StatefulWidget {
@@ -34,7 +35,11 @@ class _VehicleRentalRequestScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _resolveServiceId());
+    _rentalDaysController.addListener(_onPriceInputChanged);
+    _rentalDurationController.addListener(_onPriceInputChanged);
   }
+
+  void _onPriceInputChanged() => setState(() {});
 
   Future<void> _resolveServiceId() async {
     final api = PalaceApi();
@@ -55,10 +60,21 @@ class _VehicleRentalRequestScreenState
 
   @override
   void dispose() {
+    _rentalDaysController.removeListener(_onPriceInputChanged);
+    _rentalDurationController.removeListener(_onPriceInputChanged);
     _detailsController.dispose();
     _rentalDaysController.dispose();
     _rentalDurationController.dispose();
     super.dispose();
+  }
+
+  double? get _estimatedPrice {
+    final days = int.tryParse(_rentalDaysController.text.trim());
+    final hours = int.tryParse(_rentalDurationController.text.trim());
+    final d = (days != null && days >= 1) ? days : null;
+    final h = (hours != null && hours >= 1) ? hours : null;
+    if (d == null && h == null) return null;
+    return widget.vehicle.estimatePrice(rentalDays: d, rentalDurationHours: h);
   }
 
   void _showSnack(String msg, {bool isError = false}) {
@@ -125,6 +141,10 @@ class _VehicleRentalRequestScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 600;
+    final pad = isMobile ? 12.0 : 20.0;
+    final titleSize = isMobile ? 20.0 : 22.0;
 
     return Scaffold(
       body: Container(
@@ -139,7 +159,7 @@ class _VehicleRentalRequestScreenState
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(pad),
                 child: Row(
                   children: [
                     IconButton(
@@ -147,9 +167,12 @@ class _VehicleRentalRequestScreenState
                         Icons.arrow_back,
                         color: AppTheme.accentGold,
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        HapticHelper.lightImpact();
+                        Navigator.pop(context);
+                      },
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isMobile ? 8 : 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,12 +180,13 @@ class _VehicleRentalRequestScreenState
                         children: [
                           Text(
                             widget.vehicle.name,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.requestVehicleRental,
                             style: const TextStyle(
@@ -178,8 +202,8 @@ class _VehicleRentalRequestScreenState
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: LayoutHelper.horizontalPaddingValue(context),
                     vertical: 8,
                   ),
                   child: Column(
@@ -269,6 +293,42 @@ class _VehicleRentalRequestScreenState
                           ),
                         ),
                       ),
+                      if (_estimatedPrice != null) ...[
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentGold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.accentGold.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n.estimatedPrice,
+                                style: const TextStyle(
+                                  color: AppTheme.textGray,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                '${_estimatedPrice!.toInt()} FCFA',
+                                style: const TextStyle(
+                                  color: AppTheme.accentGold,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       TextField(
                         controller: _detailsController,

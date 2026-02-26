@@ -84,12 +84,24 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                         children: [
                           Text(
                             AppLocalizations.of(context).reserve,
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppTheme.accentGold,
                             ),
                           ),
+                          if (widget.excursion.name.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.excursion.name,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.textGray,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -98,8 +110,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 60,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -216,6 +228,75 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
   }
 
   Widget _buildParticipantsSelector() {
+    final isNarrow = MediaQuery.of(context).size.width < 380;
+    final iconSize = isNarrow ? 24.0 : 32.0;
+    final padH = isNarrow ? 8.0 : 16.0;
+    final padV = isNarrow ? 6.0 : 8.0;
+
+    Widget counter({
+      required String label,
+      required int value,
+      required bool canDecrement,
+      required bool canIncrement,
+      required VoidCallback onDecrement,
+      required VoidCallback onIncrement,
+    }) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: canDecrement ? onDecrement : null,
+                icon: Icon(Icons.remove_circle_outline, size: iconSize),
+                color: AppTheme.accentGold,
+                style: IconButton.styleFrom(
+                  minimumSize: Size(iconSize + 8, iconSize + 8),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: isNarrow ? 36 : 48),
+                  child: Text(
+                    '$value',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGold,
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: canIncrement ? onIncrement : null,
+                icon: Icon(Icons.add_circle_outline, size: iconSize),
+                color: AppTheme.accentGold,
+                style: IconButton.styleFrom(
+                  minimumSize: Size(iconSize + 8, iconSize + 8),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -230,115 +311,59 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         children: [
           Text(
             AppLocalizations.of(context).participants,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
+          isNarrow
+              ? Column(
                   children: [
-                    Text(
-                      AppLocalizations.of(context).adults,
-                      style: TextStyle(fontSize: 14, color: AppTheme.textGray),
+                    counter(
+                      label: AppLocalizations.of(context).adults,
+                      value: _adultsCount,
+                      canDecrement: _adultsCount > 1,
+                      canIncrement: _adultsCount < 20,
+                      onDecrement: () => setState(() => _adultsCount--),
+                      onIncrement: () => setState(() => _adultsCount++),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: _adultsCount > 1
-                              ? () => setState(() => _adultsCount--)
-                              : null,
-                          icon: const Icon(Icons.remove_circle_outline),
-                          color: AppTheme.accentGold,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentGold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppTheme.accentGold),
-                          ),
-                          child: Text(
-                            '$_adultsCount',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.accentGold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _adultsCount < 20
-                              ? () => setState(() => _adultsCount++)
-                              : null,
-                          icon: const Icon(Icons.add_circle_outline),
-                          color: AppTheme.accentGold,
-                        ),
-                      ],
+                    const SizedBox(height: 16),
+                    counter(
+                      label: AppLocalizations.of(context).children,
+                      value: _childrenCount,
+                      canDecrement: _childrenCount > 0,
+                      canIncrement: _childrenCount < 20,
+                      onDecrement: () => setState(() => _childrenCount--),
+                      onIncrement: () => setState(() => _childrenCount++),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: counter(
+                        label: AppLocalizations.of(context).adults,
+                        value: _adultsCount,
+                        canDecrement: _adultsCount > 1,
+                        canIncrement: _adultsCount < 20,
+                        onDecrement: () => setState(() => _adultsCount--),
+                        onIncrement: () => setState(() => _adultsCount++),
+                      ),
+                    ),
+                    Expanded(
+                      child: counter(
+                        label: AppLocalizations.of(context).children,
+                        value: _childrenCount,
+                        canDecrement: _childrenCount > 0,
+                        canIncrement: _childrenCount < 20,
+                        onDecrement: () => setState(() => _childrenCount--),
+                        onIncrement: () => setState(() => _childrenCount++),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).children,
-                      style: TextStyle(fontSize: 14, color: AppTheme.textGray),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: _childrenCount > 0
-                              ? () => setState(() => _childrenCount--)
-                              : null,
-                          icon: const Icon(Icons.remove_circle_outline),
-                          color: AppTheme.accentGold,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentGold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppTheme.accentGold),
-                          ),
-                          child: Text(
-                            '$_childrenCount',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.accentGold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _childrenCount < 20
-                              ? () => setState(() => _childrenCount++)
-                              : null,
-                          icon: const Icon(Icons.add_circle_outline),
-                          color: AppTheme.accentGold,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -359,7 +384,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
         children: [
           Text(
             AppLocalizations.of(context).specialRequestsOptional,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,

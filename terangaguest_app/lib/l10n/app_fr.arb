@@ -367,6 +367,7 @@
   "rentalDate": "Date souhaitée",
   "rentalDuration": "Durée (heures)",
   "rentalDays": "Nombre de jours",
+  "estimatedPrice": "Prix estimé",
   "guidedToursTitle": "Visites Guidées Personnalisées",
   "guidedToursSubtitle": "Indiquez la date, le type de circuit et le nombre de personnes.",
   "tourType": "Type de circuit",

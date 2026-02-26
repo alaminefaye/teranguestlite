@@ -367,6 +367,7 @@
   "rentalDate": "Preferred date",
   "rentalDuration": "Duration (hours)",
   "rentalDays": "Number of days",
+  "estimatedPrice": "Estimated price",
   "guidedToursTitle": "Personalized Guided Tours",
   "guidedToursSubtitle": "Enter date, tour type and number of people.",
   "tourType": "Tour type",

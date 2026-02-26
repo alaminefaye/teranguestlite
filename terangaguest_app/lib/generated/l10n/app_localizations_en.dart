@@ -1115,6 +1115,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentalDays => 'Number of days';
 
   @override
+  String get estimatedPrice => 'Estimated price';
+
+  @override
   String get guidedToursTitle => 'Personalized Guided Tours';
 
   @override
