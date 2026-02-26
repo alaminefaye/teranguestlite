@@ -249,6 +249,7 @@ class FirebaseNotificationService
                             'aps' => [
                                 'sound' => 'notification.mp3',
                                 'badge' => 1,
+                                'content-available' => 1,
                             ],
                         ],
                     ],
@@ -460,6 +461,7 @@ class FirebaseNotificationService
                                 'aps' => [
                                     'sound' => 'notification.mp3',
                                     'badge' => 1,
+                                    'content-available' => 1,
                                 ],
                             ],
                         ])

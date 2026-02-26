@@ -36,6 +36,15 @@ import 'screens/hotel_infos/emergency_requests_screen.dart';
 import 'widgets/idle_overlay.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 
+/// Handler appelé quand une notification est reçue en arrière-plan ou app terminée.
+/// Doit être une fonction top-level pour que le système puisse l'exécuter même si l'app est killée.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // On ne peut pas naviguer ici ; le tap utilisateur sera géré par getInitialMessage()
+  // quand l'utilisateur ouvrira l'app en cliquant sur la notification.
+}
+
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -44,6 +53,9 @@ void main() async {
 
   // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
   await Firebase.initializeApp();
+
+  // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Initialiser le locale français pour les dates
   await initializeDateFormatting('fr_FR', null);
@@ -193,19 +205,37 @@ class _LocalizedAppState extends State<_LocalizedApp>
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      _handleOpenedFromNotification(message.data);
+      final data = message.data;
+      if (data.isEmpty) return;
+      // Un frame pour être sûr que l'app est bien au premier plan
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleOpenedFromNotification(data);
+      });
     });
   }
 
   Future<void> _handleInitialFcmMessage() async {
     final message = await FirebaseMessaging.instance.getInitialMessage();
-    if (message != null) {
-      // Différer la navigation pour que le navigator soit prêt (app ouverte depuis notification en état terminé)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(milliseconds: 400), () {
-          _handleOpenedFromNotification(message.data);
-        });
-      });
+    if (message == null) return;
+    final data = message.data;
+    if (data.isEmpty) return;
+
+    // Laisser le temps au Splash de terminer (navigation vers Dashboard ou Login)
+    await Future.delayed(const Duration(milliseconds: 1800));
+    // Puis attendre que le navigator et l'auth soient prêts
+    const maxAttempts = 20;
+    const interval = Duration(milliseconds: 350);
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      await Future.delayed(interval);
+      final ctx = rootNavigatorKey.currentContext;
+      final navigator = rootNavigatorKey.currentState;
+      if (ctx == null || navigator == null || !ctx.mounted) continue;
+      try {
+        final auth = Provider.of<AuthProvider>(ctx, listen: false);
+        if (!auth.isAuthenticated) continue;
+        _handleOpenedFromNotification(data);
+        return;
+      } catch (_) {}
     }
   }
 
@@ -687,10 +717,15 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final type = data['type'] as String?;
     final navigator = rootNavigatorKey.currentState;
     final ctx = rootNavigatorKey.currentContext;
-    if (navigator == null || ctx == null) return;
+    if (navigator == null || ctx == null || !ctx.mounted) return;
 
-    final auth = Provider.of<AuthProvider>(ctx, listen: false);
-    if (!auth.isAuthenticated) return;
+    AuthProvider auth;
+    try {
+      auth = Provider.of<AuthProvider>(ctx, listen: false);
+      if (!auth.isAuthenticated) return;
+    } catch (_) {
+      return;
+    }
 
     if (type == 'chat_message') {
       final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
@@ -747,7 +782,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
       return;
     }
 
-    if (type == 'excursion_booking') {
+    if (type == 'excursion_booking' || type == 'excursion_booking_status') {
       navigator.push(
         NavigationHelper.slideRoute(const MyExcursionBookingsScreen()),
       );

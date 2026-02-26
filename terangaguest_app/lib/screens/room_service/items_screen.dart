@@ -265,6 +265,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
           ),
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
+            cacheExtent: 150,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
               childAspectRatio: LayoutHelper.listCellAspectRatio(context),

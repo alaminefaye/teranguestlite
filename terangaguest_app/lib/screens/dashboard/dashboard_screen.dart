@@ -113,11 +113,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Bloc hero : grande image en fond, logo + slogan + nom dessus, boutons notification/profil en overlay sur l'image
-              _buildEnterpriseHero(context),
+              // Bloc hero : isolé en RepaintBoundary pour éviter les repaints lors du scroll de la grille
+              RepaintBoundary(child: _buildEnterpriseHero(context)),
               // Grille des services
               Expanded(child: _buildServicesGrid(context)),
-              _buildFooter(context),
+              RepaintBoundary(child: _buildFooter(context)),
             ],
           ),
         ),
@@ -561,6 +561,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: LayoutHelper.horizontalPadding(context),
       child: GridView.builder(
         padding: EdgeInsets.symmetric(vertical: spacing),
+        cacheExtent: 200,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: spacing,

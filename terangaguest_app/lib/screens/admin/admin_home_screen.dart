@@ -1032,6 +1032,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         padding: LayoutHelper.horizontalPadding(context),
                         child: GridView.builder(
                           padding: EdgeInsets.symmetric(vertical: spacing),
+                          cacheExtent: 200,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: spacing,
