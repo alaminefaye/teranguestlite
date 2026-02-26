@@ -240,26 +240,44 @@ class ChatController extends Controller
 
             $preview = $this->buildMessagePreview($message);
 
+            $payload = [
+                'type' => 'chat_message',
+                'conversation_id' => (string) $conversation->id,
+                'sender_type' => $message->sender_type,
+                'guest_name' => $guestName,
+                'room_label' => $roomLabel ?? '',
+                'message_type' => $message->message_type,
+                'message_preview' => $preview,
+            ];
+
             $service = app(FirebaseNotificationService::class);
             $sent = $service->sendToClientOfRoom(
                 $roomId,
                 'Nouveau message du staff',
                 $preview,
-                [
-                    'type' => 'chat_message',
-                    'conversation_id' => (string) $conversation->id,
-                    'sender_type' => $message->sender_type,
-                    'guest_name' => $guestName,
-                    'room_label' => $roomLabel ?? '',
-                    'message_type' => $message->message_type,
-                    'message_preview' => $preview,
-                ]
+                $payload
             );
 
+            if (!$sent && $conversation->user) {
+                $sent = $service->sendToUser(
+                    $conversation->user,
+                    'Nouveau message du staff',
+                    $preview,
+                    $payload
+                );
+                if ($sent) {
+                    Log::info('Chat: guest notified via conversation user (fallback)', [
+                        'conversation_id' => $conversation->id,
+                        'user_id' => $conversation->user->id,
+                    ]);
+                }
+            }
+
             if (!$sent) {
-                Log::warning('Chat: sendToClientOfRoom returned false (no FCM token for room?)', [
+                Log::warning('Chat: could not notify guest (no FCM token for room or conversation user)', [
                     'conversation_id' => $conversation->id,
                     'room_id' => $roomId,
+                    'user_id' => $conversation->user_id,
                 ]);
             }
         } catch (\Throwable $e) {
