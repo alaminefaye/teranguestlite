@@ -153,11 +153,13 @@ class ExcursionsProvider with ChangeNotifier {
   Future<void> updateExcursionBookingStatus({
     required int bookingId,
     required String action,
+    String? reason,
   }) async {
     try {
       await _excursionsApi.updateExcursionBookingStatus(
         bookingId: bookingId,
         action: action,
+        reason: reason,
       );
       await fetchMyExcursionBookings(period: _selectedBookingsPeriod);
     } catch (e) {

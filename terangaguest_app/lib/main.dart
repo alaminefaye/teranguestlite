@@ -163,6 +163,8 @@ class _LocalizedAppState extends State<_LocalizedApp> {
       } else if (type == 'restaurant_reservation_status' ||
           type == 'restaurant_reservation') {
         _handleRestaurantStatusNotification(data);
+      } else if (type == 'excursion_booking_status' || type == 'excursion_booking') {
+        _handleExcursionStatusNotification(data);
       } else if (type == 'chat_message') {
         _handleChatMessageNotification(data);
       } else if (type == 'laundry_status') {
@@ -1112,6 +1114,97 @@ class _LocalizedAppState extends State<_LocalizedApp> {
       default:
         return status;
     }
+  }
+
+  void _handleExcursionStatusNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final l10n = AppLocalizations.of(ctx);
+    final status = data['status'] as String? ?? '';
+    final excursionName = data['excursion_name'] as String? ?? 'Excursion';
+    final date = data['date'] as String? ?? '';
+    final reason = data['reason'] as String?;
+
+    String title = 'Réservation Excursions & Activités';
+    String message;
+    if (status == 'confirmed') {
+      message =
+          'Votre réservation excursion « $excursionName » est confirmée pour le $date.';
+    } else if (status == 'cancelled') {
+      message = l10n.reservationCancelledMessage;
+      if (reason != null && reason.isNotEmpty) {
+        message += '\nMotif : $reason';
+      }
+    } else if (status == 'completed') {
+      message =
+          'Votre excursion « $excursionName » du $date a été honorée.';
+    } else {
+      final label = _restaurantStatusLabel(l10n, status);
+      message = 'Statut de votre réservation excursion : $label';
+    }
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Fermer',
+                style: TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+                navigator.push(
+                  NavigationHelper.slideRoute(
+                    const MyExcursionBookingsScreen(),
+                  ),
+                );
+              },
+              child: Text(
+                l10n.myExcursionsShort,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _statusMessage(AppLocalizations l10n, String statusLabel) {

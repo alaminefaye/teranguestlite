@@ -144,11 +144,16 @@ class ExcursionsApi {
   Future<ExcursionBooking> updateExcursionBookingStatus({
     required int bookingId,
     required String action,
+    String? reason,
   }) async {
     try {
+      final data = <String, dynamic>{'action': action};
+      if (reason != null && reason.trim().isNotEmpty) {
+        data['reason'] = reason.trim();
+      }
       final response = await _apiService.post(
         '/excursion-bookings/$bookingId/status',
-        data: {'action': action},
+        data: data,
       );
 
       return ExcursionBooking.fromJson(

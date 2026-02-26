@@ -175,7 +175,7 @@ class ExcursionController extends Controller
             'number_of_children' => $children,
             'total_price' => $totalPrice,
             'special_requests' => $request->special_requests,
-            'status' => 'confirmed',
+            'status' => 'pending',
         ]);
 
         // Notification au client de la chambre et au staff
@@ -352,9 +352,59 @@ class ExcursionController extends Controller
 
         if ($nextStatus === 'cancelled' && ! $booking->cancelled_at) {
             $booking->cancelled_at = now();
+            $reason = $validated['reason'] ?? '';
+            if ($reason !== '') {
+                $booking->cancellation_reason = $reason;
+            }
         }
 
         $booking->save();
+
+        try {
+            if ($booking->room_id) {
+                $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+                $excursionName = $booking->excursion->name ?? 'Excursion';
+                $dateStr = $booking->booking_date?->format('d/m/Y');
+                $reason = $booking->cancellation_reason ?? '';
+
+                $statusMessages = [
+                    'confirmed' => "Votre réservation excursion « {$excursionName} » est confirmée pour le {$dateStr}.",
+                    'cancelled' => "Votre réservation excursion « {$excursionName} » a été annulée.",
+                    'completed' => "Votre excursion « {$excursionName} » du {$dateStr} a été honorée.",
+                ];
+
+                $title = 'Réservation Excursions & Activités';
+                $body = $statusMessages[$nextStatus] ?? 'Statut de votre réservation excursion mis à jour.';
+
+                if ($nextStatus === 'cancelled' && $reason !== '') {
+                    $body .= ' Motif : ' . $reason;
+                }
+
+                $data = [
+                    'type' => 'excursion_booking_status',
+                    'booking_id' => (string) $booking->id,
+                    'status' => $nextStatus,
+                    'screen' => 'MyExcursionBookings',
+                    'excursion_name' => $excursionName,
+                    'date' => $dateStr,
+                ];
+
+                if ($reason !== '') {
+                    $data['reason'] = $reason;
+                }
+
+                $firebaseService->sendToClientOfRoom(
+                    $booking->room_id,
+                    $title,
+                    $body,
+                    $data
+                );
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Firebase notification error (excursion booking status): ' . $e->getMessage()
+            );
+        }
 
         return response()->json([
             'success' => true,

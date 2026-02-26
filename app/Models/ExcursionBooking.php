@@ -9,7 +9,7 @@ class ExcursionBooking extends Model
 {
     use EnterpriseScopeTrait;
 
-    protected $fillable = ['enterprise_id', 'user_id', 'guest_id', 'excursion_id', 'room_id', 'booking_date', 'number_of_adults', 'number_of_children', 'total_price', 'special_requests', 'status', 'confirmed_at', 'cancelled_at'];
+    protected $fillable = ['enterprise_id', 'user_id', 'guest_id', 'excursion_id', 'room_id', 'booking_date', 'number_of_adults', 'number_of_children', 'total_price', 'special_requests', 'status', 'confirmed_at', 'cancelled_at', 'cancellation_reason'];
     
     protected $casts = ['booking_date' => 'date', 'total_price' => 'decimal:2', 'confirmed_at' => 'datetime', 'cancelled_at' => 'datetime'];
 

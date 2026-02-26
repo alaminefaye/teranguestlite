@@ -9,8 +9,10 @@ import '../../models/order.dart';
 import '../../models/laundry.dart';
 import '../../models/palace.dart';
 import '../../models/restaurant.dart';
+import '../../models/excursion.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_api.dart';
+import '../../services/excursions_api.dart';
 import '../../services/orders_api.dart';
 import '../../services/laundry_api.dart';
 import '../../services/palace_api.dart';
@@ -24,7 +26,7 @@ import '../orders/order_detail_screen.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/my_reservations_screen.dart';
 import '../spa/my_spa_reservations_screen.dart';
-import '../excursions/my_excursion_bookings_screen.dart';
+import '../excursions/my_excursion_bookings_screen.dart' show MyExcursionBookingsScreen, ExcursionBookingDetailScreen;
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../hotel_infos/emergency_requests_screen.dart';
@@ -64,6 +66,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final PalaceApi _palaceApi = PalaceApi();
   final RestaurantsApi _restaurantsApi = RestaurantsApi();
   final SpaApi _spaApi = SpaApi();
+  final ExcursionsApi _excursionsApi = ExcursionsApi();
   AdminSummary? _summary;
   bool _isLoading = false;
   Timer? _summaryTimer;
@@ -79,6 +82,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   bool _isShowingNewRestaurantDialog = false;
   final List<RestaurantReservation> _newRestaurantQueue = [];
   final Set<int> _alertedRestaurantIds = {};
+
+  bool _isShowingNewExcursionDialog = false;
+  final List<ExcursionBooking> _newExcursionQueue = [];
+  final Set<int> _alertedExcursionIds = {};
 
   bool _isShowingNewSpaDialog = false;
   final List<SpaReservation> _newSpaQueue = [];
@@ -161,15 +168,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _enqueueRescheduledSpaReservationsForAlert(context);
     }
     if (newSummary.excursionsPending > oldSummary.excursionsPending) {
+      _enqueueNewExcursionBookingsForAlert(context);
       messages.add('Nouvelle demande Excursions & Activités à traiter');
-      _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouvelle demande Excursions & Activités',
-          message: 'Vous avez une nouvelle demande excursions à traiter.',
-          icon: Icons.landscape,
-          routeKey: 'admin-excursions',
-        ),
-      );
     }
     if (newSummary.laundryPending > oldSummary.laundryPending) {
       _enqueueNewLaundryRequestsForAlert(context);
@@ -593,6 +593,73 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (_newRestaurantQueue.isNotEmpty && context.mounted) {
       _showNewRestaurantCarousel(context);
+    }
+  }
+
+  Future<void> _enqueueNewExcursionBookingsForAlert(
+    BuildContext context,
+  ) async {
+    try {
+      final result = await _excursionsApi.getMyExcursionBookings(
+        period: 'all',
+        page: 1,
+        perPage: 15,
+      );
+      final bookings =
+          result['bookings'] as List<ExcursionBooking>;
+      final pendingBookings = bookings.where(
+        (b) => b.status == 'pending',
+      );
+      for (final booking in pendingBookings) {
+        if (!_alertedExcursionIds.contains(booking.id)) {
+          _alertedExcursionIds.add(booking.id);
+          _newExcursionQueue.add(booking);
+        }
+      }
+      if (!_isShowingNewExcursionDialog &&
+          _newExcursionQueue.isNotEmpty &&
+          context.mounted) {
+        _showNewExcursionCarousel(context);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showNewExcursionCarousel(BuildContext context) async {
+    if (!context.mounted) return;
+    if (_newExcursionQueue.isEmpty) {
+      _isShowingNewExcursionDialog = false;
+      return;
+    }
+    _isShowingNewExcursionDialog = true;
+    final bookingsToShow = List<ExcursionBooking>.from(_newExcursionQueue);
+    _newExcursionQueue.clear();
+
+    final navigator = Navigator.of(context);
+
+    HapticHelper.heavyImpact();
+
+    final selectedBooking = await showDialog<ExcursionBooking?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return _NewExcursionCarouselDialog(bookings: bookingsToShow);
+      },
+    );
+
+    if (!context.mounted) {
+      _isShowingNewExcursionDialog = false;
+      return;
+    }
+    _isShowingNewExcursionDialog = false;
+    if (selectedBooking != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => ExcursionBookingDetailScreen(booking: selectedBooking),
+        ),
+      );
+    }
+    if (_newExcursionQueue.isNotEmpty && context.mounted) {
+      _showNewExcursionCarousel(context);
     }
   }
 
@@ -2426,6 +2493,273 @@ class _NewRestaurantCarouselDialogState
           onPressed: () {
             final reservation = widget.reservations[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(reservation);
+          },
+          child: const Text(
+            'Ouvrir',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewExcursionCarouselDialog extends StatefulWidget {
+  const _NewExcursionCarouselDialog({required this.bookings});
+
+  final List<ExcursionBooking> bookings;
+
+  @override
+  State<_NewExcursionCarouselDialog> createState() =>
+      _NewExcursionCarouselDialogState();
+}
+
+class _NewExcursionCarouselDialogState extends State<_NewExcursionCarouselDialog> {
+  static const int _totalSeconds = 60;
+  late int _remainingSeconds;
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = _totalSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _remainingSeconds -= 1;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        if (mounted) {
+          Navigator.of(context).maybePop();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress => _remainingSeconds / _totalSeconds;
+
+  ExcursionBooking get _currentBooking => widget.bookings[_currentIndex];
+
+  @override
+  Widget build(BuildContext context) {
+    final booking = _currentBooking;
+    final roomLabel = booking.roomNumber != null && booking.roomNumber!.isNotEmpty
+        ? 'Chambre ${booking.roomNumber}'
+        : 'Chambre non spécifiée';
+    final guestName = booking.guestName != null && booking.guestName!.isNotEmpty
+        ? booking.guestName!
+        : 'Client inconnu';
+    final dateStr = booking.date.toIso8601String().split('T')[0];
+
+    return AlertDialog(
+      backgroundColor: AppTheme.primaryBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.accentGold.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.landscape_outlined,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Nouvelle demande Excursions & Activités',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Réservation #${booking.id}',
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            roomLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            guestName,
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    booking.excursionName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Date : $dateStr · ${booking.adultsCount + booking.childrenCount} pers.',
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 13),
+          ),
+          if (booking.specialRequests != null &&
+              booking.specialRequests!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentGold.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.format_quote,
+                      color: AppTheme.accentGold.withValues(alpha: 0.5),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        booking.specialRequests!,
+                        style: const TextStyle(
+                          color: AppTheme.accentGold,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _progress,
+              backgroundColor: AppTheme.textGray.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.accentGold,
+              ),
+              minHeight: 4,
+            ),
+          ),
+          if (widget.bookings.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1}/${widget.bookings.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Colors.white),
+                    onPressed: _currentIndex < widget.bookings.length - 1
+                        ? () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cette alerte disparaîtra automatiquement dans une minute.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: const Text(
+            'Fermer',
+            style: TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final booking = widget.bookings[_currentIndex];
+            Navigator.of(context, rootNavigator: true).pop(booking);
           },
           child: const Text(
             'Ouvrir',
