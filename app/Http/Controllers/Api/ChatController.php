@@ -194,8 +194,9 @@ class ChatController extends Controller
             $preview = $this->buildMessagePreview($message);
 
             $service = app(FirebaseNotificationService::class);
-            $service->sendToStaff(
+            $service->sendToStaffForSection(
                 $conversation->enterprise_id,
+                \App\Helpers\StaffSection::CHAT_MESSAGES,
                 'Nouveau message client',
                 $preview,
                 [

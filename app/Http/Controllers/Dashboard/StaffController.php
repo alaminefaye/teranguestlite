@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\StaffSection;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -102,6 +103,7 @@ class StaffController extends Controller
         return view('pages.dashboard.staff.create', [
             'title' => 'Ajouter un membre du staff',
             'departmentOptions' => self::departmentOptions(),
+            'sectionOptions' => StaffSection::labels(),
         ]);
     }
 
@@ -114,12 +116,15 @@ class StaffController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
             'department' => ['nullable', 'string', 'max:100', Rule::in(self::departmentOptions())],
+            'managed_sections' => ['nullable', 'array'],
+            'managed_sections.*' => ['string', Rule::in(StaffSection::all())],
         ]);
 
         $validated['enterprise_id'] = $enterpriseId;
         $validated['role'] = 'staff';
         $validated['password'] = Hash::make($validated['password']);
         $validated['department'] = $validated['department'] ?? null;
+        $validated['managed_sections'] = $validated['managed_sections'] ?? [];
 
         User::create($validated);
 
@@ -134,6 +139,7 @@ class StaffController extends Controller
             'title' => 'Modifier ' . $staff->name,
             'staff' => $staff,
             'departmentOptions' => self::departmentOptions(),
+            'sectionOptions' => StaffSection::labels(),
         ]);
     }
 
@@ -145,6 +151,8 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $staff->id,
             'department' => ['nullable', 'string', 'max:100', Rule::in(self::departmentOptions())],
+            'managed_sections' => ['nullable', 'array'],
+            'managed_sections.*' => ['string', Rule::in(StaffSection::all())],
         ];
         if ($request->filled('password')) {
             $rules['password'] = ['string', 'confirmed', Password::min(8)];
@@ -154,6 +162,7 @@ class StaffController extends Controller
         $staff->name = $validated['name'];
         $staff->email = $validated['email'];
         $staff->department = $validated['department'] ?? null;
+        $staff->managed_sections = $validated['managed_sections'] ?? [];
         if (!empty($validated['password'])) {
             $staff->password = Hash::make($validated['password']);
         }

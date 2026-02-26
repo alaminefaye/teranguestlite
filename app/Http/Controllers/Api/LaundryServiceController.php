@@ -124,9 +124,16 @@ class LaundryServiceController extends Controller
             'status' => 'pending',
         ]);
 
-        // Notification au client de la chambre
+        // Notifications
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $firebaseService->sendToStaffForSection(
+                $user->enterprise_id,
+                \App\Helpers\StaffSection::LAUNDRY_REQUESTS,
+                'Nouvelle demande blanchisserie',
+                "Nouvelle demande #{$laundryRequest->request_number}",
+                ['type' => 'laundry_status', 'request_id' => (string) $laundryRequest->id, 'screen' => 'LaundryRequests']
+            );
             if ($laundryRequest->room_id) {
                 $firebaseService->sendToClientOfRoom(
                     $laundryRequest->room_id,

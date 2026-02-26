@@ -189,8 +189,9 @@ class ExcursionController extends Controller
                 );
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $user->enterprise_id,
+                \App\Helpers\StaffSection::EXCURSIONS,
                 'Nouvelle réservation excursion',
                 "Nouvelle excursion {$excursion->name} le " . $booking->booking_date?->format('d/m/Y'),
                 [

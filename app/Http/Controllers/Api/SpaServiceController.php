@@ -153,8 +153,9 @@ class SpaServiceController extends Controller
                 );
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $user->enterprise_id,
+                \App\Helpers\StaffSection::SPA_RESERVATIONS,
                 'Nouvelle réservation spa',
                 "Nouvelle réservation spa {$service->name} le " . $reservation->reservation_date->format('d/m/Y') . " à " . \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
                 [
@@ -349,8 +350,9 @@ class SpaServiceController extends Controller
                 $roomText = $roomNumber ? " (Chambre $roomNumber)" : "";
 
                 if ($action === 'cancel') {
-                    $firebaseService->sendToStaff(
+                    $firebaseService->sendToStaffForSection(
                         $reservation->enterprise_id,
+                        \App\Helpers\StaffSection::SPA_RESERVATIONS,
                         'Annulation Spa',
                         "$guestName$roomText a annulé sa réservation pour $serviceName.",
                         [
@@ -359,8 +361,9 @@ class SpaServiceController extends Controller
                         ]
                     );
                 } elseif ($action === 'reschedule') {
-                    $firebaseService->sendToStaff(
+                    $firebaseService->sendToStaffForSection(
                         $reservation->enterprise_id,
+                        \App\Helpers\StaffSection::SPA_RESERVATIONS,
                         'Modification Spa',
                         "$guestName$roomText a demandé à replanifier sa réservation pour $serviceName au $dateStr à $timeStr.",
                         [
@@ -544,8 +547,9 @@ class SpaServiceController extends Controller
             } else {
                 // Client a annulé -> notifier le staff
                 $data['screen'] = 'AdminSpaReservations';
-                $firebaseService->sendToStaff(
+                $firebaseService->sendToStaffForSection(
                     $reservation->enterprise_id,
+                    \App\Helpers\StaffSection::SPA_RESERVATIONS,
                     'Réservation spa annulée par le client',
                     $body,
                     $data
@@ -604,8 +608,9 @@ class SpaServiceController extends Controller
                 $body .= " (Chambre {$roomNumber})";
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $reservation->enterprise_id,
+                \App\Helpers\StaffSection::SPA_RESERVATIONS,
                 'Réservation spa confirmée par le client',
                 $body,
                 [

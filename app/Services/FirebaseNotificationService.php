@@ -766,4 +766,32 @@ class FirebaseNotificationService
 
         return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);
     }
+
+    /**
+     * Envoyer une notification au staff qui gère la section donnée (admin reçoit tout, staff selon managed_sections).
+     */
+    public function sendToStaffForSection($enterpriseId, string $sectionKey, string $title, string $body, array $data = [])
+    {
+        $staff = User::where('enterprise_id', $enterpriseId)
+            ->whereIn('role', ['admin', 'staff'])
+            ->has('fcmTokens')
+            ->where(function ($q) use ($sectionKey) {
+                $q->where('role', 'admin')
+                    ->orWhere(function ($q2) use ($sectionKey) {
+                        $q2->where('role', 'staff')
+                            ->where(function ($q3) use ($sectionKey) {
+                                $q3->whereNull('managed_sections')
+                                    ->orWhereJsonContains('managed_sections', $sectionKey);
+                            });
+                    });
+            })
+            ->get();
+
+        if ($staff->isEmpty()) {
+            Log::warning("No staff with FCM tokens found for enterprise {$enterpriseId} and section {$sectionKey}");
+            return false;
+        }
+
+        return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);
+    }
 }

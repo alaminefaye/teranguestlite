@@ -251,8 +251,9 @@ class PalaceServiceController extends Controller
             }
 
             // Notifier le staff
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $request->user()->enterprise_id,
+                \App\Helpers\StaffSection::PALACE_SERVICES,
                 'Nouvelle demande palace',
                 "Nouvelle demande de service : {$staffPushTitle}"
             );

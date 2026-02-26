@@ -122,8 +122,9 @@ class RestaurantController extends Controller
                 );
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $user->enterprise_id,
+                \App\Helpers\StaffSection::RESTAURANT_RESERVATIONS,
                 'Nouvelle réservation restaurant',
                 "Nouvelle réservation au restaurant {$restaurant->name} le " . $reservation->reservation_date->format('d/m/Y') . " à " . \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
                 [
@@ -429,8 +430,9 @@ class RestaurantController extends Controller
                 $data['reason'] = $reason;
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $reservation->enterprise_id,
+                \App\Helpers\StaffSection::RESTAURANT_RESERVATIONS,
                 'Réservation restaurant annulée par le client',
                 $body,
                 $data

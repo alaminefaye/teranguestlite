@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'enterprise_id',
         'department',
+        'managed_sections',
         'room_number',
         'room_id',
         'must_change_password',
@@ -54,6 +55,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'must_change_password' => 'boolean',
             'fcm_token_updated_at' => 'datetime',
+            'managed_sections' => 'array',
         ];
     }
 

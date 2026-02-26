@@ -381,8 +381,9 @@ class OrderController extends Controller
                 $data['reason'] = $reason;
             }
 
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $order->enterprise_id ?? $user->enterprise_id,
+                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
                 'Commande annulée par le client',
                 $body,
                 $data

@@ -236,8 +236,9 @@ class RoomServiceController extends Controller
                 $firebaseService->sendNewOrderNotificationToRoom($order);
             }
             // Notifier le staff
-            $firebaseService->sendToStaff(
+            $firebaseService->sendToStaffForSection(
                 $user->enterprise_id,
+                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
                 'Nouvelle commande',
                 "Nouvelle commande #{$order->order_number} de la chambre {$user->room_number}"
             );

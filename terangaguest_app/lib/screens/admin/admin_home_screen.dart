@@ -301,7 +301,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final l10n = AppLocalizations.of(context);
     _handleTileTap(
       context,
-      _AdminTile(label: '', icon: Icons.circle, routeKey: routeKey),
+      _AdminTile(label: '', icon: Icons.circle, routeKey: routeKey, sectionKey: routeKey),
       l10n,
     );
   }
@@ -925,56 +925,82 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final user = context.watch<AuthProvider>().user;
     final enterpriseName = user?.enterprise?.name ?? 'Votre établissement';
 
-    final tiles = [
+    const sectionRoomService = 'room_service_orders';
+    const sectionRestaurants = 'restaurant_reservations';
+    const sectionSpa = 'spa_reservations';
+    const sectionExcursions = 'excursions';
+    const sectionLaundry = 'laundry_requests';
+    const sectionPalace = 'palace_services';
+    const sectionEmergency = 'assistance_emergency';
+    const sectionChat = 'chat_messages';
+
+    final allTiles = [
       _AdminTile(
         icon: Icons.room_service_outlined,
         label: 'Commandes Room Service',
         routeKey: 'admin-room-service',
+        sectionKey: sectionRoomService,
         badge: _summary?.ordersPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.restaurant_menu_outlined,
         label: 'Réservations Restaurants',
         routeKey: 'admin-restaurants',
+        sectionKey: sectionRestaurants,
         badge: _summary?.restaurantPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.spa_outlined,
         label: 'Réservations Spa & Bien-être',
         routeKey: 'admin-spa',
+        sectionKey: sectionSpa,
         badge: _summary?.spaPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.hiking_outlined,
         label: 'Excursions & Activités',
         routeKey: 'admin-excursions',
+        sectionKey: sectionExcursions,
         badge: _summary?.excursionsPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.local_laundry_service_outlined,
         label: 'Demandes Blanchisserie',
         routeKey: 'admin-laundry',
+        sectionKey: sectionLaundry,
         badge: _summary?.laundryPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.workspace_premium_outlined,
         label: 'Services Palace / Conciergerie',
         routeKey: 'admin-palace',
+        sectionKey: sectionPalace,
         badge: _summary?.palacePending ?? 0,
       ),
       _AdminTile(
         icon: Icons.health_and_safety_outlined,
         label: 'Assistance & Urgence',
         routeKey: 'admin-emergency',
+        sectionKey: sectionEmergency,
         badge: _summary?.emergencyOpen ?? 0,
       ),
       _AdminTile(
         icon: Icons.chat_bubble_outline,
         label: 'Messages / Chat client',
         routeKey: 'admin-chat',
+        sectionKey: sectionChat,
         badge: _summary?.chatUnreadConversations ?? 0,
       ),
     ];
+
+    // Admin : toutes les tuiles. Staff legacy (managedSections = null) : toutes. Staff avec [] : aucune. Staff avec sections : seulement celles-ci.
+    final managed = user?.managedSections;
+    final list = managed ?? <String>[];
+    final tiles = (user?.isAdmin == true || managed == null)
+        ? allTiles
+        : (list.isEmpty
+            ? <_AdminTile>[]
+            : allTiles.where((t) => list.contains(t.sectionKey)).toList());
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
@@ -988,32 +1014,46 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             children: [
               _buildAdminHero(context, enterpriseName),
               Expanded(
-                child: Padding(
-                  padding: LayoutHelper.horizontalPadding(context),
-                  child: GridView.builder(
-                    padding: EdgeInsets.symmetric(vertical: spacing),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: spacing,
-                      mainAxisSpacing: spacing,
-                      childAspectRatio: aspectRatio,
-                    ),
-                    itemCount: tiles.length,
-                    itemBuilder: (context, index) {
-                      final tile = tiles[index];
-                      return ServiceCard(
-                        title: tile.label,
-                        icon: tile.icon,
-                        badge: tile.badge > 0 ? tile.badge.toString() : null,
-                        isLoading: _isLoading && _summary == null,
-                        onTap: () {
-                          HapticHelper.lightImpact();
-                          _handleTileTap(context, tile, l10n);
-                        },
-                      );
-                    },
-                  ),
-                ),
+                child: tiles.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Text(
+                            'Aucune section assignée. Contactez l\'administrateur pour gérer vos accès.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Padding(
+                        padding: LayoutHelper.horizontalPadding(context),
+                        child: GridView.builder(
+                          padding: EdgeInsets.symmetric(vertical: spacing),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: spacing,
+                            mainAxisSpacing: spacing,
+                            childAspectRatio: aspectRatio,
+                          ),
+                          itemCount: tiles.length,
+                          itemBuilder: (context, index) {
+                            final tile = tiles[index];
+                            return ServiceCard(
+                              title: tile.label,
+                              icon: tile.icon,
+                              badge: tile.badge > 0 ? tile.badge.toString() : null,
+                              isLoading: _isLoading && _summary == null,
+                              onTap: () {
+                                HapticHelper.lightImpact();
+                                _handleTileTap(context, tile, l10n);
+                              },
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -1402,12 +1442,14 @@ class _AdminTile {
   final IconData icon;
   final String label;
   final String routeKey;
+  final String sectionKey;
   final int badge;
 
   const _AdminTile({
     required this.icon,
     required this.label,
     required this.routeKey,
+    required this.sectionKey,
     this.badge = 0,
   });
 }

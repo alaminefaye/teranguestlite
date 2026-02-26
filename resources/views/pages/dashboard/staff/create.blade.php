@@ -40,6 +40,21 @@
                 @error('department')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
             <div></div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sections à gérer (app + notifications)</label>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Ce membre ne verra et ne recevra des notifications que pour les sections cochées.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    @foreach($sectionOptions ?? [] as $key => $label)
+                        <div class="flex items-center">
+                            <input type="checkbox" name="managed_sections[]" id="section_{{ $key }}" value="{{ $key }}"
+                                {{ in_array($key, old('managed_sections', [])) ? 'checked' : '' }}
+                                class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                            <label for="section_{{ $key }}" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $label }}</label>
+                        </div>
+                    @endforeach
+                </div>
+                @error('managed_sections')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
+            </div>
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mot de passe <span class="text-error-500">*</span></label>
                 <input type="password" name="password" id="password" required autocomplete="new-password"

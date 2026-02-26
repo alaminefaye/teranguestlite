@@ -5,6 +5,8 @@ class User {
   final String role;
   final int? enterpriseId;
   final String? department;
+  /// Sections que le staff peut gérer (tuiles Espace Admin + notifications). Vide ou null = admin voit tout.
+  final List<String>? managedSections;
   final String? roomNumber;
   final bool mustChangePassword;
   final String? fcmToken;
@@ -20,6 +22,7 @@ class User {
     required this.role,
     this.enterpriseId,
     this.department,
+    this.managedSections,
     this.roomNumber,
     this.mustChangePassword = false,
     this.fcmToken,
@@ -37,6 +40,7 @@ class User {
       role: json['role'] as String,
       enterpriseId: _parseId(json['enterprise_id']),
       department: json['department'] as String?,
+      managedSections: _parseStringList(json['managed_sections']),
       roomNumber: _parseStringNullable(json['room_number']),
       mustChangePassword: json['must_change_password'] as bool? ?? false,
       fcmToken: json['fcm_token'] as String?,
@@ -65,6 +69,12 @@ class User {
     return null;
   }
 
+  static List<String>? _parseStringList(dynamic value) {
+    if (value == null) return null;
+    if (value is! List) return null;
+    return value.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+  }
+
   // Convertir en JSON
   Map<String, dynamic> toJson() {
     return {
@@ -74,6 +84,7 @@ class User {
       'role': role,
       'enterprise_id': enterpriseId,
       'department': department,
+      'managed_sections': managedSections,
       'room_number': roomNumber,
       'must_change_password': mustChangePassword,
       'fcm_token': fcmToken,
@@ -91,6 +102,7 @@ class User {
     String? role,
     int? enterpriseId,
     String? department,
+    List<String>? managedSections,
     String? roomNumber,
     bool? mustChangePassword,
     String? fcmToken,
@@ -105,6 +117,7 @@ class User {
       role: role ?? this.role,
       enterpriseId: enterpriseId ?? this.enterpriseId,
       department: department ?? this.department,
+      managedSections: managedSections ?? this.managedSections,
       roomNumber: roomNumber ?? this.roomNumber,
       mustChangePassword: mustChangePassword ?? this.mustChangePassword,
       fcmToken: fcmToken ?? this.fcmToken,
