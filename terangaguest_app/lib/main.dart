@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'src/platform_check_stub.dart'
+    if (dart.library.io) 'src/platform_check_io.dart' as platform_check;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,8 +63,15 @@ void main() async {
   // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Sur Android, capturer le message initial dès que possible (tap sur notif = app lancée)
-  _pendingInitialFcmMessage = await FirebaseMessaging.instance.getInitialMessage();
+  // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
+  // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
+  if (platform_check.isAndroid) {
+    _pendingInitialFcmMessage = await FirebaseMessaging.instance.getInitialMessage();
+  } else {
+    FirebaseMessaging.instance.getInitialMessage().then((msg) {
+      _pendingInitialFcmMessage = msg;
+    });
+  }
 
   // Initialiser le locale français pour les dates
   await initializeDateFormatting('fr_FR', null);

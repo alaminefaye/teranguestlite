@@ -4,3 +4,5 @@ output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 output-dir: lib/generated/l10n
 nullable-getter: false
+# Évite que gen-l10n bloque en attendant une saisie quand il y a des messages non traduits
+untranslated-messages-file: untranslated_messages.txt
