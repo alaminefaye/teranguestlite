@@ -195,15 +195,26 @@ class _LocalizedAppState extends State<_LocalizedApp> {
   }
 
   void _handleChatMessageNotification(Map<String, dynamic> data) {
-    _startNotificationSoundLoop();
-
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null) return;
 
-    final l10n = AppLocalizations.of(ctx);
     final auth = Provider.of<AuthProvider>(ctx, listen: false);
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+    final senderType = data['sender_type'] as String?;
 
+    // Ne jamais afficher le popup à l'expéditeur : seul le destinataire le voit.
+    // Client envoie → notif aux staff uniquement. Staff envoie → notif au client uniquement.
+    if (senderType != null) {
+      if (isStaffOrAdmin && senderType == 'staff') return; // Message du staff → je suis le staff, c'est mon envoi
+      if (!isStaffOrAdmin && senderType == 'guest') return; // Message du client → je suis le client, c'est mon envoi
+    } else {
+      // Payload incomplet (sender_type manquant) : ne pas afficher pour éviter d'afficher à l'expéditeur.
+      return;
+    }
+
+    _startNotificationSoundLoop();
+
+    final l10n = AppLocalizations.of(ctx);
     final conversationIdRaw = data['conversation_id'] as String?;
     final conversationId = int.tryParse(conversationIdRaw ?? '');
     final guestName = data['guest_name'] as String? ?? 'Client chambre';

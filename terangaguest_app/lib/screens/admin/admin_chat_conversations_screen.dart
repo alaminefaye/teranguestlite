@@ -435,6 +435,7 @@ class _AdminChatConversationScreenState
   bool _sending = false;
   bool _sendingMedia = false;
   bool _recording = false;
+  bool _recordingPaused = false;
   DateTime? _recordStartAt;
   Timer? _recordTimer;
   int _recordSeconds = 0;
@@ -568,11 +569,8 @@ class _AdminChatConversationScreenState
   }
 
   Future<void> _toggleRecord() async {
-    if (_recording) {
-      await _stopRecordingAndSend();
-    } else {
-      await _startRecording();
-    }
+    if (_recording) return;
+    await _startRecording();
   }
 
   Future<void> _startRecording() async {
@@ -604,6 +602,7 @@ class _AdminChatConversationScreenState
       if (!mounted) return;
       setState(() {
         _recording = true;
+        _recordingPaused = false;
         _recordSeconds = 0;
       });
 
@@ -611,7 +610,7 @@ class _AdminChatConversationScreenState
       _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
         setState(() {
-          _recordSeconds++;
+          if (!_recordingPaused) _recordSeconds++;
         });
       });
     } catch (e) {
@@ -625,6 +624,51 @@ class _AdminChatConversationScreenState
     }
   }
 
+  Future<void> _pauseRecording() async {
+    try {
+      await _audioRecorder.pause();
+      if (!mounted) return;
+      setState(() {
+        _recordingPaused = true;
+        _recordTimer?.cancel();
+      });
+      HapticHelper.lightImpact();
+    } catch (_) {}
+  }
+
+  Future<void> _resumeRecording() async {
+    try {
+      await _audioRecorder.resume();
+      if (!mounted) return;
+      setState(() {
+        _recordingPaused = false;
+      });
+      _recordTimer?.cancel();
+      _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted) return;
+        setState(() {
+          if (!_recordingPaused) _recordSeconds++;
+        });
+      });
+      HapticHelper.lightImpact();
+    } catch (_) {}
+  }
+
+  Future<void> _cancelRecording() async {
+    try {
+      await _audioRecorder.cancel();
+      if (!mounted) return;
+      setState(() {
+        _recording = false;
+        _recordingPaused = false;
+        _recordStartAt = null;
+        _recordTimer?.cancel();
+        _recordSeconds = 0;
+      });
+      HapticHelper.lightImpact();
+    } catch (_) {}
+  }
+
   Future<void> _stopRecordingAndSend() async {
     try {
       final startedAt = _recordStartAt;
@@ -633,6 +677,7 @@ class _AdminChatConversationScreenState
       if (!mounted) return;
       setState(() {
         _recording = false;
+        _recordingPaused = false;
         _recordStartAt = null;
         _recordTimer?.cancel();
       });
@@ -1026,71 +1071,72 @@ class _AdminChatConversationScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_recording) _buildRecordingIndicator(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: (_sending || _sendingMedia || _recording)
-                      ? null
-                      : () => _pickAndSendMedia('image'),
-                  icon: Icon(
-                    Icons.attach_file,
-                    color: (_sending || _sendingMedia)
-                        ? AppTheme.textGray
-                        : AppTheme.accentGold,
-                  ),
+          if (_recording) _buildVoiceNoteRecordingBar() else _buildNormalInputRow(context, l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNormalInputRow(BuildContext context, AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: (_sending || _sendingMedia)
+                ? null
+                : () => _pickAndSendMedia('image'),
+            icon: Icon(
+              Icons.attach_file,
+              color: (_sending || _sendingMedia)
+                  ? AppTheme.textGray
+                  : AppTheme.accentGold,
+            ),
+          ),
+          IconButton(
+            onPressed: (_sending || _sendingMedia) ? null : _toggleRecord,
+            icon: Icon(
+              Icons.mic_none_rounded,
+              color: (_sending || _sendingMedia)
+                  ? AppTheme.textGray
+                  : AppTheme.accentGold,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryDark.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.4),
                 ),
-                IconButton(
-                  onPressed: (_sending || _sendingMedia) ? null : _toggleRecord,
-                  icon: Icon(
-                    _recording
-                        ? Icons.stop_circle_rounded
-                        : Icons.mic_none_rounded,
-                    color: (_sending || _sendingMedia)
-                        ? AppTheme.textGray
-                        : (_recording ? Colors.redAccent : AppTheme.accentGold),
+              ),
+              child: TextField(
+                controller: _controller,
+                maxLines: 4,
+                minLines: 1,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: l10n.chatbotDesc,
+                  hintStyle: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontSize: 14,
                   ),
+                  border: InputBorder.none,
                 ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryDark.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppTheme.accentGold.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _controller,
-                      maxLines: 4,
-                      minLines: 1,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: l10n.chatbotDesc,
-                        hintStyle: const TextStyle(
-                          color: AppTheme.textGray,
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                      ),
-                      onSubmitted: (_) => _sendMessage(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: (_sending || _sendingMedia) ? null : _sendMessage,
-                  icon: Icon(
-                    Icons.send_rounded,
-                    color: (_sending || _sendingMedia)
-                        ? AppTheme.textGray
-                        : AppTheme.accentGold,
-                  ),
-                ),
-              ],
+                onSubmitted: (_) => _sendMessage(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: (_sending || _sendingMedia) ? null : _sendMessage,
+            icon: Icon(
+              Icons.send_rounded,
+              color: (_sending || _sendingMedia)
+                  ? AppTheme.textGray
+                  : AppTheme.accentGold,
             ),
           ),
         ],
@@ -1098,40 +1144,118 @@ class _AdminChatConversationScreenState
     );
   }
 
-  Widget _buildRecordingIndicator() {
-    final pattern = [6.0, 18.0, 26.0, 14.0, 22.0, 10.0, 20.0];
+  Widget _buildVoiceNoteRecordingBar() {
+    final pattern = [6.0, 18.0, 26.0, 14.0, 22.0, 10.0, 20.0, 16.0, 12.0];
     final shift = _recordSeconds % pattern.length;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      child: Row(
-        children: [
-          Text(
-            _formatRecordDuration(),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: SizedBox(
-              height: 28,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(pattern.length, (index) {
-                  final h = pattern[(index + shift) % pattern.length];
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 160),
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    width: 3,
-                    height: h,
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentGold,
-                      borderRadius: BorderRadius.circular(8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A3542),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Text(
+                  _formatRecordDuration(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: SizedBox(
+                    height: 32,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(pattern.length, (index) {
+                        final h = _recordingPaused
+                            ? 8.0
+                            : pattern[(index + shift) % pattern.length];
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 120),
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          width: 3,
+                          height: h,
+                          decoration: BoxDecoration(
+                            color: _recordingPaused
+                                ? AppTheme.textGray
+                                : AppTheme.accentGold,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        );
+                      }),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: _cancelRecording,
+                  icon: const Icon(Icons.delete_outline, color: Colors.white, size: 26),
+                  tooltip: 'Supprimer',
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (_recordingPaused) {
+                        _resumeRecording();
+                      } else {
+                        _pauseRecording();
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(28),
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _recordingPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _stopRecordingAndSend,
+                    borderRadius: BorderRadius.circular(28),
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -156,6 +156,10 @@ class ChatController extends Controller
         ], 201);
     }
 
+    /**
+     * Notifier uniquement le staff (jamais le client expéditeur).
+     * Appelé quand un GUEST envoie un message → FCM envoyé aux seuls admin/staff de l'établissement.
+     */
     protected function notifyStaffNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
@@ -193,6 +197,10 @@ class ChatController extends Controller
         }
     }
 
+    /**
+     * Notifier uniquement le client de la chambre (jamais le staff expéditeur).
+     * Appelé quand un STAFF envoie un message → FCM envoyé au seul user tablette de la chambre.
+     */
     protected function notifyGuestNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
