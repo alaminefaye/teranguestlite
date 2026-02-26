@@ -18,6 +18,34 @@ use Illuminate\Http\Request;
 class TabletSessionController extends Controller
 {
     /**
+     * Livret d'accueil pour la chambre (tablette en session : room_id depuis la session).
+     * GET /api/tablet/hotel-infos?room_id=1
+     */
+    public function hotelInfos(Request $request): JsonResponse
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+        ]);
+
+        $room = Room::withoutGlobalScope('enterprise')->find($request->room_id);
+        if (!$room || !$room->enterprise) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chambre non trouvée.',
+            ], 404);
+        }
+
+        $infos = $room->enterprise->getHotelInfosForRoom($room);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'hotel_infos' => $infos,
+            ],
+        ], 200);
+    }
+
+    /**
      * Valide le code et retourne la session (guest + room + reservation) si le séjour est valide.
      * POST /api/tablet/validate-code
      * Body: { "code": "123456", "room_id": 1 } ou { "code": "123456", "room_number": "101" }

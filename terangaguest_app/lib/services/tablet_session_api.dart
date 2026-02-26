@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 import '../models/guest_session.dart';
+import '../models/user.dart';
 import 'api_service.dart';
 
 /// API tablette en chambre (sans auth) : validation code et checkout.
@@ -50,6 +51,34 @@ class TabletSessionApi {
                   : e.response?.statusCode == 403
                   ? 'Votre réservation est terminée ou n\'est pas encore active. Vérifiez vos dates de séjour avec la réception.'
                   : 'Impossible de valider le code. Réessayez ou contactez la réception.'),
+      );
+    }
+  }
+
+  /// Récupère le livret d'accueil (Wi‑Fi, règlement, etc.) pour la chambre concernée.
+  /// Utilisé par la tablette en session pour afficher les infos de la chambre (Wi‑Fi chambre si renseigné).
+  Future<HotelInfos> getHotelInfos(int roomId) async {
+    try {
+      final response = await _api.get(
+        ApiConfig.tabletHotelInfos,
+        queryParameters: {'room_id': roomId},
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true) {
+        throw Exception(data?['message'] ?? 'Impossible de charger les infos.');
+      }
+      final inner = data['data'] as Map<String, dynamic>?;
+      final raw = inner?['hotel_infos'] as Map<String, dynamic>?;
+      return HotelInfos.fromJson(raw);
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final message = body is Map && body['message'] != null
+          ? (body['message'] as String?)
+          : null;
+      throw Exception(
+        message?.trim().isNotEmpty == true
+            ? message!
+            : 'Impossible de charger les infos de l\'hôtel.',
       );
     }
   }

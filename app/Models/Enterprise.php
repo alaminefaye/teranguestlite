@@ -139,6 +139,21 @@ class Enterprise extends Model
     }
 
     /**
+     * Livret d'accueil pour une chambre donnée : infos hôtel avec Wi‑Fi chambre si renseigné.
+     */
+    public function getHotelInfosForRoom(Room $room): array
+    {
+        $infos = $this->hotel_infos;
+        if (trim((string) $room->wifi_network) !== '') {
+            $infos['wifi_network'] = $room->wifi_network;
+        }
+        if (trim((string) $room->wifi_password) !== '') {
+            $infos['wifi_password'] = $room->wifi_password;
+        }
+        return $infos;
+    }
+
+    /**
      * Assistance & Urgence : médecin et urgence sécurité (activés ou non).
      * Stocké dans settings['emergency'].
      */

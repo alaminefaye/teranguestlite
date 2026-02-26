@@ -33,6 +33,7 @@ Route::prefix('auth')->group(function () {
 // TABLETTE EN CHAMBRE - Validation code client (sans auth)
 // ==========================================
 Route::prefix('tablet')->group(function () {
+    Route::get('/hotel-infos', [\App\Http\Controllers\Api\TabletSessionController::class, 'hotelInfos']);
     Route::post('/validate-code', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateCode']);
     Route::post('/validate-session', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateSession']);
     Route::post('/checkout', [\App\Http\Controllers\Api\TabletSessionController::class, 'checkout']);

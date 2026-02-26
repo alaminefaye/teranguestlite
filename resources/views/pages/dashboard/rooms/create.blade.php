@@ -99,6 +99,28 @@
                 @enderror
             </div>
 
+            <!-- Wi‑Fi chambre (optionnel) -->
+            <div>
+                <label for="wifi_network" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Nom du réseau Wi‑Fi (chambre)
+                </label>
+                <input type="text" name="wifi_network" id="wifi_network" value="{{ old('wifi_network') }}" placeholder="Laisser vide = Wi‑Fi global de l'hôtel"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('wifi_network')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label for="wifi_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Mot de passe Wi‑Fi (chambre)
+                </label>
+                <input type="text" name="wifi_password" id="wifi_password" value="{{ old('wifi_password') }}" placeholder="Si réseau chambre renseigné"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('wifi_password')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Description -->
             <div class="md:col-span-2">
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

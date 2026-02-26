@@ -2,18 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
+import '../../services/tablet_session_api.dart';
 import '../../utils/haptic_helper.dart';
 
-/// Livret d'accueil : Wi-Fi, plans, règlement, infos pratiques.
-class HotelInfosScreen extends StatelessWidget {
+/// Livret d'accueil : Wi‑Fi (chambre si renseigné), plans, règlement, infos pratiques.
+/// En session tablette (code validé), affiche les infos de la chambre concernée.
+class HotelInfosScreen extends StatefulWidget {
   const HotelInfosScreen({super.key});
+
+  @override
+  State<HotelInfosScreen> createState() => _HotelInfosScreenState();
+}
+
+class _HotelInfosScreenState extends State<HotelInfosScreen> {
+  final TabletSessionApi _tabletApi = TabletSessionApi();
+  HotelInfos? _tabletInfos;
+  int? _lastFetchedRoomId;
+  bool _loadingTablet = false;
+  String? _tabletError;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final session = context.read<TabletSessionProvider>().session;
+    if (session != null && session.roomId != _lastFetchedRoomId && !_loadingTablet) {
+      _loadTabletInfos(session.roomId);
+    }
+  }
+
+  Future<void> _loadTabletInfos(int roomId) async {
+    if (_loadingTablet) return;
+    setState(() {
+      _loadingTablet = true;
+      _tabletError = null;
+    });
+    try {
+      final infos = await _tabletApi.getHotelInfos(roomId);
+      if (mounted) {
+        setState(() {
+          _tabletInfos = infos;
+          _lastFetchedRoomId = roomId;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _tabletError = e.toString().replaceFirst('Exception: ', '');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTablet = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final enterprise = context.watch<AuthProvider>().user?.enterprise;
-    final infos = enterprise?.hotelInfos;
+    final tabletSession = context.watch<TabletSessionProvider>();
+    final hasSession = tabletSession.hasSession && tabletSession.session != null;
+
+    // En session tablette : utiliser les infos de la chambre (API)
+    HotelInfos? infos;
+    if (hasSession && tabletSession.session != null) {
+      if (_loadingTablet) {
+        infos = null; // on affichera le loader
+      } else if (_tabletError != null) {
+        infos = null; // on affichera l'erreur
+      } else {
+        infos = _tabletInfos;
+      }
+    }
+    // Sinon : utilisateur connecté (staff / guest avec compte) → infos entreprise (déjà avec Wi‑Fi chambre si user.room_id)
+    if (infos == null && !hasSession) {
+      infos = context.watch<AuthProvider>().user?.enterprise?.hotelInfos;
+    }
 
     return Scaffold(
       body: Container(
@@ -64,113 +131,147 @@ class HotelInfosScreen extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (infos != null) ...[
-                        if (infos.wifiNetwork.isNotEmpty || infos.wifiPassword.isNotEmpty)
-                          _section(
-                            context,
-                            l10n.wifiCode,
-                            [
-                              if (infos.wifiNetwork.isNotEmpty)
-                                _row(l10n.wifiCode, infos.wifiNetwork),
-                              if (infos.wifiPassword.isNotEmpty)
-                                _row(l10n.wifiPassword, infos.wifiPassword),
-                            ],
-                          ),
-                        if (infos.houseRules.trim().isNotEmpty)
-                          _section(context, l10n.houseRules, [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                infos.houseRules,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ]),
-                        if (infos.mapUrl != null && infos.mapUrl!.isNotEmpty)
-                          _section(
-                            context,
-                            'Plan',
-                            [
-                              const SizedBox(height: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  infos.mapUrl!,
-                                  fit: BoxFit.contain,
-                                  width: double.infinity,
-                                  loadingBuilder: (context, child, progress) =>
-                                      progress == null
-                                          ? child
-                                          : const Center(
-                                              child: CircularProgressIndicator(
-                                                color: AppTheme.accentGold,
-                                              ),
-                                            ),
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          const Icon(
-                                            Icons.map_outlined,
-                                            color: AppTheme.textGray,
-                                            size: 48,
-                                          ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        if (infos.practicalInfo.trim().isNotEmpty)
-                          _section(context, l10n.practicalInfo, [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                infos.practicalInfo,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ]),
-                        if (infos.wifiNetwork.isEmpty &&
-                            infos.wifiPassword.isEmpty &&
-                            infos.houseRules.trim().isEmpty &&
-                            (infos.mapUrl == null || infos.mapUrl!.isEmpty) &&
-                            infos.practicalInfo.trim().isEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                l10n.comingSoon,
-                                style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
-                              ),
-                            ),
-                          ),
-                      ] else
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Text(
-                              l10n.comingSoon,
-                              style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                child: _buildContent(context, l10n, infos),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, AppLocalizations l10n, HotelInfos? infos) {
+    if (_loadingTablet) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.accentGold),
+      );
+    }
+    if (_tabletError != null && context.watch<TabletSessionProvider>().hasSession) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _tabletError!,
+                style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  final session = context.read<TabletSessionProvider>().session;
+                  if (session != null) _loadTabletInfos(session.roomId);
+                },
+                child: const Text('Réessayer', style: TextStyle(color: AppTheme.accentGold)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (infos != null) ...[
+            if (infos.wifiNetwork.isNotEmpty || infos.wifiPassword.isNotEmpty)
+              _section(
+                context,
+                l10n.wifiCode,
+                [
+                  if (infos.wifiNetwork.isNotEmpty)
+                    _row(l10n.wifiCode, infos.wifiNetwork),
+                  if (infos.wifiPassword.isNotEmpty)
+                    _row(l10n.wifiPassword, infos.wifiPassword),
+                ],
+              ),
+            if (infos.houseRules.trim().isNotEmpty)
+              _section(context, l10n.houseRules, [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    infos.houseRules,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ]),
+            if (infos.mapUrl != null && infos.mapUrl!.isNotEmpty)
+              _section(
+                context,
+                'Plan',
+                [
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      infos.mapUrl!,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      loadingBuilder: (context, child, progress) =>
+                          progress == null
+                              ? child
+                              : const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppTheme.accentGold,
+                                  ),
+                                ),
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.map_outlined,
+                                color: AppTheme.textGray,
+                                size: 48,
+                              ),
+                    ),
+                  ),
+                ],
+              ),
+            if (infos.practicalInfo.trim().isNotEmpty)
+              _section(context, l10n.practicalInfo, [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    infos.practicalInfo,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ]),
+            if (infos.wifiNetwork.isEmpty &&
+                infos.wifiPassword.isEmpty &&
+                infos.houseRules.trim().isEmpty &&
+                (infos.mapUrl == null || infos.mapUrl!.isEmpty) &&
+                infos.practicalInfo.trim().isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    l10n.comingSoon,
+                    style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                  ),
+                ),
+              ),
+          ] else
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  l10n.comingSoon,
+                  style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

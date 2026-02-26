@@ -83,4 +83,5 @@ class ApiConfig {
   static const String tabletValidateCode = '/tablet/validate-code';
   static const String tabletValidateSession = '/tablet/validate-session';
   static const String tabletCheckout = '/tablet/checkout';
+  static const String tabletHotelInfos = '/tablet/hotel-infos';
 }

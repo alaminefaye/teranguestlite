@@ -21,6 +21,8 @@ class Room extends Model
         'description',
         'amenities',
         'image',
+        'wifi_network',
+        'wifi_password',
     ];
 
     protected $casts = [

@@ -71,6 +71,8 @@ class RoomController extends Controller
             'description' => 'nullable|string',
             'amenities' => 'nullable|array',
             'image' => 'nullable|image|max:30720',
+            'wifi_network' => 'nullable|string|max:255',
+            'wifi_password' => 'nullable|string|max:255',
         ]);
 
         // Ajouter enterprise_id automatiquement
@@ -141,6 +143,8 @@ class RoomController extends Controller
             'description' => 'nullable|string',
             'amenities' => 'nullable|array',
             'image' => 'nullable|image|max:30720',
+            'wifi_network' => 'nullable|string|max:255',
+            'wifi_password' => 'nullable|string|max:255',
         ]);
 
         // Upload nouvelle image

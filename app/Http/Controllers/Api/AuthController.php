@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\GuestReservationHelper;
 use Illuminate\Validation\Rules\Password;
@@ -34,6 +35,17 @@ class AuthController extends Controller
         // Créer un token d'accès
         $token = $user->createToken('mobile-app')->plainTextToken;
 
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
+
         return response()->json([
             'success' => true,
             'message' => 'Connexion réussie',
@@ -44,16 +56,7 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'enterprise_id' => $user->enterprise_id,
-                    'enterprise' => $user->enterprise ? [
-                        'id' => $user->enterprise->id,
-                        'name' => $user->enterprise->name,
-                        'logo' => $user->enterprise->logo,
-                        'cover_photo' => $user->enterprise->cover_photo,
-                        'gym_hours' => $user->enterprise->gym_hours,
-                        'hotel_infos' => $user->enterprise->hotel_infos,
-                        'emergency' => $user->enterprise->emergency,
-                        'chatbot_url' => $user->enterprise->chatbot_url,
-                    ] : null,
+                    'enterprise' => $enterpriseData,
                     'department' => $user->department,
                     'room_number' => $user->room_number,
                     'must_change_password' => $user->must_change_password ?? false,
@@ -87,6 +90,20 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load('enterprise');
 
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'address' => $user->enterprise->address,
+            'phone' => $user->enterprise->phone,
+            'email' => $user->enterprise->email,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -95,19 +112,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'enterprise_id' => $user->enterprise_id,
-                'enterprise' => $user->enterprise ? [
-                    'id' => $user->enterprise->id,
-                    'name' => $user->enterprise->name,
-                    'logo' => $user->enterprise->logo,
-                    'cover_photo' => $user->enterprise->cover_photo,
-                    'gym_hours' => $user->enterprise->gym_hours,
-                    'address' => $user->enterprise->address,
-                    'phone' => $user->enterprise->phone,
-                    'email' => $user->enterprise->email,
-                    'hotel_infos' => $user->enterprise->hotel_infos,
-                    'emergency' => $user->enterprise->emergency,
-                    'chatbot_url' => $user->enterprise->chatbot_url,
-                ] : null,
+                'enterprise' => $enterpriseData,
                 'department' => $user->department,
                 'room_number' => $user->room_number,
                 'must_change_password' => $user->must_change_password ?? false,
@@ -115,6 +120,33 @@ class AuthController extends Controller
                 'created_at' => $user->created_at->toISOString(),
             ],
         ], 200);
+    }
+
+    /**
+     * Retourne les hotel_infos (livret d'accueil) pour l'utilisateur.
+     * Si l'utilisateur a un room_id, les identifiants Wi‑Fi de la chambre remplacent ceux de l'hôtel.
+     */
+    private function hotelInfosForUser(User $user): array
+    {
+        if (!$user->enterprise) {
+            return [
+                'wifi_network' => '',
+                'wifi_password' => '',
+                'house_rules' => '',
+                'map_url' => null,
+                'practical_info' => '',
+            ];
+        }
+        if ($user->room_id) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('id', $user->room_id)
+                ->first();
+            if ($room) {
+                return $user->enterprise->getHotelInfosForRoom($room);
+            }
+        }
+        return $user->enterprise->hotel_infos;
     }
 
     /**
