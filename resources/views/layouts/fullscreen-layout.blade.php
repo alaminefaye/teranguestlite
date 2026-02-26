@@ -8,6 +8,9 @@
 
     <title>{{ $title ?? 'Dashboard' }} | Temp</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo/logo.png') }}">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

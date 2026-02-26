@@ -48,9 +48,9 @@
                 </svg>
             </button>
 
-            <!-- Logo (mobile only) - Teranga Guest (même design que login) -->
-            <a href="/" class="xl:hidden inline-flex items-center rounded-full px-3 py-1.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
-                <span class="text-base font-bold tracking-wide text-white">TERAN</span><span class="text-base font-bold tracking-wide" style="color: #D4AF37;">GUEST</span>
+            <!-- Logo (mobile only) - Teranga Guest -->
+            <a href="/" class="xl:hidden inline-flex items-center justify-center rounded-full px-3 py-1.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="Teranga Guest" class="h-7 w-auto object-contain" />
             </a>
 
             <!-- Application Menu Toggle (mobile only) -->

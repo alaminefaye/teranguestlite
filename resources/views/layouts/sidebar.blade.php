@@ -70,22 +70,24 @@
     }"
     @mouseenter="if (!$store.sidebar.isExpanded) $store.sidebar.setHovered(true)"
     @mouseleave="$store.sidebar.setHovered(false)">
-    <!-- Logo Section - Teranga Guest (même design que la page login) -->
+    <!-- Logo Section - Teranga Guest (fond bleu, logo image) -->
     <div class="pt-6 pb-5 flex"
         :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
         'xl:justify-center' :
         'justify-start'">
         <a href="/" class="flex items-center">
-            <!-- Logo étendu : TERAN + GUEST (style login) -->
+            <!-- Logo étendu -->
             <div x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                class="inline-flex items-center rounded-full px-4 py-2"
+                class="inline-flex items-center justify-center rounded-full px-3 py-2"
                 style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
-                <span class="text-lg font-bold tracking-wide text-white">TERAN</span><span class="text-lg font-bold tracking-wide" style="color: #D4AF37;">GUEST</span>
+                <img src="{{ asset('images/logo/logo.png') }}" alt="Teranga Guest" class="h-8 w-auto object-contain" />
             </div>
             <!-- Logo réduit (sidebar collapsed) -->
             <div x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen"
-                class="flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm"
-                style="background-color: #1E252D; border: 1.5px solid #D4AF37; color: #D4AF37;">TG</div>
+                class="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden"
+                style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="TG" class="h-7 w-7 object-contain" />
+            </div>
         </a>
     </div>
 

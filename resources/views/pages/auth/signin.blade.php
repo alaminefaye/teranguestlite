@@ -8,8 +8,8 @@
                 <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center pt-10">
                     <div>
                         <div class="mb-6 flex justify-center">
-                            <div class="inline-flex items-center rounded-full px-6 py-2.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
-                                <span class="text-xl font-bold tracking-wide text-white">TERAN</span><span class="text-xl font-bold tracking-wide" style="color: #D4AF37;">GUEST</span>
+                            <div class="inline-flex items-center justify-center rounded-full px-5 py-2.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                                <img src="{{ asset('images/logo/logo.png') }}" alt="Teranga Guest" class="h-10 w-auto object-contain" />
                             </div>
                         </div>
                         <div class="mb-5 sm:mb-8">
