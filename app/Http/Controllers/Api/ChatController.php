@@ -186,7 +186,7 @@ class ChatController extends Controller
                     'sender_type' => $message->sender_type,
                     'guest_name' => $guestName,
                     'room_label' => $roomLabel ?? '',
-                    'message_type' => $message->message_type,
+                    'msg_type' => $message->message_type,
                     'message_preview' => $preview,
                 ]
             );
@@ -246,7 +246,7 @@ class ChatController extends Controller
                 'sender_type' => $message->sender_type,
                 'guest_name' => $guestName,
                 'room_label' => $roomLabel ?? '',
-                'message_type' => $message->message_type,
+                'msg_type' => $message->message_type,
                 'message_preview' => $preview,
             ];
 

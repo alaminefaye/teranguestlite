@@ -243,7 +243,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final guestName = data['guest_name'] as String? ?? 'Client chambre';
     final roomLabel = data['room_label'] as String? ?? '';
     final preview = data['message_preview'] as String? ?? '';
-    final messageType = data['message_type'] as String? ?? 'text';
+    final messageType = data['msg_type'] as String? ?? data['message_type'] as String? ?? 'text';
 
     String typeLabel;
     if (messageType == 'image') {
