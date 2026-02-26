@@ -148,4 +148,13 @@ class PalaceServiceController extends Controller
         return redirect()->route('dashboard.palace-services.index')
             ->with('success', 'Service palace supprimé avec succès !');
     }
+
+    /** Masquer / Afficher (sans supprimer). */
+    public function toggleActive(PalaceService $palaceService): RedirectResponse
+    {
+        $palaceService->update(['is_active' => !$palaceService->is_active]);
+        $label = $palaceService->is_active ? 'affiché' : 'masqué';
+        return redirect()->route('dashboard.palace-services.index')
+            ->with('success', "Service palace {$label}.");
+    }
 }

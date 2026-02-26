@@ -20,9 +20,14 @@ class LeisureCategory extends Model
     public const TYPE_FITNESS = 'fitness';
     public const TYPE_OTHER = 'other';
 
-    protected $fillable = ['enterprise_id', 'parent_id', 'name', 'description', 'type', 'display_order'];
+    protected $fillable = ['enterprise_id', 'parent_id', 'name', 'description', 'type', 'display_order', 'is_active'];
 
-    protected $casts = ['display_order' => 'integer'];
+    protected $casts = ['display_order' => 'integer', 'is_active' => 'boolean'];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function enterprise()
     {

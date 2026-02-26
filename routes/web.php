@@ -70,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
         
         // Services Spa
         Route::resource('spa-services', \App\Http\Controllers\Dashboard\SpaServiceController::class);
+        Route::post('spa-services/{spa_service}/toggle', [\App\Http\Controllers\Dashboard\SpaServiceController::class, 'toggleActive'])->name('spa-services.toggle');
 
         // Horaires salle de sport (établissement courant)
         Route::get('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'index'])->name('gym-hours.index');
@@ -86,30 +87,37 @@ Route::middleware(['auth'])->group(function () {
 
         // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
         Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
+        Route::post('leisure-categories/{leisure_category}/toggle', [\App\Http\Controllers\Dashboard\LeisureCategoryController::class, 'toggleActive'])->name('leisure-categories.toggle');
         Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');
         Route::get('leisure-categories/{leisure_category}/subcategories/create', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'create'])->name('leisure-categories.subcategories.create');
         Route::post('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'store'])->name('leisure-categories.subcategories.store');
         Route::get('leisure-categories/{leisure_category}/subcategories/{subcategory}/edit', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'edit'])->name('leisure-categories.subcategories.edit');
         Route::put('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'update'])->name('leisure-categories.subcategories.update');
         Route::delete('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'destroy'])->name('leisure-categories.subcategories.destroy');
+        Route::post('leisure-categories/{leisure_category}/subcategories/{subcategory}/toggle', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'toggleActive'])->name('leisure-categories.subcategories.toggle');
         
         // Blanchisserie
         Route::resource('laundry-services', \App\Http\Controllers\Dashboard\LaundryServiceController::class);
-        
+        Route::post('laundry-services/{laundry_service}/toggle', [\App\Http\Controllers\Dashboard\LaundryServiceController::class, 'toggleActive'])->name('laundry-services.toggle');
+
         // Services Palace
         Route::resource('palace-services', \App\Http\Controllers\Dashboard\PalaceServiceController::class);
+        Route::post('palace-services/{palace_service}/toggle', [\App\Http\Controllers\Dashboard\PalaceServiceController::class, 'toggleActive'])->name('palace-services.toggle');
 
         // Amenities & Conciergerie (catégories + articles dynamiques pour l'app mobile)
         Route::resource('amenity-categories', \App\Http\Controllers\Dashboard\AmenityCategoryController::class);
+        Route::post('amenity-categories/{amenity_category}/toggle', [\App\Http\Controllers\Dashboard\AmenityCategoryController::class, 'toggleActive'])->name('amenity-categories.toggle');
         Route::get('amenity-categories/{amenity_category}/items', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'index'])->name('amenity-categories.items.index');
         Route::get('amenity-categories/{amenity_category}/items/create', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'create'])->name('amenity-categories.items.create');
         Route::post('amenity-categories/{amenity_category}/items', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'store'])->name('amenity-categories.items.store');
         Route::get('amenity-categories/{amenity_category}/items/{item}/edit', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'edit'])->name('amenity-categories.items.edit');
         Route::put('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'update'])->name('amenity-categories.items.update');
         Route::delete('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'destroy'])->name('amenity-categories.items.destroy');
+        Route::post('amenity-categories/{amenity_category}/items/{item}/toggle', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'toggleActive'])->name('amenity-categories.items.toggle');
         
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);
+        Route::post('excursions/{excursion}/toggle', [\App\Http\Controllers\Dashboard\ExcursionController::class, 'toggleActive'])->name('excursions.toggle');
 
         // Réservations & demandes (spa, excursions, restaurants, blanchisserie, palace)
         Route::get('spa-reservations', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'index'])->name('spa-reservations.index');
@@ -121,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Véhicules (location avec chauffeur)
         Route::resource('vehicles', \App\Http\Controllers\Dashboard\VehicleController::class);
+        Route::post('vehicles/{vehicle}/toggle', [\App\Http\Controllers\Dashboard\VehicleController::class, 'toggleActive'])->name('vehicles.toggle');
         
         // Staff (personnel de l'hôtel)
         Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');

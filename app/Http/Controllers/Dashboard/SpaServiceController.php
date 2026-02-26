@@ -131,4 +131,13 @@ class SpaServiceController extends Controller
         return redirect()->route('dashboard.spa-services.index')
             ->with('success', 'Service spa supprimé avec succès !');
     }
+
+    /** Masquer / Afficher (sans supprimer). */
+    public function toggleActive(SpaService $spaService): RedirectResponse
+    {
+        $spaService->update(['is_active' => !$spaService->is_active]);
+        $label = $spaService->is_active ? 'affiché' : 'masqué';
+        return redirect()->route('dashboard.spa-services.index')
+            ->with('success', "Service spa {$label}.");
+    }
 }

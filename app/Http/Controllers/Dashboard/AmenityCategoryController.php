@@ -77,4 +77,13 @@ class AmenityCategoryController extends Controller
         return redirect()->route('dashboard.amenity-categories.index')
             ->with('success', 'Catégorie supprimée.');
     }
+
+    /** Masquer / Afficher la catégorie (sans supprimer). */
+    public function toggleActive(AmenityCategory $amenityCategory): RedirectResponse
+    {
+        $amenityCategory->update(['is_active' => !$amenityCategory->is_active]);
+        $label = $amenityCategory->is_active ? 'affichée' : 'masquée';
+        return redirect()->route('dashboard.amenity-categories.index')
+            ->with('success', "Catégorie {$label}.");
+    }
 }

@@ -23,9 +23,11 @@ class SpaService extends Model
         'benefits',
         'contraindications',
         'display_order',
+        'is_active',
     ];
 
     protected $casts = [
+        'is_active' => 'boolean',
         'price' => 'decimal:2',
         'duration' => 'integer',
         'is_featured' => 'boolean',
@@ -48,6 +50,11 @@ class SpaService extends Model
     public function scopeAvailable($query)
     {
         return $query->where('status', 'available');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     public function scopeFeatured($query)

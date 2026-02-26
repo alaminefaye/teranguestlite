@@ -17,7 +17,7 @@ class LaundryServiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = LaundryService::query();
+        $query = LaundryService::query()->active();
 
         // Filtrer par disponibilité
         if ($request->has('available')) {
@@ -68,12 +68,12 @@ class LaundryServiceController extends Controller
         $itemsData = [];
 
         foreach ($request->items as $item) {
-            $service = LaundryService::find($item['laundry_service_id']);
+            $service = LaundryService::active()->find($item['laundry_service_id']);
             
             if (!$service || !$service->is_available) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Le service {$service->name} n'est pas disponible",
+                    'message' => "Un des services n'est pas disponible ou a été masqué.",
                 ], 400);
             }
 
@@ -91,7 +91,7 @@ class LaundryServiceController extends Controller
 
         // Calculer le temps de livraison (prendre le max des turnaround_hours)
         $maxTurnaround = collect($request->items)->map(function($item) {
-            return LaundryService::find($item['laundry_service_id'])->turnaround_hours;
+            return LaundryService::active()->find($item['laundry_service_id'])->turnaround_hours;
         })->max();
 
         $pickupTime = $request->pickup_time ? $request->pickup_time : now()->addHours(1)->format('Y-m-d H:i');

@@ -9,9 +9,11 @@ class PalaceService extends Model
 {
     use EnterpriseScopeTrait;
 
-    protected $fillable = ['enterprise_id', 'name', 'category', 'description', 'image', 'price', 'price_on_request', 'status', 'is_premium', 'display_order'];
-    
-    protected $casts = ['price' => 'decimal:2', 'price_on_request' => 'boolean', 'is_premium' => 'boolean', 'display_order' => 'integer'];
+    protected $fillable = ['enterprise_id', 'name', 'category', 'description', 'image', 'price', 'price_on_request', 'status', 'is_premium', 'display_order', 'is_active'];
+
+    protected $casts = ['price' => 'decimal:2', 'price_on_request' => 'boolean', 'is_premium' => 'boolean', 'display_order' => 'integer', 'is_active' => 'boolean'];
+
+    public function scopeActive($query) { return $query->where('is_active', true); }
 
     public function enterprise() { return $this->belongsTo(Enterprise::class); }
     public function scopeAvailable($query) { return $query->where('status', 'available'); }

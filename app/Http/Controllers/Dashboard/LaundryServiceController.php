@@ -108,4 +108,13 @@ class LaundryServiceController extends Controller
         return redirect()->route('dashboard.laundry-services.index')
             ->with('success', 'Service blanchisserie supprimé avec succès !');
     }
+
+    /** Masquer / Afficher (sans supprimer). */
+    public function toggleActive(LaundryService $laundryService): RedirectResponse
+    {
+        $laundryService->update(['is_active' => !$laundryService->is_active]);
+        $label = $laundryService->is_active ? 'affiché' : 'masqué';
+        return redirect()->route('dashboard.laundry-services.index')
+            ->with('success', "Service blanchisserie {$label}.");
+    }
 }

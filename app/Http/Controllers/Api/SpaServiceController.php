@@ -16,7 +16,7 @@ class SpaServiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = SpaService::query();
+        $query = SpaService::query()->active();
 
         // Filtrer par catégorie
         if ($request->filled('category')) {
@@ -61,7 +61,7 @@ class SpaServiceController extends Controller
      */
     public function show($id)
     {
-        $service = SpaService::find($id);
+        $service = SpaService::active()->find($id);
 
         if (!$service) {
             return response()->json([
@@ -101,7 +101,7 @@ class SpaServiceController extends Controller
             'special_requests' => 'nullable|string|max:500',
         ]);
 
-        $service = SpaService::find($id);
+        $service = SpaService::active()->find($id);
 
         if (!$service) {
             return response()->json([

@@ -98,4 +98,16 @@ class LeisureSubcategoryController extends Controller
         return redirect()->route('dashboard.leisure-categories.subcategories.index', $leisureCategory)
             ->with('success', 'Activité supprimée.');
     }
+
+    /** Masquer / Afficher l'activité (sans supprimer). */
+    public function toggleActive(LeisureCategory $leisureCategory, LeisureCategory $subcategory): RedirectResponse
+    {
+        if ($leisureCategory->parent_id !== null || $subcategory->parent_id != $leisureCategory->id) {
+            abort(404);
+        }
+        $subcategory->update(['is_active' => !$subcategory->is_active]);
+        $label = $subcategory->is_active ? 'affichée' : 'masquée';
+        return redirect()->route('dashboard.leisure-categories.subcategories.index', $leisureCategory)
+            ->with('success', "Activité {$label}.");
+    }
 }

@@ -9,9 +9,14 @@ class AmenityCategory extends Model
 {
     use EnterpriseScopeTrait;
 
-    protected $fillable = ['enterprise_id', 'name', 'display_order'];
+    protected $fillable = ['enterprise_id', 'name', 'display_order', 'is_active'];
 
-    protected $casts = ['display_order' => 'integer'];
+    protected $casts = ['display_order' => 'integer', 'is_active' => 'boolean'];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function enterprise()
     {

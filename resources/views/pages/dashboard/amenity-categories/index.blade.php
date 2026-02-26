@@ -16,9 +16,10 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     @forelse($categories as $category)
-        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 {{ !$category->is_active ? 'opacity-70' : '' }}">
             <div class="flex items-start justify-between mb-2">
                 <div class="flex-1 min-w-0">
+                    @if(!$category->is_active)<span class="text-xs text-amber-600 dark:text-amber-400 font-medium">Masquée</span>@endif
                     <h3 class="font-semibold text-gray-800 dark:text-white/90">{{ $category->name }}</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ $category->items_count }} article(s)</p>
                 </div>
@@ -26,10 +27,11 @@
             <div class="flex items-center gap-2 mt-3">
                 <a href="{{ route('dashboard.amenity-categories.items.index', $category) }}" class="inline-flex items-center px-3 py-1.5 text-sm bg-brand-500 text-white rounded hover:bg-brand-600">Gérer les articles</a>
                 <a href="{{ route('dashboard.amenity-categories.edit', $category) }}" class="inline-flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-800">Modifier</a>
-                <form action="{{ route('dashboard.amenity-categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Supprimer cette catégorie et tous ses articles ?');" class="inline">
+                <form action="{{ route('dashboard.amenity-categories.toggle', $category) }}" method="POST" class="inline">
                     @csrf
-                    @method('DELETE')
-                    <button type="submit" class="inline-flex items-center px-2 py-1 text-xs text-error-600 dark:text-error-400 border border-error-300 dark:border-error-700 rounded hover:bg-error-50 dark:hover:bg-error-900/20">Suppr.</button>
+                    <button type="submit" class="inline-flex items-center px-2 py-1 text-xs {{ $category->is_active ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-success-600 dark:text-success-400 border-success-300 dark:border-success-700 hover:bg-success-50 dark:hover:bg-success-900/20' }} border rounded">
+                        {{ $category->is_active ? 'Masquer' : 'Afficher' }}
+                    </button>
                 </form>
             </div>
         </div>

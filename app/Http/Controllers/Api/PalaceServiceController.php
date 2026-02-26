@@ -18,7 +18,7 @@ class PalaceServiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PalaceService::query();
+        $query = PalaceService::query()->active();
 
         // Filtrer par catégorie
         if ($request->filled('category')) {
@@ -68,7 +68,7 @@ class PalaceServiceController extends Controller
      */
     public function show($id)
     {
-        $service = PalaceService::find($id);
+        $service = PalaceService::active()->find($id);
 
         if (!$service) {
             return response()->json([
@@ -151,7 +151,7 @@ class PalaceServiceController extends Controller
             }
         }
 
-        $service = PalaceService::find($id);
+        $service = PalaceService::active()->find($id);
 
         if (!$service) {
             return response()->json([

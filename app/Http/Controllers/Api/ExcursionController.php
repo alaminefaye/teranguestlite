@@ -17,7 +17,7 @@ class ExcursionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Excursion::query();
+        $query = Excursion::query()->active();
 
         // Filtrer par type
         if ($request->filled('type')) {
@@ -68,7 +68,7 @@ class ExcursionController extends Controller
      */
     public function show($id)
     {
-        $excursion = Excursion::find($id);
+        $excursion = Excursion::active()->find($id);
 
         if (!$excursion) {
             return response()->json([
@@ -114,7 +114,7 @@ class ExcursionController extends Controller
             'special_requests' => 'nullable|string|max:500',
         ]);
 
-        $excursion = Excursion::find($id);
+        $excursion = Excursion::active()->find($id);
 
         if (!$excursion) {
             return response()->json([

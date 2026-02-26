@@ -15,9 +15,10 @@ class LeisureCategoryController extends Controller
     public function index(): JsonResponse
     {
         $mainCategories = LeisureCategory::with(['children' => function ($q) {
-            $q->ordered();
+            $q->active()->ordered();
         }])
             ->topLevel()
+            ->active()
             ->ordered()
             ->get();
 
@@ -28,7 +29,7 @@ class LeisureCategoryController extends Controller
                 'description' => $main->description,
                 'type' => $main->type,
                 'display_order' => $main->display_order,
-                'children' => $main->children->map(fn ($c) => [
+                'children' => $main->children->filter(fn ($c) => $c->is_active)->map(fn ($c) => [
                     'id' => $c->id,
                     'name' => $c->name,
                     'description' => $c->description,

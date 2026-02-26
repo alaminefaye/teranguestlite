@@ -84,4 +84,16 @@ class AmenityItemController extends Controller
         return redirect()->route('dashboard.amenity-categories.items.index', $amenityCategory)
             ->with('success', 'Article supprimé.');
     }
+
+    /** Masquer / Afficher l'article (sans supprimer). */
+    public function toggleActive(AmenityCategory $amenityCategory, AmenityItem $item): RedirectResponse
+    {
+        if ($item->amenity_category_id != $amenityCategory->id) {
+            abort(404);
+        }
+        $item->update(['is_active' => !$item->is_active]);
+        $label = $item->is_active ? 'affiché' : 'masqué';
+        return redirect()->route('dashboard.amenity-categories.items.index', $amenityCategory)
+            ->with('success', "Article {$label}.");
+    }
 }

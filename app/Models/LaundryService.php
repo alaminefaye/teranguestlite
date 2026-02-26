@@ -9,9 +9,11 @@ class LaundryService extends Model
 {
     use EnterpriseScopeTrait;
 
-    protected $fillable = ['enterprise_id', 'name', 'category', 'description', 'price', 'turnaround_hours', 'status', 'display_order'];
-    
-    protected $casts = ['price' => 'decimal:2', 'turnaround_hours' => 'integer', 'display_order' => 'integer'];
+    protected $fillable = ['enterprise_id', 'name', 'category', 'description', 'price', 'turnaround_hours', 'status', 'display_order', 'is_active'];
+
+    protected $casts = ['price' => 'decimal:2', 'turnaround_hours' => 'integer', 'display_order' => 'integer', 'is_active' => 'boolean'];
+
+    public function scopeActive($query) { return $query->where('is_active', true); }
 
     public function enterprise() { return $this->belongsTo(Enterprise::class); }
     public function scopeAvailable($query) { return $query->where('status', 'available'); }

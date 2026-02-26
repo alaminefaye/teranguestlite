@@ -16,8 +16,9 @@ class AmenityCategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $categories = AmenityCategory::with(['items' => function ($q) {
-            $q->orderBy('display_order')->orderBy('name');
+            $q->active()->orderBy('display_order')->orderBy('name');
         }])
+            ->active()
             ->ordered()
             ->get();
 
@@ -26,7 +27,7 @@ class AmenityCategoryController extends Controller
                 'id' => $cat->id,
                 'name' => $cat->name,
                 'display_order' => $cat->display_order,
-                'items' => $cat->items->map(fn ($item) => [
+                'items' => $cat->items->filter(fn ($item) => $item->is_active)->map(fn ($item) => [
                     'id' => $item->id,
                     'name' => $item->name,
                     'display_order' => $item->display_order,

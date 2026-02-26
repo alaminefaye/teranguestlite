@@ -6,9 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class AmenityItem extends Model
 {
-    protected $fillable = ['amenity_category_id', 'name', 'display_order'];
+    protected $fillable = ['amenity_category_id', 'name', 'display_order', 'is_active'];
 
-    protected $casts = ['display_order' => 'integer'];
+    protected $casts = ['display_order' => 'integer', 'is_active' => 'boolean'];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function amenityCategory()
     {

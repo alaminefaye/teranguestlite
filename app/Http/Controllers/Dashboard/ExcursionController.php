@@ -144,6 +144,15 @@ class ExcursionController extends Controller
             ->with('success', 'Excursion supprimée avec succès !');
     }
 
+    /** Masquer / Afficher (sans supprimer). */
+    public function toggleActive(Excursion $excursion): RedirectResponse
+    {
+        $excursion->update(['is_active' => !$excursion->is_active]);
+        $label = $excursion->is_active ? 'affichée' : 'masquée';
+        return redirect()->route('dashboard.excursions.index')
+            ->with('success', "Excursion {$label}.");
+    }
+
     private function parseLines(?string $value): array
     {
         if (empty($value)) {

@@ -48,6 +48,12 @@ class Vehicle extends Model
         return $query->where('is_available', true);
     }
 
+    /** Alias pour cohérence avec les autres modules (masquer = is_available false). */
+    public function scopeActive($query)
+    {
+        return $query->where('is_available', true);
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('display_order', 'asc')->orderBy('name', 'asc');

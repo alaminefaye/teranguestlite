@@ -117,4 +117,13 @@ class VehicleController extends Controller
         return redirect()->route('dashboard.vehicles.index')
             ->with('success', 'Véhicule supprimé.');
     }
+
+    /** Masquer / Afficher (sans supprimer) : utilise is_available. */
+    public function toggleActive(Vehicle $vehicle): RedirectResponse
+    {
+        $vehicle->update(['is_available' => !$vehicle->is_available]);
+        $label = $vehicle->is_available ? 'affiché' : 'masqué';
+        return redirect()->route('dashboard.vehicles.index')
+            ->with('success', "Véhicule {$label}.");
+    }
 }
