@@ -301,6 +301,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Le service Urgence sécurité n\'est pas configuré pour cet établissement.';
 
   @override
+  String confirmEmergencyAction(String action) {
+    return 'Voulez-vous confirmer : $action ?';
+  }
+
+  @override
+  String get deleteConversationConfirm => 'Supprimer cette conversation ?';
+
+  @override
+  String get deleteConversation => 'Supprimer la conversation';
+
+  @override
   String get chatbotComingSoon => 'Bientôt disponible';
 
   @override

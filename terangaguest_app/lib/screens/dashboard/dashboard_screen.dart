@@ -9,6 +9,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/chat_unread_provider.dart';
 import '../../widgets/service_card.dart';
 
 import '../../utils/navigation_helper.dart';
@@ -42,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrdersProvider>().fetchOrdersForDashboard();
+      context.read<ChatUnreadProvider>().loadUnreadCount();
     });
   }
 
@@ -568,6 +570,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         itemCount: services.length,
         itemBuilder: (context, index) {
           final service = services[index];
+          final isHotelInfos = service['route'] == '/hotel-infos-security';
+          if (isHotelInfos) {
+            return Consumer<ChatUnreadProvider>(
+              builder: (context, chatUnread, _) {
+                return ServiceCard(
+                  title: service['title'] as String,
+                  icon: service['icon'] as IconData,
+                  badge: chatUnread.unreadCount > 0
+                      ? '${chatUnread.unreadCount}'
+                      : null,
+                  onTap: () {
+                    _handleServiceTap(
+                      context,
+                      service['route'] as String,
+                      service['title'] as String,
+                    );
+                  },
+                );
+              },
+            );
+          }
           return ServiceCard(
             title: service['title'] as String,
             icon: service['icon'] as IconData,

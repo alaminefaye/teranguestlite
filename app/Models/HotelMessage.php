@@ -15,12 +15,20 @@ class HotelMessage extends Model
         'content',
         'metadata',
         'read_at',
+        'reply_to_id',
+        'deleted_at',
     ];
 
     protected $casts = [
         'metadata' => 'array',
         'read_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
+
+    public function replyTo()
+    {
+        return $this->belongsTo(HotelMessage::class, 'reply_to_id');
+    }
 
     public function conversation()
     {

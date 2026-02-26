@@ -30,6 +30,57 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     return null;
   }
 
+  /// Affiche une boîte de dialogue de confirmation avant d'envoyer la demande.
+  Future<void> _confirmAndSendRequest(String type, String actionTitle) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            l10n.confirmRequest,
+            style: const TextStyle(
+              color: AppTheme.accentGold,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: Text(
+            l10n.confirmEmergencyAction(actionTitle),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.accentGold,
+                foregroundColor: AppTheme.primaryDark,
+              ),
+              child: Text(l10n.validate),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed == true && mounted) _sendRequest(type);
+  }
+
   Future<void> _sendRequest(String type) async {
     final l10n = AppLocalizations.of(context);
     final user = context.read<AuthProvider>().user;
@@ -193,7 +244,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 loading: _sendingDoctor,
                                 onTap: () {
                                   HapticHelper.lightImpact();
-                                  _sendRequest('doctor');
+                                  _confirmAndSendRequest('doctor', l10n.requestDoctor);
                                 },
                               ),
                             if (securityEnabled)
@@ -204,7 +255,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 loading: _sendingSecurity,
                                 onTap: () {
                                   HapticHelper.lightImpact();
-                                  _sendRequest('security');
+                                  _confirmAndSendRequest('security', l10n.reportSecurityEmergency);
                                 },
                               ),
                           ],

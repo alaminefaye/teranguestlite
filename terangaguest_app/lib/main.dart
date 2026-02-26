@@ -27,6 +27,7 @@ import 'providers/palace_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
+import 'providers/chat_unread_provider.dart';
 import 'services/fcm_service.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
@@ -95,6 +96,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
+        ChangeNotifierProvider(create: (_) => ChatUnreadProvider()),
       ],
       child: const _LocalizedApp(),
     );
@@ -233,6 +235,13 @@ class _LocalizedAppState extends State<_LocalizedApp>
     } else {
       // Payload incomplet (sender_type manquant) : ne pas afficher pour éviter d'afficher à l'expéditeur.
       return;
+    }
+
+    // Mettre à jour le badge "Hotel Infos & Sécurité" pour le client
+    if (!isStaffOrAdmin) {
+      try {
+        ctx.read<ChatUnreadProvider>().loadUnreadCount();
+      } catch (_) {}
     }
 
     _startNotificationSoundLoop();

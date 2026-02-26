@@ -297,6 +297,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Security emergency service is not configured for this property.';
 
   @override
+  String confirmEmergencyAction(String action) {
+    return 'Do you want to confirm: $action?';
+  }
+
+  @override
+  String get deleteConversationConfirm => 'Delete this conversation?';
+
+  @override
+  String get deleteConversation => 'Delete conversation';
+
+  @override
   String get chatbotComingSoon => 'Coming soon';
 
   @override

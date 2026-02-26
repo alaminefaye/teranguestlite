@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,6 +10,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
+import '../../providers/chat_unread_provider.dart';
 import '../../services/chat_api.dart';
 import '../../services/fcm_service.dart';
 import '../../utils/haptic_helper.dart';
@@ -43,12 +45,15 @@ class _ChatbotScreenState extends State<ChatbotScreen>
   String? _error;
   List<ChatMessage> _messages = [];
   Timer? _pollTimer;
+  int _unreadCountBelow = 0;
+  ChatMessage? _replyingTo;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _fcmService.registerTokenIfNeeded();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMessages();
       _startPolling();
@@ -68,8 +73,17 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     }
   }
 
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 80 && _unreadCountBelow > 0) {
+      setState(() => _unreadCountBelow = 0);
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     _controller.dispose();
@@ -102,13 +116,20 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       final newLastIsFromStaff = items.isNotEmpty && items.last.senderType == 'staff';
       if (items.length != prevCount || prevLastId != newLastId) {
         final hadNewStaffMessage = newLastIsFromStaff && (prevLastId != newLastId);
-        final wasNearBottom = _scrollController.hasClients &&
+        final newCount = items.length - prevCount;
+        final isNearBottom = _scrollController.hasClients &&
             _scrollController.offset >=
                 _scrollController.position.maxScrollExtent - 80;
         setState(() {
           _messages = items;
+          if (isNearBottom) {
+            _unreadCountBelow = 0;
+          } else {
+            _unreadCountBelow += newCount;
+          }
         });
-        if (wasNearBottom) _scrollToBottom();
+        // Toujours afficher le dernier message (soi ou l'autre)
+        _scrollToBottomAfterBuild();
         if (hadNewStaffMessage && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -136,7 +157,18 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         _messages = items;
         _loading = false;
       });
-      _scrollToBottom();
+      // Scroll en bas après le rendu (comportement type WhatsApp)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _scrollToBottom();
+        });
+      });
+      final maxId = items.isEmpty
+          ? 0
+          : items.map((e) => e.id).reduce((a, b) => a > b ? a : b);
+      if (mounted) {
+        context.read<ChatUnreadProvider>().markAsRead(maxId);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -154,7 +186,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       setState(() {
         _messages = items;
       });
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -179,7 +211,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         _sending = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -222,7 +254,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         _sendingMedia = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -377,7 +409,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         _sendingMedia = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -402,8 +434,23 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
-      );
+      ).then((_) {
+        if (mounted && _unreadCountBelow > 0) {
+          setState(() => _unreadCountBelow = 0);
+        }
+      });
     }
+  }
+
+  /// Scroll en bas après le prochain rendu (toujours le dernier message, soi ou l’autre).
+  void _scrollToBottomAfterBuild() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 80), () {
+          if (mounted) _scrollToBottom();
+        });
+      });
+    });
   }
 
   @override
@@ -524,20 +571,23 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                                       16,
                                       12,
                                     ),
-                                    itemCount: _messages.length,
+                                    itemCount: _chatEntries.length,
                                     itemBuilder: (context, index) {
-                                      final message = _messages[index];
-                                      final isMe =
-                                          message.senderType == 'guest';
+                                      final entry = _chatEntries[index];
+                                      if (entry.isDate) {
+                                        return _buildDateSeparator(entry.date!);
+                                      }
+                                      final message = entry.message!;
                                       return _buildMessageBubble(
                                         context,
                                         message,
-                                        isMe,
+                                        message.senderType == 'guest',
                                       );
                                     },
                                   ),
                           ),
                         ),
+                      if (_unreadCountBelow > 0) _buildScrollToBottomBadge(),
                       _buildInputBar(context, l10n),
                     ],
                   ),
@@ -547,6 +597,151 @@ class _ChatbotScreenState extends State<ChatbotScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildScrollToBottomBadge() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          _scrollToBottom();
+          setState(() => _unreadCountBelow = 0);
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.accentGold,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primaryDark, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                _unreadCountBelow == 1
+                    ? '1 nouveau message'
+                    : '$_unreadCountBelow nouveaux messages',
+                style: const TextStyle(
+                  color: AppTheme.primaryDark,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<_ChatListEntry> get _chatEntries {
+    final list = <_ChatListEntry>[];
+    DateTime? lastDay;
+    for (final m in _messages) {
+      final d = m.createdAt.toLocal();
+      final day = DateTime(d.year, d.month, d.day);
+      if (lastDay == null || day != lastDay) {
+        lastDay = day;
+        list.add(_ChatListEntry(isDate: true, date: d));
+      }
+      list.add(_ChatListEntry(isDate: false, message: m));
+    }
+    return list;
+  }
+
+  String _formatDateLabel(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final day = DateTime(d.year, d.month, d.day);
+    if (day == today) return 'Aujourd\'hui';
+    if (day == yesterday) return 'Hier';
+    return DateFormat('d MMMM yyyy', 'fr_FR').format(d);
+  }
+
+  Widget _buildDateSeparator(DateTime date) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            _formatDateLabel(date),
+            style: const TextStyle(
+              color: AppTheme.textGray,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMessageOptions(ChatMessage message, bool isMe) {
+    HapticHelper.lightImpact();
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppTheme.primaryBlue,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.reply, color: AppTheme.accentGold),
+                title: Text(l10n.reply, style: const TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() => _replyingTo = message);
+                },
+              ),
+              if (isMe)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  title: Text(l10n.deleteMessage, style: const TextStyle(color: Colors.white)),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    try {
+                      await _api.deleteMessage(message.id);
+                      if (!mounted) return;
+                      setState(() {
+                        final i = _messages.indexWhere((m) => m.id == message.id);
+                        if (i >= 0) _messages[i] = message.copyWith(isDeleted: true, content: null);
+                      });
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.redAccent),
+                        );
+                      }
+                    }
+                  },
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -566,35 +761,38 @@ class _ChatbotScreenState extends State<ChatbotScreen>
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.all(12),
-        constraints: const BoxConstraints(maxWidth: 480),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(16).copyWith(
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+      child: GestureDetector(
+        onLongPress: () => _showMessageOptions(message, isMe),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.all(12),
+          constraints: const BoxConstraints(maxWidth: 480),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(16).copyWith(
+              bottomLeft: Radius.circular(isMe ? 16 : 4),
+              bottomRight: Radius.circular(isMe ? 4 : 16),
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (senderLabel != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  senderLabel,
-                  style: TextStyle(
-                    color: textColor.withValues(alpha: 0.8),
-                    fontSize: 12,
+          child: Column(
+            crossAxisAlignment: isMe
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (message.replyTo != null) _buildReplyQuote(message.replyTo!, textColor),
+              if (senderLabel != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    senderLabel,
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.8),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-            _buildMessageContent(message, textColor),
+              _buildMessageContent(message, textColor),
             const SizedBox(height: 4),
             Text(
               time,
@@ -605,11 +803,64 @@ class _ChatbotScreenState extends State<ChatbotScreen>
             ),
           ],
         ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReplyQuote(ReplyTo replyTo, Color textColor) {
+    final l10n = AppLocalizations.of(context);
+    final preview = replyTo.isDeleted
+        ? l10n.messageDeleted
+        : (replyTo.content ?? '').replaceAll('\n', ' ').trim();
+    if (preview.isEmpty && !replyTo.isDeleted) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(left: 10, top: 6, bottom: 6, right: 8),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: Colors.blue, width: 3)),
+        borderRadius: BorderRadius.circular(6),
+        color: textColor.withValues(alpha: 0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (replyTo.senderName != null && replyTo.senderName!.isNotEmpty)
+            Text(
+              replyTo.senderName!,
+              style: TextStyle(
+                color: Colors.blue.shade700,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          Text(
+            preview,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.85),
+              fontSize: 14,
+              fontStyle: replyTo.isDeleted ? FontStyle.italic : null,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildMessageContent(ChatMessage message, Color textColor) {
+    if (message.isDeleted) {
+      return Text(
+        AppLocalizations.of(context).messageDeleted,
+        style: TextStyle(
+          color: textColor.withValues(alpha: 0.7),
+          fontSize: 15,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+    }
     if (message.messageType == 'image') {
       final meta = message.metadata;
       final url = meta != null ? meta['url'] as String? : null;
@@ -958,4 +1209,11 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     final seconds = _recordSeconds % 60;
     return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
+}
+
+class _ChatListEntry {
+  final bool isDate;
+  final DateTime? date;
+  final ChatMessage? message;
+  _ChatListEntry({required this.isDate, this.date, this.message});
 }

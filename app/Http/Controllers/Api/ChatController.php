@@ -30,31 +30,15 @@ class ChatController extends Controller
             ]);
         }
 
-        $conversation->load(['user', 'messages.sender']);
+        $conversation->load(['user', 'messages.sender', 'messages.replyTo.sender']);
 
         $guestName = $conversation->user?->name ?: 'Client chambre';
 
         $messages = $conversation->messages()
+            ->with('replyTo.sender')
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(function (HotelMessage $message) use ($guestName) {
-                $senderName = null;
-                if ($message->sender_type === 'guest') {
-                    $senderName = $guestName;
-                } elseif ($message->sender_type === 'staff') {
-                    $senderName = $message->sender?->name ?: 'Staff hôtel';
-                }
-
-                return [
-                    'id' => $message->id,
-                    'sender_type' => $message->sender_type,
-                    'sender_name' => $senderName,
-                    'message_type' => $message->message_type,
-                    'content' => $message->content,
-                    'metadata' => $message->metadata,
-                    'created_at' => $message->created_at?->toISOString(),
-                ];
-            })
+            ->map(fn (HotelMessage $m) => $this->formatMessageForApi($m, $guestName))
             ->toArray();
 
         return response()->json([
@@ -91,6 +75,7 @@ class ChatController extends Controller
             ];
         }
 
+        $rules['reply_to_id'] = ['nullable', 'integer', 'exists:hotel_messages,id'];
         $validated = $request->validate($rules);
 
         $conversation = HotelConversation::firstOrCreate(
@@ -135,6 +120,7 @@ class ChatController extends Controller
             'message_type' => $type,
             'content' => $content,
             'metadata' => $metadata,
+            'reply_to_id' => $validated['reply_to_id'] ?? null,
         ]);
 
         $conversation->last_message_at = now();
@@ -142,18 +128,12 @@ class ChatController extends Controller
 
         $this->notifyStaffNewMessage($conversation, $message);
 
+        $message->load('replyTo.sender');
+        $guestName = $conversation->user?->name ?: 'Client chambre';
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $message->id,
-                'conversation_id' => $conversation->id,
-                'sender_type' => $message->sender_type,
-                'sender_name' => $user->name ?: 'Client chambre',
-                'message_type' => $message->message_type,
-                'content' => $message->content,
-                'metadata' => $message->metadata,
-                'created_at' => $message->created_at?->toISOString(),
-            ],
+            'data' => $this->formatMessageForApi($message, $guestName),
         ], 201);
     }
 
@@ -161,6 +141,44 @@ class ChatController extends Controller
      * Notifier uniquement le staff (jamais le client expéditeur).
      * Appelé quand un GUEST envoie un message → FCM envoyé aux seuls admin/staff de l'établissement.
      */
+    /**
+     * Formater un message pour l’API (reply_to, deleted).
+     */
+    protected function formatMessageForApi(HotelMessage $message, string $guestName): array
+    {
+        $senderName = null;
+        if ($message->sender_type === 'guest') {
+            $senderName = $guestName;
+        } elseif ($message->sender_type === 'staff') {
+            $senderName = $message->sender?->name ?: 'Staff hôtel';
+        }
+
+        $replyToArray = null;
+        if ($message->reply_to_id && $message->relationLoaded('replyTo') && $message->replyTo) {
+            $reply = $message->replyTo;
+            $replySenderName = $reply->sender_type === 'guest' ? $guestName : ($reply->sender?->name ?: 'Staff hôtel');
+            $replyToArray = [
+                'id' => $reply->id,
+                'sender_name' => $replySenderName,
+                'content' => $reply->deleted_at ? null : $reply->content,
+                'deleted' => (bool) $reply->deleted_at,
+            ];
+        }
+
+        return [
+            'id' => $message->id,
+            'sender_type' => $message->sender_type,
+            'sender_name' => $senderName,
+            'message_type' => $message->message_type,
+            'content' => $message->deleted_at ? null : $message->content,
+            'metadata' => $message->metadata,
+            'created_at' => $message->created_at?->toISOString(),
+            'deleted_at' => $message->deleted_at?->toISOString(),
+            'reply_to_id' => $message->reply_to_id,
+            'reply_to' => $replyToArray,
+        ];
+    }
+
     protected function notifyStaffNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
@@ -381,13 +399,18 @@ class ChatController extends Controller
                 ->orderByDesc('id')
                 ->first();
 
+            $preview = null;
+            if ($lastMessage) {
+                $preview = $lastMessage->deleted_at ? null : $lastMessage->content;
+            }
+
             return [
                 'id' => $conversation->id,
                 'guest_name' => $guestName,
                 'room_label' => $roomLabel,
                 'status' => $conversation->status,
                 'last_message_at' => $conversation->last_message_at?->toISOString(),
-                'last_message_preview' => $lastMessage?->content,
+                'last_message_preview' => $preview,
                 'unread_count' => (int) ($conversation->unread_count ?? 0),
             ];
         });
@@ -405,6 +428,43 @@ class ChatController extends Controller
                     'total' => $conversations->total(),
                 ],
             ],
+        ], 200);
+    }
+
+    /**
+     * Supprimer une conversation (staff) — comme « supprimer le chat » sur WhatsApp.
+     */
+    public function staffDestroyConversation(Request $request, HotelConversation $conversation)
+    {
+        $user = $request->user();
+
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé',
+            ], 403);
+        }
+
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l’hôtel',
+            ], 403);
+        }
+
+        if ($conversation->enterprise_id !== $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Conversation introuvable pour cet établissement',
+            ], 404);
+        }
+
+        $conversation->messages()->delete();
+        $conversation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Conversation supprimée',
         ], 200);
     }
 
@@ -438,31 +498,15 @@ class ChatController extends Controller
             ->where('sender_type', 'guest')
             ->update(['read_at' => now()]);
 
-        $conversation->load(['user', 'room', 'messages.sender']);
+        $conversation->load(['user', 'room', 'messages.sender', 'messages.replyTo.sender']);
 
         $guestName = $conversation->user?->name ?: 'Client chambre';
 
         $messages = $conversation->messages()
+            ->with('replyTo.sender')
             ->orderBy('created_at')
             ->get()
-            ->map(function (HotelMessage $message) use ($guestName) {
-                $senderName = null;
-                if ($message->sender_type === 'guest') {
-                    $senderName = $guestName;
-                } elseif ($message->sender_type === 'staff') {
-                    $senderName = $message->sender?->name ?: 'Staff hôtel';
-                }
-
-                return [
-                    'id' => $message->id,
-                    'sender_type' => $message->sender_type,
-                    'sender_name' => $senderName,
-                    'message_type' => $message->message_type,
-                    'content' => $message->content,
-                    'metadata' => $message->metadata,
-                    'created_at' => $message->created_at?->toISOString(),
-                ];
-            })
+            ->map(fn (HotelMessage $m) => $this->formatMessageForApi($m, $guestName))
             ->toArray();
 
         $guestName = $conversation->user?->name ?: 'Client chambre';
@@ -515,6 +559,7 @@ class ChatController extends Controller
         $rules = [
             'message_type' => ['nullable', 'string', 'in:text,image,audio'],
             'duration' => ['nullable', 'integer', 'min:1', 'max:3600'],
+            'reply_to_id' => ['nullable', 'integer', 'exists:hotel_messages,id'],
         ];
 
         if ($messageType === 'text' || $messageType === null) {
@@ -564,6 +609,7 @@ class ChatController extends Controller
             'message_type' => $type,
             'content' => $content,
             'metadata' => $metadata,
+            'reply_to_id' => $validated['reply_to_id'] ?? null,
         ]);
 
         $conversation->last_message_at = now();
@@ -571,18 +617,48 @@ class ChatController extends Controller
 
         $this->notifyGuestNewMessage($conversation, $message);
 
+        $message->load('replyTo.sender');
+        $guestName = $conversation->user?->name ?: 'Client chambre';
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $message->id,
-                'conversation_id' => $conversation->id,
-                'sender_type' => $message->sender_type,
-                'sender_name' => $user->name ?: 'Staff hôtel',
-                'message_type' => $message->message_type,
-                'content' => $message->content,
-                'metadata' => $message->metadata,
-                'created_at' => $message->created_at?->toISOString(),
-            ],
+            'data' => $this->formatMessageForApi($message, $guestName),
         ], 201);
+    }
+
+    /** Supprimer un message (client) — soft delete, uniquement ses propres messages. */
+    public function destroyMessage(Request $request, HotelMessage $message)
+    {
+        $user = $request->user();
+        $conversation = $message->conversation;
+        if (!$conversation || $conversation->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Message introuvable'], 404);
+        }
+        if ($message->sender_type !== 'guest' || (int) $message->sender_id !== (int) $user->id) {
+            return response()->json(['success' => false, 'message' => 'Vous ne pouvez supprimer que vos messages'], 403);
+        }
+        $message->update(['deleted_at' => now(), 'content' => null]);
+        $message->metadata = null;
+        $message->save();
+        return response()->json(['success' => true, 'message' => 'Message supprimé'], 200);
+    }
+
+    /** Supprimer un message (staff) — soft delete. */
+    public function staffDestroyMessage(Request $request, HotelConversation $conversation, HotelMessage $message)
+    {
+        $user = $request->user();
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
+            return response()->json(['success' => false, 'message' => 'Accès non autorisé'], 403);
+        }
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json(['success' => false, 'message' => 'Accès réservé au staff'], 403);
+        }
+        if ($message->conversation_id !== $conversation->id || $conversation->enterprise_id !== $user->enterprise_id) {
+            return response()->json(['success' => false, 'message' => 'Message introuvable'], 404);
+        }
+        $message->update(['deleted_at' => now(), 'content' => null]);
+        $message->metadata = null;
+        $message->save();
+        return response()->json(['success' => true, 'message' => 'Message supprimé'], 200);
     }
 }

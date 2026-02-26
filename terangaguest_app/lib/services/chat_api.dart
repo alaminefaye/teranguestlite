@@ -34,11 +34,13 @@ class ChatApi {
     }
   }
 
-  Future<ChatMessage> sendMessage(String content) async {
+  Future<ChatMessage> sendMessage(String content, {int? replyToId}) async {
     try {
+      final payload = <String, dynamic>{'content': content};
+      if (replyToId != null) payload['reply_to_id'] = replyToId;
       final response = await _api.post(
         '/chat/messages',
-        data: {'content': content},
+        data: payload,
       );
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {
@@ -210,14 +212,76 @@ class ChatApi {
     }
   }
 
+  /// Supprimer une conversation (staff) — comme supprimer le chat sur WhatsApp.
+  Future<void> deleteStaffConversation(int conversationId) async {
+    try {
+      final response = await _api.delete(
+        '/staff/chat/conversations/$conversationId',
+      );
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] != true) {
+        throw Exception(
+          data['message'] ?? 'Erreur lors de la suppression de la conversation.',
+        );
+      }
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final serverMessage = body is Map && body['message'] is String
+          ? (body['message'] as String).trim()
+          : null;
+      throw Exception(
+        serverMessage != null && serverMessage.isNotEmpty
+            ? serverMessage
+            : 'Impossible de se connecter au serveur.',
+      );
+    } catch (_) {
+      throw Exception('Erreur inattendue lors de la suppression de la conversation.');
+    }
+  }
+
+  /// Supprimer un message (client) — soft delete, uniquement ses propres messages.
+  Future<void> deleteMessage(int messageId) async {
+    try {
+      final response = await _api.delete('/chat/messages/$messageId');
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] != true) {
+        throw Exception(data['message'] ?? 'Erreur lors de la suppression.');
+      }
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final msg = body is Map && body['message'] is String ? body['message'] as String : null;
+      throw Exception(msg ?? 'Impossible de supprimer le message.');
+    }
+  }
+
+  /// Supprimer un message (staff) — soft delete.
+  Future<void> deleteStaffMessage(int conversationId, int messageId) async {
+    try {
+      final response = await _api.delete(
+        '/staff/chat/conversations/$conversationId/messages/$messageId',
+      );
+      final data = response.data as Map<String, dynamic>;
+      if (data['success'] != true) {
+        throw Exception(data['message'] ?? 'Erreur lors de la suppression.');
+      }
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final msg = body is Map && body['message'] is String ? body['message'] as String : null;
+      throw Exception(msg ?? 'Impossible de supprimer le message.');
+    }
+  }
+
   Future<ChatMessage> sendStaffTextMessage(
     int conversationId,
-    String content,
-  ) async {
+    String content, {
+    int? replyToId,
+  }) async {
     try {
+      final payload = <String, dynamic>{'content': content};
+      if (replyToId != null) payload['reply_to_id'] = replyToId;
       final response = await _api.post(
         '/staff/chat/conversations/$conversationId/messages',
-        data: {'content': content},
+        data: payload,
       );
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {

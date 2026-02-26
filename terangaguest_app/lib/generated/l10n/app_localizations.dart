@@ -654,6 +654,24 @@ abstract class AppLocalizations {
   /// **'Le service Urgence sécurité n\'est pas configuré pour cet établissement.'**
   String get assistanceSecurityNotConfigured;
 
+  /// No description provided for @confirmEmergencyAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous confirmer : {action} ?'**
+  String confirmEmergencyAction(String action);
+
+  /// No description provided for @deleteConversationConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette conversation ?'**
+  String get deleteConversationConfirm;
+
+  /// No description provided for @deleteConversation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la conversation'**
+  String get deleteConversation;
+
   /// No description provided for @chatbotComingSoon.
   ///
   /// In fr, this message translates to:

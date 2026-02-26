@@ -173,6 +173,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('chat')->group(function () {
         Route::get('/messages', [ApiChatController::class, 'index']);
         Route::post('/messages', [ApiChatController::class, 'store']);
+        Route::delete('/messages/{message}', [ApiChatController::class, 'destroyMessage']);
     });
 
     // ==========================================
@@ -182,5 +183,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/conversations', [ApiChatController::class, 'staffConversations']);
         Route::get('/conversations/{conversation}', [ApiChatController::class, 'staffConversationMessages']);
         Route::post('/conversations/{conversation}/messages', [ApiChatController::class, 'staffReply']);
+        Route::delete('/conversations/{conversation}', [ApiChatController::class, 'staffDestroyConversation']);
+        Route::delete('/conversations/{conversation}/messages/{message}', [ApiChatController::class, 'staffDestroyMessage']);
     });
 });

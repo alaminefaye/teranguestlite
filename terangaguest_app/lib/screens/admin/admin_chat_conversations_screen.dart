@@ -284,16 +284,83 @@ class _AdminChatConversationsScreenState
               );
             }
             final conv = _conversations[index];
-            return _buildConversationTile(context, conv);
+            return _buildConversationTile(context, conv, index);
           },
         ),
       ),
     );
   }
 
+  Future<void> _performDeleteConversation(StaffConversationSummary conv, int index) async {
+    try {
+      await _api.deleteStaffConversation(conv.id);
+      if (!mounted) return;
+      setState(() {
+        _conversations.removeWhere((c) => c.id == conv.id);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).deleteConversation + ' ✓'),
+          backgroundColor: AppTheme.accentGold,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  void _showDeleteConversationDialog(BuildContext context, StaffConversationSummary conv, int index) {
+    HapticHelper.lightImpact();
+    final l10n = AppLocalizations.of(context);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            l10n.deleteConversation,
+            style: const TextStyle(color: AppTheme.accentGold, fontSize: 18),
+          ),
+          content: Text(
+            l10n.deleteConversationConfirm,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                _performDeleteConversation(conv, index);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(l10n.deleteConversation),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildConversationTile(
     BuildContext context,
     StaffConversationSummary conv,
+    int index,
   ) {
     final date = conv.lastMessageAt;
     final subtitleParts = <String>[];
@@ -305,7 +372,7 @@ class _AdminChatConversationsScreenState
     }
     final subtitle = subtitleParts.join(' · ');
 
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -321,6 +388,7 @@ class _AdminChatConversationsScreenState
             ),
           );
         },
+        onLongPress: () => _showDeleteConversationDialog(context, conv, index),
         child: Container(
           decoration: BoxDecoration(
             color: AppTheme.primaryDark.withValues(alpha: 0.7),
@@ -404,6 +472,40 @@ class _AdminChatConversationsScreenState
         ),
       ),
     );
+
+    return Dismissible(
+      key: ValueKey<int>(conv.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.delete_forever, color: Colors.white, size: 32),
+      ),
+      onDismissed: (direction) {
+        setState(() => _conversations.removeWhere((c) => c.id == conv.id));
+        _api.deleteStaffConversation(conv.id).catchError((e) {
+          if (mounted) {
+            setState(() {
+              _conversations.insert(index, conv);
+              _conversations.sort((a, b) =>
+                  (b.lastMessageAt ?? DateTime(0)).compareTo(a.lastMessageAt ?? DateTime(0)));
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(e.toString().replaceAll('Exception: ', '')),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        });
+      },
+      child: tile,
+    );
   }
 }
 
@@ -446,10 +548,12 @@ class _AdminChatConversationScreenState
   String? _error;
   List<ChatMessage> _messages = [];
   Timer? _pollTimer;
+  int _unreadCountBelow = 0;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadConversation();
       _startPolling();
@@ -459,6 +563,14 @@ class _AdminChatConversationScreenState
       if (!mounted) return;
       _stopAudioPlaybackState();
     });
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 80 && _unreadCountBelow > 0) {
+      setState(() => _unreadCountBelow = 0);
+    }
   }
 
   void _startPolling() {
@@ -471,6 +583,7 @@ class _AdminChatConversationScreenState
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
@@ -494,13 +607,20 @@ class _AdminChatConversationScreenState
       final prevLastId = _messages.isNotEmpty ? _messages.last.id : null;
       final newLastId = items.isNotEmpty ? items.last.id : null;
       if (items.length != prevCount || prevLastId != newLastId) {
-        final wasNearBottom = _scrollController.hasClients &&
+        final newCount = items.length - prevCount;
+        final isNearBottom = _scrollController.hasClients &&
             _scrollController.offset >=
                 _scrollController.position.maxScrollExtent - 80;
         setState(() {
           _messages = items;
+          if (isNearBottom) {
+            _unreadCountBelow = 0;
+          } else {
+            _unreadCountBelow += newCount;
+          }
         });
-        if (wasNearBottom) _scrollToBottom();
+        // Toujours afficher le dernier message (soi ou l'autre)
+        _scrollToBottomAfterBuild();
       }
     } catch (_) {
       // Ignorer les erreurs de polling pour ne pas perturber l'utilisateur
@@ -521,7 +641,12 @@ class _AdminChatConversationScreenState
         _messages = detail.messages;
         _loading = false;
       });
-      _scrollToBottom();
+      // Scroll en bas après le rendu (comportement type WhatsApp)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _scrollToBottom();
+        });
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -547,7 +672,7 @@ class _AdminChatConversationScreenState
         _sending = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -591,7 +716,7 @@ class _AdminChatConversationScreenState
         _sendingMedia = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -747,7 +872,7 @@ class _AdminChatConversationScreenState
         _sendingMedia = false;
       });
       HapticHelper.lightImpact();
-      _scrollToBottom();
+      _scrollToBottomAfterBuild();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -772,8 +897,69 @@ class _AdminChatConversationScreenState
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
-      );
+      ).then((_) {
+        if (mounted && _unreadCountBelow > 0) {
+          setState(() => _unreadCountBelow = 0);
+        }
+      });
     }
+  }
+
+  /// Scroll en bas après le prochain rendu (toujours le dernier message, soi ou l’autre).
+  void _scrollToBottomAfterBuild() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 80), () {
+          if (mounted) _scrollToBottom();
+        });
+      });
+    });
+  }
+
+  Widget _buildScrollToBottomBadge() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          _scrollToBottom();
+          setState(() => _unreadCountBelow = 0);
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.accentGold,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primaryDark, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                _unreadCountBelow == 1
+                    ? '1 nouveau message'
+                    : '$_unreadCountBelow nouveaux messages',
+                style: const TextStyle(
+                  color: AppTheme.primaryDark,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -830,14 +1016,19 @@ class _AdminChatConversationScreenState
                               horizontal: 16,
                               vertical: 12,
                             ),
-                            itemCount: _messages.length,
+                            itemCount: _adminChatEntries.length,
                             itemBuilder: (context, index) {
-                              final msg = _messages[index];
-                              final isMe = msg.senderType != 'guest';
-                              return _buildMessageBubble(context, msg, isMe);
+                              final entry = _adminChatEntries[index];
+                              if (entry.isDate) {
+                                return _buildDateSeparator(entry.date!);
+                              }
+                              final msg = entry.message!;
+                              return _buildMessageBubble(
+                                  context, msg, msg.senderType != 'guest');
                             },
                           ),
                         ),
+                      if (_unreadCountBelow > 0) _buildScrollToBottomBadge(),
                       _buildInputBar(context, l10n),
                     ],
                   ),
@@ -893,6 +1084,54 @@ class _AdminChatConversationScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  List<_AdminChatListEntry> get _adminChatEntries {
+    final list = <_AdminChatListEntry>[];
+    DateTime? lastDay;
+    for (final m in _messages) {
+      final d = m.createdAt.toLocal();
+      final day = DateTime(d.year, d.month, d.day);
+      if (lastDay == null || day != lastDay) {
+        lastDay = day;
+        list.add(_AdminChatListEntry(isDate: true, date: d));
+      }
+      list.add(_AdminChatListEntry(isDate: false, message: m));
+    }
+    return list;
+  }
+
+  String _formatDateLabel(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final day = DateTime(d.year, d.month, d.day);
+    if (day == today) return 'Aujourd\'hui';
+    if (day == yesterday) return 'Hier';
+    return DateFormat('d MMMM yyyy', 'fr_FR').format(d);
+  }
+
+  Widget _buildDateSeparator(DateTime date) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            _formatDateLabel(date),
+            style: const TextStyle(
+              color: AppTheme.textGray,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1304,4 +1543,11 @@ class _AdminChatConversationScreenState
     final seconds = _recordSeconds % 60;
     return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
+}
+
+class _AdminChatListEntry {
+  final bool isDate;
+  final DateTime? date;
+  final ChatMessage? message;
+  _AdminChatListEntry({required this.isDate, this.date, this.message});
 }
