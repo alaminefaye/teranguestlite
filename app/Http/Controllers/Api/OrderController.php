@@ -19,19 +19,19 @@ class OrderController extends Controller
      */
     private function guestIdsForUserRoom(\App\Models\User $user): array
     {
-        if (! $user->enterprise_id) {
+        if (!$user->enterprise_id) {
             return [];
         }
         $room = null;
         if ($user->room_id) {
             $room = Room::where('enterprise_id', $user->enterprise_id)->where('id', $user->room_id)->first();
         }
-        if (! $room && $user->room_number) {
+        if (!$room && $user->room_number) {
             $room = Room::where('enterprise_id', $user->enterprise_id)
                 ->where('room_number', $user->room_number)
                 ->first();
         }
-        if (! $room) {
+        if (!$room) {
             return [];
         }
         return Reservation::where('room_id', $room->id)
@@ -61,7 +61,7 @@ class OrderController extends Controller
             $guestIds = $this->guestIdsForUserRoom($user);
             $query = Order::where(function ($q) use ($user, $guestIds) {
                 $q->where('user_id', $user->id);
-                if (! empty($guestIds)) {
+                if (!empty($guestIds)) {
                     $q->orWhereIn('guest_id', $guestIds);
                 }
             });
@@ -139,11 +139,11 @@ class OrderController extends Controller
 
         $query = Order::with(['orderItems.menuItem', 'room', 'guest']);
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             $guestIds = $this->guestIdsForUserRoom($user);
             $query->where(function ($q) use ($user, $guestIds) {
                 $q->where('user_id', $user->id);
-                if (! empty($guestIds)) {
+                if (!empty($guestIds)) {
                     $q->orWhereIn('guest_id', $guestIds);
                 }
             });
@@ -212,7 +212,7 @@ class OrderController extends Controller
             ->where('id', $id)
             ->where(function ($q) use ($user, $guestIds) {
                 $q->where('user_id', $user->id);
-                if (! empty($guestIds)) {
+                if (!empty($guestIds)) {
                     $q->orWhereIn('guest_id', $guestIds);
                 }
             })
@@ -323,13 +323,13 @@ class OrderController extends Controller
         $order = Order::where('id', $id)
             ->where(function ($q) use ($user, $guestIds) {
                 $q->where('user_id', $user->id);
-                if (! empty($guestIds)) {
+                if (!empty($guestIds)) {
                     $q->orWhereIn('guest_id', $guestIds);
                 }
             })
             ->first();
 
-        if (! $order) {
+        if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Commande non trouvée',
@@ -337,7 +337,7 @@ class OrderController extends Controller
         }
 
         $cancelAllowed = in_array($order->status, ['pending', 'confirmed', 'preparing'], true);
-        if (! $cancelAllowed) {
+        if (!$cancelAllowed) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cette commande ne peut plus être annulée (elle est déjà prête, en livraison ou livrée).',
@@ -406,13 +406,13 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $user = $request->user();
-        if (! method_exists($user, 'isAdmin') || ! method_exists($user, 'isStaff')) {
+        if (!method_exists($user, 'isAdmin') || !method_exists($user, 'isStaff')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès non autorisé',
             ], 403);
         }
-        if (! ($user->isAdmin() || $user->isStaff())) {
+        if (!($user->isAdmin() || $user->isStaff())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès réservé au staff de l’hôtel',
@@ -425,7 +425,7 @@ class OrderController extends Controller
 
         $order = Order::where('id', $id)->first();
 
-        if (! $order) {
+        if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Commande non trouvée',
@@ -486,8 +486,41 @@ class OrderController extends Controller
         $order->save();
 
         try {
-            if (! empty($order->room_id)) {
+            if (!empty($order->room_id)) {
                 app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
+            }
+
+            // [NOUVEAU] Notifier le staff "Service en chambre" quand la commande est prête à être récupérée en cuisine
+            if ($action === 'mark_ready' && $order->type === 'room_service') {
+                $serviceName = 'Room Service';
+                $statusLabel = $order->statusName; // "Prête"
+                $roomNumber = $order->room ? $order->room->room_number : null;
+                $guestName = $order->guest ? $order->guest->name : null;
+
+                $body = "La commande #{$order->order_number} est prête en cuisine. Veuillez la récupérer pour livraison.";
+                if ($roomNumber) {
+                    $body .= " (Chambre {$roomNumber})";
+                }
+
+                $data = [
+                    'type' => 'order_status',
+                    'order_id' => (string) $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'status_label' => $statusLabel,
+                    'service_name' => $serviceName,
+                    'screen' => 'AdminOrders',
+                    'room_number' => $roomNumber,
+                    'guest_name' => $guestName,
+                ];
+
+                app(FirebaseNotificationService::class)->sendToStaffForSection(
+                    $order->enterprise_id ?? $user->enterprise_id,
+                    \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
+                    'Commande prête à livrer',
+                    $body,
+                    $data
+                );
             }
         } catch (\Exception $e) {
             Log::error('Firebase notification error (order status API): ' . $e->getMessage(), ['order_id' => $order->id]);
@@ -513,7 +546,7 @@ class OrderController extends Controller
         $date = now()->format('Ymd');
         $lastOrder = Order::whereDate('created_at', today())->latest()->first();
         $sequence = $lastOrder ? (intval(substr($lastOrder->order_number, -3)) + 1) : 1;
-        
+
         return 'CMD-' . $date . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 }

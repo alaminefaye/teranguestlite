@@ -17,6 +17,7 @@ import '../excursions/my_excursion_bookings_screen.dart';
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../favorites/my_favorites_screen.dart';
+import '../invoices/invoices_list_screen.dart';
 
 /// Email et téléphone du support (modifiables par l'hôtel).
 const String _supportEmail = 'support@kingfahdpalace.com';
@@ -33,15 +34,9 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: AppTheme.primaryBlue,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppTheme.accentGold,
-            width: 1,
-          ),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1),
         ),
-        title: Text(
-          l10n.logout,
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(l10n.logout, style: const TextStyle(color: Colors.white)),
         content: Text(
           l10n.logoutConfirm,
           style: const TextStyle(color: AppTheme.textGray),
@@ -79,9 +74,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
@@ -160,10 +153,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 1.5,
-        ),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Column(
         children: [
@@ -174,10 +164,7 @@ class ProfileScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppTheme.accentGold.withValues(alpha: 0.2),
-              border: Border.all(
-                color: AppTheme.accentGold,
-                width: 2,
-              ),
+              border: Border.all(color: AppTheme.accentGold, width: 2),
             ),
             child: Center(
               child: Text(
@@ -207,10 +194,7 @@ class ProfileScreen extends StatelessWidget {
           // Email
           Text(
             user.email,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppTheme.textGray,
-            ),
+            style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -218,7 +202,8 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Infos supplémentaires
-          if (user.roomNumber != null && (user.roomNumber ?? '').isNotEmpty) ...[
+          if (user.roomNumber != null &&
+              (user.roomNumber ?? '').isNotEmpty) ...[
             const Divider(color: AppTheme.textGray, height: 24),
             _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber ?? ''),
           ],
@@ -240,10 +225,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           '$label: ',
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppTheme.textGray,
-          ),
+          style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
         ),
         Expanded(
           child: Text(
@@ -291,11 +273,23 @@ class ProfileScreen extends StatelessWidget {
         // Mes Commandes
         _buildActionTile(
           context: context,
-          icon: Icons.receipt_long_outlined,
+          icon: Icons.fastfood_outlined,
           title: AppLocalizations.of(context).myOrders,
           onTap: () {
             HapticHelper.lightImpact();
             context.navigateTo(const OrdersListScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Mes Factures (NOUVEAU)
+        _buildActionTile(
+          context: context,
+          icon: Icons.receipt_outlined,
+          title: 'Mes Factures',
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const InvoicesListScreen());
           },
         ),
         const SizedBox(height: 12),
@@ -436,10 +430,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
               const Icon(
@@ -543,7 +534,11 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.open_in_new, size: 18, color: AppTheme.textGray),
+                      const Icon(
+                        Icons.open_in_new,
+                        size: 18,
+                        color: AppTheme.textGray,
+                      ),
                     ],
                   ),
                 ),
@@ -585,7 +580,11 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.open_in_new, size: 18, color: AppTheme.textGray),
+                      const Icon(
+                        Icons.open_in_new,
+                        size: 18,
+                        color: AppTheme.textGray,
+                      ),
                     ],
                   ),
                 ),
@@ -596,7 +595,10 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).close, style: const TextStyle(color: AppTheme.accentGold)),
+            child: Text(
+              AppLocalizations.of(context).close,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
           ),
         ],
       ),
@@ -656,7 +658,10 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).ok, style: const TextStyle(color: AppTheme.accentGold)),
+            child: Text(
+              AppLocalizations.of(context).ok,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
           ),
         ],
       ),

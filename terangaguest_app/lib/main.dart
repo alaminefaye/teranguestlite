@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'src/platform_check_stub.dart'
-    if (dart.library.io) 'src/platform_check_io.dart' as platform_check;
+    if (dart.library.io) 'src/platform_check_io.dart'
+    as platform_check;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ import 'config/theme.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/orders/order_detail_screen.dart';
+import 'screens/invoices/invoice_receipt_dialog.dart';
 import 'screens/spa/my_spa_reservations_screen.dart';
 import 'screens/restaurants/my_reservations_screen.dart';
 import 'screens/excursions/my_excursion_bookings_screen.dart';
@@ -66,7 +68,8 @@ void main() async {
   // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
   // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
   if (platform_check.isAndroid) {
-    _pendingInitialFcmMessage = await FirebaseMessaging.instance.getInitialMessage();
+    _pendingInitialFcmMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
   } else {
     FirebaseMessaging.instance.getInitialMessage().then((msg) {
       _pendingInitialFcmMessage = msg;
@@ -208,7 +211,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
       } else if (type == 'restaurant_reservation_status' ||
           type == 'restaurant_reservation') {
         _handleRestaurantStatusNotification(data);
-      } else if (type == 'excursion_booking_status' || type == 'excursion_booking') {
+      } else if (type == 'excursion_booking_status' ||
+          type == 'excursion_booking') {
         _handleExcursionStatusNotification(data);
       } else if (type == 'chat_message') {
         _handleChatMessageNotification(data, retryCount: 0);
@@ -234,7 +238,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
   Future<void> _handleInitialFcmMessage() async {
     // Utiliser le message capturé dans main() (Android) ou le récupérer maintenant
-    final message = _pendingInitialFcmMessage ?? await FirebaseMessaging.instance.getInitialMessage();
+    final message =
+        _pendingInitialFcmMessage ??
+        await FirebaseMessaging.instance.getInitialMessage();
     _pendingInitialFcmMessage = null;
     if (message == null) return;
     final data = message.data;
@@ -260,15 +266,21 @@ class _LocalizedAppState extends State<_LocalizedApp>
     }
   }
 
-  void _handleChatMessageNotification(Map<String, dynamic> data, {int retryCount = 0}) {
+  void _handleChatMessageNotification(
+    Map<String, dynamic> data, {
+    int retryCount = 0,
+  }) {
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null) {
       if (retryCount < 5) {
         final delays = [400, 600, 1000, 1500, 2000];
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Future.delayed(Duration(milliseconds: delays[retryCount.clamp(0, 4)]), () {
-            _handleChatMessageNotification(data, retryCount: retryCount + 1);
-          });
+          Future.delayed(
+            Duration(milliseconds: delays[retryCount.clamp(0, 4)]),
+            () {
+              _handleChatMessageNotification(data, retryCount: retryCount + 1);
+            },
+          );
         });
       }
       return;
@@ -281,8 +293,10 @@ class _LocalizedAppState extends State<_LocalizedApp>
     // Ne jamais afficher le popup à l'expéditeur : seul le destinataire le voit.
     // Client envoie → notif aux staff uniquement. Staff envoie → notif au client uniquement.
     if (senderType != null) {
-      if (isStaffOrAdmin && senderType == 'staff') return; // Message du staff → je suis le staff, c'est mon envoi
-      if (!isStaffOrAdmin && senderType == 'guest') return; // Message du client → je suis le client, c'est mon envoi
+      if (isStaffOrAdmin && senderType == 'staff')
+        return; // Message du staff → je suis le staff, c'est mon envoi
+      if (!isStaffOrAdmin && senderType == 'guest')
+        return; // Message du client → je suis le client, c'est mon envoi
     } else {
       // Payload incomplet (sender_type manquant) : ne pas afficher pour éviter d'afficher à l'expéditeur.
       return;
@@ -303,7 +317,10 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final guestName = data['guest_name'] as String? ?? 'Client chambre';
     final roomLabel = data['room_label'] as String? ?? '';
     final preview = data['message_preview'] as String? ?? '';
-    final messageType = data['msg_type'] as String? ?? data['message_type'] as String? ?? 'text';
+    final messageType =
+        data['msg_type'] as String? ??
+        data['message_type'] as String? ??
+        'text';
 
     String typeLabel;
     if (messageType == 'image') {
@@ -462,6 +479,20 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final orderId = int.tryParse(orderIdRaw ?? '');
 
     final statusLabel = _statusLabel(l10n, status);
+
+    if (status == 'delivered') {
+      showDialog(
+        context: ctx,
+        barrierDismissible: true,
+        builder: (dialogContext) {
+          return InvoiceReceiptDialog(
+            orderId: orderId ?? 0,
+            orderNumber: orderNumber,
+          );
+        },
+      );
+      return;
+    }
 
     showDialog(
       context: ctx,
@@ -1238,8 +1269,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
         message += '\nMotif : $reason';
       }
     } else if (status == 'completed') {
-      message =
-          'Votre excursion « $excursionName » du $date a été honorée.';
+      message = 'Votre excursion « $excursionName » du $date a été honorée.';
     } else {
       final label = _restaurantStatusLabel(l10n, status);
       message = 'Statut de votre réservation excursion : $label';
