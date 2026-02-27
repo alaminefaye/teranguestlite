@@ -77,7 +77,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -282,7 +284,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               const countPerLine = 5;
               final itemWidth =
                   (constraints.maxWidth - (countPerLine - 1) * spacing) /
-                      countPerLine;
+                  countPerLine;
               return Wrap(
                 spacing: spacing,
                 runSpacing: spacing,

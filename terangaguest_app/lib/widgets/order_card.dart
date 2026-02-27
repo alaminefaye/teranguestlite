@@ -189,10 +189,7 @@ class OrderCard extends StatelessWidget {
     final statusColors = _getStatusColor(order.status);
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8 : 10,
-        vertical: 4,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 10, vertical: 4),
       decoration: BoxDecoration(
         color: statusColors['bg'],
         borderRadius: BorderRadius.circular(12),

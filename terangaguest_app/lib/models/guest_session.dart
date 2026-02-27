@@ -9,6 +9,7 @@ class GuestSession {
   final String roomNumber;
   final int reservationId;
   final String reservationNumber;
+
   /// Date/heure de validation du code (ISO8601). Envoyée à validate-session pour rejet si code régénéré.
   final String? validatedAt;
 

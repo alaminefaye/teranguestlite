@@ -26,7 +26,8 @@ import '../orders/order_detail_screen.dart';
 import '../orders/orders_list_screen.dart';
 import '../restaurants/my_reservations_screen.dart';
 import '../spa/my_spa_reservations_screen.dart';
-import '../excursions/my_excursion_bookings_screen.dart' show MyExcursionBookingsScreen, ExcursionBookingDetailScreen;
+import '../excursions/my_excursion_bookings_screen.dart'
+    show MyExcursionBookingsScreen, ExcursionBookingDetailScreen;
 import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../hotel_infos/emergency_requests_screen.dart';
@@ -301,7 +302,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final l10n = AppLocalizations.of(context);
     _handleTileTap(
       context,
-      _AdminTile(label: '', icon: Icons.circle, routeKey: routeKey, sectionKey: routeKey),
+      _AdminTile(
+        label: '',
+        icon: Icons.circle,
+        routeKey: routeKey,
+        sectionKey: routeKey,
+      ),
       l10n,
     );
   }
@@ -605,11 +611,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         page: 1,
         perPage: 15,
       );
-      final bookings =
-          result['bookings'] as List<ExcursionBooking>;
-      final pendingBookings = bookings.where(
-        (b) => b.status == 'pending',
-      );
+      final bookings = result['bookings'] as List<ExcursionBooking>;
+      final pendingBookings = bookings.where((b) => b.status == 'pending');
       for (final booking in pendingBookings) {
         if (!_alertedExcursionIds.contains(booking.id)) {
           _alertedExcursionIds.add(booking.id);
@@ -654,7 +657,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (selectedBooking != null) {
       navigator.push(
         MaterialPageRoute(
-          builder: (_) => ExcursionBookingDetailScreen(booking: selectedBooking),
+          builder: (_) =>
+              ExcursionBookingDetailScreen(booking: selectedBooking),
         ),
       );
     }
@@ -999,8 +1003,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final tiles = (user?.isAdmin == true || managed == null)
         ? allTiles
         : (list.isEmpty
-            ? <_AdminTile>[]
-            : allTiles.where((t) => list.contains(t.sectionKey)).toList());
+              ? <_AdminTile>[]
+              : allTiles.where((t) => list.contains(t.sectionKey)).toList());
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
@@ -1033,19 +1037,22 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         child: GridView.builder(
                           padding: EdgeInsets.symmetric(vertical: spacing),
                           cacheExtent: 200,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: spacing,
-                            mainAxisSpacing: spacing,
-                            childAspectRatio: aspectRatio,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
                           itemCount: tiles.length,
                           itemBuilder: (context, index) {
                             final tile = tiles[index];
                             return ServiceCard(
                               title: tile.label,
                               icon: tile.icon,
-                              badge: tile.badge > 0 ? tile.badge.toString() : null,
+                              badge: tile.badge > 0
+                                  ? tile.badge.toString()
+                                  : null,
                               isLoading: _isLoading && _summary == null,
                               onTap: () {
                                 HapticHelper.lightImpact();
@@ -2557,7 +2564,8 @@ class _NewExcursionCarouselDialog extends StatefulWidget {
       _NewExcursionCarouselDialogState();
 }
 
-class _NewExcursionCarouselDialogState extends State<_NewExcursionCarouselDialog> {
+class _NewExcursionCarouselDialogState
+    extends State<_NewExcursionCarouselDialog> {
   static const int _totalSeconds = 60;
   late int _remainingSeconds;
   Timer? _timer;
@@ -2594,7 +2602,8 @@ class _NewExcursionCarouselDialogState extends State<_NewExcursionCarouselDialog
   @override
   Widget build(BuildContext context) {
     final booking = _currentBooking;
-    final roomLabel = booking.roomNumber != null && booking.roomNumber!.isNotEmpty
+    final roomLabel =
+        booking.roomNumber != null && booking.roomNumber!.isNotEmpty
         ? 'Chambre ${booking.roomNumber}'
         : 'Chambre non spécifiée';
     final guestName = booking.guestName != null && booking.guestName!.isNotEmpty

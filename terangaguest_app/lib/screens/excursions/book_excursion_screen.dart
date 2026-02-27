@@ -85,7 +85,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                           Text(
                             AppLocalizations.of(context).reserve,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 24,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -111,7 +113,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -267,7 +271,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.primaryBlue.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minWidth: isNarrow ? 36 : 48),
@@ -566,7 +572,8 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
 
     final auth = context.read<AuthProvider>();
     final clientCode = _clientCodeController.text.trim();
-    final relyingOnCanReserve = clientCode.isEmpty && (auth.user?.canReserve == true);
+    final relyingOnCanReserve =
+        clientCode.isEmpty && (auth.user?.canReserve == true);
 
     if (relyingOnCanReserve) {
       await auth.loadUser();

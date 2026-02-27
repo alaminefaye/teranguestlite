@@ -28,10 +28,7 @@ class QuantitySelector extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 1.5,
-        ),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

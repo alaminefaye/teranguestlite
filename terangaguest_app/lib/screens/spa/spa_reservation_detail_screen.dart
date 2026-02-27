@@ -62,7 +62,10 @@ class SpaReservationDetailScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       if (reservation.specialRequests != null &&
                           reservation.specialRequests!.isNotEmpty) ...[
-                        _buildSectionTitle(context, AppLocalizations.of(context).specialRequests),
+                        _buildSectionTitle(
+                          context,
+                          AppLocalizations.of(context).specialRequests,
+                        ),
                         const SizedBox(height: 8),
                         _buildInfoChip(
                           context,
@@ -116,10 +119,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 const Text(
                   'Détail de la réservation',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textGray,
-                  ),
+                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
                 ),
               ],
             ),
@@ -159,10 +159,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
           if (reservation.guestName != null &&
               reservation.guestName!.isNotEmpty) ...[
             const SizedBox(height: 10),
-            _buildInfoRow(
-              Icons.person_outline,
-              reservation.guestName!,
-            ),
+            _buildInfoRow(Icons.person_outline, reservation.guestName!),
           ],
           const SizedBox(height: 10),
           _buildInfoRow(Icons.payments_outlined, reservation.formattedPrice),

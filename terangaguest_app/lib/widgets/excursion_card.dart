@@ -23,80 +23,125 @@ class ExcursionCard extends StatelessWidget {
       child: GestureDetector(
         onTap: excursion.isAvailable ? onTap : null,
         child: Transform(
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateX(-0.05)
-          ..rotateY(0.02),
-        alignment: Alignment.center,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(-0.05)
+            ..rotateY(0.02),
+          alignment: Alignment.center,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.accentGold, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: AppTheme.accentGold.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  spreadRadius: -2,
+                  offset: const Offset(0, -4),
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.accentGold, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 20,
-                spreadRadius: 2,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: AppTheme.accentGold.withValues(alpha: 0.1),
-                blurRadius: 15,
-                spreadRadius: -2,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 5,
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(14),
-                        topRight: Radius.circular(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(14),
+                          topRight: Radius.circular(14),
+                        ),
+                        child: excursion.image != null
+                            ? CachedNetworkImage(
+                                imageUrl: excursion.image!,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    _buildPlaceholder(),
+                                errorWidget: (context, url, error) =>
+                                    _buildPlaceholder(),
+                              )
+                            : _buildPlaceholder(),
                       ),
-                      child: excursion.image != null
-                          ? CachedNetworkImage(
-                              imageUrl: excursion.image!,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => _buildPlaceholder(),
-                              errorWidget: (context, url, error) => _buildPlaceholder(),
-                            )
-                          : _buildPlaceholder(),
-                    ),
-                    if (!excursion.isAvailable)
+                      if (!excursion.isAvailable)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.red, width: 1),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.cancel,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Indisponible',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       Positioned(
-                        top: 8,
-                        right: 8,
+                        bottom: 8,
+                        left: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.9),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.red, width: 1),
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          child: const Row(
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentGold.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.accentGold,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.cancel, size: 12, color: Colors.white),
-                              SizedBox(width: 4),
+                              const Icon(
+                                Icons.access_time,
+                                size: 12,
+                                color: AppTheme.primaryDark,
+                              ),
+                              const SizedBox(width: 4),
                               Text(
-                                'Indisponible',
-                                style: TextStyle(
+                                excursion.formattedDuration,
+                                style: const TextStyle(
                                   fontSize: 11,
-                                  color: Colors.white,
+                                  color: AppTheme.primaryDark,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -104,99 +149,76 @@ class ExcursionCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accentGold.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: AppTheme.accentGold, width: 1),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.access_time,
-                                size: 12, color: AppTheme.primaryDark),
-                            const SizedBox(width: 4),
-                            Text(
-                              excursion.formattedDuration,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppTheme.primaryDark,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                flex: 3,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          excursion.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.accentGold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context).adultPrice(excursion.formattedPriceAdult),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.accentGold,
-                                  ),
-                                ),
-                                Text(
-                                  AppLocalizations.of(context).childPrice(excursion.formattedPriceChild),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppTheme.textGray,
-                                  ),
-                                ),
-                              ],
+                Expanded(
+                  flex: 3,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            excursion.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
                             ),
-                            const Icon(Icons.arrow_forward_ios,
-                                size: 14, color: AppTheme.accentGold),
-                          ],
-                        ),
-                      ],
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).adultPrice(excursion.formattedPriceAdult),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.accentGold,
+                                    ),
+                                  ),
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).childPrice(excursion.formattedPriceChild),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppTheme.textGray,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: AppTheme.accentGold,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

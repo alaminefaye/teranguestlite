@@ -40,7 +40,9 @@ class Order {
     return Order(
       id: _parseInt(json['id']),
       orderNumber: _parseString(json['order_number']),
-      status: _parseString(json['status']).isEmpty ? 'pending' : _parseString(json['status']),
+      status: _parseString(json['status']).isEmpty
+          ? 'pending'
+          : _parseString(json['status']),
       total: _parseDouble(json['total_amount'] ?? json['total']),
       instructions: _parseStringNullable(
         json['special_instructions'] ?? json['instructions'],

@@ -16,7 +16,8 @@ class HotelInfosSecurityScreen extends StatefulWidget {
   const HotelInfosSecurityScreen({super.key});
 
   @override
-  State<HotelInfosSecurityScreen> createState() => _HotelInfosSecurityScreenState();
+  State<HotelInfosSecurityScreen> createState() =>
+      _HotelInfosSecurityScreenState();
 }
 
 class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
@@ -33,18 +34,30 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
     final l10n = AppLocalizations.of(context);
 
     final subServices = [
-      (l10n.hotelInfos, Icons.info_outline, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const HotelInfosScreen());
-      }),
-      (l10n.assistanceEmergency, Icons.emergency_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const AssistanceEmergencyScreen());
-      }),
-      (l10n.chatbotMultilingual, Icons.smart_toy_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const ChatbotScreen());
-      }),
+      (
+        l10n.hotelInfos,
+        Icons.info_outline,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const HotelInfosScreen());
+        },
+      ),
+      (
+        l10n.assistanceEmergency,
+        Icons.emergency_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const AssistanceEmergencyScreen());
+        },
+      ),
+      (
+        l10n.chatbotMultilingual,
+        Icons.smart_toy_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const ChatbotScreen());
+        },
+      ),
     ];
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
@@ -53,13 +66,15 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(context, l10n.hotelInfosSecurity, l10n.hotelInfosSecuritySubtitle),
+              _buildAppBar(
+                context,
+                l10n.hotelInfosSecurity,
+                l10n.hotelInfosSecuritySubtitle,
+              ),
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),

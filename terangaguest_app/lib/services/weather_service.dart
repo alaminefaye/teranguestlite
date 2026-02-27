@@ -31,7 +31,9 @@ class WeatherService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Les permissions de localisation sont définitivement refusées');
+      throw Exception(
+        'Les permissions de localisation sont définitivement refusées',
+      );
     }
 
     return await Geolocator.getCurrentPosition();
@@ -55,7 +57,7 @@ class WeatherService {
   // Obtenir l'icône météo Flutter correspondante
   static String getWeatherIcon(String? weatherMain) {
     if (weatherMain == null) return '☁️';
-    
+
     switch (weatherMain.toLowerCase()) {
       case 'clear':
         return '☀️';

@@ -16,6 +16,7 @@ import '../../utils/layout_helper.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
+
   /// Données déjà connues (ex. depuis la liste) : affichées tout de suite, détail API en complément.
   final Order? orderPreview;
 
@@ -296,7 +297,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                         ),
                       ),
                     ),
-                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    SizedBox(
+                      height: LayoutHelper.width(context) < 600 ? 20 : 30,
+                    ),
                     FadeTransition(
                       opacity: _timelineAnim,
                       child: SlideTransition(
@@ -307,7 +310,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                         child: _buildTimeline(),
                       ),
                     ),
-                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    SizedBox(
+                      height: LayoutHelper.width(context) < 600 ? 20 : 30,
+                    ),
                     FadeTransition(
                       opacity: _itemsAnim,
                       child: SlideTransition(
@@ -318,7 +323,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                         child: _buildOrderItems(),
                       ),
                     ),
-                    SizedBox(height: LayoutHelper.width(context) < 600 ? 20 : 30),
+                    SizedBox(
+                      height: LayoutHelper.width(context) < 600 ? 20 : 30,
+                    ),
                     FadeTransition(
                       opacity: _summaryAnim,
                       child: SlideTransition(

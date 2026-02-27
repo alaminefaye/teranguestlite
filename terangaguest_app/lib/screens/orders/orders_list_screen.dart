@@ -391,7 +391,10 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                       onTap: () {
                         HapticHelper.lightImpact();
                         // Navigator racine pour éviter crash côté guest (Mes Commandes)
-                        final rootNav = Navigator.maybeOf(context, rootNavigator: true);
+                        final rootNav = Navigator.maybeOf(
+                          context,
+                          rootNavigator: true,
+                        );
                         rootNav?.push(
                           NavigationHelper.slideFadeRoute(
                             OrderDetailScreen(

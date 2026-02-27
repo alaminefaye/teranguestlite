@@ -756,7 +756,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           Text(
                             AppLocalizations.of(context).demand,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -780,7 +782,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(

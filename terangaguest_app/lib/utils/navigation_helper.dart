@@ -11,14 +11,12 @@ class NavigationHelper {
         const end = Offset.zero;
         const curve = Curves.easeInOut;
 
-        var tween = Tween(begin: begin, end: end).chain(
-          CurveTween(curve: curve),
-        );
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
 
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
+        return SlideTransition(position: animation.drive(tween), child: child);
       },
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -29,10 +27,7 @@ class NavigationHelper {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
       transitionDuration: const Duration(milliseconds: 250),
     );
@@ -44,17 +39,11 @@ class NavigationHelper {
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const curve = Curves.easeOutCubic;
-        var curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: curve,
-        );
+        var curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
 
         return ScaleTransition(
           scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
-          child: FadeTransition(
-            opacity: curvedAnimation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: curvedAnimation, child: child),
         );
       },
       transitionDuration: const Duration(milliseconds: 300),
@@ -70,13 +59,15 @@ class NavigationHelper {
         const end = Offset.zero;
         const curve = Curves.easeOutCubic;
 
-        var slideTween = Tween(begin: begin, end: end).chain(
-          CurveTween(curve: curve),
-        );
+        var slideTween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
 
-        var fadeTween = Tween<double>(begin: 0.0, end: 1.0).chain(
-          CurveTween(curve: curve),
-        );
+        var fadeTween = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(slideTween),
@@ -101,43 +92,34 @@ class NavigationHelper {
   }
 
   /// Navigation avec animation slide standard
-  static Future<T?> navigateToSlide<T>(
-    BuildContext context,
-    Widget page,
-  ) {
-    return _navigator(context)?.push<T>(slideRoute(page)) ?? Future<T?>.value(null);
+  static Future<T?> navigateToSlide<T>(BuildContext context, Widget page) {
+    return _navigator(context)?.push<T>(slideRoute(page)) ??
+        Future<T?>.value(null);
   }
 
   /// Navigation avec animation fade
-  static Future<T?> navigateToFade<T>(
-    BuildContext context,
-    Widget page,
-  ) {
-    return _navigator(context)?.push<T>(fadeRoute(page)) ?? Future<T?>.value(null);
+  static Future<T?> navigateToFade<T>(BuildContext context, Widget page) {
+    return _navigator(context)?.push<T>(fadeRoute(page)) ??
+        Future<T?>.value(null);
   }
 
   /// Navigation avec animation scale
-  static Future<T?> navigateToScale<T>(
-    BuildContext context,
-    Widget page,
-  ) {
-    return _navigator(context)?.push<T>(scaleRoute(page)) ?? Future<T?>.value(null);
+  static Future<T?> navigateToScale<T>(BuildContext context, Widget page) {
+    return _navigator(context)?.push<T>(scaleRoute(page)) ??
+        Future<T?>.value(null);
   }
 
   /// Navigation avec animation slide+fade combinée (recommandé)
-  static Future<T?> navigateTo<T>(
-    BuildContext context,
-    Widget page,
-  ) {
-    return _navigator(context)?.push<T>(slideFadeRoute(page)) ?? Future<T?>.value(null);
+  static Future<T?> navigateTo<T>(BuildContext context, Widget page) {
+    return _navigator(context)?.push<T>(slideFadeRoute(page)) ??
+        Future<T?>.value(null);
   }
 
   /// Remplacer l'écran actuel avec animation
-  static Future<T?> replaceWith<T>(
-    BuildContext context,
-    Widget page,
-  ) {
-    return _navigator(context)?.pushReplacement<T, void>(slideFadeRoute(page)) ??
+  static Future<T?> replaceWith<T>(BuildContext context, Widget page) {
+    return _navigator(
+          context,
+        )?.pushReplacement<T, void>(slideFadeRoute(page)) ??
         Future<T?>.value(null);
   }
 

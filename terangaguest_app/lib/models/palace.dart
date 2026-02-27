@@ -24,7 +24,8 @@ class PalaceService {
   factory PalaceService.fromJson(Map<String, dynamic> json) {
     final name = json['name'] as String? ?? '';
     final fromApi = json['is_guided_tours'] as bool?;
-    final fromName = name.toLowerCase().contains('visites guidées') ||
+    final fromName =
+        name.toLowerCase().contains('visites guidées') ||
         name.toLowerCase().contains('visite guidée');
     return PalaceService(
       id: json['id'] as int,

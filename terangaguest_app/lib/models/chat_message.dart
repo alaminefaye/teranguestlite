@@ -23,10 +23,7 @@ class ChatMessage {
     this.replyTo,
   });
 
-  ChatMessage copyWith({
-    bool? isDeleted,
-    String? content,
-  }) {
+  ChatMessage copyWith({bool? isDeleted, String? content}) {
     return ChatMessage(
       id: id,
       senderType: senderType,

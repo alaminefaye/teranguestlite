@@ -23,56 +23,58 @@ class CartBadge extends StatelessWidget {
       builder: (context, cart, child) {
         return Semantics(
           button: true,
-          label: cart.itemCount > 0 ? '${AppLocalizations.of(context).cart}, ${AppLocalizations.of(context).articleCount(cart.itemCount)}' : AppLocalizations.of(context).cart,
+          label: cart.itemCount > 0
+              ? '${AppLocalizations.of(context).cart}, ${AppLocalizations.of(context).articleCount(cart.itemCount)}'
+              : AppLocalizations.of(context).cart,
           child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.shopping_cart,
-                color: iconColor,
-                size: iconSize,
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.shopping_cart,
+                  color: iconColor,
+                  size: iconSize,
+                ),
+                onPressed: () {
+                  HapticHelper.lightImpact();
+                  context.navigateTo(const CartScreen());
+                },
               ),
-              onPressed: () {
-                HapticHelper.lightImpact();
-                context.navigateTo(const CartScreen());
-              },
-            ),
-            
-            // Badge avec le nombre d'articles
-            if (cart.itemCount > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppTheme.primaryDark,
-                      width: 1.5,
+
+              // Badge avec le nombre d'articles
+              if (cart.itemCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
                     ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      cart.itemCount > 9 ? '9+' : cart.itemCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        height: 1,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppTheme.primaryDark,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        cart.itemCount > 9 ? '9+' : cart.itemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          height: 1,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
+            ],
+          ),
         );
       },
     );

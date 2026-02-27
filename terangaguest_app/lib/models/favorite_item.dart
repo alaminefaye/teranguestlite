@@ -1,10 +1,5 @@
 /// Type d'élément pouvant être mis en favori.
-enum FavoriteType {
-  menuItem,
-  restaurant,
-  spa,
-  excursion,
-}
+enum FavoriteType { menuItem, restaurant, spa, excursion }
 
 /// Un favori stocké localement (sans backend).
 class FavoriteItem {
@@ -34,11 +29,11 @@ class FavoriteItem {
   }
 
   Map<String, dynamic> toJson() => {
-        't': typeKey,
-        'id': id,
-        'name': name,
-        'image': imageUrl,
-      };
+    't': typeKey,
+    'id': id,
+    'name': name,
+    'image': imageUrl,
+  };
 
   static FavoriteItem fromJson(Map<String, dynamic> json) {
     final String t = json['t'] as String? ?? 'menu_item';

@@ -7,12 +7,12 @@ import '../models/user.dart';
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
   late FlutterSecureStorage _storage;
-  
+
   // Flags pour savoir quel storage fonctionne
   bool _useSecureStorage = true;
   bool _useSharedPreferences = true;
   SharedPreferences? _prefs;
-  
+
   // Storage en mémoire comme dernier recours (ne persiste pas)
   final Map<String, String> _memoryStorage = {};
 
@@ -22,12 +22,8 @@ class SecureStorage {
 
   SecureStorage._internal() {
     _storage = const FlutterSecureStorage(
-      aOptions: AndroidOptions(
-        encryptedSharedPreferences: true,
-      ),
-      iOptions: IOSOptions(
-        accessibility: KeychainAccessibility.first_unlock,
-      ),
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
     );
   }
 
@@ -60,7 +56,7 @@ class SecureStorage {
         _useSecureStorage = false;
       }
     }
-    
+
     // Niveau 2 : SharedPreferences (fallback 1)
     if (_useSharedPreferences) {
       try {
@@ -74,7 +70,7 @@ class SecureStorage {
         _useSharedPreferences = false;
       }
     }
-    
+
     // Niveau 3 : Mémoire (fallback ultime - ne persiste pas)
     debugPrint('ℹ️ Using in-memory storage (non-persistent)');
     _memoryStorage[key] = value;
@@ -91,7 +87,7 @@ class SecureStorage {
         _useSecureStorage = false;
       }
     }
-    
+
     // Niveau 2 : SharedPreferences (fallback 1)
     if (_useSharedPreferences) {
       try {
@@ -104,7 +100,7 @@ class SecureStorage {
         _useSharedPreferences = false;
       }
     }
-    
+
     // Niveau 3 : Mémoire (fallback ultime)
     return _memoryStorage[key];
   }
@@ -121,7 +117,7 @@ class SecureStorage {
         _useSecureStorage = false;
       }
     }
-    
+
     // Niveau 2 : SharedPreferences (fallback 1)
     if (_useSharedPreferences) {
       try {
@@ -135,7 +131,7 @@ class SecureStorage {
         _useSharedPreferences = false;
       }
     }
-    
+
     // Niveau 3 : Mémoire (fallback ultime)
     _memoryStorage.remove(key);
   }
@@ -216,7 +212,7 @@ class SecureStorage {
         _useSecureStorage = false;
       }
     }
-    
+
     // Niveau 2 : SharedPreferences
     if (_useSharedPreferences) {
       try {
@@ -227,7 +223,7 @@ class SecureStorage {
         _useSharedPreferences = false;
       }
     }
-    
+
     // Niveau 3 : Mémoire
     _memoryStorage.clear();
   }

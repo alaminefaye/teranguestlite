@@ -47,10 +47,7 @@ class ErrorStateWidget extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppTheme.textGray,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
             ),
             if (hint != null && hint!.isNotEmpty) ...[
               const SizedBox(height: 12),

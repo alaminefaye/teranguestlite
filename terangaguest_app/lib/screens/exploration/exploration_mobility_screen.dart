@@ -20,22 +20,38 @@ class ExplorationMobilityScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     final subServices = [
-      (l10n.vehicleRental, Icons.directions_car_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const VehicleListScreen());
-      }),
-      (l10n.sitesTouristiques, Icons.place_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const ExcursionsListScreen());
-      }),
-      (l10n.guidedTours, Icons.tour_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const GuidedToursRequestScreen());
-      }),
-      (l10n.transfersVtc, Icons.local_taxi_outlined, () {
-        HapticHelper.lightImpact();
-        context.navigateTo(const TransfersRequestScreen());
-      }),
+      (
+        l10n.vehicleRental,
+        Icons.directions_car_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const VehicleListScreen());
+        },
+      ),
+      (
+        l10n.sitesTouristiques,
+        Icons.place_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const ExcursionsListScreen());
+        },
+      ),
+      (
+        l10n.guidedTours,
+        Icons.tour_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const GuidedToursRequestScreen());
+        },
+      ),
+      (
+        l10n.transfersVtc,
+        Icons.local_taxi_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const TransfersRequestScreen());
+        },
+      ),
     ];
 
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
@@ -44,13 +60,15 @@ class ExplorationMobilityScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(context, l10n.explorationMobility, l10n.explorationMobilitySubtitle),
+              _buildAppBar(
+                context,
+                l10n.explorationMobility,
+                l10n.explorationMobilitySubtitle,
+              ),
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),

@@ -23,6 +23,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   List<Vehicle> _vehicles = [];
   bool _loading = true;
   String? _error;
+
   /// Filtres : null = tous
   String? _filterType;
   int? _filterMinSeats;
@@ -84,7 +85,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -123,51 +127,63 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 child: _loading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
                         ),
                       )
                     : _error != null
-                        ? ErrorStateWidget(
-                            message: _error!,
-                            hint: l10n.errorHint,
-                            onRetry: _loadVehicles,
-                          )
-                        : _vehicles.isEmpty
-                            ? EmptyStateWidget(
-                                icon: Icons.directions_car_outlined,
-                                title: l10n.noVehicleAvailable,
-                                subtitle: l10n.noVehicleAvailableHint,
-                              )
-                            : RefreshIndicator(
-                                color: AppTheme.accentGold,
-                                onRefresh: _loadVehicles,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: LayoutHelper.horizontalPaddingValue(context),
-                                    vertical: 8,
+                    ? ErrorStateWidget(
+                        message: _error!,
+                        hint: l10n.errorHint,
+                        onRetry: _loadVehicles,
+                      )
+                    : _vehicles.isEmpty
+                    ? EmptyStateWidget(
+                        icon: Icons.directions_car_outlined,
+                        title: l10n.noVehicleAvailable,
+                        subtitle: l10n.noVehicleAvailableHint,
+                      )
+                    : RefreshIndicator(
+                        color: AppTheme.accentGold,
+                        onRefresh: _loadVehicles,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: LayoutHelper.horizontalPaddingValue(
+                              context,
+                            ),
+                            vertical: 8,
+                          ),
+                          child: GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount:
+                                      LayoutHelper.gridCrossAxisCount(context),
+                                  childAspectRatio: 0.82,
+                                  crossAxisSpacing: LayoutHelper.gridSpacing(
+                                    context,
                                   ),
-                                  child: GridView.builder(
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
-                                      childAspectRatio: 0.82,
-                                      crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                                      mainAxisSpacing: LayoutHelper.gridSpacing(context),
-                                    ),
-                                    itemCount: _vehicles.length,
-                                    itemBuilder: (context, index) {
-                                      final v = _vehicles[index];
-                                      return _VehicleCard(
-                                        vehicle: v,
-                                        onTap: () {
-                                          HapticHelper.lightImpact();
-                                          context.navigateTo(VehicleRentalRequestScreen(vehicle: v));
-                                        },
-                                      );
-                                    },
+                                  mainAxisSpacing: LayoutHelper.gridSpacing(
+                                    context,
                                   ),
                                 ),
-                              ),
-            ),
+                            itemCount: _vehicles.length,
+                            itemBuilder: (context, index) {
+                              final v = _vehicles[index];
+                              return _VehicleCard(
+                                vehicle: v,
+                                onTap: () {
+                                  HapticHelper.lightImpact();
+                                  context.navigateTo(
+                                    VehicleRentalRequestScreen(vehicle: v),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+              ),
             ],
           ),
         ),
@@ -195,7 +211,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.primaryBlue.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.4),
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String?>(
@@ -203,17 +221,30 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                   isExpanded: true,
                   hint: Text(
                     l10n.filterVehicleType,
-                    style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppTheme.textGray,
+                      fontSize: 14,
+                    ),
                   ),
                   dropdownColor: AppTheme.primaryBlue,
-                  icon: const Icon(Icons.arrow_drop_down, color: AppTheme.accentGold),
-                  items: types.map((t) => DropdownMenuItem<String?>(
-                    value: t.$1,
-                    child: Text(
-                      t.$2,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  )).toList(),
+                  icon: const Icon(
+                    Icons.arrow_drop_down,
+                    color: AppTheme.accentGold,
+                  ),
+                  items: types
+                      .map(
+                        (t) => DropdownMenuItem<String?>(
+                          value: t.$1,
+                          child: Text(
+                            t.$2,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                   onChanged: (v) {
                     setState(() {
                       _filterType = v;
@@ -231,7 +262,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.primaryBlue.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.4),
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<int?>(
@@ -239,16 +272,39 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                   isExpanded: true,
                   hint: Text(
                     l10n.filterMinSeats,
-                    style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppTheme.textGray,
+                      fontSize: 14,
+                    ),
                   ),
                   dropdownColor: AppTheme.primaryBlue,
-                  icon: const Icon(Icons.arrow_drop_down, color: AppTheme.accentGold),
+                  icon: const Icon(
+                    Icons.arrow_drop_down,
+                    color: AppTheme.accentGold,
+                  ),
                   items: [
-                    DropdownMenuItem<int?>(value: null, child: Text(l10n.filterAllTypes, style: const TextStyle(color: Colors.white, fontSize: 14))),
-                    ...List.generate(19, (i) => i + 2).map((s) => DropdownMenuItem<int?>(
-                      value: s,
-                      child: Text('$s', style: const TextStyle(color: Colors.white, fontSize: 14)),
-                    )),
+                    DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text(
+                        l10n.filterAllTypes,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    ...List.generate(19, (i) => i + 2).map(
+                      (s) => DropdownMenuItem<int?>(
+                        value: s,
+                        child: Text(
+                          '$s',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                   onChanged: (v) {
                     setState(() {
@@ -288,7 +344,9 @@ class _VehicleCard extends StatelessWidget {
             Expanded(
               flex: 3,
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(15),
+                ),
                 child: vehicle.image != null && vehicle.image!.isNotEmpty
                     ? Image.network(
                         vehicle.image!,
@@ -298,17 +356,28 @@ class _VehicleCard extends StatelessWidget {
                           if (progress == null) return child;
                           return const Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.accentGold,
+                              ),
                               strokeWidth: 2,
                             ),
                           );
                         },
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 48),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.directions_car,
+                                color: AppTheme.textGray,
+                                size: 48,
+                              ),
+                            ),
                       )
                     : const Center(
-                        child: Icon(Icons.directions_car, color: AppTheme.textGray, size: 48),
+                        child: Icon(
+                          Icons.directions_car,
+                          color: AppTheme.textGray,
+                          size: 48,
+                        ),
                       ),
               ),
             ),
@@ -335,7 +404,8 @@ class _VehicleCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  if (vehicle.pricePerDay != null || vehicle.priceHalfDay != null) ...[
+                  if (vehicle.pricePerDay != null ||
+                      vehicle.priceHalfDay != null) ...[
                     const SizedBox(height: 6),
                     Text(
                       vehicle.displayPricePerDay,

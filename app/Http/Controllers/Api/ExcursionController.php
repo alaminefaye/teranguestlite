@@ -154,7 +154,7 @@ class ExcursionController extends Controller
 
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
-        if (! $stay) {
+        if (!$stay) {
             $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
                 ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
                 : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
@@ -193,7 +193,7 @@ class ExcursionController extends Controller
                 $user->enterprise_id,
                 \App\Helpers\StaffSection::EXCURSIONS,
                 'Nouvelle réservation excursion',
-                "Nouvelle excursion {$excursion->name} le " . $booking->booking_date?->format('d/m/Y'),
+                "Nouvelle excursion {$excursion->name} le " . \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y'),
                 [
                     'type' => 'excursion_booking',
                     'booking_id' => (string) $booking->id,
@@ -214,11 +214,11 @@ class ExcursionController extends Controller
                     'name' => $excursion->name,
                     'departure_time' => $excursion->departure_time,
                 ],
-                'date' => $booking->booking_date?->format('Y-m-d'),
+                'date' => \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d'),
                 'adults' => $booking->number_of_adults,
                 'children' => $booking->number_of_children,
                 'total_price' => $booking->total_price,
-                'formatted_total' => number_format($booking->total_price, 0, '', ' ') . ' FCFA',
+                'formatted_total' => number_format((float) $booking->total_price, 0, '', ' ') . ' FCFA',
                 'status' => $booking->status,
             ],
         ], 201);
@@ -236,7 +236,7 @@ class ExcursionController extends Controller
 
         $query = ExcursionBooking::with(['excursion', 'room', 'guest']);
 
-        if (! $isStaffOrAdmin) {
+        if (!$isStaffOrAdmin) {
             $query->where('user_id', $user->id);
         }
 
@@ -309,7 +309,7 @@ class ExcursionController extends Controller
 
         $booking = ExcursionBooking::with(['excursion', 'room', 'guest'])->find($id);
 
-        if (! $booking || $booking->enterprise_id != $user->enterprise_id) {
+        if (!$booking || $booking->enterprise_id != $user->enterprise_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Réservation non trouvée',
@@ -347,11 +347,11 @@ class ExcursionController extends Controller
         $nextStatus = $statusTransitions[$action][$booking->status];
         $booking->status = $nextStatus;
 
-        if ($nextStatus === 'confirmed' && ! $booking->confirmed_at) {
+        if ($nextStatus === 'confirmed' && !$booking->confirmed_at) {
             $booking->confirmed_at = now();
         }
 
-        if ($nextStatus === 'cancelled' && ! $booking->cancelled_at) {
+        if ($nextStatus === 'cancelled' && !$booking->cancelled_at) {
             $booking->cancelled_at = now();
             $reason = $validated['reason'] ?? '';
             if ($reason !== '') {
@@ -365,7 +365,7 @@ class ExcursionController extends Controller
             if ($booking->room_id) {
                 $firebaseService = app(\App\Services\FirebaseNotificationService::class);
                 $excursionName = $booking->excursion->name ?? 'Excursion';
-                $dateStr = $booking->booking_date?->format('d/m/Y');
+                $dateStr = \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y');
                 $reason = $booking->cancellation_reason ?? '';
 
                 $statusMessages = [
@@ -402,7 +402,7 @@ class ExcursionController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error(
+            Log::error(
                 'Firebase notification error (excursion booking status): ' . $e->getMessage()
             );
         }
@@ -416,7 +416,7 @@ class ExcursionController extends Controller
                     'name' => $booking->excursion->name,
                     'type' => $booking->excursion->type,
                 ],
-                'date' => $booking->booking_date?->format('Y-m-d'),
+                'date' => \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d'),
                 'adults' => $booking->number_of_adults,
                 'children' => $booking->number_of_children,
                 'total_price' => $booking->total_price,

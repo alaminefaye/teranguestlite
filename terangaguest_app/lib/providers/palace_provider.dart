@@ -30,6 +30,7 @@ class PalaceProvider with ChangeNotifier {
       if (hasListeners) notifyListeners();
     });
   }
+
   bool get hasMoreRequestPages => _hasMoreRequestPages;
   bool get hasMoreEmergencyPages => _hasMoreEmergencyPages;
   String? get selectedRequestsPeriod => _selectedRequestsPeriod;

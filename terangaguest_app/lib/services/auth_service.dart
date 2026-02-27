@@ -18,15 +18,12 @@ class AuthService {
     try {
       final response = await _apiService.post(
         ApiConfig.login,
-        data: {
-          'email': email,
-          'password': password,
-        },
+        data: {'email': email, 'password': password},
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
-        
+
         if (data['success'] == true) {
           final userData = data['data']['user'];
           final token = data['data']['token'] as String;
@@ -42,10 +39,7 @@ class AuthService {
           // Définir le token dans ApiService pour les futures requêtes
           _apiService.setAuthToken(token);
 
-          return {
-            'user': user,
-            'token': token,
-          };
+          return {'user': user, 'token': token};
         } else {
           throw Exception(data['message'] ?? 'Erreur de connexion');
         }
@@ -95,7 +89,8 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = response.data;
         // API renvoie { "success": true, "data": { ... user ... } }
-        final Map<String, dynamic> userData = data is Map && data['data'] != null
+        final Map<String, dynamic> userData =
+            data is Map && data['data'] != null
             ? data['data'] as Map<String, dynamic>
             : data as Map<String, dynamic>;
         final user = User.fromJson(userData);
@@ -135,7 +130,9 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['success'] != true) {
-          throw Exception(data['message'] ?? 'Erreur lors du changement de mot de passe');
+          throw Exception(
+            data['message'] ?? 'Erreur lors du changement de mot de passe',
+          );
         }
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');

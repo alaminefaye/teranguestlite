@@ -19,7 +19,8 @@ class WellnessSportLeisureScreen extends StatefulWidget {
       _WellnessSportLeisureScreenState();
 }
 
-class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen> {
+class _WellnessSportLeisureScreenState
+    extends State<WellnessSportLeisureScreen> {
   List<LeisureMainCategoryDto>? _mainCategories;
   bool _loading = true;
 
@@ -52,7 +53,9 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
     }
   }
 
-  static List<LeisureMainCategoryDto> _fallbackMainCategories(AppLocalizations l10n) {
+  static List<LeisureMainCategoryDto> _fallbackMainCategories(
+    AppLocalizations l10n,
+  ) {
     return [
       LeisureMainCategoryDto(
         id: 0,
@@ -61,9 +64,27 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
         type: 'sport',
         displayOrder: 0,
         children: [
-          LeisureCategoryDto(id: 1, name: l10n.golfTitle, description: null, type: 'golf', displayOrder: 0),
-          LeisureCategoryDto(id: 2, name: l10n.tennisTitle, description: null, type: 'tennis', displayOrder: 1),
-          LeisureCategoryDto(id: 3, name: l10n.sportFitnessTitle, description: null, type: 'fitness', displayOrder: 2),
+          LeisureCategoryDto(
+            id: 1,
+            name: l10n.golfTitle,
+            description: null,
+            type: 'golf',
+            displayOrder: 0,
+          ),
+          LeisureCategoryDto(
+            id: 2,
+            name: l10n.tennisTitle,
+            description: null,
+            type: 'tennis',
+            displayOrder: 1,
+          ),
+          LeisureCategoryDto(
+            id: 3,
+            name: l10n.sportFitnessTitle,
+            description: null,
+            type: 'fitness',
+            displayOrder: 2,
+          ),
         ],
       ),
       LeisureMainCategoryDto(
@@ -73,7 +94,13 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
         type: 'loisirs',
         displayOrder: 1,
         children: [
-          LeisureCategoryDto(id: 4, name: l10n.spaWellness, description: null, type: 'spa', displayOrder: 0),
+          LeisureCategoryDto(
+            id: 4,
+            name: l10n.spaWellness,
+            description: null,
+            type: 'spa',
+            displayOrder: 0,
+          ),
         ],
       ),
     ];
@@ -92,9 +119,7 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -103,19 +128,22 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
                 child: _loading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
                         ),
                       )
                     : Padding(
                         padding: LayoutHelper.horizontalPadding(context),
                         child: GridView.builder(
                           padding: EdgeInsets.symmetric(vertical: spacing),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: spacing,
-                            mainAxisSpacing: spacing,
-                            childAspectRatio: aspectRatio,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
                           itemCount: list.length,
                           itemBuilder: (context, index) {
                             final mainCat = list[index];
@@ -124,7 +152,9 @@ class _WellnessSportLeisureScreenState extends State<WellnessSportLeisureScreen>
                               icon: _iconForMainType(mainCat.type),
                               onTap: () {
                                 HapticHelper.lightImpact();
-                                context.navigateTo(LeisureSubListScreen(mainCategory: mainCat));
+                                context.navigateTo(
+                                  LeisureSubListScreen(mainCategory: mainCat),
+                                );
                               },
                             );
                           },

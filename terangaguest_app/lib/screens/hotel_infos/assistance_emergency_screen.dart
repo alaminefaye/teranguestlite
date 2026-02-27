@@ -53,10 +53,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
           ),
           content: Text(
             l10n.confirmEmergencyAction(actionTitle),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           actions: [
             TextButton(
@@ -192,7 +189,9 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                           Text(
                             l10n.assistanceEmergency,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -228,10 +227,13 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                     ? Padding(
                         padding: LayoutHelper.horizontalPadding(context),
                         child: GridView.count(
-                          crossAxisCount: LayoutHelper.gridCrossAxisCount(context),
+                          crossAxisCount: LayoutHelper.gridCrossAxisCount(
+                            context,
+                          ),
                           mainAxisSpacing: LayoutHelper.gridSpacing(context),
                           crossAxisSpacing: LayoutHelper.gridSpacing(context),
-                          childAspectRatio: LayoutHelper.dashboardCellAspectRatio(context),
+                          childAspectRatio:
+                              LayoutHelper.dashboardCellAspectRatio(context),
                           padding: EdgeInsets.symmetric(
                             vertical: LayoutHelper.gridSpacing(context),
                           ),
@@ -244,7 +246,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 loading: _sendingDoctor,
                                 onTap: () {
                                   HapticHelper.lightImpact();
-                                  _confirmAndSendRequest('doctor', l10n.requestDoctor);
+                                  _confirmAndSendRequest(
+                                    'doctor',
+                                    l10n.requestDoctor,
+                                  );
                                 },
                               ),
                             if (securityEnabled)
@@ -255,7 +260,10 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 loading: _sendingSecurity,
                                 onTap: () {
                                   HapticHelper.lightImpact();
-                                  _confirmAndSendRequest('security', l10n.reportSecurityEmergency);
+                                  _confirmAndSendRequest(
+                                    'security',
+                                    l10n.reportSecurityEmergency,
+                                  );
                                 },
                               ),
                           ],

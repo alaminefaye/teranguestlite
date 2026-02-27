@@ -291,7 +291,10 @@ class _AdminChatConversationsScreenState
     );
   }
 
-  Future<void> _performDeleteConversation(StaffConversationSummary conv, int index) async {
+  Future<void> _performDeleteConversation(
+    StaffConversationSummary conv,
+    int index,
+  ) async {
     try {
       await _api.deleteStaffConversation(conv.id);
       if (!mounted) return;
@@ -300,7 +303,7 @@ class _AdminChatConversationsScreenState
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).deleteConversation + ' ✓'),
+          content: Text('${AppLocalizations.of(context).deleteConversation} ✓'),
           backgroundColor: AppTheme.accentGold,
         ),
       );
@@ -315,7 +318,11 @@ class _AdminChatConversationsScreenState
     }
   }
 
-  void _showDeleteConversationDialog(BuildContext context, StaffConversationSummary conv, int index) {
+  void _showDeleteConversationDialog(
+    BuildContext context,
+    StaffConversationSummary conv,
+    int index,
+  ) {
     HapticHelper.lightImpact();
     final l10n = AppLocalizations.of(context);
     showDialog<void>(
@@ -338,7 +345,10 @@ class _AdminChatConversationsScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textGray)),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(color: AppTheme.textGray),
+              ),
             ),
             FilledButton(
               onPressed: () {
@@ -487,15 +497,19 @@ class _AdminChatConversationsScreenState
         child: const Icon(Icons.delete_forever, color: Colors.white, size: 32),
       ),
       onDismissed: (direction) {
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
         setState(() => _conversations.removeWhere((c) => c.id == conv.id));
         _api.deleteStaffConversation(conv.id).catchError((e) {
           if (mounted) {
             setState(() {
               _conversations.insert(index, conv);
-              _conversations.sort((a, b) =>
-                  (b.lastMessageAt ?? DateTime(0)).compareTo(a.lastMessageAt ?? DateTime(0)));
+              _conversations.sort(
+                (a, b) => (b.lastMessageAt ?? DateTime(0)).compareTo(
+                  a.lastMessageAt ?? DateTime(0),
+                ),
+              );
             });
-            ScaffoldMessenger.of(context).showSnackBar(
+            scaffoldMessenger.showSnackBar(
               SnackBar(
                 content: Text(e.toString().replaceAll('Exception: ', '')),
                 backgroundColor: Colors.redAccent,
@@ -609,7 +623,8 @@ class _AdminChatConversationScreenState
       final newLastId = items.isNotEmpty ? items.last.id : null;
       if (items.length != prevCount || prevLastId != newLastId) {
         final newCount = items.length - prevCount;
-        final isNearBottom = _scrollController.hasClients &&
+        final isNearBottom =
+            _scrollController.hasClients &&
             _scrollController.offset >=
                 _scrollController.position.maxScrollExtent - 80;
         setState(() {
@@ -900,15 +915,17 @@ class _AdminChatConversationScreenState
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      ).then((_) {
-        if (mounted && _unreadCountBelow > 0) {
-          setState(() => _unreadCountBelow = 0);
-        }
-      });
+      _scrollController
+          .animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          )
+          .then((_) {
+            if (mounted && _unreadCountBelow > 0) {
+              setState(() => _unreadCountBelow = 0);
+            }
+          });
     }
   }
 
@@ -950,7 +967,11 @@ class _AdminChatConversationScreenState
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primaryDark, size: 24),
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppTheme.primaryDark,
+                size: 24,
+              ),
               const SizedBox(width: 8),
               Text(
                 _unreadCountBelow == 1
@@ -1031,7 +1052,10 @@ class _AdminChatConversationScreenState
                               }
                               final msg = entry.message!;
                               return _buildMessageBubble(
-                                  context, msg, msg.senderType != 'guest');
+                                context,
+                                msg,
+                                msg.senderType != 'guest',
+                              );
                             },
                           ),
                         ),
@@ -1087,10 +1111,7 @@ class _AdminChatConversationScreenState
                   preview.isEmpty ? l10n.messageDeleted : preview,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -1215,28 +1236,50 @@ class _AdminChatConversationScreenState
             children: [
               ListTile(
                 leading: const Icon(Icons.reply, color: AppTheme.accentGold),
-                title: Text(l10n.reply, style: const TextStyle(color: Colors.white)),
+                title: Text(
+                  l10n.reply,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() => _replyingTo = message);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                title: Text(l10n.deleteMessage, style: const TextStyle(color: Colors.white)),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.redAccent,
+                ),
+                title: Text(
+                  l10n.deleteMessage,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onTap: () async {
                   Navigator.pop(ctx);
                   try {
-                    await _api.deleteStaffMessage(widget.conversationId, message.id);
+                    await _api.deleteStaffMessage(
+                      widget.conversationId,
+                      message.id,
+                    );
                     if (!mounted) return;
                     setState(() {
                       final i = _messages.indexWhere((m) => m.id == message.id);
-                      if (i >= 0) _messages[i] = message.copyWith(isDeleted: true, content: null);
+                      if (i >= 0) {
+                        _messages[i] = message.copyWith(
+                          isDeleted: true,
+                          content: null,
+                        );
+                      }
                     });
                   } catch (e) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.redAccent),
+                        SnackBar(
+                          content: Text(
+                            e.toString().replaceAll('Exception: ', ''),
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
                       );
                     }
                   }
@@ -1326,7 +1369,8 @@ class _AdminChatConversationScreenState
                 : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (message.replyTo != null) _buildReplyQuote(message.replyTo!, textColor),
+              if (message.replyTo != null)
+                _buildReplyQuote(message.replyTo!, textColor),
               if (senderLabel != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -1518,7 +1562,10 @@ class _AdminChatConversationScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_recording) _buildVoiceNoteRecordingBar() else _buildNormalInputRow(context, l10n),
+          if (_recording)
+            _buildVoiceNoteRecordingBar()
+          else
+            _buildNormalInputRow(context, l10n),
         ],
       ),
     );
@@ -1650,7 +1697,11 @@ class _AdminChatConversationScreenState
               children: [
                 IconButton(
                   onPressed: _cancelRecording,
-                  icon: const Icon(Icons.delete_outline, color: Colors.white, size: 26),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.white,
+                    size: 26,
+                  ),
                   tooltip: 'Supprimer',
                 ),
                 Material(
@@ -1672,7 +1723,9 @@ class _AdminChatConversationScreenState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _recordingPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                        _recordingPaused
+                            ? Icons.play_arrow_rounded
+                            : Icons.pause_rounded,
                         color: Colors.white,
                         size: 32,
                       ),

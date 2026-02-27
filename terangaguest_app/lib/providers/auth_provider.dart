@@ -29,7 +29,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final user = await _authService.initAuth();
-      
+
       if (user != null) {
         _user = user;
         _isAuthenticated = true;
@@ -111,7 +111,7 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('❌ Error loading user: $e');
-      
+
       // Si erreur 401, déconnecter
       if (e.toString().contains('Session expirée')) {
         await logout();

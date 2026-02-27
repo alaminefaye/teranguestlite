@@ -42,9 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            value ? l10n.notificationsOn : l10n.notificationsOff,
-          ),
+          content: Text(value ? l10n.notificationsOn : l10n.notificationsOff),
           backgroundColor: AppTheme.primaryBlue,
           behavior: SnackBarBehavior.floating,
         ),
@@ -56,9 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -67,17 +63,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: _loading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
                         ),
                       )
                     : ListView(
                         padding: const EdgeInsets.all(20),
                         children: [
-                          _buildSectionTitle(AppLocalizations.of(context).preferences),
+                          _buildSectionTitle(
+                            AppLocalizations.of(context).preferences,
+                          ),
                           const SizedBox(height: 12),
                           _buildNotificationTile(context),
                           const SizedBox(height: 24),
-                          _buildSectionTitle(AppLocalizations.of(context).application),
+                          _buildSectionTitle(
+                            AppLocalizations.of(context).application,
+                          ),
                           const SizedBox(height: 12),
                           _buildLanguageTile(context),
                         ],
@@ -134,9 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         color: AppTheme.primaryBlue.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -145,10 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Expanded(
             child: Text(
               l10n.notifications,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
           Switch(
@@ -169,10 +166,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final currentLabel = code == 'en'
         ? l10n.english
         : code == 'ar'
-            ? l10n.arabic
-            : code == 'es'
-                ? l10n.spanish
-                : l10n.french;
+        ? l10n.arabic
+        : code == 'es'
+        ? l10n.spanish
+        : l10n.french;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -194,21 +191,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Expanded(
                 child: Text(
                   l10n.language,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
               Text(
                 currentLabel,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textGray,
-                ),
+                style: TextStyle(fontSize: 14, color: AppTheme.textGray),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textGray),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: AppTheme.textGray,
+              ),
             ],
           ),
         ),
@@ -236,28 +231,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text(l10n.french, style: const TextStyle(color: Colors.white)),
+              title: Text(
+                l10n.french,
+                style: const TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 localeProvider.setLocale(const Locale('fr'));
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text(l10n.english, style: const TextStyle(color: Colors.white)),
+              title: Text(
+                l10n.english,
+                style: const TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 localeProvider.setLocale(const Locale('en'));
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text(l10n.arabic, style: const TextStyle(color: Colors.white)),
+              title: Text(
+                l10n.arabic,
+                style: const TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 localeProvider.setLocale(const Locale('ar'));
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text(l10n.spanish, style: const TextStyle(color: Colors.white)),
+              title: Text(
+                l10n.spanish,
+                style: const TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 localeProvider.setLocale(const Locale('es'));
                 Navigator.pop(context);
@@ -268,7 +275,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.close, style: const TextStyle(color: AppTheme.accentGold)),
+            child: Text(
+              l10n.close,
+              style: const TextStyle(color: AppTheme.accentGold),
+            ),
           ),
         ],
       ),

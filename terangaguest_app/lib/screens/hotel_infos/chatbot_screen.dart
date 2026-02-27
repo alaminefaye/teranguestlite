@@ -113,11 +113,14 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       final prevCount = _messages.length;
       final prevLastId = _messages.isNotEmpty ? _messages.last.id : null;
       final newLastId = items.isNotEmpty ? items.last.id : null;
-      final newLastIsFromStaff = items.isNotEmpty && items.last.senderType == 'staff';
+      final newLastIsFromStaff =
+          items.isNotEmpty && items.last.senderType == 'staff';
       if (items.length != prevCount || prevLastId != newLastId) {
-        final hadNewStaffMessage = newLastIsFromStaff && (prevLastId != newLastId);
+        final hadNewStaffMessage =
+            newLastIsFromStaff && (prevLastId != newLastId);
         final newCount = items.length - prevCount;
-        final isNearBottom = _scrollController.hasClients &&
+        final isNearBottom =
+            _scrollController.hasClients &&
             _scrollController.offset >=
                 _scrollController.position.maxScrollExtent - 80;
         setState(() {
@@ -432,15 +435,17 @@ class _ChatbotScreenState extends State<ChatbotScreen>
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      ).then((_) {
-        if (mounted && _unreadCountBelow > 0) {
-          setState(() => _unreadCountBelow = 0);
-        }
-      });
+      _scrollController
+          .animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          )
+          .then((_) {
+            if (mounted && _unreadCountBelow > 0) {
+              setState(() => _unreadCountBelow = 0);
+            }
+          });
     }
   }
 
@@ -488,7 +493,9 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                           Text(
                             l10n.chatbotMultilingual,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -630,7 +637,11 @@ class _ChatbotScreenState extends State<ChatbotScreen>
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primaryDark, size: 24),
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppTheme.primaryDark,
+                size: 24,
+              ),
               const SizedBox(width: 8),
               Text(
                 _unreadCountBelow == 1
@@ -713,7 +724,10 @@ class _ChatbotScreenState extends State<ChatbotScreen>
             children: [
               ListTile(
                 leading: const Icon(Icons.reply, color: AppTheme.accentGold),
-                title: Text(l10n.reply, style: const TextStyle(color: Colors.white)),
+                title: Text(
+                  l10n.reply,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() => _replyingTo = message);
@@ -721,21 +735,39 @@ class _ChatbotScreenState extends State<ChatbotScreen>
               ),
               if (isMe)
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  title: Text(l10n.deleteMessage, style: const TextStyle(color: Colors.white)),
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
+                  title: Text(
+                    l10n.deleteMessage,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                   onTap: () async {
                     Navigator.pop(ctx);
                     try {
                       await _api.deleteMessage(message.id);
                       if (!mounted) return;
                       setState(() {
-                        final i = _messages.indexWhere((m) => m.id == message.id);
-                        if (i >= 0) _messages[i] = message.copyWith(isDeleted: true, content: null);
+                        final i = _messages.indexWhere(
+                          (m) => m.id == message.id,
+                        );
+                        if (i >= 0) {
+                          _messages[i] = message.copyWith(
+                            isDeleted: true,
+                            content: null,
+                          );
+                        }
                       });
                     } catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.redAccent),
+                          SnackBar(
+                            content: Text(
+                              e.toString().replaceAll('Exception: ', ''),
+                            ),
+                            backgroundColor: Colors.redAccent,
+                          ),
                         );
                       }
                     }
@@ -783,7 +815,8 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                 : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (message.replyTo != null) _buildReplyQuote(message.replyTo!, textColor),
+              if (message.replyTo != null)
+                _buildReplyQuote(message.replyTo!, textColor),
               if (senderLabel != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -796,16 +829,16 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                   ),
                 ),
               _buildMessageContent(message, textColor),
-            const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                color: textColor.withValues(alpha: 0.8),
-                fontSize: 12,
+              const SizedBox(height: 4),
+              Text(
+                time,
+                style: TextStyle(
+                  color: textColor.withValues(alpha: 0.8),
+                  fontSize: 12,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -1049,10 +1082,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                   preview.isEmpty ? l10n.messageDeleted : preview,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -1072,7 +1102,10 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_recording) _buildVoiceNoteRecordingBar() else _buildNormalInputRow(context, l10n),
+          if (_recording)
+            _buildVoiceNoteRecordingBar()
+          else
+            _buildNormalInputRow(context, l10n),
         ],
       ),
     );
@@ -1205,7 +1238,11 @@ class _ChatbotScreenState extends State<ChatbotScreen>
               children: [
                 IconButton(
                   onPressed: _cancelRecording,
-                  icon: const Icon(Icons.delete_outline, color: Colors.white, size: 26),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.white,
+                    size: 26,
+                  ),
                   tooltip: 'Supprimer',
                 ),
                 Material(
@@ -1227,7 +1264,9 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _recordingPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                        _recordingPaused
+                            ? Icons.play_arrow_rounded
+                            : Icons.pause_rounded,
                         color: Colors.white,
                         size: 32,
                       ),

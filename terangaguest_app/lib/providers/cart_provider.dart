@@ -8,13 +8,13 @@ import '../services/tablet_session_api.dart';
 class CartProvider with ChangeNotifier {
   final RoomServiceApi _roomServiceApi = RoomServiceApi();
   final TabletSessionApi _tabletApi = TabletSessionApi();
-  
+
   // Liste des articles dans le panier
   final List<CartItem> _items = [];
-  
+
   // Statut de chargement
   bool _isLoading = false;
-  
+
   // Message d'erreur
   String? _errorMessage;
 
@@ -42,7 +42,11 @@ class CartProvider with ChangeNotifier {
   }
 
   // Ajouter un article au panier
-  void addItem(MenuItem menuItem, {int quantity = 1, String? specialInstructions}) {
+  void addItem(
+    MenuItem menuItem, {
+    int quantity = 1,
+    String? specialInstructions,
+  }) {
     // Vérifier si l'article existe déjà dans le panier
     final existingIndex = _items.indexWhere(
       (item) => item.menuItem.id == menuItem.id,
@@ -51,7 +55,7 @@ class CartProvider with ChangeNotifier {
     if (existingIndex >= 0) {
       // L'article existe déjà, augmenter la quantité
       _items[existingIndex].quantity += quantity;
-      
+
       // Mettre à jour les instructions si fournies
       if (specialInstructions != null && specialInstructions.isNotEmpty) {
         _items[existingIndex].specialInstructions = specialInstructions;
@@ -78,9 +82,7 @@ class CartProvider with ChangeNotifier {
 
   // Augmenter la quantité d'un article
   void incrementQuantity(int menuItemId) {
-    final index = _items.indexWhere(
-      (item) => item.menuItem.id == menuItemId,
-    );
+    final index = _items.indexWhere((item) => item.menuItem.id == menuItemId);
 
     if (index >= 0) {
       _items[index].quantity++;
@@ -90,9 +92,7 @@ class CartProvider with ChangeNotifier {
 
   // Diminuer la quantité d'un article
   void decrementQuantity(int menuItemId) {
-    final index = _items.indexWhere(
-      (item) => item.menuItem.id == menuItemId,
-    );
+    final index = _items.indexWhere((item) => item.menuItem.id == menuItemId);
 
     if (index >= 0) {
       if (_items[index].quantity > 1) {
@@ -112,9 +112,7 @@ class CartProvider with ChangeNotifier {
       return;
     }
 
-    final index = _items.indexWhere(
-      (item) => item.menuItem.id == menuItemId,
-    );
+    final index = _items.indexWhere((item) => item.menuItem.id == menuItemId);
 
     if (index >= 0) {
       _items[index].quantity = newQuantity;
@@ -124,9 +122,7 @@ class CartProvider with ChangeNotifier {
 
   // Mettre à jour les instructions spéciales d'un article
   void updateSpecialInstructions(int menuItemId, String? instructions) {
-    final index = _items.indexWhere(
-      (item) => item.menuItem.id == menuItemId,
-    );
+    final index = _items.indexWhere((item) => item.menuItem.id == menuItemId);
 
     if (index >= 0) {
       _items[index].specialInstructions = instructions;
@@ -213,9 +209,7 @@ class CartProvider with ChangeNotifier {
   // Obtenir un article du panier par ID
   CartItem? getItem(int menuItemId) {
     try {
-      return _items.firstWhere(
-        (item) => item.menuItem.id == menuItemId,
-      );
+      return _items.firstWhere((item) => item.menuItem.id == menuItemId);
     } catch (e) {
       return null;
     }

@@ -14,10 +14,7 @@ import 'leisure_request_screen.dart';
 /// Liste des activités d'une catégorie principale (Sport ou Loisirs).
 /// Données dynamiques : enfants de la catégorie principale.
 class LeisureSubListScreen extends StatelessWidget {
-  const LeisureSubListScreen({
-    super.key,
-    required this.mainCategory,
-  });
+  const LeisureSubListScreen({super.key, required this.mainCategory});
 
   final LeisureMainCategoryDto mainCategory;
 
@@ -40,18 +37,42 @@ class LeisureSubListScreen extends StatelessWidget {
 
   static IconData _iconForOtherByName(String name) {
     final n = name.toLowerCase();
-    if (n.contains('squash')) return Icons.sports_tennis_outlined;
-    if (n.contains('piscine') || n.contains('pool')) return Icons.pool_outlined;
-    if (n.contains('yoga') || n.contains('pilates')) return Icons.self_improvement_outlined;
-    if (n.contains('aquagym') || n.contains('natation')) return Icons.pool_outlined;
-    if (n.contains('running')) return Icons.directions_run_outlined;
-    if (n.contains('vtt') || n.contains('vélo')) return Icons.directions_bike_outlined;
-    if (n.contains('beach') || n.contains('volley')) return Icons.sports_volleyball_outlined;
-    if (n.contains('cours collectifs') || n.contains('groupe')) return Icons.groups_outlined;
-    if (n.contains('hammam') || n.contains('sauna')) return Icons.thermostat_outlined;
-    if (n.contains('excursion') || n.contains('découverte')) return Icons.explore_outlined;
-    if (n.contains('foot') || n.contains('football')) return Icons.sports_soccer_outlined;
-    if (n.contains('basket')) return Icons.sports_basketball_outlined;
+    if (n.contains('squash')) {
+      return Icons.sports_tennis_outlined;
+    }
+    if (n.contains('piscine') || n.contains('pool')) {
+      return Icons.pool_outlined;
+    }
+    if (n.contains('yoga') || n.contains('pilates')) {
+      return Icons.self_improvement_outlined;
+    }
+    if (n.contains('aquagym') || n.contains('natation')) {
+      return Icons.pool_outlined;
+    }
+    if (n.contains('running')) {
+      return Icons.directions_run_outlined;
+    }
+    if (n.contains('vtt') || n.contains('vélo')) {
+      return Icons.directions_bike_outlined;
+    }
+    if (n.contains('beach') || n.contains('volley')) {
+      return Icons.sports_volleyball_outlined;
+    }
+    if (n.contains('cours collectifs') || n.contains('groupe')) {
+      return Icons.groups_outlined;
+    }
+    if (n.contains('hammam') || n.contains('sauna')) {
+      return Icons.thermostat_outlined;
+    }
+    if (n.contains('excursion') || n.contains('découverte')) {
+      return Icons.explore_outlined;
+    }
+    if (n.contains('foot') || n.contains('football')) {
+      return Icons.sports_soccer_outlined;
+    }
+    if (n.contains('basket')) {
+      return Icons.sports_basketball_outlined;
+    }
     return Icons.directions_run_outlined;
   }
 
@@ -80,9 +101,7 @@ class LeisureSubListScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -106,12 +125,13 @@ class LeisureSubListScreen extends StatelessWidget {
                         padding: LayoutHelper.horizontalPadding(context),
                         child: GridView.builder(
                           padding: EdgeInsets.symmetric(vertical: spacing),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: spacing,
-                            mainAxisSpacing: spacing,
-                            childAspectRatio: aspectRatio,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
                           itemCount: children.length,
                           itemBuilder: (context, index) {
                             final child = children[index];

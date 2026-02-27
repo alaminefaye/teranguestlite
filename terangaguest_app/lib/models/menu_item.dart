@@ -28,7 +28,8 @@ class MenuItem {
       name: json['name'] as String,
       description: json['description'] as String?,
       price: _parsePrice(json['price']),
-      formattedPrice: json['formatted_price'] as String? ?? '${json['price']} FCFA',
+      formattedPrice:
+          json['formatted_price'] as String? ?? '${json['price']} FCFA',
       image: json['image'] as String?,
       preparationTime: json['preparation_time'] as int? ?? 0,
       isAvailable: json['is_available'] as bool? ?? true,
@@ -67,10 +68,7 @@ class MenuItemCategory {
   final int id;
   final String name;
 
-  MenuItemCategory({
-    required this.id,
-    required this.name,
-  });
+  MenuItemCategory({required this.id, required this.name});
 
   factory MenuItemCategory.fromJson(Map<String, dynamic> json) {
     return MenuItemCategory(
@@ -80,9 +78,6 @@ class MenuItemCategory {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    return {'id': id, 'name': name};
   }
 }

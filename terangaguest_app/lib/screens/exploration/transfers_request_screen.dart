@@ -156,7 +156,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                           Text(
                             l10n.transfersVtcTitle,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -178,7 +180,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -189,7 +193,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         child: TextField(
                           controller: _pickupController,
                           style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration(hint: 'Ex: Aéroport, Hôtel…'),
+                          decoration: _inputDecoration(
+                            hint: 'Ex: Aéroport, Hôtel…',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -198,7 +204,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                         child: TextField(
                           controller: _destinationController,
                           style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration(hint: 'Ex: Centre-ville, Adresse…'),
+                          decoration: _inputDecoration(
+                            hint: 'Ex: Centre-ville, Adresse…',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -236,7 +244,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                             decoration: _inputDecoration(),
                             child: Text(
                               _requestedFor != null
-                                  ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!)
+                                  ? DateFormat(
+                                      'dd/MM/yyyy HH:mm',
+                                    ).format(_requestedFor!)
                                   : '—',
                               style: TextStyle(
                                 color: _requestedFor != null
@@ -255,7 +265,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                           controller: _detailsController,
                           maxLines: 2,
                           style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration(hint: l10n.describeRequest),
+                          decoration: _inputDecoration(
+                            hint: l10n.describeRequest,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -305,7 +317,9 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+        borderSide: BorderSide(
+          color: AppTheme.accentGold.withValues(alpha: 0.3),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -314,10 +328,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
     );
   }
 
-  Widget _buildField({
-    required String label,
-    required Widget child,
-  }) {
+  Widget _buildField({required String label, required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

@@ -13,7 +13,8 @@ class GuidedToursRequestScreen extends StatefulWidget {
   const GuidedToursRequestScreen({super.key});
 
   @override
-  State<GuidedToursRequestScreen> createState() => _GuidedToursRequestScreenState();
+  State<GuidedToursRequestScreen> createState() =>
+      _GuidedToursRequestScreenState();
 }
 
 class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
@@ -66,7 +67,10 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: isError ? Colors.red : AppTheme.accentGold),
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red : AppTheme.accentGold,
+      ),
     );
   }
 
@@ -86,11 +90,13 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
         'guests_count': int.tryParse(_guestsController.text.trim()) ?? 1,
       };
       await context.read<PalaceProvider>().createPalaceRequest(
-            serviceId: _serviceId!,
-            details: _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim(),
-            scheduledTime: _requestedFor,
-            metadata: metadata,
-          );
+        serviceId: _serviceId!,
+        details: _detailsController.text.trim().isEmpty
+            ? null
+            : _detailsController.text.trim(),
+        scheduledTime: _requestedFor,
+        metadata: metadata,
+      );
       if (mounted) {
         _showSnack(l10n.requestSentMessage);
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -123,7 +129,10 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 12),
@@ -135,7 +144,9 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                           Text(
                             l10n.guidedToursTitle,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -143,7 +154,10 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                           const SizedBox(height: 4),
                           Text(
                             l10n.guidedToursSubtitle,
-                            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -154,7 +168,9 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 16
+                        : 60,
                     vertical: 20,
                   ),
                   child: Column(
@@ -170,9 +186,7 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                           controller: _guestsController,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration(
-                            hint: 'Ex: 4',
-                          ),
+                          decoration: _inputDecoration(hint: 'Ex: 4'),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -190,7 +204,10 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                       if (_serviceId == null) ...[
                         const SizedBox(height: 16),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.orange.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
@@ -199,12 +216,19 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.info_outline, color: Colors.orange, size: 22),
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.orange,
+                                size: 22,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   'Visites guidées non configurées. L\'établissement doit ajouter le service « Visites guidées personnalisées » dans le tableau de bord (Services Palace).',
-                                  style: TextStyle(color: Colors.orange.shade100, fontSize: 13),
+                                  style: TextStyle(
+                                    color: Colors.orange.shade100,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -213,12 +237,22 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                       ],
                       const SizedBox(height: 24),
                       FilledButton.icon(
-                        onPressed: _sending ? null : () { HapticHelper.lightImpact(); _submit(); },
+                        onPressed: _sending
+                            ? null
+                            : () {
+                                HapticHelper.lightImpact();
+                                _submit();
+                              },
                         icon: _sending
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.black54)),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.black54,
+                                  ),
+                                ),
                               )
                             : const Icon(Icons.send_outlined, size: 20),
                         label: Text(_sending ? '...' : l10n.sendRequest),
@@ -248,7 +282,9 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+        borderSide: BorderSide(
+          color: AppTheme.accentGold.withValues(alpha: 0.3),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -295,15 +331,28 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
           lastDate: DateTime.now().add(const Duration(days: 365)),
         );
         if (date == null || !mounted) return;
-        final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+        final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
         if (time == null || !mounted) return;
-        setState(() => _requestedFor = DateTime(date.year, date.month, date.day, time.hour, time.minute));
+        setState(
+          () => _requestedFor = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            time.hour,
+            time.minute,
+          ),
+        );
       },
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: _inputDecoration(),
         child: Text(
-          _requestedFor != null ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!) : '—',
+          _requestedFor != null
+              ? DateFormat('dd/MM/yyyy HH:mm').format(_requestedFor!)
+              : '—',
           style: TextStyle(
             color: _requestedFor != null ? Colors.white : AppTheme.textGray,
             fontSize: 16,
@@ -329,8 +378,12 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
           selected: selected,
           onSelected: (v) => setState(() => _tourType = t.$1),
           selectedColor: AppTheme.accentGold.withValues(alpha: 0.3),
-          side: BorderSide(color: AppTheme.accentGold.withValues(alpha: selected ? 1 : 0.5)),
-          labelStyle: TextStyle(color: selected ? AppTheme.accentGold : Colors.white70),
+          side: BorderSide(
+            color: AppTheme.accentGold.withValues(alpha: selected ? 1 : 0.5),
+          ),
+          labelStyle: TextStyle(
+            color: selected ? AppTheme.accentGold : Colors.white70,
+          ),
         );
       }).toList(),
     );

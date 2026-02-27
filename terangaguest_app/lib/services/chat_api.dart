@@ -38,10 +38,7 @@ class ChatApi {
     try {
       final payload = <String, dynamic>{'content': content};
       if (replyToId != null) payload['reply_to_id'] = replyToId;
-      final response = await _api.post(
-        '/chat/messages',
-        data: payload,
-      );
+      final response = await _api.post('/chat/messages', data: payload);
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {
         throw Exception(
@@ -221,7 +218,8 @@ class ChatApi {
       final data = response.data as Map<String, dynamic>;
       if (data['success'] != true) {
         throw Exception(
-          data['message'] ?? 'Erreur lors de la suppression de la conversation.',
+          data['message'] ??
+              'Erreur lors de la suppression de la conversation.',
         );
       }
     } on DioException catch (e) {
@@ -235,7 +233,9 @@ class ChatApi {
             : 'Impossible de se connecter au serveur.',
       );
     } catch (_) {
-      throw Exception('Erreur inattendue lors de la suppression de la conversation.');
+      throw Exception(
+        'Erreur inattendue lors de la suppression de la conversation.',
+      );
     }
   }
 
@@ -249,7 +249,9 @@ class ChatApi {
       }
     } on DioException catch (e) {
       final body = e.response?.data;
-      final msg = body is Map && body['message'] is String ? body['message'] as String : null;
+      final msg = body is Map && body['message'] is String
+          ? body['message'] as String
+          : null;
       throw Exception(msg ?? 'Impossible de supprimer le message.');
     }
   }
@@ -266,7 +268,9 @@ class ChatApi {
       }
     } on DioException catch (e) {
       final body = e.response?.data;
-      final msg = body is Map && body['message'] is String ? body['message'] as String : null;
+      final msg = body is Map && body['message'] is String
+          ? body['message'] as String
+          : null;
       throw Exception(msg ?? 'Impossible de supprimer le message.');
     }
   }

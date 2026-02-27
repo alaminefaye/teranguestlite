@@ -54,7 +54,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               const Icon(Icons.check_circle, color: Colors.white),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(AppLocalizations.of(context).passwordChangedSuccess),
+                child: Text(
+                  AppLocalizations.of(context).passwordChangedSuccess,
+                ),
               ),
             ],
           ),
@@ -69,7 +71,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       // Erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context).error),
+          content: Text(
+            authProvider.errorMessage ?? AppLocalizations.of(context).error,
+          ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -81,9 +85,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -110,7 +112,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           obscure: _obscureCurrentPassword,
                           onToggleVisibility: () {
                             setState(() {
-                              _obscureCurrentPassword = !_obscureCurrentPassword;
+                              _obscureCurrentPassword =
+                                  !_obscureCurrentPassword;
                             });
                           },
                           validator: (value) {
@@ -157,7 +160,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           obscure: _obscureConfirmPassword,
                           onToggleVisibility: () {
                             setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
                             });
                           },
                           validator: (value) {
@@ -165,7 +169,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               return AppLocalizations.of(context).fieldRequired;
                             }
                             if (value != _newPasswordController.text) {
-                              return AppLocalizations.of(context).passwordsDoNotMatch;
+                              return AppLocalizations.of(
+                                context,
+                              ).passwordsDoNotMatch;
                             }
                             return null;
                           },
@@ -215,9 +221,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       decoration: BoxDecoration(
         color: AppTheme.accentGold.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.accentGold.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -276,23 +280,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppTheme.accentGold,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppTheme.accentGold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.red,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
       ),
       validator: validator,

@@ -13,7 +13,9 @@ class LeisureApi {
       final response = await _apiService.get(ApiConfig.leisureCategories);
       final list = response.data['data'] as List? ?? [];
       return list
-          .map((e) => LeisureMainCategoryDto.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => LeisureMainCategoryDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       debugPrint('❌ LeisureApi Error: $e');

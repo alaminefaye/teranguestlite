@@ -293,10 +293,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
     // Ne jamais afficher le popup à l'expéditeur : seul le destinataire le voit.
     // Client envoie → notif aux staff uniquement. Staff envoie → notif au client uniquement.
     if (senderType != null) {
-      if (isStaffOrAdmin && senderType == 'staff')
+      if (isStaffOrAdmin && senderType == 'staff') {
         return; // Message du staff → je suis le staff, c'est mon envoi
-      if (!isStaffOrAdmin && senderType == 'guest')
+      }
+      if (!isStaffOrAdmin && senderType == 'guest') {
         return; // Message du client → je suis le client, c'est mon envoi
+      }
     } else {
       // Payload incomplet (sender_type manquant) : ne pas afficher pour éviter d'afficher à l'expéditeur.
       return;

@@ -61,7 +61,9 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                           Text(
                             AppLocalizations.of(context).palaceServices,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),

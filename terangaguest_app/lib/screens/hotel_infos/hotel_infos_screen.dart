@@ -29,7 +29,9 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final session = context.read<TabletSessionProvider>().session;
-    if (session != null && session.roomId != _lastFetchedRoomId && !_loadingTablet) {
+    if (session != null &&
+        session.roomId != _lastFetchedRoomId &&
+        !_loadingTablet) {
       _loadTabletInfos(session);
     }
   }
@@ -65,7 +67,8 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final tabletSession = context.watch<TabletSessionProvider>();
-    final hasSession = tabletSession.hasSession && tabletSession.session != null;
+    final hasSession =
+        tabletSession.hasSession && tabletSession.session != null;
 
     // En session tablette : utiliser les infos de la chambre (API)
     HotelInfos? infos;
@@ -100,7 +103,10 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -115,7 +121,9 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                           Text(
                             l10n.hotelInfos,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -123,7 +131,10 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                           const SizedBox(height: 4),
                           Text(
                             l10n.hotelInfosDesc,
-                            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textGray,
+                            ),
                           ),
                         ],
                       ),
@@ -131,9 +142,7 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: _buildContent(context, l10n, infos),
-              ),
+              Expanded(child: _buildContent(context, l10n, infos)),
             ],
           ),
         ),
@@ -141,13 +150,18 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context, AppLocalizations l10n, HotelInfos? infos) {
+  Widget _buildContent(
+    BuildContext context,
+    AppLocalizations l10n,
+    HotelInfos? infos,
+  ) {
     if (_loadingTablet) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.accentGold),
       );
     }
-    if (_tabletError != null && context.watch<TabletSessionProvider>().hasSession) {
+    if (_tabletError != null &&
+        context.watch<TabletSessionProvider>().hasSession) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -165,7 +179,10 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                   final session = context.read<TabletSessionProvider>().session;
                   if (session != null) _loadTabletInfos(session);
                 },
-                child: const Text('Réessayer', style: TextStyle(color: AppTheme.accentGold)),
+                child: const Text(
+                  'Réessayer',
+                  style: TextStyle(color: AppTheme.accentGold),
+                ),
               ),
             ],
           ),
@@ -179,16 +196,12 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
         children: [
           if (infos != null) ...[
             if (infos.wifiNetwork.isNotEmpty || infos.wifiPassword.isNotEmpty)
-              _section(
-                context,
-                l10n.wifiCode,
-                [
-                  if (infos.wifiNetwork.isNotEmpty)
-                    _row(l10n.wifiCode, infos.wifiNetwork),
-                  if (infos.wifiPassword.isNotEmpty)
-                    _row(l10n.wifiPassword, infos.wifiPassword),
-                ],
-              ),
+              _section(context, l10n.wifiCode, [
+                if (infos.wifiNetwork.isNotEmpty)
+                  _row(l10n.wifiCode, infos.wifiNetwork),
+                if (infos.wifiPassword.isNotEmpty)
+                  _row(l10n.wifiPassword, infos.wifiPassword),
+              ]),
             if (infos.houseRules.trim().isNotEmpty)
               _section(context, l10n.houseRules, [
                 Padding(
@@ -204,36 +217,30 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                 ),
               ]),
             if (infos.mapUrl != null && infos.mapUrl!.isNotEmpty)
-              _section(
-                context,
-                'Plan',
-                [
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      infos.mapUrl!,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                      loadingBuilder: (context, child, progress) =>
-                          progress == null
-                              ? child
-                              : const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppTheme.accentGold,
-                                  ),
-                                ),
-                      errorBuilder:
-                          (context, error, stackTrace) =>
-                              const Icon(
-                                Icons.map_outlined,
-                                color: AppTheme.textGray,
-                                size: 48,
-                              ),
+              _section(context, 'Plan', [
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    infos.mapUrl!,
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    loadingBuilder: (context, child, progress) =>
+                        progress == null
+                        ? child
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.map_outlined,
+                      color: AppTheme.textGray,
+                      size: 48,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ]),
             if (infos.practicalInfo.trim().isNotEmpty)
               _section(context, l10n.practicalInfo, [
                 Padding(
@@ -258,7 +265,10 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Text(
                     l10n.comingSoon,
-                    style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                    style: const TextStyle(
+                      color: AppTheme.textGray,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
@@ -268,7 +278,10 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Text(
                   l10n.comingSoon,
-                  style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+                  style: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
@@ -321,7 +334,11 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],

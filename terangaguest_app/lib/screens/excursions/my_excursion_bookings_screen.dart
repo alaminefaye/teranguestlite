@@ -708,7 +708,9 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0),
+                padding: EdgeInsets.all(
+                  MediaQuery.sizeOf(context).width < 600 ? 12.0 : 20.0,
+                ),
                 child: Row(
                   children: [
                     IconButton(
@@ -718,7 +720,9 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    SizedBox(width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width < 600 ? 8 : 12,
+                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,7 +731,9 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                           Text(
                             booking.excursionName,
                             style: TextStyle(
-                              fontSize: MediaQuery.sizeOf(context).width < 600 ? 20.0 : 24.0,
+                              fontSize: MediaQuery.sizeOf(context).width < 600
+                                  ? 20.0
+                                  : 24.0,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -1039,7 +1045,10 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
           backgroundColor: AppTheme.primaryBlue,
-          title: Text(title, style: const TextStyle(color: AppTheme.accentGold)),
+          title: Text(
+            title,
+            style: const TextStyle(color: AppTheme.accentGold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

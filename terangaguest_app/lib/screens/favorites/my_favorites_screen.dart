@@ -66,9 +66,7 @@ class _MyFavoritesScreenState extends State<MyFavoritesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -79,7 +77,9 @@ class _MyFavoritesScreenState extends State<MyFavoritesScreen> {
                     if (!provider.isLoaded) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentGold,
+                          ),
                         ),
                       );
                     }
@@ -135,7 +135,11 @@ class _MyFavoritesScreenState extends State<MyFavoritesScreen> {
     );
   }
 
-  Widget _buildFavoriteTile(BuildContext context, FavoriteItem fav, FavoritesProvider provider) {
+  Widget _buildFavoriteTile(
+    BuildContext context,
+    FavoriteItem fav,
+    FavoritesProvider provider,
+  ) {
     final IconData icon;
     switch (fav.type) {
       case FavoriteType.menuItem:
@@ -163,7 +167,9 @@ class _MyFavoritesScreenState extends State<MyFavoritesScreen> {
             decoration: BoxDecoration(
               color: AppTheme.primaryBlue.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppTheme.accentGold.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
@@ -176,7 +182,8 @@ class _MyFavoritesScreenState extends State<MyFavoritesScreen> {
                           height: 56,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => _placeholder(56, icon),
-                          errorWidget: (context, url, error) => _placeholder(56, icon),
+                          errorWidget: (context, url, error) =>
+                              _placeholder(56, icon),
                         )
                       : _placeholder(56, icon),
                 ),
