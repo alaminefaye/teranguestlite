@@ -191,36 +191,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get explorationMobility => 'EXPLORATION & MOBILITY';
 
   @override
-  String get explorationMobilitySubtitle =>
-      'Vehicle rental, discovery, guided tours and transfers';
+  String get explorationMobilitySubtitle => 'Vehicle rental, discovery, guided tours and transfers';
 
   @override
   String get vehicleRental => 'Vehicle Rental';
 
   @override
-  String get vehicleRentalDesc =>
-      'Interactive catalog of vehicles (sedans, 4x4, city cars) with direct booking and comfort options.';
+  String get vehicleRentalDesc => 'Interactive catalog of vehicles (sedans, 4x4, city cars) with direct booking and comfort options.';
 
   @override
   String get sitesTouristiques => 'Discovery & Tourist Sites';
 
   @override
-  String get sitesTouristiquesDesc =>
-      'Must-see places: Lac Rose, Gorée Island, Plateau… Photos and detailed descriptions.';
+  String get sitesTouristiquesDesc => 'Must-see places: Lac Rose, Gorée Island, Plateau… Photos and detailed descriptions.';
 
   @override
   String get guidedTours => 'Personalized Guided Tours';
 
   @override
-  String get guidedToursDesc =>
-      'Book certified guides for cultural, gastronomic or historical tours.';
+  String get guidedToursDesc => 'Book certified guides for cultural, gastronomic or historical tours.';
 
   @override
   String get transfersVtc => 'Transfers & Chauffeur';
 
   @override
-  String get transfersVtcDesc =>
-      'Airport shuttles or private drivers for secure trips.';
+  String get transfersVtcDesc => 'Airport shuttles or private drivers for secure trips.';
 
   @override
   String get excursions => 'Excursions';
@@ -238,8 +233,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotelInfosSecurity => 'HOTEL INFOS & SECURITY';
 
   @override
-  String get hotelInfosSecuritySubtitle =>
-      'Welcome booklet, emergency assistance and chatbot';
+  String get hotelInfosSecuritySubtitle => 'Welcome booklet, emergency assistance and chatbot';
 
   @override
   String get hotelInfos => 'Hotel Infos';
@@ -251,8 +245,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistanceEmergency => 'Assistance & Emergency';
 
   @override
-  String get assistanceEmergencyDesc =>
-      'Request a doctor or report a security emergency (room identified)';
+  String get assistanceEmergencyDesc => 'Request a doctor or report a security emergency (room identified)';
 
   @override
   String get chatbotMultilingual => 'Multilingual AI Chatbot';
@@ -285,16 +278,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyRequestSent => 'Request sent. The team will contact you.';
 
   @override
-  String get noActiveStayForEmergency =>
-      'An active stay is required. Sign in with the room account or contact reception.';
+  String get noActiveStayForEmergency => 'An active stay is required. Sign in with the room account or contact reception.';
 
   @override
-  String get assistanceDoctorNotConfigured =>
-      'Doctor assistance service is not configured for this property.';
+  String get assistanceDoctorNotConfigured => 'Doctor assistance service is not configured for this property.';
 
   @override
-  String get assistanceSecurityNotConfigured =>
-      'Security emergency service is not configured for this property.';
+  String get assistanceSecurityNotConfigured => 'Security emergency service is not configured for this property.';
 
   @override
   String confirmEmergencyAction(String action) {
@@ -320,8 +310,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatbotComingSoon => 'Coming soon';
 
   @override
-  String get chatbotComingSoonHint =>
-      'The multilingual chatbot will be available soon.';
+  String get chatbotComingSoonHint => 'The multilingual chatbot will be available soon.';
 
   @override
   String get servicesChambreLogistique => 'ROOM & LOGISTICS SERVICES';
@@ -330,26 +319,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roomServiceRestauration => 'Room Service & Dining';
 
   @override
-  String get roomServiceRestaurationDesc =>
-      'High-definition digital menu to order meals and drinks with real-time preparation tracking.';
+  String get roomServiceRestaurationDesc => 'High-definition digital menu to order meals and drinks with real-time preparation tracking.';
 
   @override
-  String get laundryDesc =>
-      'Interactive price list and immediate laundry pickup request.';
+  String get laundryDesc => 'Interactive price list and immediate laundry pickup request.';
 
   @override
   String get amenitiesConcierge => 'Amenities & Concierge';
 
   @override
-  String get amenitiesConciergeDesc =>
-      'Simplified request for toiletries, extra pillows, shaving kit or any other service without calling.';
+  String get amenitiesConciergeDesc => 'Simplified request for toiletries, extra pillows, shaving kit or any other service without calling.';
 
   @override
   String get minibarIntelligent => 'Smart Mini-bar';
 
   @override
-  String get minibarIntelligentDesc =>
-      'Digital inventory of products and simplified consumption declaration.';
+  String get minibarIntelligentDesc => 'Digital inventory of products and simplified consumption declaration.';
 
   @override
   String get comingSoon => 'Coming soon';
@@ -436,8 +421,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noFavorites => 'No favorites';
 
   @override
-  String get noFavoritesHint =>
-      'Add items, restaurants, treatments or excursions to favorites from their pages.';
+  String get noFavoritesHint => 'Add items, restaurants, treatments or excursions to favorites from their pages.';
 
   @override
   String get contactSupportTitle => 'Contact support';
@@ -446,8 +430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseContact => 'Choose a contact method:';
 
   @override
-  String get aboutDescription =>
-      'Welcome and services app for King Fahd Palace Hotel guests.';
+  String get aboutDescription => 'Welcome and services app for King Fahd Palace Hotel guests.';
 
   @override
   String get hotelName => 'KING FAHD PALACE HOTEL';
@@ -495,29 +478,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get excursionNotFound => 'Excursion not found';
 
   @override
-  String get excursionNotFoundHint =>
-      'This excursion does not exist or is no longer available.';
+  String get excursionNotFoundHint => 'This excursion does not exist or is no longer available.';
 
   @override
   String get serviceNotFound => 'Service not found';
 
   @override
-  String get serviceNotFoundHint =>
-      'This service does not exist or is no longer available.';
+  String get serviceNotFoundHint => 'This service does not exist or is no longer available.';
 
   @override
   String get restaurantNotFound => 'Restaurant not found';
 
   @override
-  String get restaurantNotFoundHint =>
-      'This restaurant does not exist or is no longer available.';
+  String get restaurantNotFoundHint => 'This restaurant does not exist or is no longer available.';
 
   @override
   String get orderNotFound => 'Order not found';
 
   @override
-  String get orderNotFoundHint =>
-      'This order does not exist or has been removed.';
+  String get orderNotFoundHint => 'This order does not exist or has been removed.';
 
   @override
   String get noLaundryService => 'No laundry service available';
@@ -532,8 +511,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSpaServiceInCategory => 'No service in this category';
 
   @override
-  String get noSpaServiceHint =>
-      'Treatments and massages will be offered here.';
+  String get noSpaServiceHint => 'Treatments and massages will be offered here.';
 
   @override
   String get noPalaceService => 'No Palace service available';
@@ -545,8 +523,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noExcursionAvailable => 'No excursion available';
 
   @override
-  String get noExcursionAvailableHint =>
-      'Activities and outings will be offered here.';
+  String get noExcursionAvailableHint => 'Activities and outings will be offered here.';
 
   @override
   String get noOrder => 'No orders';
@@ -583,8 +560,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noRestaurantSubtitle =>
-      'Restaurants and bars will be listed here.';
+  String get noRestaurantSubtitle => 'Restaurants and bars will be listed here.';
 
   @override
   String get typeRestaurant => 'restaurant';
@@ -626,29 +602,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLaundryRequest => 'No laundry request';
 
   @override
-  String get noLaundryRequestHint =>
-      'Submit a request from the Laundry service.';
+  String get noLaundryRequestHint => 'Submit a request from the Laundry service.';
 
   @override
   String get noExcursionBooked => 'No excursion booked';
 
   @override
-  String get noExcursionBookedHint =>
-      'Book an excursion from the activities list.';
+  String get noExcursionBookedHint => 'Book an excursion from the activities list.';
 
   @override
   String get noSpaReservation => 'No spa reservation';
 
   @override
-  String get noSpaReservationHint =>
-      'Book a treatment from the spa services list.';
+  String get noSpaReservationHint => 'Book a treatment from the spa services list.';
 
   @override
   String get noRestaurantReservation => 'No restaurant reservation';
 
   @override
-  String get noRestaurantReservationHint =>
-      'Book a table from the restaurants list.';
+  String get noRestaurantReservationHint => 'Book a table from the restaurants list.';
 
   @override
   String get itemNotFound => 'Item not found';
@@ -776,8 +748,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specialInstructions => 'Special instructions';
 
   @override
-  String get specialInstructionsHint =>
-      'Allergies, preferences, delivery instructions...';
+  String get specialInstructionsHint => 'Allergies, preferences, delivery instructions...';
 
   @override
   String get description => 'Description';
@@ -816,8 +787,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordsDoNotMatch => 'Passwords do not match';
 
   @override
-  String get passwordRulesHint =>
-      'The new password must contain at least 8 characters, one uppercase letter and one number.';
+  String get passwordRulesHint => 'The new password must contain at least 8 characters, one uppercase letter and one number.';
 
   @override
   String get requestDetails => 'Request details';
@@ -835,8 +805,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendRequest => 'Send request';
 
   @override
-  String get requestReservationHint =>
-      'Enter date, time and details in the form.';
+  String get requestReservationHint => 'Enter date, time and details in the form.';
 
   @override
   String get requestSent => 'Request sent!';
@@ -857,8 +826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specialInstructionsOptional => 'Special instructions (optional)';
 
   @override
-  String get laundryInstructionsExample =>
-      'E.g. Fragrance-free detergent, light ironing...';
+  String get laundryInstructionsExample => 'E.g. Fragrance-free detergent, light ironing...';
 
   @override
   String get date => 'Date';
@@ -893,8 +861,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get confirmationNotification =>
-      'You will receive a confirmation by notification.';
+  String get confirmationNotification => 'You will receive a confirmation by notification.';
 
   @override
   String get numberOfGuests => 'Number of guests';
@@ -932,8 +899,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reorder => 'Reorder';
 
   @override
-  String get laundryRequestSentMessage =>
-      'Your laundry request has been recorded.';
+  String get laundryRequestSentMessage => 'Your laundry request has been recorded.';
 
   @override
   String get demand => 'Request';
@@ -995,8 +961,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allergiesPreferencesExample => 'E.g. Allergies, preferences...';
 
   @override
-  String get orderConfirmedMessage =>
-      'Your order has been successfully recorded';
+  String get orderConfirmedMessage => 'Your order has been successfully recorded';
 
   @override
   String get orderNumberLabel => 'Order no.';
@@ -1038,8 +1003,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myCart => 'My Cart';
 
   @override
-  String get orderNotificationHint =>
-      'You will receive a notification once your order is confirmed by the restaurant.';
+  String get orderNotificationHint => 'You will receive a notification once your order is confirmed by the restaurant.';
 
   @override
   String spaReservationConfirmedMessage(String name) {
@@ -1112,15 +1076,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleRentalTitle => 'Vehicle Rental';
 
   @override
-  String get vehicleRentalSubtitle =>
-      'Choose a vehicle and submit your rental request.';
+  String get vehicleRentalSubtitle => 'Choose a vehicle and submit your rental request.';
 
   @override
   String get noVehicleAvailable => 'No vehicles available';
 
   @override
-  String get noVehicleAvailableHint =>
-      'Vehicles will soon be offered by the establishment.';
+  String get noVehicleAvailableHint => 'Vehicles will soon be offered by the establishment.';
 
   @override
   String get requestVehicleRental => 'Request this rental';
@@ -1141,8 +1103,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guidedToursTitle => 'Personalized Guided Tours';
 
   @override
-  String get guidedToursSubtitle =>
-      'Enter date, tour type and number of people.';
+  String get guidedToursSubtitle => 'Enter date, tour type and number of people.';
 
   @override
   String get tourType => 'Tour type';
@@ -1160,8 +1121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transfersVtcTitle => 'Transfers & Chauffeur';
 
   @override
-  String get transfersVtcSubtitle =>
-      'Airport shuttle or private driver. Enter pickup and destination.';
+  String get transfersVtcSubtitle => 'Airport shuttle or private driver. Enter pickup and destination.';
 
   @override
   String get pickupPlace => 'Pickup location';
@@ -1173,8 +1133,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sitesTouristiquesTitle => 'Discovery & Tourist Sites';
 
   @override
-  String get sitesTouristiquesSubtitle =>
-      'Showcase of must-see places with photos and descriptions.';
+  String get sitesTouristiquesSubtitle => 'Showcase of must-see places with photos and descriptions.';
 
   @override
   String get filterVehicleType => 'Type';
