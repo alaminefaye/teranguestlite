@@ -600,8 +600,9 @@ class OrderController extends Controller
         ];
 
         try {
-            app(FirebaseNotificationService::class)->sendToRoomServiceDepartmentStaff(
+            app(FirebaseNotificationService::class)->sendToStaffForSection(
                 $order->enterprise_id,
+                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
                 $title,
                 $body,
                 $data

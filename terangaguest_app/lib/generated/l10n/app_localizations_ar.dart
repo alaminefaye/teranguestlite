@@ -191,31 +191,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get explorationMobility => 'EXPLORATION & MOBILITÉ';
 
   @override
-  String get explorationMobilitySubtitle => 'Location véhicule, découverte, visites guidées et transferts';
+  String get explorationMobilitySubtitle =>
+      'Location véhicule, découverte, visites guidées et transferts';
 
   @override
   String get vehicleRental => 'Location de Véhicule';
 
   @override
-  String get vehicleRentalDesc => 'Catalogue de véhicules (berlines, 4x4, citadines) avec réservation et options de confort.';
+  String get vehicleRentalDesc =>
+      'Catalogue de véhicules (berlines, 4x4, citadines) avec réservation et options de confort.';
 
   @override
   String get sitesTouristiques => 'Découverte & Sites Touristiques';
 
   @override
-  String get sitesTouristiquesDesc => 'Lieux incontournables : Lac Rose, Île de Gorée, Plateau… Photos et descriptifs.';
+  String get sitesTouristiquesDesc =>
+      'Lieux incontournables : Lac Rose, Île de Gorée, Plateau… Photos et descriptifs.';
 
   @override
   String get guidedTours => 'Visites Guidées Personnalisées';
 
   @override
-  String get guidedToursDesc => 'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.';
+  String get guidedToursDesc =>
+      'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.';
 
   @override
   String get transfersVtc => 'Transferts & VTC';
 
   @override
-  String get transfersVtcDesc => 'Navettes aéroport ou chauffeurs privés pour des trajets sécurisés.';
+  String get transfersVtcDesc =>
+      'Navettes aéroport ou chauffeurs privés pour des trajets sécurisés.';
 
   @override
   String get excursions => 'الجولات';
@@ -233,7 +238,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hotelInfosSecurity => 'HOTEL INFOS & SÉCURITÉ';
 
   @override
-  String get hotelInfosSecuritySubtitle => 'Livret d\'accueil, assistance urgence et chatbot';
+  String get hotelInfosSecuritySubtitle =>
+      'Livret d\'accueil, assistance urgence et chatbot';
 
   @override
   String get hotelInfos => 'Hôtel Infos';
@@ -245,7 +251,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get assistanceEmergency => 'Assistance & Urgence';
 
   @override
-  String get assistanceEmergencyDesc => 'Médecin ou urgence sécurité (chambre identifiée)';
+  String get assistanceEmergencyDesc =>
+      'Médecin ou urgence sécurité (chambre identifiée)';
 
   @override
   String get chatbotMultilingual => 'Chatbot IA Multilingue';
@@ -275,16 +282,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roomLabel => 'Chambre';
 
   @override
-  String get emergencyRequestSent => 'Demande envoyée. L\'équipe va vous contacter.';
+  String get emergencyRequestSent =>
+      'Demande envoyée. L\'équipe va vous contacter.';
 
   @override
-  String get noActiveStayForEmergency => 'Un séjour actif est requis. Connectez-vous avec le compte de la chambre ou contactez la réception.';
+  String get noActiveStayForEmergency =>
+      'Un séjour actif est requis. Connectez-vous avec le compte de la chambre ou contactez la réception.';
 
   @override
-  String get assistanceDoctorNotConfigured => 'Le service Assistance médecin n\'est pas configuré pour cet établissement.';
+  String get assistanceDoctorNotConfigured =>
+      'Le service Assistance médecin n\'est pas configuré pour cet établissement.';
 
   @override
-  String get assistanceSecurityNotConfigured => 'Le service Urgence sécurité n\'est pas configuré pour cet établissement.';
+  String get assistanceSecurityNotConfigured =>
+      'Le service Urgence sécurité n\'est pas configuré pour cet établissement.';
 
   @override
   String confirmEmergencyAction(String action) {
@@ -310,7 +321,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatbotComingSoon => 'Bientôt disponible';
 
   @override
-  String get chatbotComingSoonHint => 'Le chatbot multilingue sera disponible prochainement.';
+  String get chatbotComingSoonHint =>
+      'Le chatbot multilingue sera disponible prochainement.';
 
   @override
   String get servicesChambreLogistique => 'خدمات الغرفة واللوجستيات';
@@ -319,7 +331,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roomServiceRestauration => 'خدمة الغرفة والمطعم';
 
   @override
-  String get roomServiceRestaurationDesc => 'قائمة رقمية عالية الوضوح لطلب الوجبات والمشروبات مع متابعة التحضير في الوقت الفعلي.';
+  String get roomServiceRestaurationDesc =>
+      'قائمة رقمية عالية الوضوح لطلب الوجبات والمشروبات مع متابعة التحضير في الوقت الفعلي.';
 
   @override
   String get laundryDesc => 'قائمة أسعار تفاعلية وطلب استلام فوري للملابس.';
@@ -328,13 +341,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get amenitiesConcierge => 'المرافق والكونسيرج';
 
   @override
-  String get amenitiesConciergeDesc => 'طلب مبسط لمستلزمات الحمام، وسائد إضافية، طقم حلاقة أو أي خدمة أخرى دون الاتصال.';
+  String get amenitiesConciergeDesc =>
+      'طلب مبسط لمستلزمات الحمام، وسائد إضافية، طقم حلاقة أو أي خدمة أخرى دون الاتصال.';
 
   @override
   String get minibarIntelligent => 'ميني بار ذكي';
 
   @override
-  String get minibarIntelligentDesc => 'جرد رقمي للمنتجات وإعلان مبسط للاستهلاك.';
+  String get minibarIntelligentDesc =>
+      'جرد رقمي للمنتجات وإعلان مبسط للاستهلاك.';
 
   @override
   String get comingSoon => 'قريباً';
@@ -421,7 +436,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noFavorites => 'لا مفضلات';
 
   @override
-  String get noFavoritesHint => 'أضف عناصر أو مطاعم أو علاجات أو جولات إلى المفضلة من صفحاتها.';
+  String get noFavoritesHint =>
+      'أضف عناصر أو مطاعم أو علاجات أو جولات إلى المفضلة من صفحاتها.';
 
   @override
   String get contactSupportTitle => 'اتصل بالدعم';
@@ -430,7 +446,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chooseContact => 'اختر وسيلة الاتصال:';
 
   @override
-  String get aboutDescription => 'تطبيق الترحيب والخدمات لضيوف فندق قصر الملك فهد.';
+  String get aboutDescription =>
+      'تطبيق الترحيب والخدمات لضيوف فندق قصر الملك فهد.';
 
   @override
   String get hotelName => 'فندق قصر الملك فهد';
@@ -787,7 +804,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordsDoNotMatch => 'كلمات المرور غير متطابقة';
 
   @override
-  String get passwordRulesHint => 'يجب أن تحتوي كلمة المرور الجديدة على 8 أحرف على الأقل وحرف كبير ورقم.';
+  String get passwordRulesHint =>
+      'يجب أن تحتوي كلمة المرور الجديدة على 8 أحرف على الأقل وحرف كبير ورقم.';
 
   @override
   String get requestDetails => 'تفاصيل طلبك';
@@ -805,7 +823,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendRequest => 'إرسال الطلب';
 
   @override
-  String get requestReservationHint => 'أدخل التاريخ والوقت والتفاصيل في النموذج.';
+  String get requestReservationHint =>
+      'أدخل التاريخ والوقت والتفاصيل في النموذج.';
 
   @override
   String get requestSent => 'تم إرسال الطلب!';
@@ -826,7 +845,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get specialInstructionsOptional => 'تعليمات خاصة (اختياري)';
 
   @override
-  String get laundryInstructionsExample => 'مثلاً: منظف عديم الرائحة، كي خفيف...';
+  String get laundryInstructionsExample =>
+      'مثلاً: منظف عديم الرائحة، كي خفيف...';
 
   @override
   String get date => 'التاريخ';
@@ -1003,7 +1023,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myCart => 'سلتي';
 
   @override
-  String get orderNotificationHint => 'ستتلقى إشعاراً عند تأكيد الطلب من المطعم.';
+  String get orderNotificationHint =>
+      'ستتلقى إشعاراً عند تأكيد الطلب من المطعم.';
 
   @override
   String spaReservationConfirmedMessage(String name) {
@@ -1076,13 +1097,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vehicleRentalTitle => 'Location de Véhicule';
 
   @override
-  String get vehicleRentalSubtitle => 'Choisissez un véhicule et envoyez votre demande de réservation.';
+  String get vehicleRentalSubtitle =>
+      'Choisissez un véhicule et envoyez votre demande de réservation.';
 
   @override
   String get noVehicleAvailable => 'Aucun véhicule disponible';
 
   @override
-  String get noVehicleAvailableHint => 'Les véhicules seront bientôt proposés par l\'établissement.';
+  String get noVehicleAvailableHint =>
+      'Les véhicules seront bientôt proposés par l\'établissement.';
 
   @override
   String get requestVehicleRental => 'Demander cette location';
@@ -1103,7 +1126,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get guidedToursTitle => 'Visites Guidées Personnalisées';
 
   @override
-  String get guidedToursSubtitle => 'Indiquez la date, le type de circuit et le nombre de personnes.';
+  String get guidedToursSubtitle =>
+      'Indiquez la date, le type de circuit et le nombre de personnes.';
 
   @override
   String get tourType => 'Type de circuit';
@@ -1121,7 +1145,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transfersVtcTitle => 'Transferts & VTC';
 
   @override
-  String get transfersVtcSubtitle => 'Navette aéroport ou chauffeur privé. Indiquez lieu de prise en charge et destination.';
+  String get transfersVtcSubtitle =>
+      'Navette aéroport ou chauffeur privé. Indiquez lieu de prise en charge et destination.';
 
   @override
   String get pickupPlace => 'Lieu de prise en charge';
@@ -1133,7 +1158,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sitesTouristiquesTitle => 'Découverte & Sites Touristiques';
 
   @override
-  String get sitesTouristiquesSubtitle => 'Vitrine des lieux incontournables avec photos et descriptifs.';
+  String get sitesTouristiquesSubtitle =>
+      'Vitrine des lieux incontournables avec photos et descriptifs.';
 
   @override
   String get filterVehicleType => 'Type';
