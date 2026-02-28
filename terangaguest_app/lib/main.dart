@@ -204,6 +204,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
       final type = data['type'] as String?;
       if (type == 'order_status') {
         _handleOrderStatusNotification(data);
+      } else if (type == 'room_service_transfer') {
+        _handleRoomServiceTransferNotification(data);
       } else if (type == 'spa_reservation_rescheduled') {
         _handleSpaRescheduleNotification(data);
       } else if (type == 'spa_reservation_status') {
@@ -576,6 +578,104 @@ class _LocalizedAppState extends State<_LocalizedApp>
     );
   }
 
+  void _handleRoomServiceTransferNotification(Map<String, dynamic> data) {
+    _startNotificationSoundLoop();
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null) {
+      // Context pas encore prêt : réessayer après le prochain frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleRoomServiceTransferNotification(data);
+      });
+      return;
+    }
+
+    final orderNumber = data['order_number'] as String? ?? '';
+    final roomNumber = data['room_number'] as String? ?? '';
+    final guestName = data['guest_name'] as String? ?? '';
+    final orderIdRaw = data['order_id'] as String?;
+    final orderId = int.tryParse(orderIdRaw ?? '');
+
+    String bodyText = 'La commande $orderNumber est prête en cuisine.';
+    if (roomNumber.isNotEmpty) {
+      bodyText += '\nChambre : $roomNumber';
+    }
+    if (guestName.isNotEmpty) {
+      bodyText += '\nClient : $guestName';
+    }
+
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 2),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.campaign_rounded, color: AppTheme.accentGold, size: 26),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Livraison à effectuer',
+                  style: TextStyle(
+                    color: AppTheme.accentGold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            bodyText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _stopNotificationSound();
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: const Text(
+                'Fermer',
+                style: TextStyle(color: AppTheme.textGray),
+              ),
+            ),
+            if (orderId != null)
+              TextButton(
+                onPressed: () {
+                  _stopNotificationSound();
+                  Navigator.of(dialogContext, rootNavigator: true).pop();
+                  final navigator = rootNavigatorKey.currentState;
+                  if (navigator == null) return;
+                  navigator.push(
+                    NavigationHelper.slideRoute(
+                      OrderDetailScreen(orderId: orderId),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Voir la commande',
+                  style: TextStyle(
+                    color: AppTheme.accentGold,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   void _handleSpaRescheduleNotification(Map<String, dynamic> data) {
     _startNotificationSoundLoop();
 
@@ -806,7 +906,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
       return;
     }
 
-    if (type == 'order' || type == 'order_status') {
+    if (type == 'order' || type == 'order_status' || type == 'room_service_transfer') {
       final orderIdValue = data['order_id'];
       final int? orderId = orderIdValue is int
           ? orderIdValue

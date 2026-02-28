@@ -581,16 +581,16 @@ class OrderController extends Controller
         $guestName = $order->guest ? $order->guest->name : null;
 
         $title = '🛎 Livraison à effectuer';
-        $body = "La commande #{$order->order_number} est prête.";
+        $body = "Commande #{$order->order_number} prête.";
         if ($roomNumber) {
-            $body .= " Livraison en chambre {$roomNumber}.";
+            $body .= " → Chambre {$roomNumber}";
         }
         if ($guestName) {
-            $body .= " Client : {$guestName}.";
+            $body .= " ({$guestName})";
         }
 
         $data = [
-            'type' => 'order_status',
+            'type' => 'room_service_transfer',
             'order_id' => (string) $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,
@@ -600,13 +600,44 @@ class OrderController extends Controller
         ];
 
         try {
-            app(FirebaseNotificationService::class)->sendToStaffForSection(
+            $firebaseService = app(FirebaseNotificationService::class);
+
+            // Envoi FCM à tous les staff room_service_orders (dont service en chambre)
+            $firebaseService->sendToStaffForSection(
                 $order->enterprise_id,
                 \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
                 $title,
                 $body,
                 $data
             );
+
+            // Stockage en base (fallback garanti — visible dans la cloche de notif)
+            $staffUsers = \App\Models\User::where('enterprise_id', $order->enterprise_id)
+                ->whereIn('role', ['admin', 'staff'])
+                ->where(function ($q) {
+                    $q->where('role', 'admin')
+                        ->orWhere(function ($q2) {
+                            $q2->where('role', 'staff')
+                                ->where(function ($q3) {
+                                    $q3->whereNull('managed_sections')
+                                        ->orWhereJsonContains('managed_sections', \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS);
+                                });
+                        });
+                })
+                ->get();
+
+            foreach ($staffUsers as $staffUser) {
+                \App\Models\Notification::create([
+                    'user_id' => $staffUser->id,
+                    'title' => $title,
+                    'body' => $body,
+                    'type' => 'room_service_transfer',
+                    'data' => $data,
+                    'is_read' => false,
+                ]);
+            }
+
+            Log::info("room_service_transfer: notification envoyée + stockée en base pour {$staffUsers->count()} staff(s). Commande #{$order->order_number}");
         } catch (\Exception $e) {
             Log::error('Firebase notification error (notify-room-service): ' . $e->getMessage(), ['order_id' => $order->id]);
         }
