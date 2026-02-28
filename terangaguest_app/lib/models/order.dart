@@ -6,12 +6,12 @@ class Order {
   final String? instructions;
   final DateTime createdAt;
   final DateTime? deliveryTime;
+  final DateTime? deliveredAt;
   final int itemsCount;
   final List<OrderItem>? items;
   final String? roomNumber;
   final String? guestName;
   final String? guestPhone;
-  final DateTime? deliveredAt;
 
   Order({
     required this.id,
@@ -21,12 +21,12 @@ class Order {
     this.instructions,
     required this.createdAt,
     this.deliveryTime,
+    this.deliveredAt,
     required this.itemsCount,
     this.items,
     this.roomNumber,
     this.guestName,
     this.guestPhone,
-    this.deliveredAt,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -38,9 +38,9 @@ class Order {
     final deliveryTime = deliveryRaw != null
         ? DateTime.tryParse(_parseString(deliveryRaw))
         : null;
-    final deliveredAtRaw = _parseString(json['delivered_at'] ?? '');
-    final deliveredAt = deliveredAtRaw.isNotEmpty
-        ? DateTime.tryParse(deliveredAtRaw)
+    final deliveredAtRaw = json['delivered_at'];
+    final deliveredAt = deliveredAtRaw != null
+        ? DateTime.tryParse(_parseString(deliveredAtRaw))
         : null;
 
     return Order(
@@ -55,12 +55,12 @@ class Order {
       ),
       createdAt: createdAt,
       deliveryTime: deliveryTime,
+      deliveredAt: deliveredAt,
       itemsCount: _parseInt(json['items_count']),
       items: _parseOrderItems(json['items'] ?? json['order_items']),
       roomNumber: _parseStringNullable(json['room_number']),
       guestName: _parseStringNullable(json['guest_name']),
       guestPhone: _parseStringNullable(json['guest_phone']),
-      deliveredAt: deliveredAt,
     );
   }
 

@@ -966,11 +966,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       return const SizedBox.shrink();
     }
 
-    final showTransferButton = status == 'ready';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Bouton de transfert au Service en Chambre (uniquement quand statut = ready)
+        if (status == 'ready') ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildNotifyRoomServiceButton(),
+          ),
+        ],
         ...actions.map((a) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -984,64 +989,66 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             ),
           );
         }),
-        if (showTransferButton)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AnimatedButton(
-              text: '🔔 Notifier le Service en Chambre',
-              onPressed: _handleNotifyRoomService,
-              width: double.infinity,
-              height: 52,
-              backgroundColor: Colors.orange.shade700,
-              textColor: Colors.white,
-            ),
-          ),
       ],
+    );
+  }
+
+  Widget _buildNotifyRoomServiceButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _handleNotifyRoomService,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF1565C0),
+                const Color(0xFF0D47A1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF42A5F5).withValues(alpha: 0.7),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1565C0).withValues(alpha: 0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.campaign_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Transférer au Service en Chambre',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Future<void> _handleNotifyRoomService() async {
     if (_order == null) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.primaryBlue,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
-        ),
-        title: const Text(
-          'Transférer au Service en Chambre',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          'Envoyer une notification au personnel du Service en Chambre pour qu\'ils viennent récupérer et livrer cette commande ?',
-          style: TextStyle(color: AppTheme.textGray),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(
-              'Annuler',
-              style: TextStyle(color: AppTheme.textGray),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Notifier',
-              style: TextStyle(
-                color: Colors.orange,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
+    HapticHelper.lightImpact();
 
     try {
       showDialog(
@@ -1061,25 +1068,31 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Service en Chambre notifié avec succès'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Service en chambre notifié — commande ${_order!.orderNumber}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF1565C0),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context);
-      String message = 'Impossible d\'envoyer la notification.';
-      if (e is DioException) {
-        final statusCode = e.response?.statusCode;
-        if (statusCode == 400) {
-          message = e.response?.data?['message'] ?? message;
-        }
-      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur : $message'),
+          content: Text('Impossible d\'envoyer la notification : $e'),
           backgroundColor: Colors.red,
         ),
       );

@@ -227,13 +227,13 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
     final dateFormat = DateFormat('dd/MM/yyyy • HH:mm', 'fr_FR');
     final formattedDate = dateFormat.format(_order!.createdAt);
 
-    final deliveredAt = _order!.deliveredAt ?? _order!.deliveryTime;
-    final deliveredTimeStr = deliveredAt != null
-        ? dateFormat.format(deliveredAt)
-        : dateFormat.format(DateTime.now());
+    // Utiliser delivered_at réel si disponible, sinon l'heure actuelle (cas popup notification)
+    final deliveredTime = _order!.deliveredAt ?? DateTime.now();
+    final deliveredTimeStr = dateFormat.format(deliveredTime);
 
-    final hotelName = context.read<AuthProvider>().user?.enterprise?.name
-        ?? 'Hôtel';
+    // Nom de l'hôtel depuis le profil de l'utilisateur connecté
+    final authProvider = context.read<AuthProvider>();
+    final hotelName = authProvider.user?.enterprise?.name ?? 'Hôtel';
 
     return Column(
       children: [
@@ -248,12 +248,16 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Text(
-              hotelName,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                hotelName,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

@@ -541,8 +541,8 @@ class OrderController extends Controller
     }
 
     /**
-     * Notifier explicitement le département "Service en chambre" qu'une commande est prête à livrer.
-     * Appelé par le staff cuisine/préparation après avoir marqué la commande comme prête.
+     * Notifier explicitement le personnel "Service en chambre" qu'une commande est prête à livrer.
+     * Déclenché par un bouton dédié dans l'app mobile (statut doit être 'ready').
      */
     public function notifyRoomService(Request $request, $id)
     {
@@ -573,17 +573,17 @@ class OrderController extends Controller
         if ($order->status !== 'ready') {
             return response()->json([
                 'success' => false,
-                'message' => 'Seules les commandes prêtes peuvent être transférées au service en chambre.',
+                'message' => 'Cette action n\'est disponible que pour les commandes avec le statut "Prête".',
             ], 400);
         }
 
         $roomNumber = $order->room ? $order->room->room_number : null;
         $guestName = $order->guest ? $order->guest->name : null;
 
-        $title = '📦 Commande à livrer';
+        $title = '🛎 Livraison à effectuer';
         $body = "La commande #{$order->order_number} est prête.";
         if ($roomNumber) {
-            $body .= " Veuillez la livrer en chambre {$roomNumber}.";
+            $body .= " Livraison en chambre {$roomNumber}.";
         }
         if ($guestName) {
             $body .= " Client : {$guestName}.";
@@ -594,14 +594,14 @@ class OrderController extends Controller
             'order_id' => (string) $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,
+            'screen' => 'AdminOrders',
             'room_number' => $roomNumber ?? '',
             'guest_name' => $guestName ?? '',
-            'screen' => 'AdminOrders',
         ];
 
         try {
             app(FirebaseNotificationService::class)->sendToRoomServiceDepartmentStaff(
-                $order->enterprise_id ?? $user->enterprise_id,
+                $order->enterprise_id,
                 $title,
                 $body,
                 $data
@@ -612,7 +612,7 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Service en chambre notifié avec succès.',
+            'message' => 'Le service en chambre a été notifié.',
         ], 200);
     }
 

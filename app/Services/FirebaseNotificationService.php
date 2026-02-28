@@ -753,13 +753,12 @@ class FirebaseNotificationService
     }
 
     /**
-     * Envoyer une notification aux staff du département "Service en chambre".
-     * Utilisé pour transférer une commande prête vers l'équipe de livraison.
+     * Envoyer une notification uniquement aux staff du département "Service en chambre".
+     * Les admins reçoivent aussi la notification (ils supervisent tout).
      */
     public function sendToRoomServiceDepartmentStaff($enterpriseId, string $title, string $body, array $data = [])
     {
         $staff = User::where('enterprise_id', $enterpriseId)
-            ->whereIn('role', ['admin', 'staff'])
             ->where(function ($q) {
                 $q->where('role', 'admin')
                     ->orWhere(function ($q2) {
@@ -771,30 +770,16 @@ class FirebaseNotificationService
             ->get();
 
         if ($staff->isEmpty()) {
-            Log::warning("No 'Service en chambre' staff with FCM tokens found for enterprise {$enterpriseId}");
-            // Fallback : stocker pour polling in-app
+            Log::warning("sendToRoomServiceDepartmentStaff: aucun staff 'Service en chambre' avec FCM token pour enterprise {$enterpriseId}");
+            // Fallback : stocker en base pour polling in-app
             $allStaff = User::where('enterprise_id', $enterpriseId)
                 ->whereIn('role', ['admin', 'staff'])
+                ->where('department', 'Service en chambre')
                 ->get();
-            foreach ($allStaff as $member) {
-                $this->storeForInAppPolling($member, $title, $body, $data);
+            foreach ($allStaff as $u) {
+                $this->storeForInAppPolling($u, $title, $body, $data);
             }
             return false;
-        }
-
-        // Fallback polling pour ceux sans token FCM
-        $staffWithoutTokens = User::where('enterprise_id', $enterpriseId)
-            ->where(function ($q) {
-                $q->where('role', 'admin')
-                    ->orWhere(function ($q2) {
-                        $q2->where('role', 'staff')
-                            ->where('department', 'Service en chambre');
-                    });
-            })
-            ->doesntHave('fcmTokens')
-            ->get();
-        foreach ($staffWithoutTokens as $member) {
-            $this->storeForInAppPolling($member, $title, $body, $data);
         }
 
         return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);

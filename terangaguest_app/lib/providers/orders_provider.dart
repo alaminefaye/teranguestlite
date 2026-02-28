@@ -129,6 +129,7 @@ class OrdersProvider with ChangeNotifier {
     }
   }
 
+  /// Notifie le personnel "Service en chambre" qu'une commande est prête à livrer.
   Future<void> notifyRoomService(int orderId) async {
     try {
       await _ordersApi.notifyRoomService(orderId);
