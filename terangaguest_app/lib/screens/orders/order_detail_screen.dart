@@ -969,8 +969,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Bouton de transfert au Service en Chambre (uniquement quand statut = ready)
-        if (status == 'ready') ...[
+        // Bouton de transfert au Service en Chambre :
+        // visible seulement si le staff connecté N'EST PAS lui-même dans ce département
+        if (status == 'ready' && _canSeeTransferButton()) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildNotifyRoomServiceButton(),
@@ -991,6 +992,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         }),
       ],
     );
+  }
+
+  /// Le bouton "Transférer" est visible pour les admins et les staff qui ne sont pas
+  /// eux-mêmes dans le département "Service en chambre" (ils ne se notifieraient pas eux-mêmes).
+  bool _canSeeTransferButton() {
+    final auth = context.read<AuthProvider>();
+    if (auth.isAdmin) return true;
+    if (auth.isStaff) {
+      final dept = auth.user?.department ?? '';
+      return dept != 'Service en chambre';
+    }
+    return false;
   }
 
   Widget _buildNotifyRoomServiceButton() {

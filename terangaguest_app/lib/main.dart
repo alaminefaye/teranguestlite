@@ -213,7 +213,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
         if (type != 'room_service_transfer') continue;
 
         final notifId = notif['id'];
-        final id = notifId is int ? notifId : int.tryParse(notifId?.toString() ?? '');
+        final id = notifId is int
+            ? notifId
+            : int.tryParse(notifId?.toString() ?? '');
         if (id == null) continue;
 
         // Marquer comme lue AVANT d'afficher pour éviter les doublons
@@ -679,7 +681,11 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ),
           title: const Row(
             children: [
-              Icon(Icons.campaign_rounded, color: AppTheme.accentGold, size: 26),
+              Icon(
+                Icons.campaign_rounded,
+                color: AppTheme.accentGold,
+                size: 26,
+              ),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -969,7 +975,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
       return;
     }
 
-    if (type == 'order' || type == 'order_status' || type == 'room_service_transfer') {
+    if (type == 'order' ||
+        type == 'order_status' ||
+        type == 'room_service_transfer') {
       final orderIdValue = data['order_id'];
       final int? orderId = orderIdValue is int
           ? orderIdValue
