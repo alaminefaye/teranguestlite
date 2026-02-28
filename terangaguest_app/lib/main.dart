@@ -33,6 +33,7 @@ import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
 import 'providers/chat_unread_provider.dart';
 import 'services/fcm_service.dart';
+import 'services/notifications_api.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
 import 'screens/hotel_infos/chatbot_screen.dart';
@@ -145,6 +146,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
     with WidgetsBindingObserver {
   late final AudioPlayer _notificationPlayer;
   Timer? _notificationSoundTimer;
+  Timer? _staffPollingTimer;
   final FcmService _fcmService = FcmService();
 
   @override
@@ -161,6 +163,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
       // Enregistrer le token FCM dès le premier lancement (Android : crée le canal et permet les notifs app fermée)
       _fcmService.registerTokenIfNeeded();
       _handleInitialFcmMessage();
+      // Polling des notifications en base (fallback garanti pour le staff)
+      _startStaffNotificationPolling();
     });
   }
 
@@ -168,6 +172,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _notificationSoundTimer?.cancel();
+    _staffPollingTimer?.cancel();
     _notificationPlayer.dispose();
     super.dispose();
   }
@@ -177,6 +182,64 @@ class _LocalizedAppState extends State<_LocalizedApp>
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       _fcmService.registerTokenIfNeeded();
+    }
+  }
+
+  void _startStaffNotificationPolling() {
+    _staffPollingTimer?.cancel();
+    // Polling toutes les 30 secondes — indépendant de FCM
+    _staffPollingTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _pollStaffNotifications(),
+    );
+    // Premier appel immédiat après 5 secondes (laisser le temps à l'auth de se charger)
+    Timer(const Duration(seconds: 5), _pollStaffNotifications);
+  }
+
+  Future<void> _pollStaffNotifications() async {
+    try {
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx == null) return;
+
+      final auth = ctx.read<AuthProvider>();
+      if (!auth.isAuthenticated) return;
+      if (!auth.isStaff && !auth.isAdmin) return;
+
+      final notificationsApi = NotificationsApi();
+      final unread = await notificationsApi.fetchUnread();
+
+      for (final notif in unread) {
+        final type = notif['type'] as String? ?? '';
+        if (type != 'room_service_transfer') continue;
+
+        final notifId = notif['id'];
+        final id = notifId is int ? notifId : int.tryParse(notifId?.toString() ?? '');
+        if (id == null) continue;
+
+        // Marquer comme lue AVANT d'afficher pour éviter les doublons
+        await notificationsApi.markAsRead(id);
+
+        // Construire les données depuis le champ 'data' de la notification
+        final rawData = notif['data'];
+        Map<String, dynamic> data = {};
+        if (rawData is Map<String, dynamic>) {
+          data = rawData;
+        } else if (rawData is Map) {
+          data = Map<String, dynamic>.from(rawData);
+        }
+        // S'assurer que les champs nécessaires sont présents
+        if (!data.containsKey('order_number')) {
+          data['order_number'] = notif['title'] ?? '';
+        }
+
+        if (!mounted) return;
+        _handleRoomServiceTransferNotification(data);
+
+        // Petite pause entre deux popups si plusieurs notifs en attente
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    } catch (e) {
+      debugPrint('Staff notification polling error: $e');
     }
   }
 
