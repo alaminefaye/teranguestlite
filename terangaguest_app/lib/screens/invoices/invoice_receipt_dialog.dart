@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
 import '../../models/order.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/orders_provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/animated_button.dart';
@@ -226,8 +227,13 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
     final dateFormat = DateFormat('dd/MM/yyyy • HH:mm', 'fr_FR');
     final formattedDate = dateFormat.format(_order!.createdAt);
 
-    // Essayer d'extraire le datetime de livraison ou utiliser l'heure actuelle si c'est la notif de livraison
-    final deliveredTimeStr = dateFormat.format(DateTime.now());
+    final deliveredAt = _order!.deliveredAt ?? _order!.deliveryTime;
+    final deliveredTimeStr = deliveredAt != null
+        ? dateFormat.format(deliveredAt)
+        : dateFormat.format(DateTime.now());
+
+    final hotelName = context.read<AuthProvider>().user?.enterprise?.name
+        ?? 'Hôtel';
 
     return Column(
       children: [
@@ -243,7 +249,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
               ),
             ),
             Text(
-              'King Fahd Palace',
+              hotelName,
               style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 14,

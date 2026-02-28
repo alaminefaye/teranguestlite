@@ -753,6 +753,54 @@ class FirebaseNotificationService
     }
 
     /**
+     * Envoyer une notification aux staff du département "Service en chambre".
+     * Utilisé pour transférer une commande prête vers l'équipe de livraison.
+     */
+    public function sendToRoomServiceDepartmentStaff($enterpriseId, string $title, string $body, array $data = [])
+    {
+        $staff = User::where('enterprise_id', $enterpriseId)
+            ->whereIn('role', ['admin', 'staff'])
+            ->where(function ($q) {
+                $q->where('role', 'admin')
+                    ->orWhere(function ($q2) {
+                        $q2->where('role', 'staff')
+                            ->where('department', 'Service en chambre');
+                    });
+            })
+            ->has('fcmTokens')
+            ->get();
+
+        if ($staff->isEmpty()) {
+            Log::warning("No 'Service en chambre' staff with FCM tokens found for enterprise {$enterpriseId}");
+            // Fallback : stocker pour polling in-app
+            $allStaff = User::where('enterprise_id', $enterpriseId)
+                ->whereIn('role', ['admin', 'staff'])
+                ->get();
+            foreach ($allStaff as $member) {
+                $this->storeForInAppPolling($member, $title, $body, $data);
+            }
+            return false;
+        }
+
+        // Fallback polling pour ceux sans token FCM
+        $staffWithoutTokens = User::where('enterprise_id', $enterpriseId)
+            ->where(function ($q) {
+                $q->where('role', 'admin')
+                    ->orWhere(function ($q2) {
+                        $q2->where('role', 'staff')
+                            ->where('department', 'Service en chambre');
+                    });
+            })
+            ->doesntHave('fcmTokens')
+            ->get();
+        foreach ($staffWithoutTokens as $member) {
+            $this->storeForInAppPolling($member, $title, $body, $data);
+        }
+
+        return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);
+    }
+
+    /**
      * Envoyer un message personnalisé au staff
      */
     public function sendToStaff($enterpriseId, string $title, string $body, array $data = [])

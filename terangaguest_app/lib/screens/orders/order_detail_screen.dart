@@ -966,22 +966,124 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       return const SizedBox.shrink();
     }
 
+    final showTransferButton = status == 'ready';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: actions.map((a) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: AnimatedButton(
-            text: a['label']!,
-            onPressed: () => _handleStaffAction(a['action']!),
-            width: double.infinity,
-            height: 52,
-            backgroundColor: AppTheme.accentGold,
-            textColor: AppTheme.primaryDark,
+      children: [
+        ...actions.map((a) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AnimatedButton(
+              text: a['label']!,
+              onPressed: () => _handleStaffAction(a['action']!),
+              width: double.infinity,
+              height: 52,
+              backgroundColor: AppTheme.accentGold,
+              textColor: AppTheme.primaryDark,
+            ),
+          );
+        }),
+        if (showTransferButton)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AnimatedButton(
+              text: '🔔 Notifier le Service en Chambre',
+              onPressed: _handleNotifyRoomService,
+              width: double.infinity,
+              height: 52,
+              backgroundColor: Colors.orange.shade700,
+              textColor: Colors.white,
+            ),
           ),
-        );
-      }).toList(),
+      ],
     );
+  }
+
+  Future<void> _handleNotifyRoomService() async {
+    if (_order == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+        ),
+        title: const Text(
+          'Transférer au Service en Chambre',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Envoyer une notification au personnel du Service en Chambre pour qu\'ils viennent récupérer et livrer cette commande ?',
+          style: TextStyle(color: AppTheme.textGray),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Annuler',
+              style: TextStyle(color: AppTheme.textGray),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Notifier',
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
+        ),
+      );
+
+      await context.read<OrdersProvider>().notifyRoomService(_order!.id);
+
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Service en Chambre notifié avec succès'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      String message = 'Impossible d\'envoyer la notification.';
+      if (e is DioException) {
+        final statusCode = e.response?.statusCode;
+        if (statusCode == 400) {
+          message = e.response?.data?['message'] ?? message;
+        }
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur : $message'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _handleStaffAction(String action) async {

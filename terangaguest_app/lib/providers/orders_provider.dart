@@ -129,6 +129,14 @@ class OrdersProvider with ChangeNotifier {
     }
   }
 
+  Future<void> notifyRoomService(int orderId) async {
+    try {
+      await _ordersApi.notifyRoomService(orderId);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir les commandes
   Future<void> refreshOrders() async {
     await fetchOrders(status: _selectedStatus, period: _selectedPeriod);

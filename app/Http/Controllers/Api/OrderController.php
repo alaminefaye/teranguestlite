@@ -197,6 +197,7 @@ class OrderController extends Controller
                 'guest_phone' => $order->guest ? $order->guest->phone : null,
                 'created_at' => $order->created_at->toISOString(),
                 'updated_at' => $order->updated_at->toISOString(),
+                'delivered_at' => $order->delivered_at ? $order->delivered_at->toISOString() : null,
             ],
         ], 200);
     }
@@ -481,6 +482,7 @@ class OrderController extends Controller
                 ], 400);
             }
             $order->status = 'delivered';
+            $order->delivered_at = now();
         }
 
         $order->save();
@@ -535,6 +537,82 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'status_label' => $order->status_name,
             ],
+        ], 200);
+    }
+
+    /**
+     * Notifier explicitement le département "Service en chambre" qu'une commande est prête à livrer.
+     * Appelé par le staff cuisine/préparation après avoir marqué la commande comme prête.
+     */
+    public function notifyRoomService(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l\'hôtel',
+            ], 403);
+        }
+
+        $order = Order::with(['room', 'guest'])->where('id', $id)->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée',
+            ], 404);
+        }
+
+        if ($order->enterprise_id !== $user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande introuvable pour cet établissement',
+            ], 404);
+        }
+
+        if ($order->status !== 'ready') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Seules les commandes prêtes peuvent être transférées au service en chambre.',
+            ], 400);
+        }
+
+        $roomNumber = $order->room ? $order->room->room_number : null;
+        $guestName = $order->guest ? $order->guest->name : null;
+
+        $title = '📦 Commande à livrer';
+        $body = "La commande #{$order->order_number} est prête.";
+        if ($roomNumber) {
+            $body .= " Veuillez la livrer en chambre {$roomNumber}.";
+        }
+        if ($guestName) {
+            $body .= " Client : {$guestName}.";
+        }
+
+        $data = [
+            'type' => 'order_status',
+            'order_id' => (string) $order->id,
+            'order_number' => $order->order_number,
+            'status' => $order->status,
+            'room_number' => $roomNumber ?? '',
+            'guest_name' => $guestName ?? '',
+            'screen' => 'AdminOrders',
+        ];
+
+        try {
+            app(FirebaseNotificationService::class)->sendToRoomServiceDepartmentStaff(
+                $order->enterprise_id ?? $user->enterprise_id,
+                $title,
+                $body,
+                $data
+            );
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (notify-room-service): ' . $e->getMessage(), ['order_id' => $order->id]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service en chambre notifié avec succès.',
         ], 200);
     }
 

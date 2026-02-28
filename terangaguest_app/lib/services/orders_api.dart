@@ -118,4 +118,16 @@ class OrdersApi {
       rethrow;
     }
   }
+
+  /// Notifie le département "Service en chambre" qu'une commande prête doit être livrée.
+  Future<void> notifyRoomService(int orderId) async {
+    try {
+      await _apiService.post(
+        '${ApiConfig.orders}/$orderId/notify-room-service',
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error (notifyRoomService): $e');
+      rethrow;
+    }
+  }
 }
