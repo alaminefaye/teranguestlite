@@ -753,6 +753,36 @@ class FirebaseNotificationService
     }
 
     /**
+     * Envoyer une notification à tous les staff d'une section, en EXCLUANT un département spécifique.
+     * Utilisation : nouvelle commande → tous sauf "Service en chambre" (ils interviennent plus tard).
+     */
+    public function sendToStaffForSectionExcludingDept($enterpriseId, string $sectionKey, string $excludedDepartment, string $title, string $body, array $data = [])
+    {
+        $staff = User::where('enterprise_id', $enterpriseId)
+            ->whereIn('role', ['admin', 'staff'])
+            ->has('fcmTokens')
+            ->where(function ($q) use ($sectionKey, $excludedDepartment) {
+                $q->where('role', 'admin')
+                    ->orWhere(function ($q2) use ($sectionKey, $excludedDepartment) {
+                        $q2->where('role', 'staff')
+                            ->where('department', '!=', $excludedDepartment)
+                            ->where(function ($q3) use ($sectionKey) {
+                                $q3->whereNull('managed_sections')
+                                    ->orWhereJsonContains('managed_sections', $sectionKey);
+                            });
+                    });
+            })
+            ->get();
+
+        if ($staff->isEmpty()) {
+            Log::warning("sendToStaffForSectionExcludingDept: aucun staff éligible pour enterprise {$enterpriseId}, section {$sectionKey}, excluant '{$excludedDepartment}'");
+            return false;
+        }
+
+        return $this->sendToMultipleUsers($staff->toArray(), $title, $body, $data);
+    }
+
+    /**
      * Envoyer une notification uniquement aux staff du département "Service en chambre".
      * Les admins reçoivent aussi la notification (ils supervisent tout).
      */

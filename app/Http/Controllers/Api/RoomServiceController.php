@@ -235,12 +235,14 @@ class RoomServiceController extends Controller
             if ($order->room_id) {
                 $firebaseService->sendNewOrderNotificationToRoom($order);
             }
-            // Notifier le staff
-            $firebaseService->sendToStaffForSection(
+            // Notifier le staff — SAUF "Service en chambre" (ils interviennent seulement à la livraison)
+            $roomNumber = $user->room_number ?? ($order->room ? $order->room->room_number : null);
+            $firebaseService->sendToStaffForSectionExcludingDept(
                 $user->enterprise_id,
                 \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
+                'Service en chambre',
                 'Nouvelle commande',
-                "Nouvelle commande #{$order->order_number} de la chambre {$user->room_number}"
+                "Nouvelle commande #{$order->order_number}" . ($roomNumber ? " — Chambre {$roomNumber}" : '')
             );
         } catch (\Exception $e) {
             // Log l'erreur mais ne pas bloquer la commande
