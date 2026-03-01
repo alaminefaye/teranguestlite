@@ -174,6 +174,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('tablet-accesses/{id}', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'destroy'])->name('tablet-accesses.destroy');
         Route::post('tablet-accesses/{id}/regenerate-client-code', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'regenerateClientCode'])->name('tablet-accesses.regenerate-client-code');
 
+        // QR Code Client Web App
+        Route::get('qrcode-client', [\App\Http\Controllers\Dashboard\QrCodeClientController::class, 'index'])->name('qrcode-client.index');
+
         // Commandes
         Route::resource('orders', \App\Http\Controllers\Dashboard\OrderController::class);
 

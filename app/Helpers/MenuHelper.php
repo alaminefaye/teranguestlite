@@ -111,6 +111,11 @@ class MenuHelper
                         'path' => '/dashboard/guests',
                     ],
                     [
+                        'icon' => 'room', // using 'room' or 'ecommerce' as icon, or we can use another one
+                        'name' => 'QR Code Client',
+                        'path' => '/dashboard/qrcode-client',
+                    ],
+                    [
                         'icon' => 'ecommerce',
                         'name' => 'Commandes',
                         'path' => '/dashboard/orders',
