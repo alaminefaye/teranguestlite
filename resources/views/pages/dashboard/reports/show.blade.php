@@ -10,6 +10,9 @@
         <a href="{{ route('dashboard.reports.index') }}?date_from={{ $date_from }}&date_to={{ $date_to }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
             ← Tous les rapports
         </a>
+        <a href="{{ route('dashboard.reports.show', $type) }}?date_from={{ $date_from }}&date_to={{ $date_to }}&export=pdf" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+            Exporter PDF
+        </a>
         @if(in_array($type, ['global', 'reservations', 'orders', 'audit'], true))
             <a href="{{ route('dashboard.reports.show', $type) }}?date_from={{ $date_from }}&date_to={{ $date_to }}&export=csv" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
                 Exporter CSV

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Enterprise;
 use App\Models\ExcursionBooking;
 use App\Models\Guest;
 use App\Models\LaundryRequest;
@@ -12,8 +13,10 @@ use App\Models\PalaceRequest;
 use App\Models\Reservation;
 use App\Models\RestaurantReservation;
 use App\Models\SpaReservation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -67,6 +70,9 @@ class ReportsController extends Controller
 
         if ($request->get('export') === 'csv') {
             return $this->exportCsv($type, $enterpriseId, $dateFrom, $dateTo);
+        }
+        if ($request->get('export') === 'pdf') {
+            return $this->exportPdf($type, $enterpriseId, $dateFrom, $dateTo);
         }
 
         $data = $this->buildReportData($type, $enterpriseId, $dateFrom, $dateTo, false);
@@ -356,5 +362,56 @@ class ReportsController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Exporter le rapport en PDF avec en-tête (logo + nom de l'entreprise).
+     */
+    public function exportPdf(string $type, int $enterpriseId, string $dateFrom, string $dateTo)
+    {
+        $enterprise = Enterprise::find($enterpriseId);
+        if (!$enterprise) {
+            abort(404, 'Établissement introuvable.');
+        }
+
+        $logoBase64 = null;
+        $logoMime = 'image/png';
+        if ($enterprise->logo) {
+            $path = Storage::disk('public')->path($enterprise->logo);
+            if (is_file($path)) {
+                $logoBase64 = base64_encode(file_get_contents($path));
+                $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                $logoMime = match ($ext) {
+                    'jpg', 'jpeg' => 'image/jpeg',
+                    'gif' => 'image/gif',
+                    'webp' => 'image/webp',
+                    default => 'image/png',
+                };
+            }
+        }
+
+        $data = $this->buildReportData($type, $enterpriseId, $dateFrom, $dateTo, false);
+        $reportTitle = $this->getReportTypeName($type);
+        $dateFromFormatted = Carbon::parse($dateFrom)->format('d/m/Y');
+        $dateToFormatted = Carbon::parse($dateTo)->format('d/m/Y');
+        $emittedAt = now()->format('d/m/Y H:i');
+
+        $pdf = Pdf::loadView('pages.dashboard.reports.report-pdf', [
+            'enterprise' => $enterprise,
+            'logoBase64' => $logoBase64,
+            'logoMime' => $logoMime,
+            'reportTitle' => $reportTitle,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'date_from_formatted' => $dateFromFormatted,
+            'date_to_formatted' => $dateToFormatted,
+            'type' => $type,
+            'data' => $data,
+            'emittedAt' => $emittedAt,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'rapport-' . $type . '-' . $dateFrom . '-' . $dateTo . '.pdf';
+
+        return $pdf->download($filename);
     }
 }
