@@ -348,7 +348,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _buildStaffActions(),
-                            if (_order!.status == 'delivered') ...[
+                            if (_order!.status == 'delivered' &&
+                                context.read<AuthProvider>().isGuest) ...[
                               const SizedBox(height: 16),
                               _buildReorderButton(),
                             ],
@@ -521,7 +522,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       {
         'key': 'delivering',
         'label': l10n.statusDelivering,
-        'icon': Icons.delivery_dining,
+        'icon': Icons.directions_walk,
       },
       {
         'key': 'delivered',
@@ -948,36 +949,49 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     }
 
     final status = _order!.status;
-    final actions = <Map<String, String>>[];
+    final isRoomService = _isRoomServiceOnly();
 
-    if (status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer la commande'});
-    } else if (status == 'confirmed') {
-      actions.add({'action': 'prepare', 'label': 'Lancer la préparation'});
-    } else if (status == 'preparing') {
-      actions.add({'action': 'mark_ready', 'label': 'Marquer comme prête'});
-    } else if (status == 'ready') {
-      actions.add({'action': 'deliver', 'label': 'Mettre en livraison'});
-    } else if (status == 'delivering') {
-      actions.add({'action': 'complete', 'label': 'Marquer comme livrée'});
+    // Actions réservées à la cuisine / admin (confirmation + préparation)
+    // Le "Service en chambre" n'a pas accès à ces étapes
+    final kitchenActions = <Map<String, String>>[];
+    if (!isRoomService) {
+      if (status == 'pending') {
+        kitchenActions.add({'action': 'confirm', 'label': 'Confirmer la commande'});
+      } else if (status == 'confirmed') {
+        kitchenActions.add({'action': 'prepare', 'label': 'Lancer la préparation'});
+      } else if (status == 'preparing') {
+        kitchenActions.add({'action': 'mark_ready', 'label': 'Marquer comme prête'});
+      }
     }
 
-    if (actions.isEmpty) {
+    // Actions réservées UNIQUEMENT au Service en Chambre (livraison)
+    // Ni l'admin ni la cuisine ne peuvent changer ces statuts
+    final deliveryActions = <Map<String, String>>[];
+    if (isRoomService) {
+      if (status == 'ready') {
+        deliveryActions.add({'action': 'deliver', 'label': 'Mettre en livraison'});
+      } else if (status == 'delivering') {
+        deliveryActions.add({'action': 'complete', 'label': 'Marquer comme livrée'});
+      }
+    }
+
+    final allActions = [...kitchenActions, ...deliveryActions];
+
+    if (allActions.isEmpty && !(status == 'ready' && _canSeeTransferButton())) {
       return const SizedBox.shrink();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Bouton de transfert au Service en Chambre :
-        // visible seulement si le staff connecté N'EST PAS lui-même dans ce département
+        // Bouton "Transférer" — visible pour admin et staff NON "Service en chambre"
         if (status == 'ready' && _canSeeTransferButton()) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildNotifyRoomServiceButton(),
           ),
         ],
-        ...actions.map((a) {
+        ...allActions.map((a) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: AnimatedButton(
@@ -994,8 +1008,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     );
   }
 
-  /// Le bouton "Transférer" est visible pour les admins et les staff qui ne sont pas
-  /// eux-mêmes dans le département "Service en chambre" (ils ne se notifieraient pas eux-mêmes).
+  /// Retourne true UNIQUEMENT si l'utilisateur est du département "Service en chambre".
+  /// Les admins et les autres staffs sont exclus des actions de livraison.
+  bool _isRoomServiceOnly() {
+    final auth = context.read<AuthProvider>();
+    if (auth.isStaff) {
+      return (auth.user?.department ?? '') == 'Service en chambre';
+    }
+    return false;
+  }
+
+  /// Le bouton "Transférer" est visible pour les admins et les staff qui ne sont
+  /// PAS eux-mêmes dans le département "Service en chambre".
   bool _canSeeTransferButton() {
     final auth = context.read<AuthProvider>();
     if (auth.isAdmin) return true;
@@ -1016,10 +1040,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           height: 52,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                const Color(0xFF1565C0),
-                const Color(0xFF0D47A1),
-              ],
+              colors: [const Color(0xFF1565C0), const Color(0xFF0D47A1)],
             ),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -1037,11 +1058,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.campaign_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
+              const Icon(Icons.campaign_rounded, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               const Text(
                 'Transférer au Service en Chambre',
@@ -1097,7 +1114,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           backgroundColor: const Color(0xFF1565C0),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     } catch (e) {

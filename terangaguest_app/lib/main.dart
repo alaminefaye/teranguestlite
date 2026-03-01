@@ -212,9 +212,11 @@ class _LocalizedAppState extends State<_LocalizedApp>
         final type = notif['type'] as String? ?? '';
         if (type != 'room_service_transfer') continue;
 
-        // Cette notification est réservée au département "Service en chambre" et aux admins
-        if (auth.isStaff &&
-            (auth.user?.department ?? '') != 'Service en chambre') {
+        // Seul le département "Service en chambre" doit voir ce popup
+        // Les admins et les autres staffs (cuisine, etc.) l'ignorent
+        final isRoomServiceStaff = auth.isStaff &&
+            (auth.user?.department ?? '') == 'Service en chambre';
+        if (!isRoomServiceStaff) {
           // Marquer comme lue silencieusement pour ne plus la retrouver au prochain cycle
           final notifId = notif['id'];
           final id = notifId is int
@@ -282,7 +284,16 @@ class _LocalizedAppState extends State<_LocalizedApp>
       if (type == 'order_status') {
         _handleOrderStatusNotification(data);
       } else if (type == 'room_service_transfer') {
-        _handleRoomServiceTransferNotification(data);
+        // Afficher uniquement pour le département "Service en chambre"
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null) {
+          final auth = ctx.read<AuthProvider>();
+          final isRoomService = auth.isStaff &&
+              (auth.user?.department ?? '') == 'Service en chambre';
+          if (isRoomService) {
+            _handleRoomServiceTransferNotification(data);
+          }
+        }
       } else if (type == 'spa_reservation_rescheduled') {
         _handleSpaRescheduleNotification(data);
       } else if (type == 'spa_reservation_status') {
