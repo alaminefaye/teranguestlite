@@ -11,6 +11,10 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Formulaire complet d'enregistrement. Un code à 6 chiffres sera généré pour la tablette en chambre.</p>
 </div>
 
+@php
+    $nationalitiesList = config('nationalities', []);
+@endphp
+<script type="application/json" id="nationalities-data-create">{{ json_encode($nationalitiesList) }}</script>
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible" x-data="{ documentType: '{{ old('id_document_type', '') }}' }">
     <form action="{{ route('dashboard.guests.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -40,7 +44,6 @@
                     @error('date_of_birth')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
                 <div class="md:col-span-2"
-                    data-nationalities="{{ e(json_encode($nationalities ?? [])) }}"
                     data-initial-query="{{ e(old('nationality', '')) }}"
                     x-data="{
                         nationalities: [],
@@ -49,11 +52,12 @@
                         get suggestions() {
                             const q = (this.query || '').toString().toLowerCase().trim();
                             if (!q) return this.nationalities.slice(0, 5);
-                            return this.nationalities.filter(n => String(n).toLowerCase().includes(q)).slice(0, 10);
+                            return this.nationalities.filter(n => String(n).toLowerCase().includes(q)).slice(0, 15);
                         }
                     }"
                     x-init="
-                        try { nationalities = JSON.parse($el.dataset.nationalities || '[]'); } catch(e) { nationalities = []; }
+                        const el = document.getElementById('nationalities-data-create');
+                        try { nationalities = el && el.textContent ? JSON.parse(el.textContent) : []; } catch(e) { nationalities = []; }
                         query = ($el.dataset.initialQuery || '').trim();
                         $nextTick(() => { if ($refs.input && $refs.input.value !== undefined) query = $refs.input.value; });
                     "

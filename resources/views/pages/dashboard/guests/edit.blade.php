@@ -15,7 +15,9 @@
 
 @php
     $currentDocType = old('id_document_type', $guest->id_document_type ?? '');
+    $nationalitiesList = config('nationalities', []);
 @endphp
+<script type="application/json" id="nationalities-data-edit">{{ json_encode($nationalitiesList) }}</script>
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible" x-data="{ documentType: '{{ $currentDocType }}' }">
     <form action="{{ route('dashboard.guests.update', $guest) }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -46,7 +48,6 @@
                     @error('date_of_birth')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
                 <div class="md:col-span-2"
-                    data-nationalities="{{ e(json_encode($nationalities ?? [])) }}"
                     data-initial-query="{{ e(old('nationality', $guest->nationality ?? '')) }}"
                     x-data="{
                         nationalities: [],
@@ -55,11 +56,12 @@
                         get suggestions() {
                             const q = (this.query || '').toString().toLowerCase().trim();
                             if (!q) return this.nationalities.slice(0, 5);
-                            return this.nationalities.filter(n => String(n).toLowerCase().includes(q)).slice(0, 10);
+                            return this.nationalities.filter(n => String(n).toLowerCase().includes(q)).slice(0, 15);
                         }
                     }"
                     x-init="
-                        try { nationalities = JSON.parse($el.dataset.nationalities || '[]'); } catch(e) { nationalities = []; }
+                        const el = document.getElementById('nationalities-data-edit');
+                        try { nationalities = el && el.textContent ? JSON.parse(el.textContent) : []; } catch(e) { nationalities = []; }
                         query = ($el.dataset.initialQuery || '').trim();
                         $nextTick(() => { if ($refs.input && $refs.input.value !== undefined) query = $refs.input.value; });
                     "
