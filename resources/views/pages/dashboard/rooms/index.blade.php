@@ -111,10 +111,19 @@
                 <option value="reserved" {{ request('status') === 'reserved' ? 'selected' : '' }}>Réservée</option>
             </select>
         </div>
+        <div class="min-w-[180px]">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Trier par</label>
+            <select name="sort" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <option value="room_number_asc" {{ request('sort', 'room_number_asc') === 'room_number_asc' ? 'selected' : '' }}>Numéro (A→Z)</option>
+                <option value="room_number_desc" {{ request('sort') === 'room_number_desc' ? 'selected' : '' }}>Numéro (Z→A)</option>
+                <option value="type_asc" {{ request('sort') === 'type_asc' ? 'selected' : '' }}>Type</option>
+                <option value="status_asc" {{ request('sort') === 'status_asc' ? 'selected' : '' }}>Statut</option>
+            </select>
+        </div>
         <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
             Filtrer
         </button>
-        @if(request()->hasAny(['search', 'type', 'status']))
+        @if(request()->hasAny(['search', 'type', 'status', 'sort']))
             <a href="{{ route('dashboard.rooms.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
                 Réinitialiser
             </a>

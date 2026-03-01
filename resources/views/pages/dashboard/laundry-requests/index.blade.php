@@ -22,15 +22,44 @@
 </div>
 
 <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-    <form method="GET" action="{{ route('dashboard.laundry-requests.index') }}" class="flex flex-wrap gap-4">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="N° demande ou client..." class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 min-w-[200px]">
-        <select name="status" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
-            <option value="">Tous les statuts</option>
-            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
-            <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>En cours</option>
-            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Terminée</option>
-        </select>
-        <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Filtrer</button>
+    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</p>
+    <form method="GET" action="{{ route('dashboard.laundry-requests.index') }}" class="space-y-4">
+        <div class="flex flex-wrap gap-4 items-end">
+            <div class="min-w-[200px]">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Recherche</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="N° demande ou client..." class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Statut</label>
+                <select name="status" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
+                    <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>En cours</option>
+                    <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Terminée</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Chambre</label>
+                <select name="room_id" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 min-w-[120px]">
+                    <option value="">Toutes</option>
+                    @foreach($rooms ?? [] as $room)
+                        <option value="{{ $room->id }}" {{ request('room_id') == $room->id ? 'selected' : '' }}>{{ $room->room_number }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date (du)</label>
+                <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date (au)</label>
+                <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Filtrer</button>
+            @if(request()->hasAny(['search', 'status', 'room_id', 'date_from', 'date_to']))
+                <a href="{{ route('dashboard.laundry-requests.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Réinitialiser</a>
+            @endif
+        </div>
     </form>
 </div>
 

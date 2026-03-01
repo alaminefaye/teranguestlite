@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\LaundryRequest;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,9 +17,20 @@ class LaundryRequestsController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+        if ($request->filled('room_id')) {
+            $query->where('room_id', $request->room_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
         if ($request->filled('search')) {
-            $query->where('request_number', 'like', '%' . $request->search . '%')
-                ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'));
+            $query->where(function ($q) use ($request) {
+                $q->where('request_number', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('user', fn ($sub) => $sub->where('name', 'like', '%' . $request->search . '%'));
+            });
         }
 
         $requests = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -29,6 +41,8 @@ class LaundryRequestsController extends Controller
             'today' => LaundryRequest::whereDate('created_at', today())->count(),
         ];
 
-        return view('pages.dashboard.laundry-requests.index', compact('requests', 'stats'));
+        $rooms = Room::orderBy('room_number')->get(['id', 'room_number']);
+
+        return view('pages.dashboard.laundry-requests.index', compact('requests', 'stats', 'rooms'));
     }
 }

@@ -24,10 +24,25 @@ class GuestController extends Controller
                   ->orWhere('id_document_number', 'like', '%' . $request->search . '%');
             });
         }
+        if ($request->filled('with_reservation') && $request->with_reservation === '1') {
+            $query->whereHas('reservations');
+        }
 
-        $guests = $query->orderBy('name')->paginate(15);
+        $sort = $request->get('sort', 'name_asc');
+        if ($sort === 'name_desc') {
+            $query->orderBy('name', 'desc');
+        } elseif ($sort === 'created_desc') {
+            $query->orderBy('created_at', 'desc');
+        } elseif ($sort === 'created_asc') {
+            $query->orderBy('created_at', 'asc');
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+
+        $guests = $query->paginate(15);
         $stats = [
             'total' => Guest::count(),
+            'with_reservation' => Guest::whereHas('reservations')->count(),
         ];
 
         return view('pages.dashboard.guests.index', [

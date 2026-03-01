@@ -29,7 +29,18 @@ class RoomController extends Controller
             $query->where('room_number', 'like', '%' . $request->search . '%');
         }
 
-        $rooms = $query->with('tabletAccessUser')->orderBy('room_number', 'asc')->paginate(10);
+        $sort = $request->get('sort', 'room_number_asc');
+        if ($sort === 'room_number_desc') {
+            $query->orderBy('room_number', 'desc');
+        } elseif ($sort === 'type_asc') {
+            $query->orderBy('type', 'asc')->orderBy('room_number', 'asc');
+        } elseif ($sort === 'status_asc') {
+            $query->orderBy('status', 'asc')->orderBy('room_number', 'asc');
+        } else {
+            $query->orderBy('room_number', 'asc');
+        }
+
+        $rooms = $query->with('tabletAccessUser')->paginate(10);
 
         // Statistiques
         $stats = [

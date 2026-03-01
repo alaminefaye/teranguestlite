@@ -26,15 +26,18 @@ class ReservationController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('room_id')) {
             $query->where('room_id', $request->room_id);
         }
-
         if ($request->filled('guest_id')) {
             $query->where('guest_id', $request->guest_id);
         }
-
+        if ($request->filled('check_in_from')) {
+            $query->whereDate('check_in', '>=', $request->check_in_from);
+        }
+        if ($request->filled('check_in_to')) {
+            $query->whereDate('check_in', '<=', $request->check_in_to);
+        }
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('reservation_number', 'like', '%' . $request->search . '%')
@@ -47,7 +50,18 @@ class ReservationController extends Controller
             });
         }
 
-        $reservations = $query->orderBy('check_in', 'desc')->paginate(10);
+        // Tri
+        $sort = $request->get('sort', 'check_in_desc');
+        match ($sort) {
+            'check_in_asc' => $query->orderBy('check_in', 'asc'),
+            'check_out_desc' => $query->orderBy('check_out', 'desc'),
+            'check_out_asc' => $query->orderBy('check_out', 'asc'),
+            'total_price_desc' => $query->orderBy('total_price', 'desc'),
+            'created_desc' => $query->orderBy('created_at', 'desc'),
+            default => $query->orderBy('check_in', 'desc'),
+        };
+
+        $reservations = $query->paginate(10);
 
         // Statistiques
         $stats = [

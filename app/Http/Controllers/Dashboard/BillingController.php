@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Helpers\StaffSection;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -50,6 +51,15 @@ class BillingController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+        if ($request->filled('room_id')) {
+            $query->where('room_id', $request->room_id);
+        }
+        if ($request->filled('check_in_from')) {
+            $query->whereDate('check_in', '>=', $request->check_in_from);
+        }
+        if ($request->filled('check_in_to')) {
+            $query->whereDate('check_in', '<=', $request->check_in_to);
+        }
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('reservation_number', 'like', '%' . $request->search . '%')
@@ -82,11 +92,14 @@ class BillingController extends Controller
             }
         }
 
+        $rooms = Room::orderBy('room_number')->get(['id', 'room_number']);
+
         return view('pages.dashboard.billing.index', [
             'title' => 'Facturation / Notes de chambre',
             'rows' => $rows,
             'reservations' => $reservations,
             'stats' => $stats,
+            'rooms' => $rooms,
         ]);
     }
 }

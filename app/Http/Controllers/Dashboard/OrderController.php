@@ -18,32 +18,34 @@ class OrderController extends Controller
     {
         $query = Order::with(['user', 'guest', 'room']);
 
-        // Filtre par statut
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
-        // Filtre par type
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
-
-        // Recherche par numéro de commande, nom user (tablette) ou nom client (Guest)
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+        if ($request->filled('room_id')) {
+            $query->where('room_id', $request->room_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('order_number', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function($subQ) use ($request) {
-                      $subQ->where('name', 'like', '%' . $request->search . '%');
-                  })
-                  ->orWhereHas('guest', function($subQ) use ($request) {
-                      $subQ->where('name', 'like', '%' . $request->search . '%');
-                  });
+                  ->orWhereHas('user', fn ($subQ) => $subQ->where('name', 'like', '%' . $request->search . '%'))
+                  ->orWhereHas('guest', fn ($subQ) => $subQ->where('name', 'like', '%' . $request->search . '%'));
             });
         }
 
         $orders = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        // Statistiques
         $stats = [
             'total' => Order::count(),
             'pending' => Order::pending()->count(),
@@ -55,10 +57,13 @@ class OrderController extends Controller
             'cancelled' => Order::cancelled()->count(),
         ];
 
+        $rooms = Room::orderBy('room_number')->get(['id', 'room_number']);
+
         return view('pages.dashboard.orders.index', [
             'title' => 'Commandes',
             'orders' => $orders,
             'stats' => $stats,
+            'rooms' => $rooms,
         ]);
     }
 
