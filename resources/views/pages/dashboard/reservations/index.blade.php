@@ -97,15 +97,11 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[140px]">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Check-in à partir du</label>
-                <input type="date" name="check_in_from" value="{{ request('check_in_from') }}"
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="check_in_from" label="Check-in à partir du" placeholder="Choisir une date" :defaultDate="request('check_in_from')" />
             </div>
-            <div class="min-w-[140px]">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Check-in jusqu'au</label>
-                <input type="date" name="check_in_to" value="{{ request('check_in_to') }}"
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="check_in_to" label="Check-in jusqu'au" placeholder="Choisir une date" :defaultDate="request('check_in_to')" />
             </div>
             <div class="min-w-[160px]">
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Trier par</label>

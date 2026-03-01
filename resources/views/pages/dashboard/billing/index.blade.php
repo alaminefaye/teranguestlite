@@ -57,13 +57,11 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Check-in (du)</label>
-                <input type="date" name="check_in_from" value="{{ request('check_in_from') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="check_in_from" label="Check-in (du)" placeholder="Choisir une date" :defaultDate="request('check_in_from')" />
             </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Check-in (au)</label>
-                <input type="date" name="check_in_to" value="{{ request('check_in_to') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="check_in_to" label="Check-in (au)" placeholder="Choisir une date" :defaultDate="request('check_in_to')" />
             </div>
             <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Filtrer</button>
             @if(request()->hasAny(['search', 'status', 'room_id', 'check_in_from', 'check_in_to']))

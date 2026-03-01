@@ -120,15 +120,11 @@
                     @endforeach
                 </select>
             </div>
-            <div class="min-w-[130px]">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Du</label>
-                <input type="date" name="date_from" value="{{ request('date_from') }}"
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="date_from" label="Du" placeholder="Choisir une date" :defaultDate="request('date_from')" />
             </div>
-            <div class="min-w-[130px]">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Au</label>
-                <input type="date" name="date_to" value="{{ request('date_to') }}"
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-800 dark:text-white/90">
+            <div class="min-w-[160px]">
+                <x-form.date-picker name="date_to" label="Au" placeholder="Choisir une date" :defaultDate="request('date_to')" />
             </div>
             <div class="flex items-end gap-2">
                 <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 text-sm font-medium">Filtrer</button>
