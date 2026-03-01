@@ -581,6 +581,14 @@ class OrderController extends Controller
 
         $order->save();
 
+        if ($action === 'complete') {
+            try {
+                app(\App\Services\OrderStockService::class)->deductStockForOrder($order);
+            } catch (\Throwable $e) {
+                \Log::warning('OrderStockService: deduct stock failed for order ' . $order->id, ['error' => $e->getMessage()]);
+            }
+        }
+
         try {
             if (!empty($order->room_id)) {
                 app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);

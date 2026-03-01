@@ -23,6 +23,8 @@ class MenuItem extends Model
         'is_available',
         'is_featured',
         'display_order',
+        'stock_product_id',
+        'stock_quantity_per_portion',
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class MenuItem extends Model
         'is_available' => 'boolean',
         'is_featured' => 'boolean',
         'display_order' => 'integer',
+        'stock_quantity_per_portion' => 'decimal:3',
     ];
 
     /**
@@ -51,6 +54,11 @@ class MenuItem extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function stockProduct()
+    {
+        return $this->belongsTo(StockProduct::class, 'stock_product_id');
     }
 
     /**

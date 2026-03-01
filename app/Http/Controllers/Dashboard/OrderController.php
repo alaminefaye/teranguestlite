@@ -9,6 +9,7 @@ use App\Models\Room;
 use App\Services\ActivityLogger;
 use App\Services\FirebaseNotificationService;
 use App\Services\GuestReservationHelper;
+use App\Services\OrderStockService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -344,6 +345,8 @@ class OrderController extends Controller
             'status' => 'delivered',
             'delivered_at' => now(),
         ]);
+
+        app(OrderStockService::class)->deductStockForOrder($order);
 
         ActivityLogger::log('order_delivered', 'Commande ' . $order->order_number . ' livrée', $order);
         $this->notifyOrderStatusToClient($order);

@@ -165,6 +165,17 @@ class MenuHelper
                         'name' => 'Rapports',
                         'path' => '/dashboard/reports',
                     ],
+                    [
+                        'icon' => 'task',
+                        'name' => 'Stocks',
+                        'path' => '#',
+                        'subItems' => [
+                            ['name' => 'Tableau de bord stocks', 'path' => '/dashboard/stock'],
+                            ['name' => 'Catégories de stock', 'path' => '/dashboard/stock-categories'],
+                            ['name' => 'Produits / Stock', 'path' => '/dashboard/stock-products'],
+                            ['name' => 'Mouvements', 'path' => '/dashboard/stock-movements'],
+                        ],
+                    ],
                 ],
             ],
             [

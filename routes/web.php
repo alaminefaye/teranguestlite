@@ -173,6 +173,14 @@ Route::middleware(['auth'])->group(function () {
         // Rapports & Audits
         Route::get('reports', [\App\Http\Controllers\Dashboard\ReportsController::class, 'index'])->name('reports.index');
         Route::get('reports/{type}', [\App\Http\Controllers\Dashboard\ReportsController::class, 'show'])->name('reports.show')->where('type', 'global|overview|reservations|orders|billing|services|audit');
+
+        // Gestion des stocks (catégories, produits, mouvements, alertes)
+        Route::get('stock', [\App\Http\Controllers\Dashboard\StockController::class, 'index'])->name('stock.index');
+        Route::resource('stock-categories', \App\Http\Controllers\Dashboard\StockCategoryController::class)->names('stock-categories');
+        Route::resource('stock-products', \App\Http\Controllers\Dashboard\StockProductController::class)->names('stock-products');
+        Route::get('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'index'])->name('stock-movements.index');
+        Route::get('stock-movements/create', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'create'])->name('stock-movements.create');
+        Route::post('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'store'])->name('stock-movements.store');
     });
 
     // Routes Guest (Client)

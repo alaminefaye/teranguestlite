@@ -82,6 +82,30 @@
                 @enderror
             </div>
 
+            <!-- Lien stock (mise à jour à chaque commande livrée) -->
+            <div class="md:col-span-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Stock (optionnel)</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Si vous liez un produit stock, le stock sera automatiquement déduit à chaque livraison de commande contenant cet article.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="stock_product_id" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Produit stock</label>
+                        <select name="stock_product_id" id="stock_product_id" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                            <option value="">Aucun (pas de déduction stock)</option>
+                            @foreach($stockProducts ?? [] as $sp)
+                                <option value="{{ $sp->id }}" {{ old('stock_product_id') == $sp->id ? 'selected' : '' }}>{{ $sp->name }} ({{ $sp->category?->name ?? '' }}) — {{ number_format($sp->quantity_current, 0, ',', ' ') }} {{ $sp->unit_label }}</option>
+                            @endforeach
+                        </select>
+                        @error('stock_product_id')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="stock_quantity_per_portion" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Quantité consommée par vente</label>
+                        <input type="number" name="stock_quantity_per_portion" id="stock_quantity_per_portion" value="{{ old('stock_quantity_per_portion', 1) }}" min="0.001" step="any" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90" placeholder="1">
+                        <p class="mt-1 text-xs text-gray-500">Ex: 1 = 1 unité par article vendu, 2 = 2 unités (ex. carafe = 2 bouteilles)</p>
+                        @error('stock_quantity_per_portion')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
             <!-- Options -->
             <div class="flex items-center gap-6">
                 <div class="flex items-center">

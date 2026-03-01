@@ -18,6 +18,7 @@
         th, td { padding: 6px 8px; text-align: left; border: 1px solid #ddd; }
         th { background: #f0f0f0; font-weight: bold; }
         .text-right { text-align: right; }
+        .total-row-red { font-weight: bold; color: #c00; }
         .box { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
         .grid-2 { width: 100%; display: table; }
         .grid-2 > div { display: table-cell; width: 50%; padding-right: 10px; }
@@ -132,6 +133,7 @@
             @break
 
         @case('reservations')
+            @php $itemsReservations = $data['items'] ?? []; $totalReservations = collect($itemsReservations)->sum('total_price'); @endphp
             <table>
                 <thead>
                     <tr>
@@ -139,7 +141,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($data['items'] ?? [] as $r)
+                    @forelse($itemsReservations as $r)
                         <tr>
                             <td>{{ $r->reservation_number }}</td>
                             <td>{{ $r->room?->room_number ?? '—' }}</td>
@@ -153,6 +155,14 @@
                         <tr><td colspan="7">Aucune réservation sur la période.</td></tr>
                     @endforelse
                 </tbody>
+                @if(count($itemsReservations) > 0)
+                    <tfoot>
+                        <tr class="total-row-red">
+                            <td colspan="6" class="text-right">Total</td>
+                            <td class="text-right">{{ number_format($totalReservations, 0, ',', ' ') }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
             </table>
             @break
 

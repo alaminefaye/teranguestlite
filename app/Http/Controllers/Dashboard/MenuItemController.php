@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use App\Models\MenuCategory;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -47,10 +48,12 @@ class MenuItemController extends Controller
     public function create()
     {
         $categories = MenuCategory::active()->ordered()->get();
+        $stockProducts = StockProduct::active()->with('category')->orderBy('name')->get();
 
         return view('pages.dashboard.menu-items.create', [
             'title' => 'Créer un article',
             'categories' => $categories,
+            'stockProducts' => $stockProducts,
         ]);
     }
 
@@ -68,9 +71,12 @@ class MenuItemController extends Controller
             'is_available' => 'boolean',
             'is_featured' => 'boolean',
             'display_order' => 'nullable|integer|min:0',
+            'stock_product_id' => 'nullable|exists:stock_products,id',
+            'stock_quantity_per_portion' => 'nullable|numeric|min:0.001',
         ]);
 
         $validated['enterprise_id'] = auth()->user()->enterprise_id;
+        $validated['stock_quantity_per_portion'] = $request->filled('stock_quantity_per_portion') ? $request->stock_quantity_per_portion : 1;
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('menu-items', 'public');
@@ -95,11 +101,13 @@ class MenuItemController extends Controller
     public function edit(MenuItem $menuItem)
     {
         $categories = MenuCategory::active()->ordered()->get();
+        $stockProducts = StockProduct::active()->with('category')->orderBy('name')->get();
 
         return view('pages.dashboard.menu-items.edit', [
             'title' => 'Modifier ' . $menuItem->name,
             'item' => $menuItem,
             'categories' => $categories,
+            'stockProducts' => $stockProducts,
         ]);
     }
 
@@ -117,7 +125,10 @@ class MenuItemController extends Controller
             'is_available' => 'boolean',
             'is_featured' => 'boolean',
             'display_order' => 'nullable|integer|min:0',
+            'stock_product_id' => 'nullable|exists:stock_products,id',
+            'stock_quantity_per_portion' => 'nullable|numeric|min:0.001',
         ]);
+        $validated['stock_quantity_per_portion'] = $request->filled('stock_quantity_per_portion') ? $request->stock_quantity_per_portion : 1;
 
         if ($request->hasFile('image')) {
             if ($menuItem->image) {
