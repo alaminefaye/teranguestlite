@@ -10,6 +10,7 @@ class HotelConversation extends Model
     protected $fillable = [
         'enterprise_id',
         'user_id',
+        'guest_id',
         'room_id',
         'status',
         'last_message_at',
@@ -27,6 +28,14 @@ class HotelConversation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Client (invité) lié à la réservation active en chambre — une conversation par guest.
+     */
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class);
     }
 
     public function room()

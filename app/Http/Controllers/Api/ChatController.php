@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\HotelConversation;
 use App\Models\HotelMessage;
+use App\Models\Reservation;
 use App\Models\Room;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
@@ -12,13 +13,54 @@ use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {
+    /**
+     * Déduit le client (guest) qui occupe actuellement la chambre de l'utilisateur connecté (tablette).
+     * Chaîne : user (tablette) → chambre → réservation active → guest.
+     */
+    protected function getActiveGuestIdForUser($user): ?int
+    {
+        $roomId = $user->room_id;
+        if (!$roomId && $user->room_number) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('room_number', $user->room_number)
+                ->first();
+            $roomId = $room?->id;
+        }
+        if (!$roomId) {
+            return null;
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('room_id', $roomId)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->first();
+
+        return $reservation?->guest_id;
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
 
-        $conversation = HotelConversation::where('user_id', $user->id)
-            ->where('enterprise_id', $user->enterprise_id)
-            ->first();
+        // Priorité : conversation du client qui occupe la chambre (réservation active)
+        $guestId = $this->getActiveGuestIdForUser($user);
+        $conversation = null;
+
+        if ($guestId) {
+            $conversation = HotelConversation::where('enterprise_id', $user->enterprise_id)
+                ->where('guest_id', $guestId)
+                ->first();
+        }
+
+        // Fallback : conversation liée au compte tablette (user_id) pour compatibilité
+        if (!$conversation) {
+            $conversation = HotelConversation::where('user_id', $user->id)
+                ->where('enterprise_id', $user->enterprise_id)
+                ->first();
+        }
 
         if (!$conversation) {
             return response()->json([
@@ -30,9 +72,9 @@ class ChatController extends Controller
             ]);
         }
 
-        $conversation->load(['user', 'messages.sender', 'messages.replyTo.sender']);
+        $conversation->load(['user', 'guest', 'messages.sender', 'messages.replyTo.sender']);
 
-        $guestName = $conversation->user?->name ?: 'Client chambre';
+        $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
 
         $messages = $conversation->messages()
             ->with('replyTo.sender')
@@ -78,16 +120,32 @@ class ChatController extends Controller
         $rules['reply_to_id'] = ['nullable', 'integer', 'exists:hotel_messages,id'];
         $validated = $request->validate($rules);
 
-        $conversation = HotelConversation::firstOrCreate(
-            [
-                'enterprise_id' => $user->enterprise_id,
-                'user_id' => $user->id,
-            ],
-            [
-                'room_id' => $user->room_id,
-                'status' => 'open',
-            ]
-        );
+        // Priorité : conversation du client qui occupe la chambre (réservation active)
+        $guestId = $this->getActiveGuestIdForUser($user);
+        if ($guestId) {
+            $conversation = HotelConversation::firstOrCreate(
+                [
+                    'enterprise_id' => $user->enterprise_id,
+                    'guest_id' => $guestId,
+                ],
+                [
+                    'user_id' => $user->id,
+                    'room_id' => $user->room_id,
+                    'status' => 'open',
+                ]
+            );
+        } else {
+            $conversation = HotelConversation::firstOrCreate(
+                [
+                    'enterprise_id' => $user->enterprise_id,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'room_id' => $user->room_id,
+                    'status' => 'open',
+                ]
+            );
+        }
 
         $type = $validated['message_type'] ?? 'text';
         $metadata = null;
@@ -129,7 +187,7 @@ class ChatController extends Controller
         $this->notifyStaffNewMessage($conversation, $message);
 
         $message->load('replyTo.sender');
-        $guestName = $conversation->user?->name ?: 'Client chambre';
+        $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
 
         return response()->json([
             'success' => true,
@@ -182,7 +240,7 @@ class ChatController extends Controller
     protected function notifyStaffNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
-            $guestName = $conversation->user?->name ?: 'Client chambre';
+            $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
             $roomLabel = null;
 
             if ($conversation->room?->room_number) {
@@ -224,7 +282,7 @@ class ChatController extends Controller
     protected function notifyGuestNewMessage(HotelConversation $conversation, HotelMessage $message): void
     {
         try {
-            $conversation->loadMissing(['user', 'room']);
+            $conversation->loadMissing(['user', 'guest', 'room']);
 
             $roomId = $conversation->room_id ?? $conversation->user?->room_id;
 
@@ -248,7 +306,7 @@ class ChatController extends Controller
                 $conversation->update(['room_id' => $roomId]);
             }
 
-            $guestName = $conversation->user?->name ?: 'Client chambre';
+            $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
             $roomLabel = null;
 
             if ($conversation->room?->room_number) {
@@ -374,7 +432,7 @@ class ChatController extends Controller
         $enterpriseId = $user->enterprise_id;
 
         $conversations = HotelConversation::where('enterprise_id', $enterpriseId)
-            ->with(['user', 'room'])
+            ->with(['user', 'guest', 'room'])
             ->withCount([
                 'messages as unread_count' => function ($query) {
                     $query->whereNull('read_at')
@@ -386,7 +444,7 @@ class ChatController extends Controller
             ->paginate((int) $request->input('per_page', 20));
 
         $data = $conversations->map(function (HotelConversation $conversation) {
-            $guestName = $conversation->user?->name ?: 'Client chambre';
+            $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
             $roomLabel = null;
 
             if ($conversation->room?->room_number) {
@@ -499,9 +557,9 @@ class ChatController extends Controller
             ->where('sender_type', 'guest')
             ->update(['read_at' => now()]);
 
-        $conversation->load(['user', 'room', 'messages.sender', 'messages.replyTo.sender']);
+        $conversation->load(['user', 'guest', 'room', 'messages.sender', 'messages.replyTo.sender']);
 
-        $guestName = $conversation->user?->name ?: 'Client chambre';
+        $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
 
         $messages = $conversation->messages()
             ->with('replyTo.sender')
@@ -510,7 +568,7 @@ class ChatController extends Controller
             ->map(fn (HotelMessage $m) => $this->formatMessageForApi($m, $guestName))
             ->toArray();
 
-        $guestName = $conversation->user?->name ?: 'Client chambre';
+        $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
         $roomLabel = null;
 
         if ($conversation->room?->room_number) {
@@ -619,7 +677,7 @@ class ChatController extends Controller
         $this->notifyGuestNewMessage($conversation, $message);
 
         $message->load('replyTo.sender');
-        $guestName = $conversation->user?->name ?: 'Client chambre';
+        $guestName = $conversation->guest?->name ?? $conversation->user?->name ?? 'Client chambre';
 
         return response()->json([
             'success' => true,
