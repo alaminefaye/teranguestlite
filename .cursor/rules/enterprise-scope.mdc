@@ -1,0 +1,31 @@
+---
+description: Application SaaS — isolation stricte des données par entreprise (aucun mélange entre entreprises)
+globs: app/Models/**/*.php, app/Http/Controllers/**/*.php, app/Services/**/*.php
+---
+
+# SaaS : isolation des données par entreprise
+
+L’application est **multi-tenant (SaaS)**. **Chaque entreprise ne doit voir et modifier que ses propres données.** Aucun mélange entre entreprises.
+
+## Règles obligatoires
+
+1. **Modèles avec `enterprise_id`**  
+   Utiliser le trait **`App\Models\Scopes\EnterpriseScopeTrait`** pour appliquer automatiquement  
+   `WHERE enterprise_id = auth()->user()->enterprise_id` sur toutes les requêtes (sauf super_admin).
+
+2. **Exceptions** (ne pas ajouter le trait)  
+   `User`, `ActivityLog`, `Notification` — logique spécifique (scopes manuels ou filtre dans le provider).
+
+3. **Création d’enregistrements (store/create)**  
+   Toujours définir **`enterprise_id`** :  
+   `auth()->user()->enterprise_id` ou l’entreprise du contexte (ex. `$order->enterprise_id`, `$room->enterprise_id`).
+
+4. **Routes**  
+   - Dashboard : middleware **`enterprise`** (obligatoire).  
+   - API : utilisateur authentifié avec `enterprise_id` ; les modèles avec le trait filtrent automatiquement.
+
+5. **Requêtes cross-enterprise** (tablette, super admin)  
+   Utiliser **`Model::withoutGlobalScope('enterprise')`** puis filtrer explicitement par `enterprise_id` (ex. `$room->enterprise_id`) pour éviter toute fuite de données.
+
+6. **Nouveaux modèles / nouvelles tables**  
+   Si la ressource appartient à une entreprise, ajouter la colonne **`enterprise_id`** et le **`EnterpriseScopeTrait`**, et renseigner **`enterprise_id`** à chaque création.

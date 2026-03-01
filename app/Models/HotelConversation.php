@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\HotelMessage;
+use App\Models\Scopes\EnterpriseScopeTrait;
 
 class HotelConversation extends Model
 {
+    use EnterpriseScopeTrait;
+
     protected $fillable = [
         'enterprise_id',
         'user_id',

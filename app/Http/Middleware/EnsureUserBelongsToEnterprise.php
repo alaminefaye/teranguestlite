@@ -6,23 +6,25 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware SaaS : s'assure que l'utilisateur est bien rattaché à une entreprise
+ * avant d'accéder au dashboard. Évite tout accès sans contexte entreprise (données non mélangées).
+ */
 class EnsureUserBelongsToEnterprise
 {
     /**
-     * Handle an incoming request.
-     *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = auth()->user();
 
-        // Super admin a accès à tout
+        // Super admin a accès à tout (gestion multi-entreprises)
         if ($user && $user->isSuperAdmin()) {
             return $next($request);
         }
 
-        // Vérifier que l'utilisateur a bien un enterprise_id
+        // Sans enterprise_id, pas d'accès : isolation stricte des données par entreprise
         if ($user && !$user->enterprise_id) {
             abort(403, 'Accès non autorisé : vous n\'êtes associé à aucune entreprise.');
         }
