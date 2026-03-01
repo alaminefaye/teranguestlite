@@ -112,7 +112,10 @@
                 </button>
 
                 <!-- Notification Dropdown -->
-                <x-header.notification-dropdown />
+                <x-header.notification-dropdown
+                    :notifications="$headerNotifications ?? collect()"
+                    :unreadCount="$headerUnreadNotificationCount ?? 0"
+                />
             </div>
 
             <!-- User Dropdown -->

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\HotelMessage;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('layouts.app', function ($view) {
             $unreadCount = 0;
+            $headerNotifications = [];
+            $headerUnreadNotificationCount = 0;
 
             if (Auth::check()) {
                 $user = Auth::user();
@@ -40,9 +43,18 @@ class AppServiceProvider extends ServiceProvider
                         })
                         ->count();
                 }
+
+                // Notifications réelles pour le header (dernières 20, non lues en premier)
+                $headerUnreadNotificationCount = Notification::forUser($user->id)->unread()->count();
+                $headerNotifications = Notification::forUser($user->id)
+                    ->orderByRaw('is_read ASC, created_at DESC')
+                    ->limit(20)
+                    ->get();
             }
 
             $view->with('unreadChatCount', $unreadCount);
+            $view->with('headerNotifications', $headerNotifications);
+            $view->with('headerUnreadNotificationCount', $headerUnreadNotificationCount);
         });
     }
 }
