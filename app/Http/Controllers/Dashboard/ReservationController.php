@@ -8,8 +8,10 @@ use App\Models\Reservation;
 use App\Models\ReservationSettlement;
 use App\Models\Room;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ReservationController extends Controller
 {
@@ -163,6 +165,51 @@ class ReservationController extends Controller
             'roomBillOrders' => $roomBillOrders,
             'totalRoomBill' => $totalRoomBill,
         ]);
+    }
+
+    /**
+     * Télécharger la facture en PDF (réservation check-out).
+     */
+    public function invoicePdf(Reservation $reservation)
+    {
+        if ($reservation->status !== 'checked_out') {
+            return redirect()->route('dashboard.reservations.show', $reservation)
+                ->with('error', 'La facture PDF est disponible uniquement pour les réservations avec statut Check-out effectué.');
+        }
+
+        $reservation->load(['room', 'user', 'guest', 'enterprise', 'settlements']);
+        $roomBillOrders = $reservation->roomBillOrders()->with('orderItems')->orderBy('created_at')->get();
+        $totalConsos = $roomBillOrders->sum('total');
+        $grandTotal = (float) $reservation->total_price + $totalConsos;
+
+        $logoBase64 = null;
+        $logoMime = 'image/png';
+        if ($reservation->enterprise && $reservation->enterprise->logo) {
+            $path = Storage::disk('public')->path($reservation->enterprise->logo);
+            if (is_file($path)) {
+                $logoBase64 = base64_encode(file_get_contents($path));
+                $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                $logoMime = match ($ext) {
+                    'jpg', 'jpeg' => 'image/jpeg',
+                    'gif' => 'image/gif',
+                    'webp' => 'image/webp',
+                    default => 'image/png',
+                };
+            }
+        }
+
+        $pdf = Pdf::loadView('pages.dashboard.reservations.invoice-pdf', [
+            'reservation' => $reservation,
+            'roomBillOrders' => $roomBillOrders,
+            'grandTotal' => $grandTotal,
+            'logoBase64' => $logoBase64,
+            'logoMime' => $logoMime,
+            'emittedAt' => now()->format('d/m/Y H:i'),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'facture-' . $reservation->reservation_number . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     /**

@@ -16,6 +16,12 @@
             </svg>
             Retour
         </a>
+        <a href="{{ route('dashboard.reservations.invoice.pdf', $reservation) }}" class="inline-flex items-center px-4 py-2 bg-success-500 text-white rounded-md hover:bg-success-600">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Télécharger PDF
+        </a>
         <button type="button" onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
@@ -151,10 +157,24 @@
 
 <style>
 @media print {
-    .no-print, #sidebar, header[class*="sticky"], .preloader, [x-data] { display: none !important; }
-    body { background: white !important; }
-    main { padding: 0 !important; }
-    #invoice-content { box-shadow: none; border: none; }
+    /* Ne garder que le contenu de la facture à l'impression */
+    body * { visibility: hidden; }
+    #invoice-content, #invoice-content * { visibility: visible; }
+    #invoice-content {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 1rem !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+    }
+    #invoice-content h1, #invoice-content p, #invoice-content td, #invoice-content th, #invoice-content li { color: #111 !important; }
+    #invoice-content .text-gray-500, #invoice-content .text-gray-400, #invoice-content .text-gray-600 { color: #333 !important; }
+    #invoice-content .text-brand-600, #invoice-content .text-brand-400 { color: #111 !important; }
 }
 </style>
 @endsection

@@ -57,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('reservations.settle');
         Route::get('reservations/{reservation}/invoice', [\App\Http\Controllers\Dashboard\ReservationController::class, 'invoice'])
             ->name('reservations.invoice');
+        Route::get('reservations/{reservation}/invoice/pdf', [\App\Http\Controllers\Dashboard\ReservationController::class, 'invoicePdf'])
+            ->name('reservations.invoice.pdf');
         
         // Clients (invités) - code tablette
         Route::resource('guests', \App\Http\Controllers\Dashboard\GuestController::class);
