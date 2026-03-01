@@ -91,16 +91,23 @@ class Reservation extends Model
     }
 
     /**
+     * Toutes les commandes « note de chambre » pour ce séjour (pour facture / reçu)
+     */
+    public function roomBillOrders()
+    {
+        return Order::withoutGlobalScope('enterprise')
+            ->where('payment_method', 'room_bill')
+            ->where('guest_id', $this->guest_id)
+            ->where('room_id', $this->room_id)
+            ->whereBetween('created_at', [$this->check_in, $this->check_out]);
+    }
+
+    /**
      * Commandes « note de chambre » non encore réglées pour ce séjour
      */
     public function roomBillOrdersUnsettled()
     {
-        return Order::withoutGlobalScope('enterprise')
-            ->where('payment_method', 'room_bill')
-            ->whereNull('settled_at')
-            ->where('guest_id', $this->guest_id)
-            ->where('room_id', $this->room_id)
-            ->whereBetween('created_at', [$this->check_in, $this->check_out]);
+        return $this->roomBillOrders()->whereNull('settled_at');
     }
 
     /**

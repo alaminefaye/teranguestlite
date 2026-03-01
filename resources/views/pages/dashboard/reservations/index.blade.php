@@ -150,6 +150,7 @@
                             <td class="px-6 py-4">
                                 <x-action-buttons 
                                     :showRoute="route('dashboard.reservations.show', $reservation)"
+                                    :invoiceRoute="$reservation->status === 'checked_out' ? route('dashboard.reservations.invoice', $reservation) : null"
                                 />
                             </td>
                         </tr>

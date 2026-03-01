@@ -144,6 +144,28 @@ class ReservationController extends Controller
     }
 
     /**
+     * Afficher la facture / reçu (réservation en check-out) : logo entreprise, infos, détail, possibilité d'imprimer.
+     */
+    public function invoice(Reservation $reservation)
+    {
+        if ($reservation->status !== 'checked_out') {
+            return redirect()->route('dashboard.reservations.show', $reservation)
+                ->with('error', 'La facture est disponible uniquement pour les réservations avec statut Check-out effectué.');
+        }
+
+        $reservation->load(['room', 'user', 'guest', 'enterprise', 'settlements']);
+        $roomBillOrders = $reservation->roomBillOrders()->with('orderItems')->orderBy('created_at')->get();
+        $totalRoomBill = $roomBillOrders->sum('total');
+
+        return view('pages.dashboard.reservations.invoice', [
+            'title' => 'Facture ' . $reservation->reservation_number,
+            'reservation' => $reservation,
+            'roomBillOrders' => $roomBillOrders,
+            'totalRoomBill' => $totalRoomBill,
+        ]);
+    }
+
+    /**
      * Régler la note de chambre (facture) : Wave, Orange Money, Espèce, Carte bancaire
      */
     public function settle(Request $request, Reservation $reservation): RedirectResponse

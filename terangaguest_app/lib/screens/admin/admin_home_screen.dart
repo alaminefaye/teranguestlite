@@ -943,7 +943,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     const sectionPalace = 'palace_services';
     const sectionEmergency = 'assistance_emergency';
     const sectionChat = 'chat_messages';
-    const sectionBilling = 'billing_invoicing';
 
     final allTiles = [
       _AdminTile(
@@ -1001,13 +1000,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         routeKey: 'admin-chat',
         sectionKey: sectionChat,
         badge: _summary?.chatUnreadConversations ?? 0,
-      ),
-      _AdminTile(
-        icon: Icons.receipt_long_outlined,
-        label: 'Facturation / Notes de chambre',
-        routeKey: 'admin-billing',
-        sectionKey: sectionBilling,
-        badge: _summary?.billingWithBalance ?? 0,
       ),
     ];
 
@@ -1443,17 +1435,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => const AdminChatConversationsScreen(),
-          ),
-        );
-        break;
-      case 'admin-billing':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'La facturation (notes de chambre) est disponible sur le dashboard web : Facturation.',
-            ),
-            backgroundColor: AppTheme.accentGold,
-            duration: const Duration(seconds: 3),
           ),
         );
         break;
