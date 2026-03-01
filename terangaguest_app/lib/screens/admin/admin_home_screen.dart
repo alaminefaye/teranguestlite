@@ -150,8 +150,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final messages = <String>[];
     final hasNewOrder = newSummary.ordersPending > oldSummary.ordersPending;
     if (hasNewOrder) {
-      _enqueueNewOrdersForAlert(context);
-      messages.add('Nouvelle commande Room Service à traiter');
+      // Le Service en Chambre ne gère pas les nouvelles commandes (seulement la livraison)
+      final auth = context.read<AuthProvider>();
+      final isRoomServiceDept = auth.isStaff &&
+          (auth.user?.department ?? '') == 'Service en chambre';
+      if (!isRoomServiceDept) {
+        _enqueueNewOrdersForAlert(context);
+        messages.add('Nouvelle commande Room Service à traiter');
+      }
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
       _enqueueNewRestaurantReservationsForAlert(context);
