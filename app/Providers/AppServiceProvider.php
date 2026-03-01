@@ -44,9 +44,15 @@ class AppServiceProvider extends ServiceProvider
                         ->count();
                 }
 
-                // Notifications réelles pour le header (dernières 20, non lues en premier)
-                $headerUnreadNotificationCount = Notification::forUser($user->id)->unread()->count();
-                $headerNotifications = Notification::forUser($user->id)
+                // Notifications réelles pour le header : uniquement celles de l'entreprise connectée (ou sans entreprise pour compat)
+                $notificationQuery = Notification::forUser($user->id);
+                if ($user->enterprise_id) {
+                    $notificationQuery->where(function ($q) use ($user) {
+                        $q->where('enterprise_id', $user->enterprise_id)->orWhereNull('enterprise_id');
+                    });
+                }
+                $headerUnreadNotificationCount = (clone $notificationQuery)->unread()->count();
+                $headerNotifications = $notificationQuery
                     ->orderByRaw('is_read ASC, created_at DESC')
                     ->limit(20)
                     ->get();

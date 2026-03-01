@@ -8,6 +8,7 @@ class Notification extends Model
 {
     protected $fillable = [
         'user_id',
+        'enterprise_id',
         'title',
         'body',
         'type',
@@ -25,6 +26,11 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function enterprise()
+    {
+        return $this->belongsTo(Enterprise::class);
     }
 
     public function markAsRead()

@@ -721,6 +721,7 @@ class OrderController extends Controller
             foreach ($recipients as $recipient) {
                 \App\Models\Notification::create([
                     'user_id' => $recipient->id,
+                    'enterprise_id' => $order->enterprise_id,
                     'title' => $title,
                     'body' => $body,
                     'type' => 'room_service_transfer',

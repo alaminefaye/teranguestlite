@@ -191,6 +191,7 @@ class FirebaseNotificationService
         try {
             \App\Models\Notification::create([
                 'user_id' => $user->id,
+                'enterprise_id' => $user->enterprise_id,
                 'title' => $title,
                 'body' => $body,
                 'data' => $data,
