@@ -30,11 +30,11 @@
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Service ou client..." class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date (du)</label>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Pickup (du)</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date (au)</label>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Pickup (au)</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
             </div>
             <div>
