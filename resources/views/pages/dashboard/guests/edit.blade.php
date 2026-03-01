@@ -17,7 +17,7 @@
     $currentDocType = old('id_document_type', $guest->id_document_type ?? '');
     $nationalitiesList = config('nationalities', []);
 @endphp
-<script type="application/json" id="nationalities-data-edit">{{ json_encode($nationalitiesList) }}</script>
+<script type="application/json" id="nationalities-data-edit">{!! json_encode($nationalitiesList) !!}</script>
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible" x-data="{ documentType: '{{ $currentDocType }}' }">
     <form action="{{ route('dashboard.guests.update', $guest) }}" method="POST" enctype="multipart/form-data">
         @csrf

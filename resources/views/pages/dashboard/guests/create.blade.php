@@ -14,7 +14,7 @@
 @php
     $nationalitiesList = config('nationalities', []);
 @endphp
-<script type="application/json" id="nationalities-data-create">{{ json_encode($nationalitiesList) }}</script>
+<script type="application/json" id="nationalities-data-create">{!! json_encode($nationalitiesList) !!}</script>
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible" x-data="{ documentType: '{{ old('id_document_type', '') }}' }">
     <form action="{{ route('dashboard.guests.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
