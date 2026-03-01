@@ -61,11 +61,11 @@
                     {!! $qrCode !!}
                 </div>
 
-                <!-- Logo Overlay in the center (absolutely positioned over SVG) -->
+                <!-- Logo overlay centré (par-dessus le QR ; la correction d'erreur H permet de garder le scan fiable) -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="bg-white p-1.5 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.2)] flex items-center justify-center border-[3px] border-brand-500 bg-clip-padding"
-                        style="width: 76px; height: 76px;">
-                        <img src="{{ asset('images/logo/logo.png') }}" class="w-14 h-14 object-contain rounded-full"
+                    <div class="bg-white rounded-full flex items-center justify-center ring-2 ring-gray-200/80 shadow-sm overflow-hidden"
+                        style="width: 72px; height: 72px;">
+                        <img src="{{ asset('images/logo/logo.png') }}" class="w-11 h-11 object-contain"
                             alt="Teranga Guest" onerror="this.style.display='none'">
                     </div>
                 </div>
