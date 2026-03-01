@@ -284,16 +284,18 @@ class _LocalizedAppState extends State<_LocalizedApp>
       if (type == 'order_status') {
         _handleOrderStatusNotification(data);
       } else if (type == 'room_service_transfer') {
-        // Afficher uniquement pour le département "Service en chambre"
-        final ctx = rootNavigatorKey.currentContext;
-        if (ctx != null) {
+        // Reporter l'usage du context au prochain frame pour éviter use_build_context_synchronously
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final ctx = rootNavigatorKey.currentContext;
+          if (ctx == null) return;
           final auth = ctx.read<AuthProvider>();
           final isRoomService = auth.isStaff &&
               (auth.user?.department ?? '') == 'Service en chambre';
           if (isRoomService) {
             _handleRoomServiceTransferNotification(data);
           }
-        }
+        });
       } else if (type == 'spa_reservation_rescheduled') {
         _handleSpaRescheduleNotification(data);
       } else if (type == 'spa_reservation_status') {

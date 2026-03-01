@@ -83,6 +83,70 @@ class TabletSessionController extends Controller
     }
 
     /**
+     * Récupère la session client (guest + room + reservation) à partir de la chambre uniquement,
+     * si cette chambre a un séjour actif (une réservation confirmée/checked_in en cours).
+     * Utilisé par la tablette pour pré-remplir la session sans demander le code au client.
+     * POST /api/tablet/session-by-room
+     * Body: { "room_id": 1 } ou { "room_number": "101" }
+     */
+    public function sessionByRoom(Request $request): JsonResponse
+    {
+        $request->validate([
+            'room_id' => 'nullable|exists:rooms,id',
+            'room_number' => 'nullable|string|max:20',
+        ]);
+
+        $room = null;
+        if ($request->filled('room_id')) {
+            $room = Room::find($request->room_id);
+        } elseif ($request->filled('room_number')) {
+            $room = Room::withoutGlobalScope('enterprise')
+                ->where('room_number', $request->room_number)
+                ->first();
+        }
+
+        if (!$room) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chambre non trouvée. Indiquez room_id ou room_number.',
+            ], 400);
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->with('guest')
+            ->first();
+
+        if (!$reservation || !$reservation->guest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun séjour actif pour cette chambre. Entrez votre code client si vous avez une réservation.',
+            ], 404);
+        }
+
+        $guest = $reservation->guest;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'guest_id' => $guest->id,
+                'guest_name' => $guest->name,
+                'guest_phone' => $guest->phone,
+                'guest_email' => $guest->email,
+                'room_id' => $room->id,
+                'room_number' => $room->room_number,
+                'reservation_id' => $reservation->id,
+                'reservation_number' => $reservation->reservation_number,
+                'validated_at' => now()->toIso8601String(),
+                'client_code' => $guest->access_code,
+            ],
+        ], 200);
+    }
+
+    /**
      * Valide le code et retourne la session (guest + room + reservation) si le séjour est valide.
      * POST /api/tablet/validate-code
      * Body: { "code": "123456", "room_id": 1 } ou { "code": "123456", "room_number": "101" }

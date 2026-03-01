@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/orders_provider.dart';
 import '../../providers/chat_unread_provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../widgets/service_card.dart';
 
 import '../../utils/navigation_helper.dart';
@@ -625,103 +626,185 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final badgePadH = isVeryCompact ? 6.0 : (isCompact ? 8.0 : 10.0);
     final badgePadV = isVeryCompact ? 3.0 : (isCompact ? 4.0 : 5.0);
 
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: padV, horizontal: padH),
-      child: Consumer<OrdersProvider>(
-        builder: (context, ordersProvider, _) {
-          final inProgressCount = ordersProvider.inProgressOrdersCount;
-          final hideDateTimeOnMobile = isMobile && inProgressCount > 0;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Commande(s) en cours — affiché seulement s'il y en a au moins une (animé, clignotant)
-              if (inProgressCount > 0)
-                _BlinkingOrdersBadge(
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticHelper.lightImpact();
-                      context.navigateTo(const OrdersListScreen());
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: badgePadH + 4,
-                        vertical: badgePadV + 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.orange, width: 1.5),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.receipt_long,
-                            size: isVeryCompact
-                                ? 14.0
-                                : (isCompact ? 16.0 : 20.0),
-                            color: Colors.orange,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Ligne commandes en cours + date/heure
+        Container(
+          padding: EdgeInsets.symmetric(vertical: padV, horizontal: padH),
+          child: Consumer<OrdersProvider>(
+            builder: (context, ordersProvider, _) {
+              final inProgressCount = ordersProvider.inProgressOrdersCount;
+              final hideDateTimeOnMobile = isMobile && inProgressCount > 0;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Commande(s) en cours — affiché seulement s'il y en a au moins une (animé, clignotant)
+                  if (inProgressCount > 0)
+                    _BlinkingOrdersBadge(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticHelper.lightImpact();
+                          context.navigateTo(const OrdersListScreen());
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: badgePadH + 4,
+                            vertical: badgePadV + 2,
                           ),
-                          SizedBox(width: isCompact ? 6 : 8),
-                          Text(
-                            inProgressCount == 1
-                                ? '1 commande en cours'
-                                : '$inProgressCount commandes en cours',
-                            style: TextStyle(
-                              fontSize: isVeryCompact
-                                  ? 11.0
-                                  : (isCompact ? 12.0 : 14.0),
-                              fontWeight: FontWeight.w600,
-                              color: Colors.orange,
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.orange, width: 1.5),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              else
-                const SizedBox.shrink(),
-              // Heure et date — masquées sur mobile quand il y a des commandes en cours (évite overflow)
-              if (!hideDateTimeOnMobile)
-                StreamBuilder(
-                  stream: Stream.periodic(const Duration(seconds: 1)),
-                  builder: (context, snapshot) {
-                    final now = DateTime.now();
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          DateFormat('hh:mm a').format(now).toUpperCase(),
-                          style: TextStyle(
-                            fontSize: timeSize,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.accentGold,
-                            height: 1.0,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.receipt_long,
+                                size: isVeryCompact
+                                    ? 14.0
+                                    : (isCompact ? 16.0 : 20.0),
+                                color: Colors.orange,
+                              ),
+                              SizedBox(width: isCompact ? 6 : 8),
+                              Text(
+                                inProgressCount == 1
+                                    ? '1 commande en cours'
+                                    : '$inProgressCount commandes en cours',
+                                style: TextStyle(
+                                  fontSize: isVeryCompact
+                                      ? 11.0
+                                      : (isCompact ? 12.0 : 14.0),
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: isCompact ? 10 : 14),
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  // Heure et date — masquées sur mobile quand il y a des commandes en cours (évite overflow)
+                  if (!hideDateTimeOnMobile)
+                    StreamBuilder(
+                      stream: Stream.periodic(const Duration(seconds: 1)),
+                      builder: (context, snapshot) {
+                        final now = DateTime.now();
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateFormat('hh:mm a').format(now).toUpperCase(),
+                              style: TextStyle(
+                                fontSize: timeSize,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.accentGold,
+                                height: 1.0,
+                              ),
+                            ),
+                            SizedBox(width: isCompact ? 10 : 14),
+                            Text(
+                              DateFormat('EEEE d MMMM', 'fr_FR').format(now),
+                              style: TextStyle(
+                                fontSize: dateSize,
+                                fontWeight: FontWeight.w400,
+                                color: AppTheme.textGray,
+                                height: 1.0,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                  else
+                    const SizedBox.shrink(),
+                ],
+              );
+            },
+          ),
+        ),
+        // Barre panier — affichée uniquement quand le panier contient des articles
+        Consumer<CartProvider>(
+          builder: (context, cart, _) {
+            if (cart.isEmpty) return const SizedBox.shrink();
+            final l10n = AppLocalizations.of(context);
+            return Padding(
+              padding: EdgeInsets.only(
+                left: padH,
+                right: padH,
+                bottom: padV,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticHelper.lightImpact();
+                    context.navigateTo(const CartScreen());
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: padH + 4,
+                      vertical: padV + 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart,
+                          size: isCompact ? 20.0 : 24.0,
+                          color: Colors.green,
+                        ),
+                        SizedBox(width: isCompact ? 8 : 12),
                         Text(
-                          DateFormat('EEEE d MMMM', 'fr_FR').format(now),
+                          l10n.articleCount(cart.itemCount),
                           style: TextStyle(
-                            fontSize: dateSize,
-                            fontWeight: FontWeight.w400,
-                            color: AppTheme.textGray,
-                            height: 1.0,
+                            fontSize: isVeryCompact
+                                ? 12.0
+                                : (isCompact ? 13.0 : 15.0),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green,
+                          ),
+                        ),
+                        SizedBox(width: isCompact ? 8 : 12),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: isCompact ? 12.0 : 14.0,
+                            color: Colors.green.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        SizedBox(width: isCompact ? 8 : 12),
+                        Text(
+                          l10n.viewCartCaps,
+                          style: TextStyle(
+                            fontSize: isVeryCompact
+                                ? 11.0
+                                : (isCompact ? 12.0 : 14.0),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
                           ),
                         ),
                       ],
-                    );
-                  },
-                )
-              else
-                const SizedBox.shrink(),
-            ],
-          );
-        },
-      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

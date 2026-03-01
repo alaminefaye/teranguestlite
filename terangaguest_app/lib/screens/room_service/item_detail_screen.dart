@@ -100,11 +100,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ),
       ),
     );
-
-    // Retourner à l'écran précédent après que le snackbar disparaît
-    Future.delayed(const Duration(seconds: 2), () {
-      if (context.mounted) Navigator.pop(context);
-    });
   }
 
   @override

@@ -80,6 +80,7 @@ class ApiConfig {
   static const String fcmToken = '/fcm-token';
 
   // Tablette en chambre - code client (sans auth)
+  static const String tabletSessionByRoom = '/tablet/session-by-room';
   static const String tabletValidateCode = '/tablet/validate-code';
   static const String tabletValidateSession = '/tablet/validate-session';
   static const String tabletCheckout = '/tablet/checkout';

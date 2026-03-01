@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/menu_category.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/category_card.dart';
 import '../../widgets/cart_badge.dart';
@@ -29,6 +31,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void initState() {
     super.initState();
     _loadCategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final tabletSession = context.read<TabletSessionProvider>();
+      await tabletSession.load();
+      if (!mounted) return;
+      await tabletSession.tryRestoreSessionFromRoom();
+    });
   }
 
   Future<void> _loadCategories() async {

@@ -12,11 +12,14 @@ class TabletSessionProvider with ChangeNotifier {
   final TabletSessionApi _api = TabletSessionApi();
   GuestSession? _session;
   String? _roomNumber;
+  String? _clientCodeForPreFill;
   bool _loading = false;
   String? _error;
 
   GuestSession? get session => _session;
   String? get roomNumber => _roomNumber;
+  /// Code client pour pré-remplissage sur les écrans de réservation (spa, restaurant, etc.).
+  String? get clientCodeForPreFill => _clientCodeForPreFill;
   bool get hasSession => _session != null;
   bool get isLoading => _loading;
   String? get error => _error;
@@ -25,6 +28,26 @@ class TabletSessionProvider with ChangeNotifier {
   Future<void> load() async {
     await _loadFromStorage();
     notifyListeners();
+  }
+
+  /// Tente de récupérer automatiquement la session (et le code pour pré-remplissage) à partir
+  /// de la chambre configurée. À appeler au chargement des écrans menu, panier, réservations.
+  Future<bool> tryRestoreSessionFromRoom() async {
+    final room = (_roomNumber ?? '').trim();
+    if (room.isEmpty) return false;
+    try {
+      final result = await _api.getSessionByRoom(roomNumber: room);
+      if (result == null) return false;
+      _session = result.session;
+      _clientCodeForPreFill = result.clientCode;
+      _error = null;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keySession, jsonEncode(result.session.toJson()));
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _loadFromStorage() async {
@@ -100,6 +123,7 @@ class TabletSessionProvider with ChangeNotifier {
 
   Future<void> clearSession() async {
     _session = null;
+    _clientCodeForPreFill = null;
     _error = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keySession);

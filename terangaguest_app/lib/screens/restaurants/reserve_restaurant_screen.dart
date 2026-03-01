@@ -6,6 +6,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/restaurants_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
@@ -47,8 +48,24 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<AuthProvider>().loadUser();
+      if (!mounted) return;
+      final tabletSession = context.read<TabletSessionProvider>();
+      final auth = context.read<AuthProvider>();
+      await tabletSession.load();
+      if (!mounted) return;
+      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+        final roomNumber = auth.user?.roomNumber?.trim() ?? '';
+        if (roomNumber.isNotEmpty) await tabletSession.setRoomNumber(roomNumber);
+      }
+      await tabletSession.tryRestoreSessionFromRoom();
+      if (!mounted) return;
+      final code = tabletSession.clientCodeForPreFill;
+      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+        _clientCodeController.text = code;
+        setState(() {});
+      }
     });
   }
 

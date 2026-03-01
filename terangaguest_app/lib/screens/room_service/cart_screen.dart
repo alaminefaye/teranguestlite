@@ -45,6 +45,9 @@ class _CartScreenState extends State<CartScreen> {
           await tabletSession.setRoomNumber(roomNumber);
         }
       }
+      if (!mounted) return;
+      // Récupération auto de la session si la chambre a un séjour actif (on ne déconnecte pas la tablette)
+      await tabletSession.tryRestoreSessionFromRoom();
     });
   }
 

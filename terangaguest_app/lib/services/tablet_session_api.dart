@@ -4,9 +4,54 @@ import '../models/guest_session.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
+/// Résultat de session-by-room : session + code client pour pré-remplissage (résa spa, resto, etc.).
+class SessionByRoomResult {
+  final GuestSession session;
+  final String? clientCode;
+
+  const SessionByRoomResult({required this.session, this.clientCode});
+}
+
 /// API tablette en chambre (sans auth) : validation code et checkout.
 class TabletSessionApi {
   final ApiService _api = ApiService();
+
+  /// Récupère la session client (guest + room + réservation) à partir de la chambre uniquement,
+  /// si cette chambre a un séjour actif. Retourne null si aucune réservation active (404).
+  /// Inclut [clientCode] pour pré-remplir les écrans de réservation (spa, restaurant, etc.).
+  Future<SessionByRoomResult?> getSessionByRoom({
+    int? roomId,
+    String? roomNumber,
+  }) async {
+    final hasRoomNumber = (roomNumber?.trim().isNotEmpty ?? false);
+    if (roomId == null && !hasRoomNumber) {
+      return null;
+    }
+    try {
+      final payload = <String, dynamic>{};
+      if (roomId != null) {
+        payload['room_id'] = roomId;
+      }
+      if (hasRoomNumber) {
+        payload['room_number'] = roomNumber!.trim();
+      }
+      final response = await _api.post(
+        ApiConfig.tabletSessionByRoom,
+        data: payload,
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true || data['data'] == null) {
+        return null;
+      }
+      final inner = data['data'] as Map<String, dynamic>;
+      final session = GuestSession.fromJson(inner);
+      final code = inner['client_code'] as String?;
+      return SessionByRoomResult(session: session, clientCode: code?.trim());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
+    }
+  }
 
   /// Valide le code client. Envoie [roomId] ou [roomNumber] pour lier à la chambre.
   /// En cas d'erreur (401/403), lance une Exception avec le message clair du serveur.
