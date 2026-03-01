@@ -382,13 +382,28 @@ class OrderController extends Controller
                 $data['reason'] = $reason;
             }
 
-            $firebaseService->sendToStaffForSection(
-                $order->enterprise_id ?? $user->enterprise_id,
-                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
-                'Commande annulée par le client',
-                $body,
-                $data
-            );
+            // Cibler tous les admins + staffs non "Service en chambre"
+            // (pas de filtre sur managed_sections pour garantir la réception)
+            $enterpriseId = $order->enterprise_id ?? $user->enterprise_id;
+            $recipients = \App\Models\User::where('enterprise_id', $enterpriseId)
+                ->where(function ($q) {
+                    $q->where('role', 'admin')
+                        ->orWhere(function ($q2) {
+                            $q2->where('role', 'staff')
+                                ->where(function ($q3) {
+                                    $q3->whereNull('department')
+                                        ->orWhere('department', '!=', 'Service en chambre');
+                                });
+                        });
+                })
+                ->has('fcmTokens')
+                ->get();
+
+            foreach ($recipients as $recipient) {
+                $firebaseService->sendToUser($recipient, 'Commande annulée par le client', $body, $data);
+            }
+
+            Log::info("order_cancelled: notification envoyée à {$recipients->count()} staff(s)/admin(s). Commande #{$order->order_number}");
         } catch (\Exception $e) {
             Log::error('Firebase notification error (order cancel API): ' . $e->getMessage(), ['order_id' => $order->id]);
         }

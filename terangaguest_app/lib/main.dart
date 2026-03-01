@@ -560,6 +560,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null) return;
 
+    final auth = Provider.of<AuthProvider>(ctx, listen: false);
+    final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
+
     final l10n = AppLocalizations.of(ctx);
     final orderIdRaw = data['order_id'] as String?;
     final orderNumber = data['order_number'] as String? ?? '';
@@ -569,20 +572,130 @@ class _LocalizedAppState extends State<_LocalizedApp>
         ? rawReason.trim()
         : null;
     final orderId = int.tryParse(orderIdRaw ?? '');
+    final roomNumber = data['room_number'] as String?;
+    final guestName = data['guest_name'] as String?;
 
     final statusLabel = _statusLabel(l10n, status);
 
-    if (status == 'delivered') {
+    // Popup dédié pour le staff/admin quand un client annule une commande
+    if (isStaffOrAdmin && status == 'cancelled') {
+      final lines = <String>[];
+      if (roomNumber != null && roomNumber.isNotEmpty) {
+        lines.add('Chambre : $roomNumber');
+      }
+      if (guestName != null && guestName.isNotEmpty) {
+        lines.add('Client : $guestName');
+      }
+      if (reason != null) {
+        lines.add('Motif : $reason');
+      }
+
       showDialog(
         context: ctx,
         barrierDismissible: true,
         builder: (dialogContext) {
-          return InvoiceReceiptDialog(
-            orderId: orderId ?? 0,
-            orderNumber: orderNumber,
+          return AlertDialog(
+            backgroundColor: AppTheme.primaryBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.redAccent, width: 1.5),
+            ),
+            title: Row(
+              children: const [
+                Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Commande annulée par le client',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (orderNumber.isNotEmpty)
+                  Text(
+                    'Commande #$orderNumber',
+                    style: const TextStyle(
+                      color: AppTheme.accentGold,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                if (lines.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  ...lines.map(
+                    (line) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        line,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _stopNotificationSound();
+                  Navigator.of(dialogContext, rootNavigator: true).pop();
+                },
+                child: const Text(
+                  'Fermer',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              if (orderId != null)
+                TextButton(
+                  onPressed: () {
+                    _stopNotificationSound();
+                    Navigator.of(dialogContext, rootNavigator: true).pop();
+                    rootNavigatorKey.currentState?.push(
+                      NavigationHelper.slideRoute(
+                        OrderDetailScreen(orderId: orderId),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Voir la commande',
+                    style: TextStyle(
+                      color: AppTheme.accentGold,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
           );
         },
       );
+      return;
+    }
+
+    if (status == 'delivered') {
+      if (!isStaffOrAdmin) {
+        showDialog(
+          context: ctx,
+          barrierDismissible: true,
+          builder: (dialogContext) {
+            return InvoiceReceiptDialog(
+              orderId: orderId ?? 0,
+              orderNumber: orderNumber,
+            );
+          },
+        );
+      }
       return;
     }
 
