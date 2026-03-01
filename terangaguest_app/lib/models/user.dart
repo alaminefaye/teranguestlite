@@ -211,6 +211,11 @@ class Enterprise {
   final EmergencySettings emergency;
   final String? chatbotUrl;
 
+  /// Adresse, téléphone et email de l'entreprise (reçu, facture, contact).
+  final String? address;
+  final String? phone;
+  final String? email;
+
   Enterprise({
     required this.id,
     required this.name,
@@ -221,6 +226,9 @@ class Enterprise {
     HotelInfos? hotelInfos,
     EmergencySettings? emergency,
     this.chatbotUrl,
+    this.address,
+    this.phone,
+    this.email,
   }) : hotelInfos = hotelInfos ?? HotelInfos(),
        emergency = emergency ?? EmergencySettings();
 
@@ -239,6 +247,9 @@ class Enterprise {
         json['emergency'] as Map<String, dynamic>?,
       ),
       chatbotUrl: json['chatbot_url'] as String?,
+      address: json['address'] as String?,
+      phone: json['phone'] as String?,
+      email: json['email'] as String?,
     );
   }
 
@@ -258,6 +269,9 @@ class Enterprise {
       'cover_photo': coverPhoto,
       'gym_hours': gymHours,
       'type': type,
+      'address': address,
+      'phone': phone,
+      'email': email,
       'hotel_infos': {
         'wifi_network': hotelInfos.wifiNetwork,
         'wifi_password': hotelInfos.wifiPassword,

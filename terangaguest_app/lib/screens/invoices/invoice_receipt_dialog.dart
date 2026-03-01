@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
 import '../../models/order.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/orders_provider.dart';
@@ -117,6 +119,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      _buildEnterpriseBlock(),
                       _buildHeader(),
                       Flexible(
                         child: SingleChildScrollView(
@@ -175,12 +178,114 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
     );
   }
 
+  /// Bloc en-tête du reçu : logo de l'entreprise + nom, adresse, téléphone, email.
+  Widget _buildEnterpriseBlock() {
+    final enterprise = context.read<AuthProvider>().user?.enterprise;
+    final name = enterprise?.name.trim() ?? '';
+    final logoPath = enterprise?.logo;
+    final logoUrl = () {
+      if (logoPath == null || logoPath.trim().isEmpty) return null;
+      final trimmed = logoPath.trim();
+      if (trimmed.startsWith('http')) return trimmed;
+      return ApiConfig.storageUrl(trimmed);
+    }();
+    final address = enterprise?.address?.trim();
+    final phone = enterprise?.phone?.trim();
+    final email = enterprise?.email?.trim();
+    final hasAnyContact = (address != null && address.isNotEmpty) ||
+        (phone != null && phone.isNotEmpty) ||
+        (email != null && email.isNotEmpty);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        children: [
+          if (logoUrl != null && logoUrl.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: logoUrl,
+                height: 56,
+                fit: BoxFit.contain,
+                placeholder: (_, __) => SizedBox(
+                  height: 56,
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.primaryDark.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (_, __, ___) => const SizedBox(height: 56),
+              ),
+            ),
+          if (logoUrl != null && logoUrl.isNotEmpty) const SizedBox(height: 12),
+          if (name.isNotEmpty)
+            Text(
+              name,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          if (hasAnyContact) ...[
+            if (name.isNotEmpty) const SizedBox(height: 8),
+            if (address != null && address.isNotEmpty)
+              Text(
+                address,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            if (phone != null && phone.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                phone,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (email != null && email.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                email,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         color: AppTheme.primaryDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
