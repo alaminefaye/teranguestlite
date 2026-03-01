@@ -79,6 +79,15 @@
                         class="text-brand-500 hover:text-brand-600 hover:underline">{{ $url }}</a>
                 </p>
                 <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center qr-actions">
+                    <a href="{{ route('dashboard.qrcode-client.pdf', $code ? ['code' => $code] : []) }}"
+                        class="inline-flex justify-center items-center px-6 py-2.5 bg-brand-500 text-white font-medium rounded-md hover:bg-brand-600 transition-colors border border-transparent">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Télécharger en PDF
+                    </a>
                     <button onclick="window.print()"
                         class="inline-flex justify-center items-center px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

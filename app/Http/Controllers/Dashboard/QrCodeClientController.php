@@ -3,32 +3,59 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrCodeClientController extends Controller
 {
-    public function index(Request $request)
+    private function buildQrData(Request $request): array
     {
         $code = trim((string) $request->input('code'));
-
         $url = url('/client');
         if ($code) {
             $url .= '?code=' . urlencode($code);
         }
-
-        // Generate SVG QR Code with High error correction ('H' = 30%)
-        // so the center logo overlay doesn't break scannability.
-        // Style: 'square' + 'square' eyes = clean, classic look (change to 'round'/'circle' for a softer style).
         $qrCode = QrCode::size(340)
             ->errorCorrection('H')
             ->margin(1)
-            ->color(30, 37, 45) // AppTheme.primaryDark #1E252D
-            ->backgroundColor(255, 255, 255, 0) // Transparent
-            ->style('square') // square = classic; options: square, dot, round
-            ->eye('square')   // square = classic; options: square, circle
+            ->color(30, 37, 45)
+            ->backgroundColor(255, 255, 255, 0)
+            ->style('square')
+            ->eye('square')
             ->generate($url);
 
-        return view('pages.dashboard.qrcode-client.index', compact('qrCode', 'code', 'url'));
+        return compact('qrCode', 'code', 'url');
+    }
+
+    public function index(Request $request)
+    {
+        $data = $this->buildQrData($request);
+
+        return view('pages.dashboard.qrcode-client.index', $data);
+    }
+
+    /**
+     * Télécharger le QR Code client en PDF.
+     */
+    public function pdf(Request $request)
+    {
+        $data = $this->buildQrData($request);
+
+        $logoPath = public_path('images/logo/logo.png');
+        $logoBase64 = null;
+        if (is_file($logoPath)) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+        $data['logoBase64'] = $logoBase64;
+
+        $pdf = Pdf::loadView('pages.dashboard.qrcode-client.pdf', $data)
+            ->setPaper('a4', 'portrait');
+
+        $filename = $data['code']
+            ? 'qrcode-acces-client-' . $data['code'] . '.pdf'
+            : 'qrcode-acces-client.pdf';
+
+        return $pdf->download($filename);
     }
 }

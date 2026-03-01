@@ -176,6 +176,7 @@ Route::middleware(['auth'])->group(function () {
 
         // QR Code Client Web App
         Route::get('qrcode-client', [\App\Http\Controllers\Dashboard\QrCodeClientController::class, 'index'])->name('qrcode-client.index');
+        Route::get('qrcode-client/pdf', [\App\Http\Controllers\Dashboard\QrCodeClientController::class, 'pdf'])->name('qrcode-client.pdf');
 
         // Commandes
         Route::resource('orders', \App\Http\Controllers\Dashboard\OrderController::class);
