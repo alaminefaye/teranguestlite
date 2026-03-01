@@ -169,6 +169,10 @@ Route::middleware(['auth'])->group(function () {
 
         // Facturation / Notes de chambre (type Opera, Oracle)
         Route::get('billing', [\App\Http\Controllers\Dashboard\BillingController::class, 'index'])->name('billing.index');
+
+        // Rapports & Audits
+        Route::get('reports', [\App\Http\Controllers\Dashboard\ReportsController::class, 'index'])->name('reports.index');
+        Route::get('reports/{type}', [\App\Http\Controllers\Dashboard\ReportsController::class, 'show'])->name('reports.show')->where('type', 'global|overview|reservations|orders|billing|services|audit');
     });
 
     // Routes Guest (Client)

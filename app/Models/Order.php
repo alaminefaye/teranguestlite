@@ -28,8 +28,12 @@ class Order extends Model
         'delivery_notes',
         'confirmed_at',
         'prepared_at',
+        'ready_at',
+        'preparing_at',
+        'delivering_at',
         'delivered_at',
         'settled_at',
+        'cancelled_at',
     ];
 
     protected $casts = [

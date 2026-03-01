@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\Room;
+use App\Services\ActivityLogger;
 use App\Services\FirebaseNotificationService;
 use App\Services\GuestReservationHelper;
 use Illuminate\Http\Request;
@@ -141,6 +142,8 @@ class OrderController extends Controller
 
         // Créer la commande
         $order = Order::create($validated);
+
+        ActivityLogger::log('order_created', 'Commande ' . $order->order_number . ' créée', $order);
 
         // Créer les lignes de commande
         foreach ($itemsData as $itemData) {
@@ -325,6 +328,7 @@ class OrderController extends Controller
             'delivering_at' => now(),
         ]);
 
+        ActivityLogger::log('order_delivering', 'Commande ' . $order->order_number . ' en livraison', $order);
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande en cours de livraison !');
@@ -341,6 +345,7 @@ class OrderController extends Controller
             'delivered_at' => now(),
         ]);
 
+        ActivityLogger::log('order_delivered', 'Commande ' . $order->order_number . ' livrée', $order);
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande livrée avec succès !');
@@ -357,6 +362,7 @@ class OrderController extends Controller
             'cancelled_at' => now(),
         ]);
 
+        ActivityLogger::log('order_cancelled', 'Commande ' . $order->order_number . ' annulée', $order);
         $this->notifyOrderStatusToClient($order);
 
         return back()->with('success', 'Commande annulée.');

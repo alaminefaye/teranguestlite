@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Guest;
 use App\Models\Reservation;
+use App\Services\ActivityLogger;
 use App\Models\ReservationSettlement;
 use App\Models\Room;
 use App\Models\User;
@@ -132,6 +133,8 @@ class ReservationController extends Controller
         $validated['total_price'] = $room->price_per_night * $nights;
 
         $reservation = Reservation::create($validated);
+
+        ActivityLogger::log('reservation_created', 'Réservation ' . $reservation->reservation_number . ' créée (chambre ' . $room->room_number . ')', $reservation);
 
         // Mettre à jour le statut de la chambre si confirmée
         if ($validated['status'] === 'confirmed') {
@@ -337,6 +340,8 @@ class ReservationController extends Controller
             'checked_in_at' => now(),
         ]);
 
+        ActivityLogger::log('reservation_check_in', 'Check-in réservation ' . $reservation->reservation_number, $reservation);
+
         // Mettre à jour le statut de la chambre
         $reservation->room->update(['status' => 'occupied']);
 
@@ -363,6 +368,8 @@ class ReservationController extends Controller
             'checked_out_at' => now(),
         ]);
 
+        ActivityLogger::log('reservation_check_out', 'Check-out réservation ' . $reservation->reservation_number, $reservation);
+
         // Norme : après check-out, la chambre redevient disponible jusqu'à la prochaine réservation (check-in).
         $reservation->room->update(['status' => 'available']);
 
@@ -379,6 +386,8 @@ class ReservationController extends Controller
         }
 
         $reservation->update(['status' => 'cancelled']);
+
+        ActivityLogger::log('reservation_cancelled', 'Réservation ' . $reservation->reservation_number . ' annulée', $reservation);
 
         // Remettre la chambre disponible : si elle était réservée (confirmée) ou occupée (check-in).
         if (in_array($reservation->room->status, ['reserved', 'occupied'], true)) {
