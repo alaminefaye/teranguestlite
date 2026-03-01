@@ -7,7 +7,7 @@
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111; text-align: center; padding: 24px; }
         h1 { font-size: 20px; margin: 0 0 24px 0; color: #1E252D; }
         .qr-wrapper { position: relative; display: inline-block; margin: 0 auto 20px; }
-        .qr-wrapper .qr-svg { display: block; }
+        .qr-wrapper .qr-img { display: block; width: 340px; height: 340px; }
         .qr-wrapper .logo-overlay {
             position: absolute;
             left: 50%;
@@ -31,7 +31,11 @@
     <h1>Votre Accès Client</h1>
 
     <div class="qr-wrapper">
-        <div class="qr-svg">{!! $qrCode !!}</div>
+        @if($qrCodePngBase64 ?? null)
+            <img src="data:image/png;base64,{{ $qrCodePngBase64 }}" alt="QR Code" class="qr-img" width="340" height="340">
+        @elseif($qrCodeSvgDataUri ?? null)
+            <img src="{{ $qrCodeSvgDataUri }}" alt="QR Code" class="qr-img" width="340" height="340">
+        @endif
         @if($logoBase64 ?? null)
             <div class="logo-overlay">
                 <img src="{{ $logoBase64 }}" alt="TeranGuest">
