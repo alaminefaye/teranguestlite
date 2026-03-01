@@ -11,7 +11,7 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Formulaire complet d'enregistrement. Un code à 6 chiffres sera généré pour la tablette en chambre.</p>
 </div>
 
-<div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden" x-data="{ documentType: '{{ old('id_document_type', '') }}' }">
+<div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-visible" x-data="{ documentType: '{{ old('id_document_type', '') }}' }">
     <form action="{{ route('dashboard.guests.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -47,29 +47,39 @@
                         query: '',
                         open: false,
                         get suggestions() {
-                            const q = this.query.toLowerCase().trim();
+                            const q = (this.query || '').toString().toLowerCase().trim();
                             if (!q) return this.nationalities.slice(0, 5);
-                            return this.nationalities.filter(n => n.toLowerCase().includes(q)).slice(0, 10);
+                            return this.nationalities.filter(n => String(n).toLowerCase().includes(q)).slice(0, 10);
                         }
                     }"
-                    x-init="nationalities = JSON.parse($el.dataset.nationalities || '[]'); query = $el.dataset.initialQuery || ''"
+                    x-init="
+                        try { nationalities = JSON.parse($el.dataset.nationalities || '[]'); } catch(e) { nationalities = []; }
+                        query = ($el.dataset.initialQuery || '').trim();
+                        $nextTick(() => { if ($refs.input && $refs.input.value !== undefined) query = $refs.input.value; });
+                    "
                     @click.away="open = false">
                     <label for="nationality_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nationalité</label>
                     <div class="relative">
                         <input type="text" x-ref="input" name="nationality" id="nationality_input" value="{{ old('nationality') }}"
-                            x-model="query" @focus="open = true" @input="open = true"
+                            x-model="query"
+                            @focus="open = true"
+                            @input="open = true"
                             placeholder="Rechercher ou choisir (ex. Sénégalaise, Française)"
                             class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pr-10"
                             autocomplete="off">
                         <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </span>
-                        <ul x-show="open && suggestions.length" x-transition
-                            class="absolute z-10 mt-1 w-full max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1 text-sm">
+                        <ul x-show="open"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            class="absolute z-50 left-0 right-0 mt-1 w-full max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1 text-sm">
                             <template x-for="nat in suggestions" :key="nat">
                                 <li><button type="button" @click="query = nat; open = false; $refs.input.value = nat"
                                         class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700" x-text="nat"></button></li>
                             </template>
+                            <li x-show="open && suggestions.length === 0" class="px-4 py-2 text-gray-500 text-sm">Aucune suggestion</li>
                         </ul>
                     </div>
                     @error('nationality')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
