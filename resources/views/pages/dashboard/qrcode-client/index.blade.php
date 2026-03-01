@@ -42,20 +42,30 @@
         </div>
 
         <!-- Rendered QR Code -->
-        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 flex flex-col items-center text-center"
+        <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900 flex flex-col items-center text-center relative overflow-hidden"
             id="qrCodeContainer">
-            <h3 class="font-medium text-gray-900 dark:text-white mb-6 text-lg">Votre QR Code</h3>
+            <!-- Decorative background blob -->
+            <div
+                class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-brand-500/5 blur-3xl pointer-events-none">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-blue-500/5 blur-3xl pointer-events-none">
+            </div>
+
+            <h3 class="relative font-semibold text-gray-900 dark:text-white mb-8 text-2xl">Votre Accès Client</h3>
 
             <div
-                class="relative inline-flex bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:bg-whiteQRBackground">
+                class="relative inline-flex bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 dark:bg-whiteQRBackground transition-transform duration-300 hover:scale-105 z-10">
                 <!-- QR Code SVG -->
-                {!! $qrCode !!}
+                <div class="opacity-95">
+                    {!! $qrCode !!}
+                </div>
 
                 <!-- Logo Overlay in the center (absolutely positioned over SVG) -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="bg-white p-1 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] flex items-center justify-center"
-                        style="width: 60px; height: 60px;">
-                        <img src="{{ asset('images/logo/logo.png') }}" class="w-11 h-11 object-contain rounded-full"
+                    <div class="bg-white p-1.5 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.2)] flex items-center justify-center border-[3px] border-brand-500 bg-clip-padding"
+                        style="width: 76px; height: 76px;">
+                        <img src="{{ asset('images/logo/logo.png') }}" class="w-14 h-14 object-contain rounded-full"
                             alt="Teranga Guest" onerror="this.style.display='none'">
                     </div>
                 </div>
