@@ -212,6 +212,18 @@ class _LocalizedAppState extends State<_LocalizedApp>
         final type = notif['type'] as String? ?? '';
         if (type != 'room_service_transfer') continue;
 
+        // Cette notification est réservée au département "Service en chambre" et aux admins
+        if (auth.isStaff &&
+            (auth.user?.department ?? '') != 'Service en chambre') {
+          // Marquer comme lue silencieusement pour ne plus la retrouver au prochain cycle
+          final notifId = notif['id'];
+          final id = notifId is int
+              ? notifId
+              : int.tryParse(notifId?.toString() ?? '');
+          if (id != null) await notificationsApi.markAsRead(id);
+          continue;
+        }
+
         final notifId = notif['id'];
         final id = notifId is int
             ? notifId

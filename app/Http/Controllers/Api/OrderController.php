@@ -598,33 +598,27 @@ class OrderController extends Controller
         try {
             $firebaseService = app(FirebaseNotificationService::class);
 
-            // Envoi FCM à tous les staff room_service_orders (dont service en chambre)
-            $firebaseService->sendToStaffForSection(
-                $order->enterprise_id,
-                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
-                $title,
-                $body,
-                $data
-            );
-
-            // Stockage en base (fallback garanti — visible dans la cloche de notif)
-            $staffUsers = \App\Models\User::where('enterprise_id', $order->enterprise_id)
-                ->whereIn('role', ['admin', 'staff'])
+            // Cibler UNIQUEMENT les admins + staff "Service en chambre"
+            // (pas la cuisine, pas les autres départements)
+            $recipients = \App\Models\User::where('enterprise_id', $order->enterprise_id)
                 ->where(function ($q) {
                     $q->where('role', 'admin')
                         ->orWhere(function ($q2) {
                             $q2->where('role', 'staff')
-                                ->where(function ($q3) {
-                                    $q3->whereNull('managed_sections')
-                                        ->orWhereJsonContains('managed_sections', \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS);
-                                });
+                                ->where('department', 'Service en chambre');
                         });
                 })
                 ->get();
 
-            foreach ($staffUsers as $staffUser) {
+            // Envoi FCM à chaque destinataire
+            foreach ($recipients as $recipient) {
+                $firebaseService->sendToUser($recipient, $title, $body, $data);
+            }
+
+            // Stockage en base (fallback polling garanti)
+            foreach ($recipients as $recipient) {
                 \App\Models\Notification::create([
-                    'user_id' => $staffUser->id,
+                    'user_id' => $recipient->id,
                     'title' => $title,
                     'body' => $body,
                     'type' => 'room_service_transfer',
@@ -633,7 +627,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            Log::info("room_service_transfer: notification envoyée + stockée en base pour {$staffUsers->count()} staff(s). Commande #{$order->order_number}");
+            Log::info("room_service_transfer: envoyé à {$recipients->count()} destinataire(s) (service en chambre + admins). Commande #{$order->order_number}");
         } catch (\Exception $e) {
             Log::error('Firebase notification error (notify-room-service): ' . $e->getMessage(), ['order_id' => $order->id]);
         }
