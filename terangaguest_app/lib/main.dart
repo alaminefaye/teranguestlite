@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'src/platform_check_stub.dart'
@@ -60,21 +61,24 @@ void main() async {
   // IMPORTANT: Ensure bindings are initialized FIRST
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
-  await Firebase.initializeApp();
+  // Pour le web, on ignore FCM car on veut juste afficher le site via QR Code.
+  if (!kIsWeb) {
+    // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
+    await Firebase.initializeApp();
 
-  // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
-  // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
-  if (platform_check.isAndroid) {
-    _pendingInitialFcmMessage = await FirebaseMessaging.instance
-        .getInitialMessage();
-  } else {
-    FirebaseMessaging.instance.getInitialMessage().then((msg) {
-      _pendingInitialFcmMessage = msg;
-    });
+    // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
+    // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
+    if (platform_check.isAndroid) {
+      _pendingInitialFcmMessage = await FirebaseMessaging.instance
+          .getInitialMessage();
+    } else {
+      FirebaseMessaging.instance.getInitialMessage().then((msg) {
+        _pendingInitialFcmMessage = msg;
+      });
+    }
   }
 
   // Initialiser le locale français pour les dates
@@ -159,10 +163,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
       context
           .read<TabletSessionProvider>()
           .load(); // ← charge la session invité depuis SharedPreferences
-      _setupFcmListeners();
-      // Enregistrer le token FCM dès le premier lancement (Android : crée le canal et permet les notifs app fermée)
-      _fcmService.registerTokenIfNeeded();
-      _handleInitialFcmMessage();
+      if (!kIsWeb) {
+        _setupFcmListeners();
+        // Enregistrer le token FCM dès le premier lancement (Android : crée le canal et permet les notifs app fermée)
+        _fcmService.registerTokenIfNeeded();
+        _handleInitialFcmMessage();
+      }
       // Polling des notifications en base (fallback garanti pour le staff)
       _startStaffNotificationPolling();
     });
@@ -180,7 +186,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
+    if (!kIsWeb && state == AppLifecycleState.resumed) {
       _fcmService.registerTokenIfNeeded();
     }
   }
@@ -214,7 +220,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
         // Seul le département "Service en chambre" doit voir ce popup
         // Les admins et les autres staffs (cuisine, etc.) l'ignorent
-        final isRoomServiceStaff = auth.isStaff &&
+        final isRoomServiceStaff =
+            auth.isStaff &&
             (auth.user?.department ?? '') == 'Service en chambre';
         if (!isRoomServiceStaff) {
           // Marquer comme lue silencieusement pour ne plus la retrouver au prochain cycle
@@ -290,7 +297,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
           final ctx = rootNavigatorKey.currentContext;
           if (ctx == null) return;
           final auth = ctx.read<AuthProvider>();
-          final isRoomService = auth.isStaff &&
+          final isRoomService =
+              auth.isStaff &&
               (auth.user?.department ?? '') == 'Service en chambre';
           if (isRoomService) {
             _handleRoomServiceTransferNotification(data);
