@@ -128,4 +128,17 @@ class OrdersApi {
       rethrow;
     }
   }
+
+  /// Annule une commande par le staff/admin avec notification au client.
+  Future<void> cancelByStaff(int orderId, String reason) async {
+    try {
+      await _apiService.post(
+        '${ApiConfig.orders}/$orderId/cancel-by-staff',
+        data: {'reason': reason},
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ API Error cancelByStaff: $e');
+      rethrow;
+    }
+  }
 }

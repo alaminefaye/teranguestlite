@@ -138,6 +138,15 @@ class OrdersProvider with ChangeNotifier {
     }
   }
 
+  /// Annule une commande (par le staff/admin) avec notification au client.
+  Future<void> cancelByStaff(int orderId, String reason) async {
+    try {
+      await _ordersApi.cancelByStaff(orderId, reason);
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
   /// Rafraîchir les commandes
   Future<void> refreshOrders() async {
     await fetchOrders(status: _selectedStatus, period: _selectedPeriod);

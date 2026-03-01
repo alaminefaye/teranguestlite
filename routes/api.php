@@ -83,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::post('/{id}/reorder', [OrderController::class, 'reorder']);
         Route::post('/{id}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{id}/cancel-by-staff', [OrderController::class, 'cancelByStaff']);
         Route::post('/{id}/status', [OrderController::class, 'updateStatus']);
         Route::post('/{id}/notify-room-service', [OrderController::class, 'notifyRoomService']);
     });

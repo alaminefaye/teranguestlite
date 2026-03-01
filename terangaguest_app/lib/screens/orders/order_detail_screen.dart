@@ -977,7 +977,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
     final allActions = [...kitchenActions, ...deliveryActions];
 
-    if (allActions.isEmpty && !(status == 'ready' && _canSeeTransferButton())) {
+    // Le bouton "Annuler" est visible pour admin + cuisine (pas service en chambre)
+    // uniquement si la commande est encore annulable
+    final isCancellable = !isRoomService &&
+        ['pending', 'confirmed', 'preparing'].contains(status);
+
+    if (allActions.isEmpty &&
+        !(status == 'ready' && _canSeeTransferButton()) &&
+        !isCancellable) {
       return const SizedBox.shrink();
     }
 
@@ -1004,6 +1011,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             ),
           );
         }),
+        // Bouton "Annuler la commande" — admin + cuisine uniquement
+        if (isCancellable) ...[
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AnimatedButton(
+              text: 'Annuler la commande',
+              onPressed: _handleCancelByStaff,
+              width: double.infinity,
+              height: 52,
+              backgroundColor: Colors.red.shade700,
+              textColor: Colors.white,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1178,6 +1200,154 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.errorPrefix}$message'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleCancelByStaff() async {
+    if (_order == null) return;
+
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Colors.redAccent, width: 1.5),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Annuler la commande',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Commande #${_order!.orderNumber}',
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Le client sera notifié avec le motif saisi.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                autofocus: true,
+                maxLines: 3,
+                maxLength: 255,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Motif de l\'annulation…',
+                  hintStyle: const TextStyle(color: Colors.white38),
+                  filled: true,
+                  fillColor: Colors.white10,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppTheme.accentGold),
+                  ),
+                  counterStyle: const TextStyle(color: Colors.white38),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(
+                'Annuler',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (reasonController.text.trim().isEmpty) return;
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text(
+                'Confirmer l\'annulation',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    final reason = reasonController.text.trim();
+    if (reason.isEmpty) return;
+
+    try {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+          ),
+        ),
+      );
+
+      await context.read<OrdersProvider>().cancelByStaff(_order!.id, reason);
+      await _loadOrderDetail();
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Commande annulée — le client a été notifié.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      String message = 'Impossible d\'annuler la commande.';
+      if (e is DioException) {
+        final serverMsg = e.response?.data?['message'] as String?;
+        if (serverMsg != null && serverMsg.isNotEmpty) {
+          message = serverMsg;
+        }
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur : $message'),
           backgroundColor: Colors.red,
         ),
       );

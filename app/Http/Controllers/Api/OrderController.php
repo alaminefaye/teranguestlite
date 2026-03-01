@@ -419,6 +419,85 @@ class OrderController extends Controller
         ], 200);
     }
 
+    /**
+     * Annuler une commande par un staff/admin avec notification au client.
+     */
+    public function cancelByStaff(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!($user->isAdmin() || $user->isStaff())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès réservé au staff de l\'hôtel.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        $reason = trim($validated['reason']);
+
+        $order = Order::where('id', $id)
+            ->where('enterprise_id', $user->enterprise_id)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée.',
+            ], 404);
+        }
+
+        $cancelAllowed = in_array($order->status, ['pending', 'confirmed', 'preparing'], true);
+        if (!$cancelAllowed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette commande ne peut plus être annulée (elle est déjà prête, en livraison ou livrée).',
+            ], 400);
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        // Notifier le client (guest) de la chambre
+        try {
+            $firebaseService = app(FirebaseNotificationService::class);
+            $roomNumber = $order->room ? $order->room->room_number : null;
+
+            $body = "Votre commande #{$order->order_number} a été annulée par l'hôtel.";
+            if ($reason !== '') {
+                $body .= " Motif : {$reason}";
+            }
+
+            $data = [
+                'type'         => 'order_status',
+                'order_id'     => (string) $order->id,
+                'order_number' => $order->order_number,
+                'status'       => 'cancelled',
+                'reason'       => $reason,
+                'room_number'  => $roomNumber,
+            ];
+
+            if ($order->room_id) {
+                $firebaseService->sendToClientOfRoom($order->room_id, 'Commande annulée', $body, $data);
+            }
+
+            Log::info("cancelByStaff: commande #{$order->order_number} annulée par staff {$user->id}, client notifié. Motif: {$reason}");
+        } catch (\Exception $e) {
+            Log::error('Firebase notification error (cancelByStaff): ' . $e->getMessage(), ['order_id' => $order->id]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Commande annulée.',
+            'data' => [
+                'id'           => $order->id,
+                'order_number' => $order->order_number,
+                'status'       => $order->status,
+            ],
+        ], 200);
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $user = $request->user();
