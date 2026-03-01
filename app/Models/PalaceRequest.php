@@ -53,4 +53,16 @@ class PalaceRequest extends Model
     {
         return $this->estimated_price ? number_format($this->estimated_price, 0, ',', ' ') . ' FCFA' : 'Sur demande';
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'pending' => 'En attente',
+            'confirmed' => 'Confirmée',
+            'in_progress' => 'En cours',
+            'completed' => 'Terminée',
+            'cancelled' => 'Annulée',
+            default => $this->status,
+        };
+    }
 }

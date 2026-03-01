@@ -99,10 +99,12 @@
                         <td class="px-4 py-3">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium
                                 @if($req->status === 'pending') bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400
+                                @elseif($req->status === 'confirmed') bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400
+                                @elseif($req->status === 'in_progress') bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400
                                 @elseif($req->status === 'completed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400
                                 @elseif($req->status === 'cancelled') bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400
-                                @else bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400 @endif">
-                                {{ $req->status }}
+                                @else bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 @endif">
+                                {{ $req->status_label }}
                             </span>
                         </td>
                         <td class="px-4 py-3">
