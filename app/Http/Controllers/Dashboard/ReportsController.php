@@ -16,6 +16,7 @@ use App\Models\SpaReservation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -57,7 +58,7 @@ class ReportsController extends Controller
     /**
      * Afficher un rapport (données à l'écran).
      */
-    public function show(Request $request, string $type): View|StreamedResponse
+    public function show(Request $request, string $type): View|StreamedResponse|Response
     {
         $validTypes = ['global', 'overview', 'reservations', 'orders', 'billing', 'services', 'audit'];
         if (!in_array($type, $validTypes, true)) {
