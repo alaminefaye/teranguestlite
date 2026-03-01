@@ -24,10 +24,9 @@ Route::middleware(['auth'])->group(function () {
 
 // Routes protégées (à ajouter middleware auth plus tard)
 Route::middleware(['auth'])->group(function () {
-    // Profile
-    Route::get('/profile', function () {
-        return view('pages.profile', ['title' => 'Profil']);
-    })->name('profile');
+    // Profil (utilisateur + données établissement pour modifier son entreprise directement)
+    Route::get('/profile', [\App\Http\Controllers\Dashboard\ProfileController::class, 'index'])->name('profile');
+    Route::put('/dashboard/my-enterprise', [\App\Http\Controllers\Dashboard\ProfileController::class, 'updateEnterprise'])->name('dashboard.my-enterprise.update');
 
     // Routes Super Admin
     Route::prefix('admin')->name('admin.')->middleware(['enterprise'])->group(function () {
