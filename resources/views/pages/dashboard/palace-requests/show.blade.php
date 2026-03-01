@@ -6,6 +6,13 @@
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Demande {{ $request->request_number }}</h1>
 </div>
 
+@if(session('success'))
+    <div class="mb-6 rounded-lg bg-success-50 p-4 text-success-600 dark:bg-success-500/10 dark:text-success-400">{{ session('success') }}</div>
+@endif
+@if(session('error'))
+    <div class="mb-6 rounded-lg bg-error-50 p-4 text-error-600 dark:bg-error-500/10 dark:text-error-400">{{ session('error') }}</div>
+@endif
+
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <!-- Infos générales -->
     <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
@@ -31,6 +38,15 @@
             </div>
             <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Créée le</dt><dd>{{ $request->created_at?->format('d/m/Y H:i') }}</dd></div>
         </dl>
+        @if($request->status !== 'cancelled')
+        <div class="mt-6 flex flex-wrap gap-2">
+            <a href="{{ route('dashboard.palace-requests.edit', $request) }}" class="inline-flex items-center px-4 py-2 rounded-md bg-brand-500 text-white hover:bg-brand-600">Modifier</a>
+            <form action="{{ route('dashboard.palace-requests.cancel', $request) }}" method="POST" class="inline" onsubmit="return confirm('Confirmer l\'annulation de cette demande ?')">
+                @csrf
+                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-warning-500 text-white hover:bg-warning-600">Annuler la demande</button>
+            </form>
+        </div>
+        @endif
     </div>
 
     <!-- Description + Détails véhicule (metadata) -->

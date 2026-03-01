@@ -124,11 +124,34 @@ Route::middleware(['auth'])->group(function () {
 
         // Réservations & demandes (spa, excursions, restaurants, blanchisserie, palace)
         Route::get('spa-reservations', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'index'])->name('spa-reservations.index');
+        Route::get('spa-reservations/{spaReservation}', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'show'])->name('spa-reservations.show');
+        Route::get('spa-reservations/{spaReservation}/edit', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'edit'])->name('spa-reservations.edit');
+        Route::put('spa-reservations/{spaReservation}', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'update'])->name('spa-reservations.update');
+        Route::post('spa-reservations/{spaReservation}/cancel', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'cancel'])->name('spa-reservations.cancel');
+
         Route::get('excursion-bookings', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'index'])->name('excursion-bookings.index');
+        Route::get('excursion-bookings/{excursionBooking}', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'show'])->name('excursion-bookings.show');
+        Route::get('excursion-bookings/{excursionBooking}/edit', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'edit'])->name('excursion-bookings.edit');
+        Route::put('excursion-bookings/{excursionBooking}', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'update'])->name('excursion-bookings.update');
+        Route::post('excursion-bookings/{excursionBooking}/cancel', [\App\Http\Controllers\Dashboard\ExcursionBookingsController::class, 'cancel'])->name('excursion-bookings.cancel');
+
         Route::get('restaurant-reservations', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'index'])->name('restaurant-reservations.index');
+        Route::get('restaurant-reservations/{restaurantReservation}', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'show'])->name('restaurant-reservations.show');
+        Route::get('restaurant-reservations/{restaurantReservation}/edit', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'edit'])->name('restaurant-reservations.edit');
+        Route::put('restaurant-reservations/{restaurantReservation}', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'update'])->name('restaurant-reservations.update');
+        Route::post('restaurant-reservations/{restaurantReservation}/cancel', [\App\Http\Controllers\Dashboard\RestaurantReservationsController::class, 'cancel'])->name('restaurant-reservations.cancel');
+
         Route::get('laundry-requests', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'index'])->name('laundry-requests.index');
+        Route::get('laundry-requests/{laundryRequest}', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'show'])->name('laundry-requests.show');
+        Route::get('laundry-requests/{laundryRequest}/edit', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'edit'])->name('laundry-requests.edit');
+        Route::put('laundry-requests/{laundryRequest}', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'update'])->name('laundry-requests.update');
+        Route::post('laundry-requests/{laundryRequest}/cancel', [\App\Http\Controllers\Dashboard\LaundryRequestsController::class, 'cancel'])->name('laundry-requests.cancel');
+
         Route::get('palace-requests', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'index'])->name('palace-requests.index');
         Route::get('palace-requests/{palaceRequest}', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'show'])->name('palace-requests.show');
+        Route::get('palace-requests/{palaceRequest}/edit', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'edit'])->name('palace-requests.edit');
+        Route::put('palace-requests/{palaceRequest}', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'update'])->name('palace-requests.update');
+        Route::post('palace-requests/{palaceRequest}/cancel', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'cancel'])->name('palace-requests.cancel');
 
         // Véhicules (location avec chauffeur)
         Route::resource('vehicles', \App\Http\Controllers\Dashboard\VehicleController::class);

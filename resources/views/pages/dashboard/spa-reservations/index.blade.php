@@ -72,6 +72,7 @@
                     <th class="px-4 py-3">Client</th>
                     <th class="px-4 py-3 text-right">Prix</th>
                     <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -85,9 +86,18 @@
                         <td class="px-4 py-3">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium @if($r->status === 'confirmed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400 @elseif($r->status === 'cancelled') bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400 @else bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400 @endif">{{ $r->status }}</span>
                         </td>
+                        <td class="px-4 py-3">
+                            <x-action-buttons
+                                :showRoute="route('dashboard.spa-reservations.show', $r)"
+                                :editRoute="$r->status !== 'cancelled' ? route('dashboard.spa-reservations.edit', $r) : null"
+                                :cancelRoute="$r->status !== 'cancelled' ? route('dashboard.spa-reservations.cancel', $r) : null"
+                                :canCancel="$r->status !== 'cancelled'"
+                                :canDelete="false"
+                            />
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune réservation spa</td></tr>
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune réservation spa</td></tr>
                 @endforelse
             </tbody>
         </table>

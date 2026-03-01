@@ -36,6 +36,7 @@
                     <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
                     <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>En cours</option>
                     <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Terminée</option>
+                    <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Annulée</option>
                 </select>
             </div>
             <div>
@@ -72,6 +73,7 @@
                     <th class="px-4 py-3">Chambre</th>
                     <th class="px-4 py-3 text-right">Total</th>
                     <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -83,11 +85,20 @@
                         <td class="px-4 py-3">{{ $req->room?->room_number ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">{{ $req->formatted_total_price }}</td>
                         <td class="px-4 py-3">
-                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium @if($req->status === 'pending') bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400 @elseif($req->status === 'completed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400 @else bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400 @endif">{{ $req->status }}</span>
+                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium @if($req->status === 'pending') bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400 @elseif($req->status === 'completed') bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400 @elseif($req->status === 'cancelled') bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400 @else bg-blue-light-50 text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400 @endif">{{ $req->status }}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <x-action-buttons
+                                :showRoute="route('dashboard.laundry-requests.show', $req)"
+                                :editRoute="$req->status !== 'cancelled' ? route('dashboard.laundry-requests.edit', $req) : null"
+                                :cancelRoute="$req->status !== 'cancelled' ? route('dashboard.laundry-requests.cancel', $req) : null"
+                                :canCancel="$req->status !== 'cancelled'"
+                                :canDelete="false"
+                            />
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande blanchisserie</td></tr>
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Aucune demande blanchisserie</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\LaundryRequest;
 use App\Models\Room;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -44,5 +45,47 @@ class LaundryRequestsController extends Controller
         $rooms = Room::orderBy('room_number')->get(['id', 'room_number']);
 
         return view('pages.dashboard.laundry-requests.index', compact('requests', 'stats', 'rooms'));
+    }
+
+    public function show(LaundryRequest $laundryRequest): View
+    {
+        $laundryRequest->load(['user', 'room']);
+        return view('pages.dashboard.laundry-requests.show', ['request' => $laundryRequest]);
+    }
+
+    public function edit(LaundryRequest $laundryRequest): View
+    {
+        $laundryRequest->load(['user', 'room']);
+        $rooms = Room::orderBy('room_number')->get(['id', 'room_number']);
+        return view('pages.dashboard.laundry-requests.edit', ['request' => $laundryRequest, 'rooms' => $rooms]);
+    }
+
+    public function update(Request $request, LaundryRequest $laundryRequest): RedirectResponse
+    {
+        if ($laundryRequest->status === 'cancelled') {
+            return redirect()->route('dashboard.laundry-requests.show', $laundryRequest)->with('error', 'Une demande annulée ne peut pas être modifiée.');
+        }
+        $validated = $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+            'pickup_time' => 'nullable|date',
+            'delivery_time' => 'nullable|date',
+            'special_instructions' => 'nullable|string|max:500',
+        ]);
+        $laundryRequest->update([
+            'status' => $validated['status'],
+            'pickup_time' => $validated['pickup_time'] ?? $laundryRequest->pickup_time,
+            'delivery_time' => $validated['delivery_time'] ?? $laundryRequest->delivery_time,
+            'special_instructions' => $validated['special_instructions'],
+        ]);
+        return redirect()->route('dashboard.laundry-requests.show', $laundryRequest)->with('success', 'Demande mise à jour.');
+    }
+
+    public function cancel(Request $request, LaundryRequest $laundryRequest): RedirectResponse
+    {
+        if ($laundryRequest->status === 'cancelled') {
+            return redirect()->back()->with('info', 'Cette demande est déjà annulée.');
+        }
+        $laundryRequest->update(['status' => 'cancelled']);
+        return redirect()->route('dashboard.laundry-requests.index')->with('success', 'Demande annulée.');
     }
 }

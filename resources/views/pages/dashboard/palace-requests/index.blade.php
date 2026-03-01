@@ -108,6 +108,9 @@
                         <td class="px-4 py-3">
                             <x-action-buttons
                                 :showRoute="route('dashboard.palace-requests.show', $req)"
+                                :editRoute="$req->status !== 'cancelled' ? route('dashboard.palace-requests.edit', $req) : null"
+                                :cancelRoute="$req->status !== 'cancelled' ? route('dashboard.palace-requests.cancel', $req) : null"
+                                :canCancel="$req->status !== 'cancelled'"
                                 :canDelete="false"
                             />
                         </td>
