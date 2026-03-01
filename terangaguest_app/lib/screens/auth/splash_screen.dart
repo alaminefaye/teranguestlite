@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../admin/admin_home_screen.dart';
 import 'login_screen.dart';
+import 'web_login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -146,9 +148,24 @@ class _SplashScreenState extends State<SplashScreen>
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => home));
     } else {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+      // Si on est sur le Web, on redirige vers WebLoginScreen
+      if (kIsWeb) {
+        String? initialCode;
+        // Tenter de récupérer le code depuis l'URL si dispo
+        if (Uri.base.queryParameters.containsKey('code')) {
+          initialCode = Uri.base.queryParameters['code'];
+        }
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => WebLoginScreen(initialCode: initialCode),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
     }
   }
 

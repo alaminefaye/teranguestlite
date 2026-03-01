@@ -38,13 +38,13 @@ Route::middleware(['auth'])->group(function () {
     // Routes Admin Hôtel
     Route::prefix('dashboard')->name('dashboard.')->middleware(['enterprise'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
-        
+
         // Chambres
         Route::resource('rooms', \App\Http\Controllers\Dashboard\RoomController::class);
-        
+
         // Réservations
         Route::resource('reservations', \App\Http\Controllers\Dashboard\ReservationController::class);
-        
+
         // Actions réservations
         Route::post('reservations/{reservation}/checkin', [\App\Http\Controllers\Dashboard\ReservationController::class, 'checkIn'])
             ->name('reservations.checkin');
@@ -58,19 +58,19 @@ Route::middleware(['auth'])->group(function () {
             ->name('reservations.invoice');
         Route::get('reservations/{reservation}/invoice/pdf', [\App\Http\Controllers\Dashboard\ReservationController::class, 'invoicePdf'])
             ->name('reservations.invoice.pdf');
-        
+
         // Clients (invités) - code tablette
         Route::resource('guests', \App\Http\Controllers\Dashboard\GuestController::class);
         Route::post('guests/{guest}/regenerate-code', [\App\Http\Controllers\Dashboard\GuestController::class, 'regenerateCode'])
             ->name('guests.regenerate-code');
-        
+
         // Menus
         Route::resource('menu-categories', \App\Http\Controllers\Dashboard\MenuCategoryController::class);
         Route::resource('menu-items', \App\Http\Controllers\Dashboard\MenuItemController::class);
-        
+
         // Restaurants & Bars
         Route::resource('restaurants', \App\Http\Controllers\Dashboard\RestaurantController::class);
-        
+
         // Services Spa
         Route::resource('spa-services', \App\Http\Controllers\Dashboard\SpaServiceController::class);
         Route::post('spa-services/{spa_service}/toggle', [\App\Http\Controllers\Dashboard\SpaServiceController::class, 'toggleActive'])->name('spa-services.toggle');
@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'update'])->name('leisure-categories.subcategories.update');
         Route::delete('leisure-categories/{leisure_category}/subcategories/{subcategory}', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'destroy'])->name('leisure-categories.subcategories.destroy');
         Route::post('leisure-categories/{leisure_category}/subcategories/{subcategory}/toggle', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'toggleActive'])->name('leisure-categories.subcategories.toggle');
-        
+
         // Blanchisserie
         Route::resource('laundry-services', \App\Http\Controllers\Dashboard\LaundryServiceController::class);
         Route::post('laundry-services/{laundry_service}/toggle', [\App\Http\Controllers\Dashboard\LaundryServiceController::class, 'toggleActive'])->name('laundry-services.toggle');
@@ -117,7 +117,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'update'])->name('amenity-categories.items.update');
         Route::delete('amenity-categories/{amenity_category}/items/{item}', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'destroy'])->name('amenity-categories.items.destroy');
         Route::post('amenity-categories/{amenity_category}/items/{item}/toggle', [\App\Http\Controllers\Dashboard\AmenityItemController::class, 'toggleActive'])->name('amenity-categories.items.toggle');
-        
+
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);
         Route::post('excursions/{excursion}/toggle', [\App\Http\Controllers\Dashboard\ExcursionController::class, 'toggleActive'])->name('excursions.toggle');
@@ -156,7 +156,7 @@ Route::middleware(['auth'])->group(function () {
         // Véhicules (location avec chauffeur)
         Route::resource('vehicles', \App\Http\Controllers\Dashboard\VehicleController::class);
         Route::post('vehicles/{vehicle}/toggle', [\App\Http\Controllers\Dashboard\VehicleController::class, 'toggleActive'])->name('vehicles.toggle');
-        
+
         // Staff (personnel de l'hôtel)
         Route::get('staff', [\App\Http\Controllers\Dashboard\StaffController::class, 'index'])->name('staff.index');
         Route::get('staff/create', [\App\Http\Controllers\Dashboard\StaffController::class, 'create'])->name('staff.create');
@@ -172,10 +172,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('tablet-accesses/{id}/edit', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'edit'])->name('tablet-accesses.edit');
         Route::put('tablet-accesses/{id}', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'update'])->name('tablet-accesses.update');
         Route::delete('tablet-accesses/{id}', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'destroy'])->name('tablet-accesses.destroy');
+        Route::post('tablet-accesses/{id}/regenerate-client-code', [\App\Http\Controllers\Dashboard\TabletAccessController::class, 'regenerateClientCode'])->name('tablet-accesses.regenerate-client-code');
 
         // Commandes
         Route::resource('orders', \App\Http\Controllers\Dashboard\OrderController::class);
-        
+
         // Actions commandes
         Route::post('orders/{order}/confirm', [\App\Http\Controllers\Dashboard\OrderController::class, 'confirm'])
             ->name('orders.confirm');
@@ -209,11 +210,11 @@ Route::middleware(['auth'])->group(function () {
     // Routes Guest (Client)
     Route::prefix('guest')->name('guest.')->middleware(['enterprise'])->group(function () {
         Route::get('/', [\App\Http\Controllers\Guest\GuestDashboardController::class, 'index'])->name('dashboard');
-        
+
         // Services centraux
         Route::get('/services', [\App\Http\Controllers\Guest\ServicesController::class, 'index'])
             ->name('services.index');
-        
+
         // Room Service
         Route::get('/room-service', [\App\Http\Controllers\Guest\RoomServiceController::class, 'index'])
             ->name('room-service.index');
@@ -223,7 +224,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('room-service.checkout');
         Route::get('/room-service/{menuItem}', [\App\Http\Controllers\Guest\RoomServiceController::class, 'show'])
             ->name('room-service.show');
-        
+
         // Commandes
         Route::get('/orders', [\App\Http\Controllers\Guest\OrderController::class, 'index'])
             ->name('orders.index');
@@ -231,7 +232,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('orders.show');
         Route::post('/orders/{order}/reorder', [\App\Http\Controllers\Guest\OrderController::class, 'reorder'])
             ->name('orders.reorder');
-        
+
         // Restaurants
         Route::get('/restaurants', [\App\Http\Controllers\Guest\RestaurantController::class, 'index'])
             ->name('restaurants.index');
@@ -241,7 +242,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('restaurants.reserve');
         Route::get('/my-restaurant-reservations', [\App\Http\Controllers\Guest\RestaurantController::class, 'myReservations'])
             ->name('restaurants.my-reservations');
-        
+
         // Spa
         Route::get('/spa', [\App\Http\Controllers\Guest\SpaServiceController::class, 'index'])
             ->name('spa.index');
@@ -251,7 +252,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('spa.reserve');
         Route::get('/my-spa-reservations', [\App\Http\Controllers\Guest\SpaServiceController::class, 'myReservations'])
             ->name('spa.my-reservations');
-        
+
         // Excursions
         Route::get('/excursions', [\App\Http\Controllers\Guest\ExcursionController::class, 'index'])
             ->name('excursions.index');
@@ -261,7 +262,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('excursions.book');
         Route::get('/my-excursion-bookings', [\App\Http\Controllers\Guest\ExcursionController::class, 'myBookings'])
             ->name('excursions.my-bookings');
-        
+
         // Blanchisserie
         Route::get('/laundry', [\App\Http\Controllers\Guest\LaundryServiceController::class, 'index'])
             ->name('laundry.index');
@@ -269,7 +270,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('laundry.request');
         Route::get('/my-laundry-requests', [\App\Http\Controllers\Guest\LaundryServiceController::class, 'myRequests'])
             ->name('laundry.my-requests');
-        
+
         // Services Palace
         Route::get('/palace', [\App\Http\Controllers\Guest\PalaceServiceController::class, 'index'])
             ->name('palace.index');
@@ -296,6 +297,11 @@ Route::get('/', function () {
     }
     return redirect()->route('login');
 });
+
+// App Web Client (Flutter Routing)
+Route::get('/client/{any}', function () {
+    return file_get_contents(public_path('client/index.html'));
+})->where('any', '.*');
 
 // Pages TailAdmin (Form, Tables, Charts, UI, Blank, Error)
 Route::get('/form-elements', function () {

@@ -66,6 +66,51 @@ class AuthService {
     }
   }
 
+  /// Login Web avec Code Client
+  Future<Map<String, dynamic>> webLogin({required String clientCode}) async {
+    try {
+      final response = await _apiService.post(
+        ApiConfig.webLogin,
+        data: {'client_code': clientCode},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        if (data['success'] == true) {
+          final userData = data['data']['user'];
+          final token = data['data']['token'] as String;
+
+          final user = User.fromJson(userData);
+
+          await _secureStorage.saveToken(token);
+          await _secureStorage.saveUser(user);
+          await _secureStorage.setRememberMe(
+            true,
+          ); // Toujours se souvenir sur web client
+
+          _apiService.setAuthToken(token);
+
+          return {'user': user, 'token': token};
+        } else {
+          throw Exception(data['message'] ?? 'Erreur de connexion');
+        }
+      } else {
+        throw Exception('Erreur serveur: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorData = e.response?.data;
+        if (errorData is Map && errorData.containsKey('message')) {
+          throw Exception(errorData['message']);
+        }
+        throw Exception('Code client invalide');
+      } else {
+        throw Exception('Impossible de se connecter au serveur');
+      }
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     try {

@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ChatController as ApiChatController;
 // ==========================================
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/web-login', [AuthController::class, 'webLogin']);
 });
 
 // ==========================================
@@ -44,7 +45,7 @@ Route::prefix('tablet')->group(function () {
 // ROUTES PROTÉGÉES (Authentification requise)
 // ==========================================
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // ==========================================
     // AUTHENTIFICATION
     // ==========================================
@@ -53,19 +54,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::get('/profile', [AuthController::class, 'profile']);
     });
-    
+
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);
-    
+
     // Récapitulatif admin (badges & compteurs)
     Route::get('/admin-summary', [AdminSummaryController::class, 'index']);
-    
+
     // ==========================================
     // FCM TOKEN MANAGEMENT
     // ==========================================
     Route::post('/fcm-token', [FcmTokenController::class, 'store']);
     Route::delete('/fcm-token', [FcmTokenController::class, 'destroy']);
-    
+
     // ==========================================
     // ROOM SERVICE (Menu & Articles)
     // ==========================================
@@ -75,7 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/items/{id}', [RoomServiceController::class, 'show']);
         Route::post('/checkout', [RoomServiceController::class, 'checkout']);
     });
-    
+
     // ==========================================
     // COMMANDES (Orders)
     // ==========================================
@@ -88,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/status', [OrderController::class, 'updateStatus']);
         Route::post('/{id}/notify-room-service', [OrderController::class, 'notifyRoomService']);
     });
-    
+
     // ==========================================
     // RESTAURANTS & BARS
     // ==========================================
@@ -100,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-restaurant-reservations', [RestaurantController::class, 'myReservations']);
     Route::post('/my-restaurant-reservations/{id}/cancel', [RestaurantController::class, 'cancelReservation']);
     Route::post('/restaurant-reservations/{id}/status', [RestaurantController::class, 'updateReservationStatus']);
-    
+
     // ==========================================
     // SPA & BIEN-ÊTRE
     // ==========================================
@@ -113,7 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/my-spa-reservations/{id}/cancel', [SpaServiceController::class, 'cancelReservation']);
     Route::post('/spa-reservations/{id}/status', [SpaServiceController::class, 'updateReservationStatus']);
     Route::post('/my-spa-reservations/{id}/accept-reschedule', [SpaServiceController::class, 'acceptRescheduledReservation']);
-    
+
     // ==========================================
     // EXCURSIONS
     // ==========================================
@@ -124,7 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-excursion-bookings', [ExcursionController::class, 'myBookings']);
     Route::post('/excursion-bookings/{id}/status', [ExcursionController::class, 'updateBookingStatus']);
-    
+
     // ==========================================
     // BLANCHISSERIE (Laundry)
     // ==========================================
@@ -134,7 +135,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/my-laundry-requests', [LaundryServiceController::class, 'myRequests']);
     Route::post('/laundry-requests/{id}/status', [LaundryServiceController::class, 'updateRequestStatus']);
-    
+
     // ==========================================
     // AMENITIES & CONCIERGERIE (catégories + articles dynamiques)
     // ==========================================
@@ -159,7 +160,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Véhicules (pour formulaire Location)
     Route::get('/vehicles', [VehicleController::class, 'index']);
-    
+
     // ==========================================
     // NOTIFICATIONS (In-App Polling Fallback)
     // ==========================================

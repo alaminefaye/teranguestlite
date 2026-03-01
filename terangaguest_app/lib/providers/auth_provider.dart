@@ -82,6 +82,34 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Login Web avec Code Client (QR Code)
+  Future<bool> webLogin({required String clientCode}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _authService.webLogin(clientCode: clientCode);
+
+      _user = result['user'] as User;
+      _isAuthenticated = true;
+      _isLoading = false;
+      notifyListeners();
+
+      // On web we might not strictly need FCM but the method is safe
+      _fcmService.registerTokenIfNeeded();
+
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      _isAuthenticated = false;
+      notifyListeners();
+
+      return false;
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     _isLoading = true;

@@ -31,7 +31,7 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        
+
         // Créer un token d'accès
         $token = $user->createToken('mobile-app')->plainTextToken;
 
@@ -64,6 +64,66 @@ class AuthController extends Controller
                     'managed_sections' => $user->managed_sections ?? [],
                     'room_number' => $user->room_number,
                     'must_change_password' => $user->must_change_password ?? false,
+                    'can_reserve' => GuestReservationHelper::activeStayForUser($user) !== null,
+                ],
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ],
+        ], 200);
+    }
+
+    /**
+     * Connexion Web via le Code Client (QR Code)
+     */
+    public function webLogin(Request $request)
+    {
+        $request->validate([
+            'client_code' => 'required|string',
+        ]);
+
+        $user = User::where('client_code', $request->client_code)
+            ->where('role', 'guest')
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Code client invalide',
+            ], 401);
+        }
+
+        // Créer un token d'accès spécifique au Web
+        $token = $user->createToken('web-app')->plainTextToken;
+
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'address' => $user->enterprise->address,
+            'phone' => $user->enterprise->phone,
+            'email' => $user->enterprise->email,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Connexion réussie',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'enterprise_id' => $user->enterprise_id,
+                    'enterprise' => $enterpriseData,
+                    'department' => $user->department,
+                    'managed_sections' => $user->managed_sections ?? [],
+                    'room_number' => $user->room_number,
+                    'must_change_password' => false,
                     'can_reserve' => GuestReservationHelper::activeStayForUser($user) !== null,
                 ],
                 'token' => $token,

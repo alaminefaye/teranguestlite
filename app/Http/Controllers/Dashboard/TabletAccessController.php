@@ -141,6 +141,7 @@ class TabletAccessController extends Controller
             'name' => $name,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'client_code' => mb_strtoupper(mb_substr(uniqid(), -6)), // Génération d'un code client unique de 6 caractères
             'role' => 'guest',
             'enterprise_id' => $enterpriseId,
             'department' => null,
@@ -243,5 +244,21 @@ class TabletAccessController extends Controller
 
         return redirect()->route('dashboard.tablet-accesses.index')
             ->with('success', 'Accès tablette supprimé (chambre ' . $roomNumber . ').');
+    }
+
+    /**
+     * Régénérer le code client (admin / gérant uniquement)
+     */
+    public function regenerateClientCode(int $id): RedirectResponse
+    {
+        $user = User::guests()
+            ->where('id', $id)
+            ->where('enterprise_id', $this->getEnterpriseId())
+            ->firstOrFail();
+
+        $newCode = mb_strtoupper(mb_substr(uniqid(), -6));
+        $user->update(['client_code' => $newCode]);
+
+        return back()->with('success', 'Nouveau QR Code / Code Client généré : ' . $newCode);
     }
 }

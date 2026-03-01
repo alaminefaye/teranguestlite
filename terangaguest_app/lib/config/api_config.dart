@@ -28,6 +28,7 @@ class ApiConfig {
 
   // Endpoints
   static const String login = '/auth/login';
+  static const String webLogin = '/auth/web-login';
   static const String logout = '/auth/logout';
   static const String user = '/user';
   static const String changePassword = '/auth/change-password';
