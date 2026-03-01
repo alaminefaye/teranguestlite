@@ -85,6 +85,31 @@ class AuthController extends Controller
             ->where('role', 'guest')
             ->first();
 
+        // 2) Fallback : vérifier si c'est le "Code tablette" (access_code) d'un Guest physique
+        // et récupérer la tablette de la chambre correspondant à sa réservation active.
+        if (!$user) {
+            $guest = \App\Models\Guest::where('access_code', $request->client_code)->first();
+            if ($guest) {
+                $reservation = \App\Models\Reservation::withoutGlobalScope('enterprise')
+                    ->where('guest_id', $guest->id)
+                    ->whereIn('status', ['confirmed', 'checked_in'])
+                    ->where('check_in', '<=', now())
+                    ->where('check_out', '>=', now())
+                    ->first();
+
+                if ($reservation && $reservation->room_id) {
+                    // Trouver l'utilisateur (tablette) lié à cette chambre
+                    $user = User::where('role', 'guest')
+                        ->where('enterprise_id', $guest->enterprise_id)
+                        ->where(function ($q) use ($reservation) {
+                            $q->where('room_id', $reservation->room_id)
+                                ->orWhere('room_number', $reservation->room->room_number ?? null);
+                        })
+                        ->first();
+                }
+            }
+        }
+
         if (!$user) {
             return response()->json([
                 'success' => false,
