@@ -753,29 +753,33 @@ class FirebaseNotificationService
     }
 
     /**
-     * Envoyer une notification à tous les staff d'une section, en EXCLUANT un département spécifique.
-     * Utilisation : nouvelle commande → tous sauf "Service en chambre" (ils interviennent plus tard).
+     * Envoyer une notification au staff de préparation (admins + staff room_service_orders)
+     * en EXCLUANT le département "Service en chambre" (qui ne s'occupe pas de la préparation).
+     * Utilisé pour : nouvelle commande, commande prête en cuisine.
      */
-    public function sendToStaffForSectionExcludingDept($enterpriseId, string $sectionKey, string $excludedDepartment, string $title, string $body, array $data = [])
+    public function sendToKitchenStaff($enterpriseId, string $title, string $body, array $data = [])
     {
         $staff = User::where('enterprise_id', $enterpriseId)
-            ->whereIn('role', ['admin', 'staff'])
-            ->has('fcmTokens')
-            ->where(function ($q) use ($sectionKey, $excludedDepartment) {
+            ->where(function ($q) {
                 $q->where('role', 'admin')
-                    ->orWhere(function ($q2) use ($sectionKey, $excludedDepartment) {
+                    ->orWhere(function ($q2) {
                         $q2->where('role', 'staff')
-                            ->where('department', '!=', $excludedDepartment)
-                            ->where(function ($q3) use ($sectionKey) {
+                            ->where(function ($q3) {
                                 $q3->whereNull('managed_sections')
-                                    ->orWhereJsonContains('managed_sections', $sectionKey);
+                                    ->orWhereJsonContains('managed_sections', \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS);
+                            })
+                            ->where(function ($q4) {
+                                // Exclure le département "Service en chambre"
+                                $q4->whereNull('department')
+                                    ->orWhere('department', '!=', 'Service en chambre');
                             });
                     });
             })
+            ->has('fcmTokens')
             ->get();
 
         if ($staff->isEmpty()) {
-            Log::warning("sendToStaffForSectionExcludingDept: aucun staff éligible pour enterprise {$enterpriseId}, section {$sectionKey}, excluant '{$excludedDepartment}'");
+            Log::warning("sendToKitchenStaff: aucun staff cuisine/admin avec FCM token pour enterprise {$enterpriseId}");
             return false;
         }
 

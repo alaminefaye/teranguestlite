@@ -235,14 +235,20 @@ class RoomServiceController extends Controller
             if ($order->room_id) {
                 $firebaseService->sendNewOrderNotificationToRoom($order);
             }
-            // Notifier le staff — SAUF "Service en chambre" (ils interviennent seulement à la livraison)
-            $roomNumber = $user->room_number ?? ($order->room ? $order->room->room_number : null);
-            $firebaseService->sendToStaffForSectionExcludingDept(
+            // Notifier cuisine + admins (PAS le service en chambre — leur rôle commence à la livraison)
+            $roomNum = $user->room_number ?? ($order->room ? $order->room->room_number : '');
+            $firebaseService->sendToKitchenStaff(
                 $user->enterprise_id,
-                \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
-                'Service en chambre',
-                'Nouvelle commande',
-                "Nouvelle commande #{$order->order_number}" . ($roomNumber ? " — Chambre {$roomNumber}" : '')
+                '🍽 Nouvelle commande',
+                "Commande #{$order->order_number}" . ($roomNum ? " — Chambre {$roomNum}" : ''),
+                [
+                    'type' => 'order_status',
+                    'order_id' => (string) $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => 'pending',
+                    'screen' => 'AdminOrders',
+                    'room_number' => $roomNum,
+                ]
             );
         } catch (\Exception $e) {
             // Log l'erreur mais ne pas bloquer la commande

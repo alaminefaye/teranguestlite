@@ -492,14 +492,13 @@ class OrderController extends Controller
                 app(FirebaseNotificationService::class)->sendOrderStatusNotificationToRoom($order);
             }
 
-            // [NOUVEAU] Notifier le staff "Service en chambre" quand la commande est prête à être récupérée en cuisine
+            // Quand la commande est prête en cuisine : notifier admins + cuisine SEULEMENT
+            // (le service en chambre sera notifié séparément via le bouton "Transférer")
             if ($action === 'mark_ready' && $order->type === 'room_service') {
-                $serviceName = 'Room Service';
-                $statusLabel = $order->statusName; // "Prête"
                 $roomNumber = $order->room ? $order->room->room_number : null;
                 $guestName = $order->guest ? $order->guest->name : null;
 
-                $body = "La commande #{$order->order_number} est prête en cuisine. Veuillez la récupérer pour livraison.";
+                $body = "Commande #{$order->order_number} prête en cuisine.";
                 if ($roomNumber) {
                     $body .= " (Chambre {$roomNumber})";
                 }
@@ -509,17 +508,14 @@ class OrderController extends Controller
                     'order_id' => (string) $order->id,
                     'order_number' => $order->order_number,
                     'status' => $order->status,
-                    'status_label' => $statusLabel,
-                    'service_name' => $serviceName,
                     'screen' => 'AdminOrders',
-                    'room_number' => $roomNumber,
-                    'guest_name' => $guestName,
+                    'room_number' => $roomNumber ?? '',
+                    'guest_name' => $guestName ?? '',
                 ];
 
-                app(FirebaseNotificationService::class)->sendToStaffForSection(
+                app(FirebaseNotificationService::class)->sendToKitchenStaff(
                     $order->enterprise_id ?? $user->enterprise_id,
-                    \App\Helpers\StaffSection::ROOM_SERVICE_ORDERS,
-                    'Commande prête à livrer',
+                    '✅ Commande prête',
                     $body,
                     $data
                 );
