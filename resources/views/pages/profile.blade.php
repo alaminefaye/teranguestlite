@@ -27,7 +27,11 @@
         <h3 class="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90">Informations personnelles</h3>
         <div class="flex flex-wrap items-center gap-6">
             <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM12 20.5C10.1198 20.5 8.38223 19.8895 6.97461 18.8566V18.8455C6.97461 16.7744 8.65354 15.0955 10.7246 15.0955H13.2746C15.3457 15.0955 17.0246 16.7744 17.0246 18.8455V18.8566C15.6171 19.8898 13.8798 20.5 12 20.5Z" /></svg>
+                @if($enterprise && $enterprise->logo)
+                    <img src="{{ asset('storage/' . $enterprise->logo) }}" alt="{{ $enterprise->name }}" class="h-full w-full object-cover">
+                @else
+                    <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM12 20.5C10.1198 20.5 8.38223 19.8895 6.97461 18.8566V18.8455C6.97461 16.7744 8.65354 15.0955 10.7246 15.0955H13.2746C15.3457 15.0955 17.0246 16.7744 17.0246 18.8455V18.8566C15.6171 19.8898 13.8798 20.5 12 20.5Z" /></svg>
+                @endif
             </div>
             <div>
                 <p class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ $user->name ?? '—' }}</p>
