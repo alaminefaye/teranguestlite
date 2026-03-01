@@ -39,16 +39,21 @@
                     <x-form.date-picker name="date_of_birth" label="" placeholder="jj/mm/aaaa" :defaultDate="old('date_of_birth')" />
                     @error('date_of_birth')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
-                <div class="md:col-span-2" x-data="{
-                    nationalities: @json($nationalities ?? []),
-                    query: @json(old('nationality', '')),
-                    open: false,
-                    get suggestions() {
-                        const q = this.query.toLowerCase().trim();
-                        if (!q) return this.nationalities.slice(0, 5);
-                        return this.nationalities.filter(n => n.toLowerCase().includes(q)).slice(0, 10);
-                    }
-                " @click.away="open = false">
+                <div class="md:col-span-2"
+                    data-nationalities="{{ e(json_encode($nationalities ?? [])) }}"
+                    data-initial-query="{{ e(old('nationality', '')) }}"
+                    x-data="{
+                        nationalities: [],
+                        query: '',
+                        open: false,
+                        get suggestions() {
+                            const q = this.query.toLowerCase().trim();
+                            if (!q) return this.nationalities.slice(0, 5);
+                            return this.nationalities.filter(n => n.toLowerCase().includes(q)).slice(0, 10);
+                        }
+                    }"
+                    x-init="nationalities = JSON.parse($el.dataset.nationalities || '[]'); query = $el.dataset.initialQuery || ''"
+                    @click.away="open = false">
                     <label for="nationality_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nationalité</label>
                     <div class="relative">
                         <input type="text" x-ref="input" name="nationality" id="nationality_input" value="{{ old('nationality') }}"
