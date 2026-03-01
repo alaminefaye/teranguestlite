@@ -82,6 +82,104 @@
         </div>
     </div>
 
+    <!-- Services : Commandes, Restaurant, Spa, Blanchisserie, Palace, Excursions -->
+    <div class="col-span-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Commandes</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $ordersTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 dark:bg-brand-500/10">
+                    <svg class="h-5 w-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Aujourd'hui: {{ $ordersToday ?? 0 }} · En cours: {{ $ordersPending ?? 0 }}</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Restaurant</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $restaurantReservationsTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-warning-50 dark:bg-warning-500/10">
+                    <svg class="h-5 w-5 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Aujourd'hui: {{ $restaurantReservationsToday ?? 0 }} · À venir: {{ $restaurantReservationsPending ?? 0 }}</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Spa</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $spaReservationsTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-success-50 dark:bg-success-500/10">
+                    <svg class="h-5 w-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Aujourd'hui: {{ $spaReservationsToday ?? 0 }} · À venir: {{ $spaReservationsPending ?? 0 }}</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Blanchisserie</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $laundryRequestsTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light-50 dark:bg-blue-light-500/10">
+                    <svg class="h-5 w-5 text-blue-light-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">En cours: {{ $laundryRequestsPending ?? 0 }}</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Palace / Conciergerie</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $palaceRequestsTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 dark:bg-brand-500/10">
+                    <svg class="h-5 w-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">En cours: {{ $palaceRequestsPending ?? 0 }}</p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Excursions</p>
+                    <p class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ $excursionBookingsTotal ?? 0 }}</p>
+                </div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-success-50 dark:bg-success-500/10">
+                    <svg class="h-5 w-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2 1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">À venir: {{ $excursionBookingsPending ?? 0 }}</p>
+        </div>
+    </div>
+
+    <!-- Graphiques : Commandes dans le temps + CA + Articles les plus commandés -->
+    <div class="col-span-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Commandes sur 14 jours</h3>
+            <div id="dashboardOrdersChart" class="min-h-[280px]"></div>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Chiffre d'affaires commandes (FCFA) — 14 jours</h3>
+            <div id="dashboardRevenueChart" class="min-h-[280px]"></div>
+        </div>
+    </div>
+    <div class="col-span-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Articles les plus commandés</h3>
+            <div id="dashboardTopItemsChart" class="min-h-[300px]"></div>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Commandes par statut</h3>
+            <div id="dashboardOrdersByStatusChart" class="min-h-[280px]"></div>
+        </div>
+    </div>
+
     <!-- Statistiques détaillées -->
     <div class="col-span-12 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Statut des Chambres -->
@@ -220,7 +318,7 @@
                     </div>
                 </a>
 
-                <div class="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg opacity-50">
+                <a href="{{ route('dashboard.reservations.create') }}" class="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light-50 dark:bg-blue-light-500/10">
                         <svg class="h-6 w-6 text-blue-light-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -228,23 +326,90 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-800 dark:text-white/90">Nouvelle réservation</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Bientôt disponible</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Créer une réservation</p>
                     </div>
-                </div>
+                </a>
 
-                <div class="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg opacity-50">
+                <a href="{{ route('dashboard.orders.index') }}" class="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-warning-50 dark:bg-warning-500/10">
                         <svg class="h-6 w-6 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-800 dark:text-white/90">Room Service</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Bientôt disponible</p>
+                        <p class="text-sm font-medium text-gray-800 dark:text-white/90">Commandes</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Room Service</p>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ordersLabels = @json($ordersChartLabels ?? []);
+    const ordersData = @json($ordersChartData ?? []);
+    const revenueLabels = @json($revenueChartLabels ?? []);
+    const revenueData = @json($revenueChartData ?? []);
+    const topItems = @json($topOrderedItems ?? []);
+    const statusLabels = @json($ordersByStatusLabels ?? []);
+    const statusData = @json($ordersByStatusData ?? []);
+
+    if (document.querySelector('#dashboardOrdersChart') && ordersLabels.length) {
+        new ApexCharts(document.querySelector('#dashboardOrdersChart'), {
+            chart: { type: 'area', height: 280, toolbar: { show: false }, fontFamily: 'inherit' },
+            series: [{ name: 'Commandes', data: ordersData }],
+            colors: ['#465FFF'],
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0.05 } },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: { categories: ordersLabels, labels: { style: { colors: '#64748b' } } },
+            yaxis: { labels: { style: { colors: '#64748b' } } },
+            grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+            dataLabels: { enabled: false },
+            tooltip: { theme: 'light' }
+        }).render();
+    }
+    if (document.querySelector('#dashboardRevenueChart') && revenueLabels.length) {
+        new ApexCharts(document.querySelector('#dashboardRevenueChart'), {
+            chart: { type: 'line', height: 280, toolbar: { show: false }, fontFamily: 'inherit' },
+            series: [{ name: 'CA (FCFA)', data: revenueData }],
+            colors: ['#10b981'],
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: { categories: revenueLabels, labels: { style: { colors: '#64748b' } } },
+            yaxis: { labels: { style: { colors: '#64748b' }, formatter: function(v) { return (v/1000).toFixed(0) + 'k'; } } },
+            grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+            dataLabels: { enabled: false },
+            tooltip: { theme: 'light', y: { formatter: function(v) { return v.toLocaleString('fr-FR') + ' FCFA'; } } }
+        }).render();
+    }
+    if (document.querySelector('#dashboardTopItemsChart') && topItems.length) {
+        new ApexCharts(document.querySelector('#dashboardTopItemsChart'), {
+            chart: { type: 'bar', height: 300, toolbar: { show: false }, fontFamily: 'inherit' },
+            plotOptions: { bar: { horizontal: true, barHeight: '70%', borderRadius: 4 } },
+            series: [{ name: 'Quantité', data: topItems.map(i => i.total_quantity) }],
+            colors: ['#8b5cf6'],
+            xaxis: { categories: topItems.map(i => i.item_name || '—'), labels: { style: { colors: '#64748b' }, maxWidth: 180 } },
+            yaxis: { labels: { style: { colors: '#64748b' } } },
+            grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+            dataLabels: { enabled: true },
+            tooltip: { theme: 'light' }
+        }).render();
+    }
+    if (document.querySelector('#dashboardOrdersByStatusChart') && statusLabels.length) {
+        new ApexCharts(document.querySelector('#dashboardOrdersByStatusChart'), {
+            chart: { type: 'donut', height: 280, fontFamily: 'inherit' },
+            series: statusData,
+            labels: statusLabels,
+            colors: ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1', '#14b8a6', '#ef4444'],
+            legend: { position: 'bottom', horizontalAlign: 'center' },
+            dataLabels: { enabled: true },
+            plotOptions: { pie: { donut: { size: '65%' } } },
+            tooltip: { theme: 'light' }
+        }).render();
+    }
+});
+</script>
+@endpush
 @endsection
