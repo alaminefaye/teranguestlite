@@ -25,6 +25,7 @@ class Guest extends Model
         'id_document_place_of_issue',
         'id_document_issued_at',
         'id_document_photo',
+        'id_document_photo_verso',
         'access_code',
         'notes',
     ];

@@ -212,7 +212,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
                 imageUrl: logoUrl,
                 height: 56,
                 fit: BoxFit.contain,
-                placeholder: (_, __) => SizedBox(
+                placeholder: (_, _) => SizedBox(
                   height: 56,
                   child: Center(
                     child: SizedBox(
@@ -227,7 +227,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
                     ),
                   ),
                 ),
-                errorWidget: (_, __, ___) => const SizedBox(height: 56),
+                errorWidget: (_, _, _) => const SizedBox(height: 56),
               ),
             ),
           if (logoUrl != null && logoUrl.isNotEmpty) const SizedBox(height: 12),

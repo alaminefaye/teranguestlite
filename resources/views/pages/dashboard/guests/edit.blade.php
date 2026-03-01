@@ -13,7 +13,10 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Code tablette : <code class="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{{ $guest->access_code }}</code> — pour le changer, utilisez « Régénérer le code » sur la fiche client.</p>
 </div>
 
-<div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+@php
+    $currentDocType = old('id_document_type', $guest->id_document_type ?? '');
+@endphp
+<div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden" x-data="{ documentType: '{{ $currentDocType }}' }">
     <form action="{{ route('dashboard.guests.update', $guest) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -38,14 +41,39 @@
                     </select>
                 </div>
                 <div>
-                    <label for="date_of_birth" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de naissance</label>
-                    <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $guest->date_of_birth?->format('Y-m-d')) }}"
-                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de naissance</label>
+                    <x-form.date-picker name="date_of_birth" label="" placeholder="jj/mm/aaaa" :defaultDate="old('date_of_birth', $guest->date_of_birth?->format('Y-m-d'))" />
+                    @error('date_of_birth')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
-                <div class="md:col-span-2">
-                    <label for="nationality" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nationalité</label>
-                    <input type="text" name="nationality" id="nationality" value="{{ old('nationality', $guest->nationality) }}"
-                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
+                <div class="md:col-span-2" x-data="{
+                    nationalities: @json($nationalities ?? []),
+                    query: @json(old('nationality', $guest->nationality ?? '')),
+                    open: false,
+                    get suggestions() {
+                        const q = this.query.toLowerCase().trim();
+                        if (!q) return this.nationalities.slice(0, 5);
+                        return this.nationalities.filter(n => n.toLowerCase().includes(q)).slice(0, 10);
+                    }
+                " @click.away="open = false">
+                    <label for="nationality_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nationalité</label>
+                    <div class="relative">
+                        <input type="text" x-ref="input" name="nationality" id="nationality_input" value="{{ old('nationality', $guest->nationality) }}"
+                            x-model="query" @focus="open = true" @input="open = true"
+                            placeholder="Rechercher ou choisir (ex. Sénégalaise, Française)"
+                            class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pr-10"
+                            autocomplete="off">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                        <ul x-show="open && suggestions.length" x-transition
+                            class="absolute z-10 mt-1 w-full max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1 text-sm">
+                            <template x-for="nat in suggestions" :key="nat">
+                                <li><button type="button" @click="query = nat; open = false; $refs.input.value = nat"
+                                        class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700" x-text="nat"></button></li>
+                            </template>
+                        </ul>
+                    </div>
+                    @error('nationality')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
@@ -53,13 +81,20 @@
         {{-- Pièce d'identité --}}
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Pièce d'identité</h2>
-            @if($guest->id_document_photo)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Pièce actuelle : <a href="{{ asset('storage/'.$guest->id_document_photo) }}" target="_blank" class="text-brand-600 hover:underline">Voir le fichier</a></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Passeport : recto uniquement. Autres types : recto et verso.</p>
+            @if($guest->id_document_photo || $guest->id_document_photo_verso)
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Fichiers actuels :
+                @if($guest->id_document_photo)<a href="{{ asset('storage/'.$guest->id_document_photo) }}" target="_blank" class="text-brand-600 hover:underline">Recto</a>@endif
+                @if($guest->id_document_photo && $guest->id_document_photo_verso) — @endif
+                @if($guest->id_document_photo_verso)<a href="{{ asset('storage/'.$guest->id_document_photo_verso) }}" target="_blank" class="text-brand-600 hover:underline">Verso</a>@endif
+            </p>
             @endif
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="id_document_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type de pièce</label>
-                    <select name="id_document_type" id="id_document_type" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
+                    <select name="id_document_type" id="id_document_type" x-model="documentType"
+                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
                         <option value="">—</option>
                         <option value="CNI" {{ old('id_document_type', $guest->id_document_type) === 'CNI' ? 'selected' : '' }}>CNI</option>
                         <option value="Passeport" {{ old('id_document_type', $guest->id_document_type) === 'Passeport' ? 'selected' : '' }}>Passeport</option>
@@ -79,15 +114,24 @@
                         class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
                 </div>
                 <div>
-                    <label for="id_document_issued_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de délivrance</label>
-                    <input type="date" name="id_document_issued_at" id="id_document_issued_at" value="{{ old('id_document_issued_at', $guest->id_document_issued_at?->format('Y-m-d')) }}"
-                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de délivrance</label>
+                    <x-form.date-picker name="id_document_issued_at" label="" placeholder="jj/mm/aaaa" :defaultDate="old('id_document_issued_at', $guest->id_document_issued_at?->format('Y-m-d'))" />
                 </div>
                 <div class="md:col-span-2">
-                    <label for="id_document_photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Remplacer la photo / scan (optionnel)</label>
-                    <input type="file" name="id_document_photo" id="id_document_photo" accept=".jpg,.jpeg,.png,.pdf"
-                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-brand-500 file:text-white">
-                    @error('id_document_photo')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                    <div class="space-y-3">
+                        <div>
+                            <label for="id_document_photo" class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Remplacer le recto (optionnel)</label>
+                            <input type="file" name="id_document_photo" id="id_document_photo" accept=".jpg,.jpeg,.png,.pdf"
+                                class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-brand-500 file:text-white">
+                            @error('id_document_photo')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div x-show="documentType !== 'Passeport' && documentType !== ''" x-transition>
+                            <label for="id_document_photo_verso" class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Remplacer le verso (optionnel, sauf pour Passeport)</label>
+                            <input type="file" name="id_document_photo_verso" id="id_document_photo_verso" accept=".jpg,.jpeg,.png,.pdf"
+                                class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-brand-500 file:text-white">
+                            @error('id_document_photo_verso')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

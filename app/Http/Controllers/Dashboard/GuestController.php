@@ -54,7 +54,10 @@ class GuestController extends Controller
 
     public function create(): View
     {
-        return view('pages.dashboard.guests.create', ['title' => 'Enregistrer un client']);
+        return view('pages.dashboard.guests.create', [
+            'title' => 'Enregistrer un client',
+            'nationalities' => config('nationalities', []),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -66,6 +69,10 @@ class GuestController extends Controller
 
         if ($request->hasFile('id_document_photo')) {
             $validated['id_document_photo'] = $request->file('id_document_photo')
+                ->store('guests/id-documents', 'public');
+        }
+        if ($request->hasFile('id_document_photo_verso')) {
+            $validated['id_document_photo_verso'] = $request->file('id_document_photo_verso')
                 ->store('guests/id-documents', 'public');
         }
 
@@ -95,6 +102,7 @@ class GuestController extends Controller
         return view('pages.dashboard.guests.edit', [
             'title' => 'Modifier ' . $guest->name,
             'guest' => $guest,
+            'nationalities' => config('nationalities', []),
         ]);
     }
 
@@ -107,6 +115,13 @@ class GuestController extends Controller
                 Storage::disk('public')->delete($guest->id_document_photo);
             }
             $validated['id_document_photo'] = $request->file('id_document_photo')
+                ->store('guests/id-documents', 'public');
+        }
+        if ($request->hasFile('id_document_photo_verso')) {
+            if ($guest->id_document_photo_verso) {
+                Storage::disk('public')->delete($guest->id_document_photo_verso);
+            }
+            $validated['id_document_photo_verso'] = $request->file('id_document_photo_verso')
                 ->store('guests/id-documents', 'public');
         }
 
@@ -133,6 +148,7 @@ class GuestController extends Controller
             'id_document_place_of_issue' => 'nullable|string|max:150',
             'id_document_issued_at' => 'nullable|date',
             'id_document_photo' => 'nullable|file|mimes:jpeg,jpg,png,pdf|max:5120',
+            'id_document_photo_verso' => 'nullable|file|mimes:jpeg,jpg,png,pdf|max:5120',
             'notes' => 'nullable|string',
         ];
     }
