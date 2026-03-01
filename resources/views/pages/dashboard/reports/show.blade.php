@@ -14,8 +14,8 @@
             Exporter PDF
         </a>
         @if(in_array($type, ['global', 'reservations', 'orders', 'audit'], true))
-            <a href="{{ route('dashboard.reports.show', $type) }}?date_from={{ $date_from }}&date_to={{ $date_to }}&export=csv" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
-                Exporter CSV
+            <a href="{{ route('dashboard.reports.show', $type) }}?date_from={{ $date_from }}&date_to={{ $date_to }}&export=csv" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                Exporter Excel
             </a>
         @endif
     </div>
