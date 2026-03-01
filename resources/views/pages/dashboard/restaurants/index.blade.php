@@ -182,13 +182,12 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-2">
-                    <a href="{{ route('dashboard.restaurants.show', $restaurant) }}" class="flex-1 px-3 py-2 text-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm">
-                        Voir
-                    </a>
-                    <a href="{{ route('dashboard.restaurants.edit', $restaurant) }}" class="flex-1 px-3 py-2 text-center border border-brand-500 text-brand-600 dark:text-brand-400 rounded-md hover:bg-brand-50 dark:hover:bg-brand-900/20 text-sm">
-                        Modifier
-                    </a>
+                <div class="flex items-center justify-end">
+                    <x-action-buttons
+                        :showRoute="route('dashboard.restaurants.show', $restaurant)"
+                        :editRoute="route('dashboard.restaurants.edit', $restaurant)"
+                        :canDelete="false"
+                    />
                 </div>
             </div>
         </div>

@@ -76,12 +76,11 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <a href="{{ route('dashboard.tablet-accesses.edit', $user->id) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 mr-3 text-sm font-medium">Modifier</a>
-                                <form action="{{ route('dashboard.tablet-accesses.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer cet accès tablette ?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-error-600 hover:text-error-700 dark:text-error-400 text-sm font-medium">Supprimer</button>
-                                </form>
+                                <x-action-buttons
+                                    :editRoute="route('dashboard.tablet-accesses.edit', $user->id)"
+                                    :deleteRoute="route('dashboard.tablet-accesses.destroy', $user->id)"
+                                    deleteMessage="Supprimer cet accès tablette ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

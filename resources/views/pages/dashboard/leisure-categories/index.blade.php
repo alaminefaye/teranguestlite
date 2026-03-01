@@ -53,7 +53,10 @@
             </div>
             <div class="flex items-center gap-2 mt-3 flex-wrap">
                 <a href="{{ route('dashboard.leisure-categories.subcategories.index', $category) }}" class="inline-flex items-center px-3 py-1.5 text-sm bg-brand-500 text-white rounded hover:bg-brand-600">Gérer les activités</a>
-                <a href="{{ route('dashboard.leisure-categories.edit', $category) }}" class="inline-flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-800">Modifier</a>
+                <x-action-buttons
+                    :editRoute="route('dashboard.leisure-categories.edit', $category)"
+                    :canDelete="false"
+                />
                 <form action="{{ route('dashboard.leisure-categories.toggle', $category) }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" class="inline-flex items-center px-2 py-1 text-xs {{ $category->is_active ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-success-600 dark:text-success-400 border-success-300 dark:border-success-700 hover:bg-success-50 dark:hover:bg-success-900/20' }} border rounded">

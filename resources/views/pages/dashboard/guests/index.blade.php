@@ -80,14 +80,13 @@
                     <td class="px-4 py-3">
                         <code class="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{{ $guest->access_code }}</code>
                     </td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <a href="{{ route('dashboard.guests.show', $guest) }}" class="text-brand-600 dark:text-brand-400 hover:underline">Voir</a>
-                        <a href="{{ route('dashboard.guests.edit', $guest) }}" class="ml-3 text-brand-600 dark:text-brand-400 hover:underline">Modifier</a>
-                        <form action="{{ route('dashboard.guests.destroy', $guest) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Supprimer ce client ?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-error-600 dark:text-error-400 hover:underline">Suppr.</button>
-                        </form>
+                    <td class="px-4 py-3">
+                        <x-action-buttons
+                            :showRoute="route('dashboard.guests.show', $guest)"
+                            :editRoute="route('dashboard.guests.edit', $guest)"
+                            :deleteRoute="route('dashboard.guests.destroy', $guest)"
+                            deleteMessage="Supprimer ce client ?"
+                        />
                     </td>
                 </tr>
             @empty

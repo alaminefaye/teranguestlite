@@ -35,13 +35,18 @@
                 <tr class="{{ !$item->is_active ? 'opacity-70' : '' }}">
                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->display_order }}</td>
                     <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white/90">{{ $item->name }}</td>
-                    <td class="px-4 py-3 text-right">
+                    <td class="px-4 py-3">
                         @if(!$item->is_active)<span class="text-xs text-amber-600 dark:text-amber-400 mr-2">Masqué</span>@endif
-                        <a href="{{ route('dashboard.amenity-categories.items.edit', [$category, $item]) }}" class="text-brand-600 dark:text-brand-400 hover:underline text-sm">Modifier</a>
-                        <form action="{{ route('dashboard.amenity-categories.items.toggle', [$category, $item]) }}" method="POST" class="inline ml-2">
+                        <div class="flex items-center justify-end gap-2">
+                            <x-action-buttons
+                                :editRoute="route('dashboard.amenity-categories.items.edit', [$category, $item])"
+                                :canDelete="false"
+                            />
+                            <form action="{{ route('dashboard.amenity-categories.items.toggle', [$category, $item]) }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="text-sm {{ $item->is_active ? 'text-amber-600 dark:text-amber-400 hover:underline' : 'text-success-600 dark:text-success-400 hover:underline' }}">{{ $item->is_active ? 'Masquer' : 'Afficher' }}</button>
-                        </form>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty

@@ -46,13 +46,10 @@
                                 {{ $tablet->name ?? '—' }}
                             </td>
                             <td class="px-6 py-4">
-                                <form action="{{ route('dashboard.tablets.destroy', $tablet) }}" method="POST" class="inline" onsubmit="return confirm('Retirer cette tablette de la chambre ?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-error-600 hover:text-error-700 dark:text-error-400 dark:hover:text-error-300 text-sm font-medium">
-                                        Retirer
-                                    </button>
-                                </form>
+                                <x-action-buttons
+                                    :deleteRoute="route('dashboard.tablets.destroy', $tablet)"
+                                    deleteMessage="Retirer cette tablette de la chambre ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

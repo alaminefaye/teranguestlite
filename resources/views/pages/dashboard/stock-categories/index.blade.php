@@ -75,14 +75,13 @@
                                     <span class="text-gray-500 text-sm">Inactif</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <a href="{{ route('dashboard.stock-categories.show', $cat) }}" class="text-brand-500 hover:underline mr-2">Voir</a>
-                                <a href="{{ route('dashboard.stock-categories.edit', $cat) }}" class="text-gray-600 hover:underline mr-2">Modifier</a>
-                                <form action="{{ route('dashboard.stock-categories.destroy', $cat) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer cette catégorie ?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-error-600 hover:underline">Supprimer</button>
-                                </form>
+                            <td class="px-4 py-3">
+                                <x-action-buttons
+                                    :showRoute="route('dashboard.stock-categories.show', $cat)"
+                                    :editRoute="route('dashboard.stock-categories.edit', $cat)"
+                                    :deleteRoute="route('dashboard.stock-categories.destroy', $cat)"
+                                    deleteMessage="Supprimer cette catégorie ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

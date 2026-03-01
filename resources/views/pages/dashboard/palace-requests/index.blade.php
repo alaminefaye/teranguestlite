@@ -105,8 +105,11 @@
                                 {{ $req->status }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('dashboard.palace-requests.show', $req) }}" class="text-brand-600 dark:text-brand-400 hover:underline text-sm font-medium">Voir</a>
+                        <td class="px-4 py-3">
+                            <x-action-buttons
+                                :showRoute="route('dashboard.palace-requests.show', $req)"
+                                :canDelete="false"
+                            />
                         </td>
                     </tr>
                 @empty

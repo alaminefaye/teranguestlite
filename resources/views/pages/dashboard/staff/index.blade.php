@@ -71,14 +71,12 @@
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $user->email }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $user->department ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-right">
-                                <a href="{{ route('dashboard.staff.edit', $user->id) }}" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">Modifier</a>
-                                <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                                <form action="{{ route('dashboard.staff.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer ce membre du staff ?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-error-600 hover:text-error-700 dark:text-error-400 dark:hover:text-error-300">Supprimer</button>
-                                </form>
+                            <td class="px-6 py-4">
+                                <x-action-buttons
+                                    :editRoute="route('dashboard.staff.edit', $user->id)"
+                                    :deleteRoute="route('dashboard.staff.destroy', $user->id)"
+                                    deleteMessage="Supprimer ce membre du staff ?"
+                                />
                             </td>
                         </tr>
                     @endforeach

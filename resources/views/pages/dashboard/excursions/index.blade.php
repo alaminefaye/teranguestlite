@@ -91,9 +91,12 @@
                     <p class="text-lg font-bold text-brand-600 dark:text-brand-400">{{ $excursion->formatted_price_adult }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $excursion->duration_hours }}h @if($excursion->departure_time) · {{ $excursion->departure_time }} @endif</p>
                 </div>
-                <div class="flex items-center gap-1">
-                    <a href="{{ route('dashboard.excursions.show', $excursion) }}" class="inline-flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-800">Voir</a>
-                    <a href="{{ route('dashboard.excursions.edit', $excursion) }}" class="inline-flex items-center px-2 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600">Modifier</a>
+                <div class="flex items-center gap-2">
+                    <x-action-buttons
+                        :showRoute="route('dashboard.excursions.show', $excursion)"
+                        :editRoute="route('dashboard.excursions.edit', $excursion)"
+                        :canDelete="false"
+                    />
                     <form action="{{ route('dashboard.excursions.toggle', $excursion) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-2 py-1 text-xs {{ $excursion->is_active ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-success-600 dark:text-success-400 border-success-300 dark:border-success-700 hover:bg-success-50 dark:hover:bg-success-900/20' }} border rounded">{{ $excursion->is_active ? 'Masquer' : 'Afficher' }}</button>

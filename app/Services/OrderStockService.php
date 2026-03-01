@@ -23,6 +23,9 @@ class OrderStockService
             }
 
             $product = $menuItem->stockProduct;
+            if ($product->enterprise_id !== $order->enterprise_id) {
+                continue;
+            }
             $quantityToDeduct = $orderItem->quantity * (float) $menuItem->stock_quantity_per_portion;
             if ($quantityToDeduct <= 0) {
                 continue;
