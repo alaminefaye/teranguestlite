@@ -24,6 +24,7 @@ class AdminSummary {
   final int emergencyOpen;
   final int chatUnreadConversations;
   final int chatOpen;
+  final int billingWithBalance;
 
   const AdminSummary({
     required this.ordersPending,
@@ -46,6 +47,7 @@ class AdminSummary {
     required this.emergencyOpen,
     required this.chatUnreadConversations,
     required this.chatOpen,
+    required this.billingWithBalance,
   });
 
   factory AdminSummary.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class AdminSummary {
     final palace = (json['palace'] as Map?) ?? {};
     final emergency = (json['emergency'] as Map?) ?? {};
     final chat = (json['chat'] as Map?) ?? {};
+    final billing = (json['billing'] as Map?) ?? {};
 
     int toInt(Map data, String key) {
       final value = data[key];
@@ -86,6 +89,7 @@ class AdminSummary {
       emergencyOpen: toInt(emergency, 'open'),
       chatUnreadConversations: toInt(chat, 'unread_conversations'),
       chatOpen: toInt(chat, 'open'),
+      billingWithBalance: toInt(billing, 'with_balance'),
     );
   }
 }

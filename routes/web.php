@@ -163,6 +163,9 @@ Route::middleware(['auth'])->group(function () {
             ->name('orders.complete');
         Route::post('orders/{order}/cancel', [\App\Http\Controllers\Dashboard\OrderController::class, 'cancel'])
             ->name('orders.cancel');
+
+        // Facturation / Notes de chambre (type Opera, Oracle)
+        Route::get('billing', [\App\Http\Controllers\Dashboard\BillingController::class, 'index'])->name('billing.index');
     });
 
     // Routes Guest (Client)

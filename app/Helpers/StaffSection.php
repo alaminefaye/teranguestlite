@@ -16,6 +16,7 @@ final class StaffSection
     public const PALACE_SERVICES = 'palace_services';
     public const ASSISTANCE_EMERGENCY = 'assistance_emergency';
     public const CHAT_MESSAGES = 'chat_messages';
+    public const BILLING_INVOICING = 'billing_invoicing';
 
     /** Toutes les clés (pour validation et listes). */
     public static function all(): array
@@ -29,6 +30,7 @@ final class StaffSection
             self::PALACE_SERVICES,
             self::ASSISTANCE_EMERGENCY,
             self::CHAT_MESSAGES,
+            self::BILLING_INVOICING,
         ];
     }
 
@@ -44,6 +46,7 @@ final class StaffSection
             self::PALACE_SERVICES => 'Services Palace / Conciergerie',
             self::ASSISTANCE_EMERGENCY => 'Assistance & Urgence',
             self::CHAT_MESSAGES => 'Messages / Chat client',
+            self::BILLING_INVOICING => 'Facturation / Notes de chambre',
         ];
     }
 

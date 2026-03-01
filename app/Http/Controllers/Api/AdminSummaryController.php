@@ -12,6 +12,8 @@ use App\Models\ExcursionBooking;
 use App\Models\LaundryRequest;
 use App\Models\PalaceRequest;
 use App\Models\HotelConversation;
+use App\Models\Reservation;
+use Illuminate\Support\Facades\DB;
 
 class AdminSummaryController extends Controller
 {
@@ -153,6 +155,27 @@ class AdminSummaryController extends Controller
             ]
             : $zeroChat;
 
+        $zeroBilling = ['with_balance' => 0];
+        $billingSummary = $hasAccess(StaffSection::BILLING_INVOICING)
+            ? [
+                'with_balance' => Reservation::withoutGlobalScope('enterprise')
+                    ->where('reservations.enterprise_id', $enterpriseId)
+                    ->whereIn('reservations.status', ['confirmed', 'checked_in', 'checked_out'])
+                    ->whereExists(function ($q) {
+                        $q->select(DB::raw(1))
+                            ->from('orders')
+                            ->whereColumn('orders.guest_id', 'reservations.guest_id')
+                            ->whereColumn('orders.room_id', 'reservations.room_id')
+                            ->where('orders.enterprise_id', $enterpriseId)
+                            ->where('orders.payment_method', 'room_bill')
+                            ->whereNull('orders.settled_at')
+                            ->whereColumn('orders.created_at', '>=', 'reservations.check_in')
+                            ->whereColumn('orders.created_at', '<=', 'reservations.check_out');
+                    })
+                    ->count(),
+            ]
+            : $zeroBilling;
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -164,6 +187,7 @@ class AdminSummaryController extends Controller
                 'palace' => $palaceRequests,
                 'emergency' => $emergencyRequests,
                 'chat' => $chatSummary,
+                'billing' => $billingSummary,
             ],
         ], 200);
     }

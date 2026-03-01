@@ -117,6 +117,11 @@ class MenuHelper
                     ],
                     [
                         'icon' => 'task',
+                        'name' => 'Facturation',
+                        'path' => '/dashboard/billing',
+                    ],
+                    [
+                        'icon' => 'task',
                         'name' => 'Menus',
                         'path' => '#',
                         'subItems' => [
