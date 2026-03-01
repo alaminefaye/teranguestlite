@@ -39,7 +39,7 @@ class AdminSummaryController extends Controller
         $sections = $user->managed_sections;
         $isAdmin = $user->isAdmin();
         // Admin : tout. Staff avec managed_sections = null (legacy) : tout. Staff avec [] : rien. Staff avec [x,y] : seulement x,y.
-        $hasAccess = fn (string $section) => $isAdmin || $sections === null || in_array($section, $sections ?? [], true);
+        $hasAccess = fn(string $section) => $isAdmin || $sections === null || in_array($section, $sections ?? [], true);
 
         $zeroOrders = ['pending' => 0, 'in_progress' => 0, 'delivered' => 0, 'cancelled' => 0];
         $orders = $hasAccess(StaffSection::ROOM_SERVICE_ORDERS)
@@ -161,7 +161,7 @@ class AdminSummaryController extends Controller
                 'with_balance' => Reservation::withoutGlobalScope('enterprise')
                     ->where('reservations.enterprise_id', $enterpriseId)
                     ->whereIn('reservations.status', ['confirmed', 'checked_in', 'checked_out'])
-                    ->whereExists(function ($q) {
+                    ->whereExists(function ($q) use ($enterpriseId) {
                         $q->select(DB::raw(1))
                             ->from('orders')
                             ->whereColumn('orders.guest_id', 'reservations.guest_id')

@@ -383,10 +383,26 @@ class TabletSessionController extends Controller
             $order->orderItems()->create($itemData);
         }
 
-        // Notification push au client de la chambre (tablette)
+        // Notification push au client de la chambre (tablette) et au staff
         try {
             $firebaseService = app(\App\Services\FirebaseNotificationService::class);
             $firebaseService->sendNewOrderNotificationToRoom($order);
+
+            // Notifier cuisine + admins (PAS le service en chambre — leur rôle commence à la livraison)
+            $roomNum = $room->room_number ?? '';
+            $firebaseService->sendToKitchenStaff(
+                $room->enterprise_id,
+                '🍽 Nouvelle commande',
+                "Commande #{$order->order_number}" . ($roomNum ? " — Chambre {$roomNum}" : ''),
+                [
+                    'type' => 'order_status',
+                    'order_id' => (string) $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => 'pending',
+                    'screen' => 'AdminOrders',
+                    'room_number' => $roomNum,
+                ]
+            );
         } catch (\Exception $e) {
             \Log::error('Firebase notification error (tablet checkout): ' . $e->getMessage());
         }
