@@ -24,22 +24,34 @@
 </div>
 
 <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-    <form method="GET" action="{{ route('dashboard.vehicles.index') }}" class="flex flex-wrap gap-4">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom..."
-            class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 min-w-[180px]">
-        <select name="vehicle_type" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</p>
+    <form method="GET" action="{{ route('dashboard.vehicles.index') }}" class="flex flex-wrap gap-4 items-end">
+        <div class="min-w-[200px]">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Recherche</label>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom..." class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label>
+            <select name="vehicle_type" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
             <option value="">Tous les types</option>
             @foreach(\App\Models\Vehicle::TYPES as $value => $label)
                 <option value="{{ $value }}" {{ request('vehicle_type') === $value ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
-        <select name="seats" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
-            <option value="">Places min.</option>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Places min.</label>
+            <select name="seats" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+            <option value="">Toutes</option>
             @for($i = 1; $i <= 20; $i++)
                 <option value="{{ $i }}" {{ request('seats') == (string)$i ? 'selected' : '' }}>{{ $i }} place(s)</option>
             @endfor
         </select>
+        </div>
         <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Filtrer</button>
+        @if(request()->hasAny(['search', 'vehicle_type', 'seats']))
+            <a href="{{ route('dashboard.vehicles.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Réinitialiser</a>
+        @endif
     </form>
 </div>
 

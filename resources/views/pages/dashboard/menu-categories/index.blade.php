@@ -49,6 +49,39 @@
     </div>
 </div>
 
+<!-- Filtres avancés -->
+<div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</p>
+    <form method="GET" action="{{ route('dashboard.menu-categories.index') }}" class="flex flex-wrap gap-4 items-end">
+        <div class="min-w-[200px]">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Recherche</label>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom de la catégorie..." class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label>
+            <select name="type" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 min-w-[160px]">
+                <option value="">Tous</option>
+                <option value="room_service" {{ request('type') === 'room_service' ? 'selected' : '' }}>Room Service</option>
+                <option value="restaurant" {{ request('type') === 'restaurant' ? 'selected' : '' }}>Restaurant</option>
+                <option value="bar" {{ request('type') === 'bar' ? 'selected' : '' }}>Bar</option>
+                <option value="spa" {{ request('type') === 'spa' ? 'selected' : '' }}>Spa</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Statut</label>
+            <select name="status" class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 min-w-[140px]">
+                <option value="">Tous</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
+            </select>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Filtrer</button>
+        @if(request()->hasAny(['search', 'type', 'status']))
+            <a href="{{ route('dashboard.menu-categories.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Réinitialiser</a>
+        @endif
+    </form>
+</div>
+
 <!-- Liste des catégories -->
 <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     @if($categories->count() > 0)

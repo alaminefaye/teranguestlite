@@ -47,8 +47,9 @@
     </div>
 </div>
 
-<!-- Filtres -->
+<!-- Filtres avancés -->
 <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</p>
     <form method="GET" action="{{ route('dashboard.restaurants.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
             <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
@@ -81,9 +82,11 @@
             <button type="submit" class="flex-1 px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
                 Filtrer
             </button>
-            <a href="{{ route('dashboard.restaurants.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
-                Réinitialiser
-            </a>
+            @if(request()->hasAny(['search', 'type', 'status']))
+                <a href="{{ route('dashboard.restaurants.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
+                    Réinitialiser
+                </a>
+            @endif
         </div>
     </form>
 </div>

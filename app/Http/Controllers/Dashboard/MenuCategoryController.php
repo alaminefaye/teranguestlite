@@ -12,10 +12,12 @@ class MenuCategoryController extends Controller
     {
         $query = MenuCategory::query();
 
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
         if ($request->filled('type')) {
             $query->byType($request->type);
         }
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
