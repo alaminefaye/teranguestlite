@@ -20,7 +20,7 @@ Route::get('/signup', function () {
 Route::get('/politique-de-confidentialite', function () {
     return view('pages.legal.privacy-policy', [
         'title' => 'Politique de confidentialité',
-        'contactEmail' => 'contact@universaltechnoliesafrica.com',
+        'contactEmail' => 'contact@universaltechnologiesafrica.com',
         'contactPhones' => ['+221 77 096 79 94', '+221 77 330 96 13'],
     ]);
 })->name('privacy-policy');
