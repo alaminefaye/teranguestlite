@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
@@ -72,8 +73,14 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
+        $enterpriseId = auth()->user()->enterprise_id;
         $validated = $request->validate([
-            'room_number' => 'required|string|max:50|unique:rooms,room_number',
+            'room_number' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('rooms', 'room_number')->where('enterprise_id', $enterpriseId),
+            ],
             'floor' => 'nullable|integer|min:0',
             'type' => 'required|in:single,double,suite,deluxe,presidential',
             'status' => 'required|in:available,occupied,maintenance,reserved',
@@ -87,7 +94,7 @@ class RoomController extends Controller
         ]);
 
         // Ajouter enterprise_id automatiquement
-        $validated['enterprise_id'] = auth()->user()->enterprise_id;
+        $validated['enterprise_id'] = $enterpriseId;
 
         // Upload image
         if ($request->hasFile('image')) {
@@ -144,8 +151,14 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
+        $enterpriseId = auth()->user()->enterprise_id;
         $validated = $request->validate([
-            'room_number' => 'required|string|max:50|unique:rooms,room_number,' . $room->id,
+            'room_number' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('rooms', 'room_number')->where('enterprise_id', $enterpriseId)->ignore($room->id),
+            ],
             'floor' => 'nullable|integer|min:0',
             'type' => 'required|in:single,double,suite,deluxe,presidential',
             'status' => 'required|in:available,occupied,maintenance,reserved',
