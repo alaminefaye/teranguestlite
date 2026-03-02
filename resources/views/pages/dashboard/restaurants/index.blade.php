@@ -211,7 +211,8 @@
                     <x-action-buttons
                         :showRoute="route('dashboard.restaurants.show', $restaurant)"
                         :editRoute="route('dashboard.restaurants.edit', $restaurant)"
-                        :canDelete="false"
+                        :deleteRoute="route('dashboard.restaurants.destroy', $restaurant)"
+                        deleteMessage="Supprimer ce restaurant ?"
                     />
                 </div>
             </div>

@@ -104,7 +104,8 @@
                     <x-action-buttons
                         :showRoute="route('dashboard.palace-services.show', $service)"
                         :editRoute="route('dashboard.palace-services.edit', $service)"
-                        :canDelete="false"
+                        :deleteRoute="route('dashboard.palace-services.destroy', $service)"
+                        deleteMessage="Supprimer ce service palace ?"
                     />
                     <form action="{{ route('dashboard.palace-services.toggle', $service) }}" method="POST" class="inline">
                         @csrf

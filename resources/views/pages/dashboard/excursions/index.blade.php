@@ -95,7 +95,8 @@
                     <x-action-buttons
                         :showRoute="route('dashboard.excursions.show', $excursion)"
                         :editRoute="route('dashboard.excursions.edit', $excursion)"
-                        :canDelete="false"
+                        :deleteRoute="route('dashboard.excursions.destroy', $excursion)"
+                        deleteMessage="Supprimer cette excursion ?"
                     />
                     <form action="{{ route('dashboard.excursions.toggle', $excursion) }}" method="POST" class="inline">
                         @csrf

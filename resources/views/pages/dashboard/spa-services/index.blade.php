@@ -98,7 +98,8 @@
                     <x-action-buttons
                         :showRoute="route('dashboard.spa-services.show', $service)"
                         :editRoute="route('dashboard.spa-services.edit', $service)"
-                        :canDelete="false"
+                        :deleteRoute="route('dashboard.spa-services.destroy', $service)"
+                        deleteMessage="Supprimer ce service spa ?"
                     />
                     <form action="{{ route('dashboard.spa-services.toggle', $service) }}" method="POST" class="inline">
                         @csrf

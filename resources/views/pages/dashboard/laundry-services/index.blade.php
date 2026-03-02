@@ -87,7 +87,8 @@
                     <x-action-buttons
                         :showRoute="route('dashboard.laundry-services.show', $service)"
                         :editRoute="route('dashboard.laundry-services.edit', $service)"
-                        :canDelete="false"
+                        :deleteRoute="route('dashboard.laundry-services.destroy', $service)"
+                        deleteMessage="Supprimer ce service blanchisserie ?"
                     />
                     <form action="{{ route('dashboard.laundry-services.toggle', $service) }}" method="POST" class="inline">
                         @csrf
