@@ -313,7 +313,10 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// App Web Client (Flutter Routing)
+// App Web Client (Flutter) — index.html pour /client et /client/*
+Route::get('/client', function () {
+    return file_get_contents(public_path('client/index.html'));
+});
 Route::get('/client/{any}', function () {
     return file_get_contents(public_path('client/index.html'));
 })->where('any', '.*');
