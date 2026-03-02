@@ -20,15 +20,20 @@
 @endif
 
 <!-- Statistiques -->
-<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-6">
     <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
         <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
         <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">{{ $stats['total'] }}</p>
     </div>
 
     <div class="rounded-lg border border-success-200 bg-success-50 p-4 dark:border-success-800 dark:bg-success-900/20">
-        <p class="text-sm text-success-600 dark:text-success-400">Ouverts</p>
-        <p class="text-2xl font-semibold text-success-700 dark:text-success-300">{{ $stats['open'] }}</p>
+        <p class="text-sm text-success-600 dark:text-success-400">Affichés</p>
+        <p class="text-2xl font-semibold text-success-700 dark:text-success-300">{{ $stats['active'] }}</p>
+    </div>
+
+    <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <p class="text-sm text-gray-500 dark:text-gray-400">Ouverts</p>
+        <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">{{ $stats['open'] }}</p>
     </div>
 
     <div class="rounded-lg border border-error-200 bg-error-50 p-4 dark:border-error-800 dark:bg-error-900/20">
@@ -50,7 +55,7 @@
 <!-- Filtres avancés -->
 <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
     <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</p>
-    <form method="GET" action="{{ route('dashboard.restaurants.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+    <form method="GET" action="{{ route('dashboard.restaurants.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <div>
             <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
             <select name="type" id="type" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
@@ -73,6 +78,15 @@
         </div>
 
         <div>
+            <label for="is_active" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Affichage</label>
+            <select name="is_active" id="is_active" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <option value="">Tous</option>
+                <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Affichés</option>
+                <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Masqués</option>
+            </select>
+        </div>
+
+        <div>
             <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rechercher</label>
             <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Nom..."
                 class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
@@ -82,7 +96,7 @@
             <button type="submit" class="flex-1 px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
                 Filtrer
             </button>
-            @if(request()->hasAny(['search', 'type', 'status']))
+            @if(request()->hasAny(['search', 'type', 'status', 'is_active']))
                 <a href="{{ route('dashboard.restaurants.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
                     Réinitialiser
                 </a>
@@ -94,7 +108,7 @@
 <!-- Liste -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     @forelse($restaurants as $restaurant)
-        <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden {{ !$restaurant->is_active ? 'opacity-70' : '' }}">
             <!-- Image -->
             @if($restaurant->image)
                 <div class="aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
@@ -115,16 +129,21 @@
                         <h3 class="font-semibold text-gray-800 dark:text-white/90">{{ $restaurant->name }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400">{{ $restaurant->type_label }}</p>
                     </div>
-                    @php
-                        $statusColors = [
-                            'open' => 'bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400',
-                            'closed' => 'bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400',
-                            'coming_soon' => 'bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400',
-                        ];
-                    @endphp
-                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$restaurant->status] ?? 'bg-gray-50 text-gray-600' }}">
-                        {{ $restaurant->status_label }}
-                    </span>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        @if(!$restaurant->is_active)
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10">Masqué</span>
+                        @endif
+                        @php
+                            $statusColors = [
+                                'open' => 'bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-400',
+                                'closed' => 'bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-400',
+                                'coming_soon' => 'bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-400',
+                            ];
+                        @endphp
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$restaurant->status] ?? 'bg-gray-50 text-gray-600' }}">
+                            {{ $restaurant->status_label }}
+                        </span>
+                    </div>
                 </div>
 
                 @if($restaurant->description)
@@ -182,7 +201,13 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-end">
+                <div class="flex items-center justify-end gap-2 flex-wrap">
+                    <form action="{{ route('dashboard.restaurants.toggle', $restaurant) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-2 py-1 text-xs border rounded {{ $restaurant->is_active ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-success-600 dark:text-success-400 border-success-300 dark:border-success-700 hover:bg-success-50 dark:hover:bg-success-900/20' }}">
+                            {{ $restaurant->is_active ? 'Masquer' : 'Afficher' }}
+                        </button>
+                    </form>
                     <x-action-buttons
                         :showRoute="route('dashboard.restaurants.show', $restaurant)"
                         :editRoute="route('dashboard.restaurants.edit', $restaurant)"

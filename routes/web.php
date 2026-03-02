@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('menu-items', \App\Http\Controllers\Dashboard\MenuItemController::class);
 
         // Restaurants & Bars
+        Route::post('restaurants/{restaurant}/toggle', [\App\Http\Controllers\Dashboard\RestaurantController::class, 'toggleActive'])->name('restaurants.toggle');
         Route::resource('restaurants', \App\Http\Controllers\Dashboard\RestaurantController::class);
 
         // Services Spa

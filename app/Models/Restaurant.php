@@ -27,6 +27,7 @@ class Restaurant extends Model
         'has_live_music',
         'accepts_reservations',
         'display_order',
+        'is_active',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class Restaurant extends Model
         'accepts_reservations' => 'boolean',
         'capacity' => 'integer',
         'display_order' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -50,6 +52,11 @@ class Restaurant extends Model
     /**
      * Scopes
      */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public function scopeOpen($query)
     {
         return $query->where('status', 'open');

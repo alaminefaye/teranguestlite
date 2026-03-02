@@ -25,6 +25,11 @@ class RestaurantController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filtre affiché / masqué
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
         // Recherche
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -35,6 +40,7 @@ class RestaurantController extends Controller
         // Statistiques
         $stats = [
             'total' => Restaurant::count(),
+            'active' => Restaurant::active()->count(),
             'open' => Restaurant::open()->count(),
             'closed' => Restaurant::closed()->count(),
             'restaurants' => Restaurant::byType('restaurant')->count(),
@@ -196,5 +202,17 @@ class RestaurantController extends Controller
 
         return redirect()->route('dashboard.restaurants.index')
             ->with('success', 'Restaurant supprimé avec succès !');
+    }
+
+    /**
+     * Basculer l'affichage (actif / masqué) — comme dans les autres menus (spa, excursions, etc.).
+     */
+    public function toggleActive(Restaurant $restaurant): RedirectResponse
+    {
+        $restaurant->update(['is_active' => ! $restaurant->is_active]);
+        $label = $restaurant->is_active ? 'affiché' : 'masqué';
+
+        return redirect()->route('dashboard.restaurants.index')
+            ->with('success', "Restaurant « {$restaurant->name } » {$label}.");
     }
 }
