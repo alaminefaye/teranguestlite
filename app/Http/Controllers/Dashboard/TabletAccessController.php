@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -69,10 +70,29 @@ class TabletAccessController extends Controller
         $guests = $query->paginate(15);
         $total = $this->queryTabletAccessUsers()->count();
 
+        // Code client invité (norme) : pour chaque chambre, le code du client en séjour actif
+        $roomIds = $guests->pluck('room_id')->filter()->unique()->values();
+        $guestCodeByRoomId = [];
+        if ($roomIds->isNotEmpty()) {
+            $active = Reservation::withoutGlobalScope('enterprise')
+                ->whereIn('room_id', $roomIds)
+                ->whereIn('status', ['confirmed', 'checked_in'])
+                ->where('check_in', '<=', now())
+                ->where('check_out', '>=', now())
+                ->with('guest:id,access_code')
+                ->get();
+            foreach ($active as $reservation) {
+                if ($reservation->guest) {
+                    $guestCodeByRoomId[$reservation->room_id] = $reservation->guest->access_code;
+                }
+            }
+        }
+
         return view('pages.dashboard.tablet-accesses.index', [
             'title' => 'Accès tablettes',
             'guests' => $guests,
             'total' => $total,
+            'guestCodeByRoomId' => $guestCodeByRoomId,
         ]);
     }
 

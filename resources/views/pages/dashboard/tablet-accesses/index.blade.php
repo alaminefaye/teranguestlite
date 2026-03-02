@@ -4,8 +4,7 @@
     <div class="mb-6 flex items-center justify-between">
         <div>
             <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Accès tablettes</h1>
-            <p class="text-gray-600 dark:text-gray-400">Comptes « Client Chambre XXX » pour identifier chaque chambre sur la
-                tablette</p>
+            <p class="text-gray-600 dark:text-gray-400">Comptes « Client Chambre XXX » pour identifier chaque chambre sur la tablette. Le <strong>code client invité</strong> (reçu à l'enregistrement) est celui utilisé pour la Web App et le QR code.</p>
         </div>
         <a href="{{ route('dashboard.tablet-accesses.create') }}"
             class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700">
@@ -67,8 +66,7 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">
                                 Chambre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Code
-                                Client (Web)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">Code client invité (Web App)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase">
                                 Actions</th>
                         </tr>
@@ -88,32 +86,47 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if($user->client_code)
+                                    @php
+                                        $codeInvite = $user->room_id ? ($guestCodeByRoomId[$user->room_id] ?? null) : null;
+                                        $codePourWeb = $codeInvite ?? $user->client_code;
+                                    @endphp
+                                    @if($codePourWeb)
                                         <div class="flex items-center gap-3">
                                             <div class="bg-white p-1 rounded-sm shadow-sm border border-gray-100">
-                                                {!! QrCode::size(50)->generate(url('/client?code=' . $user->client_code)) !!}
+                                                {!! QrCode::size(50)->generate(url('/client?code=' . $codePourWeb)) !!}
                                             </div>
                                             <div>
-                                                <span
-                                                    class="text-sm font-bold text-gray-900 dark:text-white block">{{ $user->client_code }}</span>
-                                                <a href="{{ url('/client?code=' . $user->client_code) }}" target="_blank"
+                                                @if($codeInvite)
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400 block">Code client invité (reçu à l'enregistrement)</span>
+                                                    <span class="text-sm font-bold text-gray-900 dark:text-white block font-mono">{{ $codeInvite }}</span>
+                                                @else
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400 block">Code accès (fallback)</span>
+                                                    <span class="text-sm font-bold text-gray-900 dark:text-white block font-mono">{{ $user->client_code }}</span>
+                                                @endif
+                                                <a href="{{ url('/client?code=' . $codePourWeb) }}" target="_blank"
                                                     class="text-xs text-brand-600 hover:underline">Ouvrir Web App</a>
                                             </div>
                                         </div>
                                     @else
-                                        <span class="text-xs text-gray-400 italic">Non généré</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 block">Aucun séjour actif</span>
+                                        <span class="text-xs italic">Le client utilisera son code invité à l'ouverture.</span>
+                                        @if($user->client_code)
+                                            <span class="text-xs text-gray-600 dark:text-gray-300 block mt-1 font-mono">{{ $user->client_code }}</span>
+                                            <a href="{{ url('/client?code=' . $user->client_code) }}" target="_blank" class="text-xs text-brand-600 hover:underline">Ouvrir Web App</a>
+                                        @endif
                                     @endif
                                     <form action="{{ route('dashboard.tablet-accesses.regenerate-client-code', $user->id) }}"
                                         method="POST" class="mt-2 inline-block">
                                         @csrf
                                         <button type="submit"
-                                            class="text-xs text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300 transition-colors">
+                                            class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                                            title="Régénérer le code accès (fallback)">
                                             <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                                                 </path>
                                             </svg>
-                                            Générer Code
+                                            Générer code fallback
                                         </button>
                                     </form>
                                 </td>
