@@ -19,6 +19,11 @@
                 </div>
                 <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
                     <div>
+                        <div class="mb-6 flex justify-center">
+                            <a href="/" class="inline-flex items-center justify-center rounded-full px-5 py-2.5" style="background-color: #1E252D; border: 1.5px solid #D4AF37;">
+                                <img src="{{ asset('images/logo/logo.png') }}" alt="TeranGuest" class="h-10 w-auto object-contain" />
+                            </a>
+                        </div>
                         <div class="mb-5 sm:mb-8">
                             <h1 class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
                                 Changement de mot de passe obligatoire
@@ -178,18 +183,10 @@
                 </div>
             </div>
 
+            <!-- Panneau droit : même design que la page de connexion (TeranGuest) -->
             <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
                 <div class="z-1 flex items-center justify-center">
-                    <!-- ===== Common Grid Shape Start ===== -->
                     <x-common.common-grid-shape/>
-                    <div class="flex max-w-xs flex-col items-center">
-                        <a href="/" class="mb-4 block">
-                            <img src="/images/logo/sennavette-auth-logo.jpeg" alt="Sen Navette" style="max-width: 200px; height: auto; object-fit: contain;" />
-                        </a>
-                        <p class="text-center text-gray-400 dark:text-white/60">
-                            Plateforme de transport digitalisé au Sénégal
-                        </p>
-                    </div>
                 </div>
             </div>
             <!-- Toggler -->
