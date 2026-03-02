@@ -148,6 +148,7 @@ class MenuHelper
                             ['name' => 'Bien-être, Sport & Loisirs', 'path' => '/dashboard/leisure-categories'],
                             ['name' => 'Horaires salle de sport', 'path' => '/dashboard/gym-hours'],
                             ['name' => 'Hotel Infos & Sécurité', 'path' => '/dashboard/hotel-infos-security'],
+                            ['name' => 'Galerie', 'path' => '/dashboard/gallery'],
                             ['name' => 'Blanchisserie', 'path' => '/dashboard/laundry-services'],
                             ['name' => 'Amenities & Conciergerie', 'path' => '/dashboard/amenity-categories'],
                             ['name' => 'Services Palace', 'path' => '/dashboard/palace-services'],

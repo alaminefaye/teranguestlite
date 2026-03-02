@@ -102,6 +102,11 @@ class Enterprise extends Model
         return $this->hasMany(Excursion::class);
     }
 
+    public function galleryAlbums()
+    {
+        return $this->hasMany(EnterpriseGalleryAlbum::class, 'enterprise_id');
+    }
+
     /**
      * Scope pour les entreprises actives
      */
@@ -151,6 +156,42 @@ class Enterprise extends Model
             $infos['wifi_password'] = $room->wifi_password;
         }
         return $infos;
+    }
+
+    /**
+     * Galerie pour l'API (app mobile) : image d'établissement + albums actifs avec photos.
+     * Uniquement les données de cette entreprise.
+     */
+    public function getGalleryForApi(): array
+    {
+        $establishmentPhotoUrl = $this->cover_photo
+            ? asset('storage/' . $this->cover_photo)
+            : null;
+
+        $albums = $this->galleryAlbums()
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->with(['photos' => fn ($q) => $q->orderBy('display_order')->orderBy('id')])
+            ->get()
+            ->map(fn ($album) => [
+                'id' => $album->id,
+                'name' => $album->name,
+                'description' => $album->description,
+                'photos' => $album->photos->map(fn ($p) => [
+                    'id' => $p->id,
+                    'url' => asset('storage/' . $p->path),
+                    'title' => $p->title,
+                    'description' => $p->description,
+                ])->values()->all(),
+            ])
+            ->values()
+            ->all();
+
+        return [
+            'establishment_photo_url' => $establishmentPhotoUrl,
+            'albums' => $albums,
+        ];
     }
 
     /**

@@ -94,6 +94,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'index'])->name('hotel-infos-security.index');
         Route::put('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'update'])->name('hotel-infos-security.update');
 
+        // Galerie (image d'établissement + albums)
+        Route::get('gallery', [\App\Http\Controllers\Dashboard\GalleryController::class, 'index'])->name('gallery.index');
+        Route::put('gallery/cover-photo', [\App\Http\Controllers\Dashboard\GalleryController::class, 'updateCoverPhoto'])->name('gallery.cover-photo.update');
+        Route::resource('gallery-albums', \App\Http\Controllers\Dashboard\GalleryAlbumController::class)->names('gallery-albums')->except(['index']);
+        Route::get('gallery-albums', fn () => redirect()->route('dashboard.gallery.index'));
+        Route::get('gallery-albums/{gallery_album}/photos', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'index'])->name('gallery-albums.photos.index');
+        Route::post('gallery-albums/{gallery_album}/photos', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'store'])->name('gallery-albums.photos.store');
+        Route::put('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'update'])->name('gallery-albums.photos.update');
+        Route::delete('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'destroy'])->name('gallery-albums.photos.destroy');
+
         // Chat invité (messages depuis les tablettes)
         Route::get('hotel-chat', [\App\Http\Controllers\Dashboard\ChatController::class, 'index'])->name('hotel-chat.index');
         Route::get('hotel-chat/{conversation}', [\App\Http\Controllers\Dashboard\ChatController::class, 'show'])->name('hotel-chat.show');

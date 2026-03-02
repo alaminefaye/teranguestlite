@@ -73,11 +73,13 @@ class TabletSessionController extends Controller
         }
 
         $infos = $room->enterprise->getHotelInfosForRoom($room);
+        $gallery = $room->enterprise->getGalleryForApi();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'hotel_infos' => $infos,
+                'gallery' => $gallery,
             ],
         ], 200);
     }

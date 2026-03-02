@@ -120,7 +120,8 @@ class TabletSessionApi {
         throw Exception(data?['message'] ?? 'Impossible de charger les infos.');
       }
       final inner = data['data'] as Map<String, dynamic>?;
-      final raw = inner?['hotel_infos'] as Map<String, dynamic>?;
+      final raw = Map<String, dynamic>.from(inner?['hotel_infos'] as Map<String, dynamic>? ?? {});
+      if (inner?['gallery'] != null) raw['gallery'] = inner!['gallery'];
       return HotelInfos.fromJson(raw);
     } on DioException catch (e) {
       final body = e.response?.data;

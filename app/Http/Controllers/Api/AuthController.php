@@ -231,18 +231,22 @@ class AuthController extends Controller
                 'house_rules' => '',
                 'map_url' => null,
                 'practical_info' => '',
+                'gallery' => ['establishment_photo_url' => null, 'albums' => []],
             ];
         }
+        $enterprise = $user->enterprise;
+        $base = $enterprise->hotel_infos;
         if ($user->room_id) {
             $room = Room::withoutGlobalScope('enterprise')
-                ->where('enterprise_id', $user->enterprise_id)
+                ->where('enterprise_id', $enterprise->id)
                 ->where('id', $user->room_id)
                 ->first();
             if ($room) {
-                return $user->enterprise->getHotelInfosForRoom($room);
+                $base = $enterprise->getHotelInfosForRoom($room);
             }
         }
-        return $user->enterprise->hotel_infos;
+        $base['gallery'] = $enterprise->getGalleryForApi();
+        return $base;
     }
 
     /**
