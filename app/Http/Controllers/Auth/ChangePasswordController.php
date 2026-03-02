@@ -55,9 +55,9 @@ class ChangePasswordController extends Controller
         // Rediriger vers le dashboard approprié selon le rôle
         $redirectRoute = match($user->role) {
             'super_admin' => 'admin.dashboard',
-            'admin', 'staff' => 'dashboard',
+            'admin', 'staff' => 'dashboard.index',
             'guest' => 'guest.dashboard',
-            default => 'dashboard',
+            default => 'dashboard.index',
         };
 
         return redirect()->route($redirectRoute)
