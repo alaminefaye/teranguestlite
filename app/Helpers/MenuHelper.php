@@ -111,7 +111,7 @@ class MenuHelper
                         'path' => '/dashboard/guests',
                     ],
                     [
-                        'icon' => 'room', // using 'room' or 'ecommerce' as icon, or we can use another one
+                        'icon' => 'qr-code',
                         'name' => 'QR Code Client',
                         'path' => '/dashboard/qrcode-client',
                     ],
@@ -121,12 +121,12 @@ class MenuHelper
                         'path' => '/dashboard/orders',
                     ],
                     [
-                        'icon' => 'task',
+                        'icon' => 'receipt',
                         'name' => 'Facturation',
                         'path' => '/dashboard/billing',
                     ],
                     [
-                        'icon' => 'task',
+                        'icon' => 'menu-food',
                         'name' => 'Menus',
                         'path' => '#',
                         'subItems' => [
@@ -135,12 +135,12 @@ class MenuHelper
                         ],
                     ],
                     [
-                        'icon' => 'room',
+                        'icon' => 'restaurant',
                         'name' => 'Restaurants & Bars',
                         'path' => '/dashboard/restaurants',
                     ],
                     [
-                        'icon' => 'task',
+                        'icon' => 'services',
                         'name' => 'Services',
                         'path' => '#',
                         'subItems' => [
@@ -156,12 +156,12 @@ class MenuHelper
                         ],
                     ],
                     [
-                        'icon' => 'user-profile',
+                        'icon' => 'users',
                         'name' => 'Staff',
                         'path' => '/dashboard/staff',
                     ],
                     [
-                        'icon' => 'task',
+                        'icon' => 'tablet',
                         'name' => 'Accès tablettes',
                         'path' => '/dashboard/tablet-accesses',
                     ],
@@ -171,7 +171,7 @@ class MenuHelper
                         'path' => '/dashboard/reports',
                     ],
                     [
-                        'icon' => 'task',
+                        'icon' => 'package',
                         'name' => 'Stocks',
                         'path' => '#',
                         'subItems' => [
@@ -307,6 +307,22 @@ class MenuHelper
             'reservation' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.9955 13.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 
             'report' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 3.75C3 3.33579 3.33579 3 3.75 3H20.25C20.6642 3 21 3.33579 21 3.75V20.25C21 20.6642 20.6642 21 20.25 21H3.75C3.33579 21 3 20.6642 3 20.25V3.75ZM4.5 4.5V19.5H19.5V4.5H4.5ZM7.5 8.25C7.5 7.83579 7.83579 7.5 8.25 7.5H15.75C16.1642 7.5 16.5 7.83579 16.5 8.25C16.5 8.66421 16.1642 9 15.75 9H8.25C7.83579 9 7.5 8.66421 7.5 8.25ZM7.5 12C7.5 11.5858 7.83579 11.25 8.25 11.25H15.75C16.1642 11.25 16.5 11.5858 16.5 12C16.5 12.4142 16.1642 12.75 15.75 12.75H8.25C7.83579 12.75 7.5 12.4142 7.5 12ZM7.5 15.75C7.5 15.3358 7.83579 15 8.25 15H12.75C13.1642 15 13.5 15.3358 13.5 15.75C13.5 16.1642 13.1642 16.5 12.75 16.5H8.25C7.83579 16.5 7.5 16.1642 7.5 15.75Z" fill="currentColor"></path></svg>',
+
+            'qr-code' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h4v4H3V5zm2 2V7h2v2H5zm-2 8h4v4H3v-4zm2 2v-2h2v2H5zm8-12h4v4h-4V5zm2 2V7h2v2h-2zm4 2h2v2h-2V9zm0 2v2h2v2h-2v-2zm-2 2h-2v2h2v2h2v-2h2v-2h-2v-2h-2v2zm4 2v2h2v2h2v-2h-2v-2h-2zm-8 4h4v4h-4v-4zm2 2v-2h2v2h-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+
+            'receipt' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4v16l2-1.5 2 1.5 2-1.5 2 1.5 2-1.5 2 1.5V4H4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9h8M8 13h8M8 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+
+            'menu-food' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 10a3 3 0 1 1 6 0v8h-6v-8zM9 18V6l4 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+
+            'restaurant' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2v8h2v12h2V10h2V2H3zm8 0v6c0 2.2 1.8 4 4 4v10h2V12c-2.2 0-4-1.8-4-4V2h-4zm8 0v20h2V12c2.2 0 4-1.8 4-4V2h-6z" fill="currentColor"/></svg>',
+
+            'users' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM7 7a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm10 0a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-5 8.5c-3.5 0-6 1.8-6 3.5V20h12v-1c0-1.7-2.5-3.5-6-3.5zM3 18.5c0-1.7 2.5-3.5 6-3.5s6 1.8 6 3.5V20H3v-1.5zm16 0c0-1.7-2.5-3.5-6-3.5v2c2.5 0 4 1.2 4 2v.5h6V18c0-1.1-.9-2-2-2h-2z" fill="currentColor"/></svg>',
+
+            'tablet' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm5 13h2v-1h-2v1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+
+            'package' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7l9 5 9-5M12 22V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+
+            'services' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a7.4 7.4 0 0 0 .6-3c0-4-3.5-7-8-7s-8 3-8 7c0 1.2.3 2.3.6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4.6 15a7.4 7.4 0 0 1-.6-3c0-4 3.5-7 8-7s8 3 8 7c0 1.2-.3 2.3-.6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
         ];
 
         return $icons[$iconName] ?? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/></svg>';
