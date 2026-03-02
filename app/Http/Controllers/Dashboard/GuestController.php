@@ -8,9 +8,42 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 class GuestController extends Controller
 {
+    /**
+     * Recherche clients pour le sélecteur (réservations) : nom, code, téléphone.
+     * Retourne JSON pour appels AJAX.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = $request->input('q', '');
+        $q = trim((string) $q);
+
+        if ($q === '') {
+            $guests = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+        } else {
+            $guests = Guest::where(function ($query) use ($q) {
+                $query->where('name', 'like', '%' . $q . '%')
+                    ->orWhere('access_code', 'like', '%' . $q . '%')
+                    ->orWhere('email', 'like', '%' . $q . '%')
+                    ->orWhere('phone', 'like', '%' . $q . '%');
+            })->orderBy('name')->limit(20)->get();
+        }
+
+        return response()->json([
+            'guests' => $guests->map(fn (Guest $g) => [
+                'id' => $g->id,
+                'name' => $g->name,
+                'email' => $g->email,
+                'phone' => $g->phone,
+                'access_code' => $g->access_code,
+                'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code,
+            ]),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $query = Guest::query();

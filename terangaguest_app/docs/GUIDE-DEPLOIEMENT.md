@@ -1,8 +1,10 @@
 # 🚀 GUIDE DE DÉPLOIEMENT - TERANGUEST MOBILE
 
-**Version :** 2.0.1  
-**Date :** 3 Février 2026  
-**Statut :** Production-Ready
+**Version :** 1.0.0  
+**Date :** Mars 2026  
+**Statut :** Production-Ready  
+
+Pour les prérequis détaillés Play Store et App Store (signature, build, checklist), voir **[PRODUCTION-STORES.md](PRODUCTION-STORES.md)**.
 
 ---
 
@@ -33,11 +35,11 @@ dart --version
 
 **`pubspec.yaml`**
 ```yaml
-version: 2.0.1+2
+version: 1.0.0+1
 
 # Format: version_name+build_number
-# 2.0.1 = version affichée utilisateur
-# 2 = build number (incrémenté à chaque build)
+# 1.0.0 = version affichée utilisateur
+# 1 = build number (incrémenter à chaque soumission store)
 ```
 
 ### 2. Configuration API

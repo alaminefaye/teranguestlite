@@ -92,12 +92,23 @@ class ReservationController extends Controller
     public function create()
     {
         $rooms = Room::available()->orderBy('room_number')->get();
-        $guests = Guest::orderBy('name')->get();
+        $guests = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+        $initialGuestLabel = '';
+        if (old('guest_id')) {
+            $g = Guest::find(old('guest_id'));
+            if ($g) {
+                $initialGuestLabel = $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code;
+                if (! $guests->contains('id', $g->id)) {
+                    $guests = $guests->prepend($g)->take(5);
+                }
+            }
+        }
 
         return view('pages.dashboard.reservations.create', [
             'title' => 'Créer une réservation',
             'rooms' => $rooms,
             'guests' => $guests,
+            'initialGuestLabel' => $initialGuestLabel,
         ]);
     }
 
@@ -267,13 +278,23 @@ class ReservationController extends Controller
     public function edit(Reservation $reservation)
     {
         $rooms = Room::orderBy('room_number')->get();
-        $guests = Guest::orderBy('name')->get();
+        $latest = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+        $currentGuest = $reservation->guest;
+        $guests = $latest->contains('id', $currentGuest->id)
+            ? $latest
+            : $latest->prepend($currentGuest)->take(5);
+        $guestIdForLabel = old('guest_id', $reservation->guest_id);
+        $guestForLabel = Guest::find($guestIdForLabel);
+        $initialGuestLabel = $guestForLabel
+            ? $guestForLabel->name . ($guestForLabel->email ? ' (' . $guestForLabel->email . ')' : '') . ' — Code ' . $guestForLabel->access_code
+            : '';
 
         return view('pages.dashboard.reservations.edit', [
             'title' => 'Modifier réservation ' . $reservation->reservation_number,
             'reservation' => $reservation,
             'rooms' => $rooms,
             'guests' => $guests,
+            'initialGuestLabel' => $initialGuestLabel,
         ]);
     }
 

@@ -49,19 +49,70 @@
         @method('PUT')
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Client (invité) -->
-            <div class="md:col-span-2">
+            <!-- Client (invité) : recherche par nom, code ou téléphone ; 5 derniers inscrits par défaut -->
+            <div class="md:col-span-2" x-data="{
+                guestOpen: false,
+                guestSearch: '',
+                guestSelectedId: '{{ old('guest_id', $reservation->guest_id) }}',
+                guestSelectedLabel: @json($initialGuestLabel ?? ''),
+                guestList: @json($guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all()),
+                searchTimeout: null,
+                fetchGuests() {
+                    const q = this.guestSearch.trim();
+                    const url = '{{ route('dashboard.guests.search') }}' + (q ? '?q=' + encodeURIComponent(q) : '');
+                    fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => r.json())
+                        .then(data => { this.guestList = data.guests || []; })
+                        .catch(() => { this.guestList = []; });
+                },
+                onSearchInput() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => this.fetchGuests(), 200);
+                },
+                selectGuest(guest) {
+                    this.guestSelectedId = guest.id;
+                    this.guestSelectedLabel = guest.label;
+                    this.guestOpen = false;
+                    this.guestSearch = '';
+                    this.$refs.guestHidden.value = guest.id;
+                },
+                openDropdown() {
+                    this.guestOpen = true;
+                    if (!this.guestSearch) this.guestList = @json($guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all());
+                    this.$nextTick(() => this.$refs.guestSearchInput?.focus());
+                }
+            }" @click.outside="guestOpen = false">
                 <label for="guest_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Client (invité) <span class="text-error-500">*</span>
                 </label>
-                <select name="guest_id" id="guest_id" required
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    @foreach($guests as $g)
-                        <option value="{{ $g->id }}" {{ old('guest_id', $reservation->guest_id) == $g->id ? 'selected' : '' }}>
-                            {{ $g->name }} @if($g->email)({{ $g->email }})@endif — Code {{ $g->access_code }}
-                        </option>
-                    @endforeach
-                </select>
+                <input type="hidden" name="guest_id" id="guest_id" x-ref="guestHidden" :value="guestSelectedId" required>
+                <div class="relative">
+                    <button type="button" @click="openDropdown()"
+                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-left text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500 flex items-center justify-between">
+                        <span x-text="guestSelectedLabel || 'Sélectionner un client'" :class="!guestSelectedLabel && 'text-gray-400 dark:text-gray-500'"></span>
+                        <svg class="w-5 h-5 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="guestOpen" x-transition
+                        class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg max-h-72 overflow-hidden">
+                        <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                            <input type="text" x-ref="guestSearchInput" x-model="guestSearch" @input="onSearchInput()"
+                                placeholder="Rechercher par nom, code ou téléphone..."
+                                class="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-white/90 placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500">
+                        </div>
+                        <div class="overflow-y-auto max-h-56">
+                            <template x-for="g in guestList" :key="g.id">
+                                <button type="button" @click="selectGuest(g)"
+                                    class="w-full px-4 py-2.5 text-left text-sm text-gray-800 dark:text-white/90 hover:bg-brand-50 dark:hover:bg-brand-500/20 flex items-center gap-2"
+                                    :class="guestSelectedId == g.id && 'bg-brand-50 dark:bg-brand-500/20'">
+                                    <span x-text="g.label" class="truncate"></span>
+                                    <span x-show="guestSelectedId == g.id" class="text-brand-500">✓</span>
+                                </button>
+                            </template>
+                            <p x-show="guestList.length === 0 && !guestSearch" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Aucun client récent. Utilisez la recherche.</p>
+                            <p x-show="guestList.length === 0 && guestSearch" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Aucun résultat.</p>
+                        </div>
+                    </div>
+                </div>
                 @error('guest_id')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror

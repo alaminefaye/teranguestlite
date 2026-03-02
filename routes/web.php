@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('reservations.invoice.pdf');
 
         // Clients (invités) - code tablette
+        Route::get('guests/search', [\App\Http\Controllers\Dashboard\GuestController::class, 'search'])->name('guests.search');
         Route::resource('guests', \App\Http\Controllers\Dashboard\GuestController::class);
         Route::post('guests/{guest}/regenerate-code', [\App\Http\Controllers\Dashboard\GuestController::class, 'regenerateCode'])
             ->name('guests.regenerate-code');
