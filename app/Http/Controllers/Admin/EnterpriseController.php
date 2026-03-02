@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise;
 use App\Models\User;
+use App\Services\DefaultDataForEnterpriseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
@@ -81,6 +82,9 @@ class EnterpriseController extends Controller
             'department' => 'Direction',
             'must_change_password' => true, // Forcer le changement à la première connexion
         ]);
+
+        // Données par défaut : Sport/Loisirs, Blanchisserie, Services Palace, Amenities & Conciergerie
+        DefaultDataForEnterpriseService::seedForEnterprise($enterprise);
 
         return redirect()->route('admin.enterprises.index')
             ->with('success', "Entreprise créée avec succès !")
