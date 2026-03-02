@@ -10,7 +10,12 @@
 </div>
 
 <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90 mb-2">Modifier l'accès tablette</h1>
-<p class="text-gray-600 dark:text-gray-400 mb-6">Chambre actuelle : <strong>{{ $user->room_number }}</strong></p>
+<p class="text-gray-600 dark:text-gray-400 mb-2">Chambre actuelle : <strong>{{ $user->room_number }}</strong></p>
+@if($currentRoomId)
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">ID chambre pour la tablette : <strong>{{ $currentRoomId }}</strong> — à entrer dans l’app tablette (Paramètres / Chambre) pour que les données affichées soient bien celles de votre établissement.</p>
+@else
+    <p class="text-gray-600 dark:text-gray-400 mb-6"></p>
+@endif
 
 @if(session('error'))
     <div class="mb-6 rounded-lg bg-error-50 p-4 text-error-600 dark:bg-error-500/10 dark:text-error-400">

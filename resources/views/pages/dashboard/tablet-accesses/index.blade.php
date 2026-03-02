@@ -82,6 +82,7 @@
                                     @if($user->room)
                                         <a href="{{ route('dashboard.rooms.show', $user->room) }}"
                                             class="text-brand-600 hover:text-brand-700 dark:text-brand-400">{{ $user->room->room_number }}</a>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ID chambre : {{ $user->room->id }} (pour config tablette)</p>
                                     @else
                                         {{ $user->room_number ?? '—' }}
                                     @endif

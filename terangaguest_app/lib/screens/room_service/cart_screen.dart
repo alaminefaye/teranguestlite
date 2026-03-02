@@ -193,6 +193,9 @@ class _CartScreenState extends State<CartScreen> {
     final roomController = TextEditingController(
       text: tabletSession.roomNumber,
     );
+    final roomIdController = TextEditingController(
+      text: tabletSession.roomId != null ? '${tabletSession.roomId}' : '',
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -221,7 +224,7 @@ class _CartScreenState extends State<CartScreen> {
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     const SizedBox(height: 16),
-                    // Chambre : lecture seule si déjà définie, sinon champ unique "Définir la chambre"
+                    // Chambre : lecture seule si déjà définie, sinon champs "Numéro" + "ID chambre" (recommandé en multi-établissement)
                     if (showRoomSetup) ...[
                       TextField(
                         controller: roomController,
@@ -231,15 +234,29 @@ class _CartScreenState extends State<CartScreen> {
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
                           border: const OutlineInputBorder(),
-                          hintText: _l10n(context).clientCodeHint,
+                          hintText: 'Ex: 101',
                         ),
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
                         readOnly: false,
                       ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: roomIdController,
+                        decoration: InputDecoration(
+                          labelText: 'ID chambre (recommandé — voir tableau de bord > Accès tablettes)',
+                          labelStyle: const TextStyle(color: AppTheme.textGray),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.1),
+                          border: const OutlineInputBorder(),
+                          hintText: 'Ex: 42',
+                        ),
+                        keyboardType: TextInputType.number,
+                        style: const TextStyle(color: Colors.white),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                        'La chambre sera mémorisée pour les prochaines validations.',
+                        'En multi-établissement, renseignez l\'ID chambre pour n\'afficher que les données de votre hôtel.',
                         style: TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                       const SizedBox(height: 12),
@@ -343,7 +360,12 @@ class _CartScreenState extends State<CartScreen> {
                             );
                             return;
                           }
-                          if (showRoomSetup) await ts.setRoomNumber(r);
+                          if (showRoomSetup) {
+                            await ts.setRoomNumber(r);
+                            final idStr = roomIdController.text.trim();
+                            final id = int.tryParse(idStr);
+                            if (id != null && id > 0) await ts.setRoomId(id);
+                          }
                           try {
                             await ts.validateCode(c);
                             if (!ctx.mounted) return;
