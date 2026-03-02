@@ -47,38 +47,59 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Client (invité) : recherche par nom, code ou téléphone ; 5 derniers inscrits par défaut -->
-            <div class="md:col-span-2" x-data="{
-                guestOpen: false,
-                guestSearch: '',
-                guestSelectedId: '{{ old('guest_id') }}',
-                guestSelectedLabel: @json($initialGuestLabel ?? ''),
-                guestList: @json($guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all()),
-                searchTimeout: null,
-                fetchGuests() {
-                    const q = this.guestSearch.trim();
-                    const url = '{{ route('dashboard.guests.search') }}' + (q ? '?q=' + encodeURIComponent(q) : '');
-                    fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
-                        .then(r => r.json())
-                        .then(data => { this.guestList = data.guests || []; })
-                        .catch(() => { this.guestList = []; });
-                },
-                onSearchInput() {
-                    clearTimeout(this.searchTimeout);
-                    this.searchTimeout = setTimeout(() => this.fetchGuests(), 200);
-                },
-                selectGuest(guest) {
-                    this.guestSelectedId = guest.id;
-                    this.guestSelectedLabel = guest.label;
-                    this.guestOpen = false;
-                    this.guestSearch = '';
-                    this.$refs.guestHidden.value = guest.id;
-                },
-                openDropdown() {
-                    this.guestOpen = true;
-                    if (!this.guestSearch) this.guestList = @json($guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all());
-                    this.$nextTick(() => this.$refs.guestSearchInput?.focus());
-                }
-            }" @click.outside="guestOpen = false">
+            @php
+                $guestSelectInit = [
+                    'guestList' => $guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all(),
+                    'guestSelectedId' => old('guest_id', ''),
+                    'guestSelectedLabel' => $initialGuestLabel ?? '',
+                    'searchUrl' => route('dashboard.guests.search'),
+                ];
+            @endphp
+            <script>
+            window.guestSelectReservation = function(scriptId) {
+                var el = document.getElementById(scriptId);
+                var init = el ? JSON.parse(el.textContent) : {};
+                var initialList = Array.isArray(init.guestList) ? init.guestList : [];
+                return {
+                    guestOpen: false,
+                    guestSearch: '',
+                    guestSelectedId: init.guestSelectedId || '',
+                    guestSelectedLabel: init.guestSelectedLabel || '',
+                    guestList: initialList,
+                    searchUrl: init.searchUrl || '',
+                    searchTimeout: null,
+                    fetchGuests: function() {
+                        var q = this.guestSearch.trim();
+                        var url = this.searchUrl + (q ? '?q=' + encodeURIComponent(q) : '');
+                        var self = this;
+                        fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) { self.guestList = data.guests || []; })
+                            .catch(function() { self.guestList = []; });
+                    },
+                    onSearchInput: function() {
+                        clearTimeout(this.searchTimeout);
+                        var self = this;
+                        this.searchTimeout = setTimeout(function() { self.fetchGuests(); }, 200);
+                    },
+                    selectGuest: function(guest) {
+                        this.guestSelectedId = guest.id;
+                        this.guestSelectedLabel = guest.label;
+                        this.guestOpen = false;
+                        this.guestSearch = '';
+                        if (this.$refs.guestHidden) this.$refs.guestHidden.value = guest.id;
+                    },
+                    openDropdown: function() {
+                        this.guestOpen = true;
+                        if (!this.guestSearch) this.guestList = initialList;
+                        var self = this;
+                        this.$nextTick(function() { if (self.$refs.guestSearchInput) self.$refs.guestSearchInput.focus(); });
+                    }
+                };
+            };
+            </script>
+            <script type="application/json" id="guest-select-data-create">@json($guestSelectInit)</script>
+            <div class="md:col-span-2" x-data="guestSelectReservation('guest-select-data-create')" @click.outside="guestOpen = false">
                 <label for="guest_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Client (invité) <span class="text-error-500">*</span>
                 </label>
@@ -234,4 +255,5 @@
         </div>
     </form>
 </div>
+
 @endsection
