@@ -81,14 +81,21 @@ class AuthController extends Controller
             'client_code' => 'required|string',
         ]);
 
-        $user = User::where('client_code', $request->client_code)
+        // 1) Code client Web (QR) : unique globalement pour éviter qu'un client voie les données d'un autre hôtel
+        $user = User::where('client_code', trim($request->client_code))
             ->where('role', 'guest')
             ->first();
 
-        // 2) Fallback : vérifier si c'est le "Code tablette" (access_code) d'un Guest physique
-        // et récupérer la tablette de la chambre correspondant à sa réservation active.
+        // 2) Fallback : code tablette (Guest.access_code) — unique par établissement, donc ambigu en SaaS
         if (!$user) {
-            $guest = \App\Models\Guest::where('access_code', $request->client_code)->first();
+            $guestsWithCode = \App\Models\Guest::where('access_code', trim($request->client_code))->get();
+            if ($guestsWithCode->count() > 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce code correspond à plusieurs établissements. Utilisez le QR code de votre chambre pour ouvrir l\'accès.',
+                ], 401);
+            }
+            $guest = $guestsWithCode->first();
             if ($guest) {
                 $reservation = \App\Models\Reservation::withoutGlobalScope('enterprise')
                     ->where('guest_id', $guest->id)
@@ -98,7 +105,6 @@ class AuthController extends Controller
                     ->first();
 
                 if ($reservation && $reservation->room_id) {
-                    // Trouver l'utilisateur (tablette) lié à cette chambre
                     $user = User::where('role', 'guest')
                         ->where('enterprise_id', $guest->enterprise_id)
                         ->where(function ($q) use ($reservation) {

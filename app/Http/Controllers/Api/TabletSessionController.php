@@ -100,15 +100,17 @@ class TabletSessionController extends Controller
         if ($request->filled('room_id')) {
             $room = Room::find($request->room_id);
         } elseif ($request->filled('room_number')) {
-            $room = Room::withoutGlobalScope('enterprise')
-                ->where('room_number', $request->room_number)
-                ->first();
+            // En SaaS le numéro seul est ambigu : exiger room_id pour cibler le bon établissement
+            return response()->json([
+                'success' => false,
+                'message' => 'Indiquez l\'identifiant de la chambre (room_id). Le numéro seul ne suffit pas en multi-établissement.',
+            ], 400);
         }
 
         if (!$room) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chambre non trouvée. Indiquez room_id ou room_number.',
+                'message' => 'Chambre non trouvée. Indiquez room_id.',
             ], 400);
         }
 
@@ -165,15 +167,17 @@ class TabletSessionController extends Controller
         if ($request->filled('room_id')) {
             $room = Room::find($request->room_id);
         } elseif ($request->filled('room_number')) {
-            $room = Room::withoutGlobalScope('enterprise')
-                ->where('room_number', $request->room_number)
-                ->first();
+            // En SaaS le numéro seul est ambigu (plusieurs hôtels peuvent avoir la chambre 101)
+            return response()->json([
+                'success' => false,
+                'message' => 'Pour valider le code, indiquez l\'identifiant de la chambre (room_id). Le numéro seul ne suffit pas en multi-établissement.',
+            ], 400);
         }
 
         if (!$room) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chambre non trouvée. Indiquez room_id ou room_number.',
+                'message' => 'Chambre non trouvée. Indiquez room_id.',
             ], 400);
         }
 
@@ -337,12 +341,16 @@ class TabletSessionController extends Controller
 
         $subtotal = 0;
         $itemsData = [];
+        $enterpriseId = $room->enterprise_id;
         foreach ($request->items as $item) {
-            $menuItem = MenuItem::find($item['menu_item_id']);
+            $menuItem = MenuItem::withoutGlobalScope('enterprise')
+                ->where('enterprise_id', $enterpriseId)
+                ->where('id', $item['menu_item_id'])
+                ->first();
             if (!$menuItem || !$menuItem->is_available) {
                 return response()->json([
                     'success' => false,
-                    'message' => "L'article {$menuItem->name} n'est plus disponible.",
+                    'message' => $menuItem ? "L'article {$menuItem->name} n'est plus disponible." : 'Article invalide ou non disponible pour cet établissement.',
                 ], 400);
             }
             $qty = (int) $item['quantity'];

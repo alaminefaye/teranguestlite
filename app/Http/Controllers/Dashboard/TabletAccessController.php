@@ -25,6 +25,26 @@ class TabletAccessController extends Controller
         return $id;
     }
 
+    /**
+     * Génère un code client unique globalement (SaaS : un code = un seul établissement).
+     * Évite qu'un client d'un hôtel ouvre la session d'un autre hôtel.
+     */
+    private function generateUniqueClientCode(?int $excludeUserId = null): string
+    {
+        $maxAttempts = 100;
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $code = mb_strtoupper(strtoupper(substr(bin2hex(random_bytes(4)), 0, 6)));
+            $query = User::where('client_code', $code)->where('role', 'guest');
+            if ($excludeUserId !== null) {
+                $query->where('id', '!=', $excludeUserId);
+            }
+            if ($query->doesntExist()) {
+                return $code;
+            }
+        }
+        return mb_strtoupper(mb_substr(uniqid('', true), -6));
+    }
+
     /** Requête des accès tablette : uniquement les users avec rôle guest. */
     private function queryTabletAccessUsers()
     {
@@ -137,11 +157,13 @@ class TabletAccessController extends Controller
 
         $name = $validated['name'] ?: 'Client Chambre ' . $room->room_number;
 
+        $clientCode = $this->generateUniqueClientCode();
+
         User::create([
             'name' => $name,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'client_code' => mb_strtoupper(mb_substr(uniqid(), -6)), // Génération d'un code client unique de 6 caractères
+            'client_code' => $clientCode,
             'role' => 'guest',
             'enterprise_id' => $enterpriseId,
             'department' => null,
@@ -256,7 +278,7 @@ class TabletAccessController extends Controller
             ->where('enterprise_id', $this->getEnterpriseId())
             ->firstOrFail();
 
-        $newCode = mb_strtoupper(mb_substr(uniqid(), -6));
+        $newCode = $this->generateUniqueClientCode($user->id);
         $user->update(['client_code' => $newCode]);
 
         return back()->with('success', 'Nouveau QR Code / Code Client généré : ' . $newCode);
