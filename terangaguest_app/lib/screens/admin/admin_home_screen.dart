@@ -1479,7 +1479,7 @@ class _NewOrdersCarouselDialog extends StatefulWidget {
 }
 
 class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
-  static const int _totalSeconds = 60;
+  static const int _totalSeconds = 20;
   late int _remainingSeconds;
   Timer? _timer;
   int _currentIndex = 0;
@@ -1735,7 +1735,7 @@ class _NewLaundryCarouselDialog extends StatefulWidget {
 }
 
 class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
-  static const int _totalSeconds = 60;
+  static const int _totalSeconds = 20;
   late int _remainingSeconds;
   Timer? _timer;
   int _currentIndex = 0;
@@ -2029,8 +2029,8 @@ class _NewPalaceCarouselDialog extends StatefulWidget {
 class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
   int _currentIndex = 0;
   Timer? _timer;
-  int _remainingSeconds = 60;
-  final int _totalSeconds = 60;
+  int _remainingSeconds = 20;
+  final int _totalSeconds = 20;
 
   @override
   void initState() {
@@ -2307,7 +2307,7 @@ class _NewRestaurantCarouselDialog extends StatefulWidget {
 
 class _NewRestaurantCarouselDialogState
     extends State<_NewRestaurantCarouselDialog> {
-  static const int _totalSeconds = 60;
+  static const int _totalSeconds = 20;
   late int _remainingSeconds;
   Timer? _timer;
   int _currentIndex = 0;
@@ -2572,7 +2572,7 @@ class _NewExcursionCarouselDialog extends StatefulWidget {
 
 class _NewExcursionCarouselDialogState
     extends State<_NewExcursionCarouselDialog> {
-  static const int _totalSeconds = 60;
+  static const int _totalSeconds = 20;
   late int _remainingSeconds;
   Timer? _timer;
   int _currentIndex = 0;
@@ -2839,7 +2839,7 @@ class _NewSpaCarouselDialog extends StatefulWidget {
 }
 
 class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
-  static const int _totalSeconds = 60;
+  static const int _totalSeconds = 20;
   late int _remainingSeconds;
   Timer? _timer;
   int _currentIndex = 0;
@@ -3370,7 +3370,7 @@ class _RescheduledSpaCarouselDialogState
   late PageController _pageController;
   int _currentIndex = 0;
   Timer? _autoCloseTimer;
-  int _secondsLeft = 15;
+  int _secondsLeft = 20;
 
   @override
   void initState() {
@@ -3403,7 +3403,7 @@ class _RescheduledSpaCarouselDialogState
     super.dispose();
   }
 
-  double get _progress => _secondsLeft / 15;
+  double get _progress => _secondsLeft / 20;
 
   @override
   Widget build(BuildContext context) {

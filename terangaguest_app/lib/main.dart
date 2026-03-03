@@ -560,7 +560,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleOrderStatusNotification(Map<String, dynamic> data) {
@@ -688,7 +688,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
             ],
           );
         },
-      );
+      ).then((_) => _stopNotificationSound());
       return;
     }
 
@@ -703,7 +703,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
               orderNumber: orderNumber,
             );
           },
-        );
+        ).then((_) => _stopNotificationSound());
       }
       return;
     }
@@ -785,7 +785,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleRoomServiceTransferNotification(Map<String, dynamic> data) {
@@ -887,7 +887,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleSpaRescheduleNotification(Map<String, dynamic> data) {
@@ -950,7 +950,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleSpaStatusNotification(Map<String, dynamic> data) {
@@ -1078,7 +1078,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleOpenedFromNotification(Map<String, dynamic> data) {
@@ -1416,7 +1416,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   void _handleRestaurantStatusNotification(Map<String, dynamic> data) {
@@ -1546,7 +1546,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   String _restaurantStatusLabel(AppLocalizations l10n, String status) {
@@ -1651,7 +1651,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 
   String _statusMessage(AppLocalizations l10n, String statusLabel) {
@@ -1890,6 +1890,6 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    );
+    ).then((_) => _stopNotificationSound());
   }
 }
