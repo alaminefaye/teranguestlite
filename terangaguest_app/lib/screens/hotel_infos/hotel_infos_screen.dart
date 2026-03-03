@@ -8,7 +8,6 @@ import '../../providers/auth_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../services/tablet_session_api.dart';
 import '../../utils/haptic_helper.dart';
-import 'gallery_album_detail_screen.dart';
 
 /// Livret d'accueil : Wi‑Fi (chambre si renseigné), plans, règlement, infos pratiques.
 /// En session tablette (code validé), affiche les infos de la chambre concernée.
@@ -256,18 +255,11 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                   ),
                 ),
               ]),
-            if (infos.gallery != null &&
-                (infos.gallery!.establishmentPhotoUrl != null ||
-                    infos.gallery!.albums.isNotEmpty))
-              _buildGallerySection(context, infos.gallery!),
             if (infos.wifiNetwork.isEmpty &&
                 infos.wifiPassword.isEmpty &&
                 infos.houseRules.trim().isEmpty &&
                 (infos.mapUrl == null || infos.mapUrl!.isEmpty) &&
-                infos.practicalInfo.trim().isEmpty &&
-                (infos.gallery == null ||
-                    (infos.gallery!.establishmentPhotoUrl == null &&
-                        infos.gallery!.albums.isEmpty)))
+                infos.practicalInfo.trim().isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -354,140 +346,4 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
     );
   }
 
-  Widget _buildGallerySection(BuildContext context, Gallery gallery) {
-    final children = <Widget>[];
-    if (gallery.establishmentPhotoUrl != null &&
-        gallery.establishmentPhotoUrl!.isNotEmpty) {
-      children.add(
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            gallery.establishmentPhotoUrl!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 200,
-            loadingBuilder: (context, child, progress) =>
-                progress == null
-                    ? child
-                    : const SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: AppTheme.accentGold,
-                          ),
-                        ),
-                      ),
-            errorBuilder: (context, error, stackTrace) => const SizedBox(
-              height: 200,
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                color: AppTheme.textGray,
-                size: 48,
-              ),
-            ),
-          ),
-        ),
-      );
-      children.add(const SizedBox(height: 12));
-    }
-    if (gallery.albums.isNotEmpty) {
-      children.add(
-        const Text(
-          'Albums',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.accentGold,
-          ),
-        ),
-      );
-      children.add(const SizedBox(height: 8));
-      for (final album in gallery.albums) {
-        final firstPhotoUrl = album.photos.isNotEmpty ? album.photos.first.url : null;
-        children.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  HapticHelper.lightImpact();
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => GalleryAlbumDetailScreen(album: album),
-                    ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryBlue.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppTheme.accentGold.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      if (firstPhotoUrl != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            firstPhotoUrl,
-                            width: 72,
-                            height: 72,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const SizedBox(
-                              width: 72,
-                              height: 72,
-                              child: Icon(Icons.photo_library, color: AppTheme.textGray),
-                            ),
-                          ),
-                        )
-                      else
-                        const SizedBox(
-                          width: 72,
-                          height: 72,
-                          child: Icon(Icons.photo_library, color: AppTheme.textGray),
-                        ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              album.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            if (album.photos.isNotEmpty)
-                              Text(
-                                '${album.photos.length} photo(s)',
-                                style: const TextStyle(
-                                  color: AppTheme.textGray,
-                                  fontSize: 13,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: AppTheme.accentGold,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-    }
-    return _section(context, 'Galerie', children);
-  }
 }

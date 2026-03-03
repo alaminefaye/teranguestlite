@@ -135,19 +135,77 @@ class TabletSessionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'guest_id' => $guest->id,
-                'guest_name' => $guest->name,
-                'guest_phone' => $guest->phone,
-                'guest_email' => $guest->email,
-                'room_id' => $room->id,
-                'room_number' => $room->room_number,
-                'reservation_id' => $reservation->id,
-                'reservation_number' => $reservation->reservation_number,
-                'validated_at' => now()->toIso8601String(),
-                'client_code' => $guest->access_code,
-            ],
+            'data' => $this->sessionByRoomPayload($room, $reservation, $guest),
         ], 200);
+    }
+
+    /**
+     * Récupère la session + code client par room_number pour un utilisateur authentifié (guest).
+     * Utilisé quand l'app a le numéro de chambre (ex. depuis le profil) mais pas room_id.
+     * GET/POST /api/me/session-by-room — Body: { "room_number": "103" } — Auth: Bearer requis.
+     */
+    public function sessionByRoomAuthenticated(Request $request): JsonResponse
+    {
+        $request->validate([
+            'room_number' => 'required|string|max:20',
+        ]);
+
+        $user = $request->user();
+        if (!$user || !$user->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur ou établissement inconnu.',
+            ], 403);
+        }
+
+        $room = Room::where('enterprise_id', $user->enterprise_id)
+            ->where('room_number', trim($request->room_number))
+            ->first();
+
+        if (!$room) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chambre non trouvée pour cet établissement.',
+            ], 404);
+        }
+
+        $reservation = Reservation::withoutGlobalScope('enterprise')
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->with('guest')
+            ->first();
+
+        if (!$reservation || !$reservation->guest) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun séjour actif pour cette chambre.',
+            ], 404);
+        }
+
+        $guest = $reservation->guest;
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->sessionByRoomPayload($room, $reservation, $guest),
+        ], 200);
+    }
+
+    private function sessionByRoomPayload(Room $room, Reservation $reservation, Guest $guest): array
+    {
+        return [
+            'guest_id' => $guest->id,
+            'guest_name' => $guest->name,
+            'guest_phone' => $guest->phone,
+            'guest_email' => $guest->email,
+            'room_id' => $room->id,
+            'room_number' => $room->room_number,
+            'reservation_id' => $reservation->id,
+            'reservation_number' => $reservation->reservation_number,
+            'validated_at' => now()->toIso8601String(),
+            'client_code' => $guest->access_code,
+        ];
     }
 
     /**

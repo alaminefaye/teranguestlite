@@ -58,6 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile alternatif
     Route::get('/user', [AuthController::class, 'profile']);
 
+    // Session + code client par room_number (utilisateur connecté) — pour pré-remplissage code sur résas, commandes, etc.
+    Route::post('/me/session-by-room', [\App\Http\Controllers\Api\TabletSessionController::class, 'sessionByRoomAuthenticated']);
+
     // Récapitulatif admin (badges & compteurs)
     Route::get('/admin-summary', [AdminSummaryController::class, 'index']);
 

@@ -95,23 +95,22 @@ void main() async {
   );
 
   // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin
-  SystemChrome.setPreferredOrientations([
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
     DeviceOrientation.portraitUp,
-  ]).then((_) {
-    runZonedGuarded(
-      () {
-        runApp(const MyApp());
-      },
-      (error, stackTrace) {
-        // Log toute exception non gérée (ex: ouverture détail commande) pour debug
-        debugPrint('*** UNCAUGHT ASYNC ERROR ***');
-        debugPrint(error.toString());
-        debugPrint(stackTrace.toString());
-      },
-    );
-  });
+  ]);
+
+  runZonedGuarded(
+    () {
+      runApp(const MyApp());
+    },
+    (error, stackTrace) {
+      debugPrint('*** UNCAUGHT ASYNC ERROR ***');
+      debugPrint(error.toString());
+      debugPrint(stackTrace.toString());
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {

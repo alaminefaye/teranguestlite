@@ -261,6 +261,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatbotDesc => 'Assistant digital 24/7';
 
   @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get galleryDesc => 'صور المنشأة والألبومات';
+
+  @override
   String get wifiCode => 'Code Wi-Fi';
 
   @override

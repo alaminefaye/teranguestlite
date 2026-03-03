@@ -53,6 +53,30 @@ class TabletSessionApi {
     }
   }
 
+  /// Récupère la session + code client par room_number pour un utilisateur connecté (Bearer).
+  /// Utilisé quand on a le numéro de chambre (ex. profil guest) pour pré-remplir le code partout.
+  Future<SessionByRoomResult?> getSessionByRoomAuthenticated(String roomNumber) async {
+    final r = roomNumber.trim();
+    if (r.isEmpty) return null;
+    try {
+      final response = await _api.post(
+        ApiConfig.meSessionByRoom,
+        data: {'room_number': r},
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null || data['success'] != true || data['data'] == null) {
+        return null;
+      }
+      final inner = data['data'] as Map<String, dynamic>;
+      final session = GuestSession.fromJson(inner);
+      final code = inner['client_code'] as String?;
+      return SessionByRoomResult(session: session, clientCode: code?.trim());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404 || e.response?.statusCode == 401) return null;
+      rethrow;
+    }
+  }
+
   /// Valide le code client. Envoie [roomId] ou [roomNumber] pour lier à la chambre.
   /// En cas d'erreur (401/403), lance une Exception avec le message clair du serveur.
   Future<GuestSession> validateCode({

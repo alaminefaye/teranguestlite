@@ -38,12 +38,19 @@ class _CartScreenState extends State<CartScreen> {
       cart.clearError();
       await tabletSession.load();
       if (!mounted) return;
-      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
-        final authUser = context.read<AuthProvider>().user;
-        final roomNumber = authUser?.roomNumber?.trim() ?? '';
-        if (roomNumber.isNotEmpty) {
-          await tabletSession.setRoomNumber(roomNumber);
+      // Utilisateur connecté (guest) : toujours utiliser sa chambre depuis l'API pour ne pas afficher une ancienne chambre (ex. 101)
+      final authUser = context.read<AuthProvider>().user;
+      final authRoomNumber = authUser?.roomNumber?.trim() ?? '';
+      if (authRoomNumber.isNotEmpty) {
+        await tabletSession.setRoomNumber(authRoomNumber);
+        // Si la session en cours était pour une autre chambre, l'invalider pour forcer une re-validation
+        final currentSession = tabletSession.session;
+        final sessionRoom = (currentSession != null ? currentSession.roomNumber : '').trim();
+        if (sessionRoom.isNotEmpty && sessionRoom != authRoomNumber) {
+          await tabletSession.clearSession();
         }
+      } else if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+        // Pas de session tablette ni de chambre utilisateur : laisser l'utilisateur la renseigner
       }
       if (!mounted) return;
       // Récupération auto de la session si la chambre a un séjour actif (on ne déconnecte pas la tablette)
@@ -79,14 +86,13 @@ class _CartScreenState extends State<CartScreen> {
         ? null
         : _specialInstructionsController.text;
 
-    // Spec tablette : le code client est toujours demandé à la validation (pas de checkout "utilisateur connecté").
-    // Si pas de session tablette → afficher "Entrez votre code", puis valider la commande avec la session.
-    if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
-      final authUser = context.read<AuthProvider>().user;
-      final roomNumber = authUser?.roomNumber?.trim() ?? '';
-      if (roomNumber.isNotEmpty) {
-        await tabletSession.setRoomNumber(roomNumber);
-      }
+    // Utilisateur connecté (guest) : priorité à sa chambre depuis l'API pour éviter d'afficher une ancienne chambre (ex. 101)
+    final authUser = context.read<AuthProvider>().user;
+    final authRoomNumber = authUser?.roomNumber?.trim() ?? '';
+    if (authRoomNumber.isNotEmpty) {
+      await tabletSession.setRoomNumber(authRoomNumber);
+    } else if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
+      // Ni guest avec chambre ni session : l'utilisateur devra renseigner la chambre dans le dialogue
     }
     if (!tabletSession.hasSession) {
       final success = await _showGuestCodeDialog(tabletSession);
@@ -205,7 +211,8 @@ class _CartScreenState extends State<CartScreen> {
           builder: (ctx, ts, _) {
             final loading = ts.isLoading;
             final error = ts.error;
-            final currentRoom = (ts.roomNumber ?? '').trim();
+            // Chambre affichée = celle de la session si on a une session, sinon celle configurée
+            final currentRoom = (ts.session?.roomNumber ?? ts.roomNumber ?? '').trim();
             final showRoomSetup = currentRoom.isEmpty;
 
             return AlertDialog(
@@ -282,7 +289,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'Chambre : ${ts.roomNumber ?? "—"}',
+                              'Chambre : ${ts.session?.roomNumber ?? ts.roomNumber ?? "—"}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

@@ -88,6 +88,8 @@
   "assistanceEmergencyDesc": "Request a doctor or report a security emergency (room identified)",
   "chatbotMultilingual": "Multilingual AI Chatbot",
   "chatbotDesc": "24/7 digital assistant",
+  "gallery": "Gallery",
+  "galleryDesc": "Establishment photos and albums",
   "wifiCode": "Wi-Fi network",
   "wifiPassword": "Wi-Fi password",
   "houseRules": "House rules",

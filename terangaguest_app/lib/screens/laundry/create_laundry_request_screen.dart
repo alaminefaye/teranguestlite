@@ -30,10 +30,8 @@ class _CreateLaundryRequestScreenState
       final auth = context.read<AuthProvider>();
       await tabletSession.load();
       if (!mounted) return;
-      if ((tabletSession.roomNumber ?? '').trim().isEmpty) {
-        final roomNumber = auth.user?.roomNumber?.trim() ?? '';
-        if (roomNumber.isNotEmpty) await tabletSession.setRoomNumber(roomNumber);
-      }
+      final authRoom = auth.user?.roomNumber?.trim() ?? '';
+      if (authRoom.isNotEmpty) await tabletSession.setRoomNumber(authRoom);
       await tabletSession.tryRestoreSessionFromRoom();
       if (!mounted) return;
       final code = tabletSession.clientCodeForPreFill;

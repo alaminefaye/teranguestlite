@@ -263,6 +263,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chatbotDesc => 'Assistant digital 24/7';
 
   @override
+  String get gallery => 'Galerie';
+
+  @override
+  String get galleryDesc => 'Photos de l\'établissement et albums';
+
+  @override
   String get wifiCode => 'Code Wi-Fi';
 
   @override

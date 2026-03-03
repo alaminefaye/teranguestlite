@@ -588,6 +588,18 @@ abstract class AppLocalizations {
   /// **'Assistant digital 24/7'**
   String get chatbotDesc;
 
+  /// No description provided for @gallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Galerie'**
+  String get gallery;
+
+  /// No description provided for @galleryDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos de l\'établissement et albums'**
+  String get galleryDesc;
+
   /// No description provided for @wifiCode.
   ///
   /// In fr, this message translates to:

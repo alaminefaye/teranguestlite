@@ -209,8 +209,9 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
         ),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty)
+        if (value == null || value.isEmpty) {
           return "Veuillez entrer votre code client";
+        }
         return null;
       },
       onFieldSubmitted: (_) => _handleLogin(),

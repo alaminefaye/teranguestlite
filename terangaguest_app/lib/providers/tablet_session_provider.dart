@@ -37,30 +37,45 @@ class TabletSessionProvider with ChangeNotifier {
   }
 
   /// Tente de récupérer automatiquement la session (et le code pour pré-remplissage) à partir
-  /// de la chambre configurée. En SaaS on envoie room_id en priorité pour ne pas recevoir
-  /// les données d'un autre établissement.
+  /// de la chambre. Avec room_id → API tablette ; avec room_number seulement → API authentifiée
+  /// /me/session-by-room (utilisateur connecté) pour pré-remplir le code partout (résas, commandes, etc.).
   Future<bool> tryRestoreSessionFromRoom() async {
-    final id = roomId;
+    final id = _roomId ?? _session?.roomId;
     final room = (_roomNumber ?? '').trim();
-    if (id == null && room.isEmpty) return false;
-    try {
-      final result = await _api.getSessionByRoom(
-        roomId: id,
-        roomNumber: room.isNotEmpty ? room : null,
-      );
-      if (result == null) return false;
-      _session = result.session;
-      _clientCodeForPreFill = result.clientCode;
-      _roomId = result.session.roomId;
-      _error = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keySession, jsonEncode(result.session.toJson()));
-      await prefs.setInt(_keyRoomId, result.session.roomId);
-      notifyListeners();
-      return true;
-    } catch (_) {
-      return false;
+
+    if (id != null) {
+      try {
+        final result = await _api.getSessionByRoom(roomId: id);
+        if (result != null) return await _applySessionResult(result);
+      } catch (_) {
+        // ignore
+      }
     }
+
+    if (room.isNotEmpty) {
+      try {
+        final result = await _api.getSessionByRoomAuthenticated(room);
+        if (result != null) return await _applySessionResult(result);
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    return false;
+  }
+
+  Future<bool> _applySessionResult(SessionByRoomResult result) async {
+    _session = result.session;
+    _clientCodeForPreFill = result.clientCode;
+    _roomId = result.session.roomId;
+    _roomNumber = result.session.roomNumber;
+    _error = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keySession, jsonEncode(result.session.toJson()));
+    await prefs.setInt(_keyRoomId, result.session.roomId);
+    await prefs.setString(_keyRoomNumber, result.session.roomNumber);
+    notifyListeners();
+    return true;
   }
 
   Future<void> _loadFromStorage() async {
@@ -73,7 +88,10 @@ class TabletSessionProvider with ChangeNotifier {
         _session = GuestSession.fromJson(
           Map<String, dynamic>.from(jsonDecode(json) as Map),
         );
-        if (_roomId == null) _roomId = _session?.roomId;
+        _roomId ??= _session?.roomId;
+        if (_session != null) {
+          _roomNumber = _session!.roomNumber;
+        }
       } catch (_) {
         await prefs.remove(_keySession);
       }
@@ -119,9 +137,11 @@ class TabletSessionProvider with ChangeNotifier {
       );
       _session = s;
       _roomId = s.roomId;
+      _roomNumber = s.roomNumber;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
       await prefs.setInt(_keyRoomId, s.roomId);
+      await prefs.setString(_keyRoomNumber, s.roomNumber);
       notifyListeners();
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
