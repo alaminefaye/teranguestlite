@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('gallery', [\App\Http\Controllers\Dashboard\GalleryController::class, 'index'])->name('gallery.index');
         Route::put('gallery/cover-photo', [\App\Http\Controllers\Dashboard\GalleryController::class, 'updateCoverPhoto'])->name('gallery.cover-photo.update');
         Route::resource('gallery-albums', \App\Http\Controllers\Dashboard\GalleryAlbumController::class)->names('gallery-albums')->except(['index']);
-        Route::get('gallery-albums', fn () => redirect()->route('dashboard.gallery.index'));
+        Route::get('gallery-albums', fn() => redirect()->route('dashboard.gallery.index'));
         Route::get('gallery-albums/{gallery_album}/photos', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'index'])->name('gallery-albums.photos.index');
         Route::post('gallery-albums/{gallery_album}/photos', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'store'])->name('gallery-albums.photos.store');
         Route::put('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'update'])->name('gallery-albums.photos.update');
@@ -230,6 +230,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'index'])->name('stock-movements.index');
         Route::get('stock-movements/create', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'create'])->name('stock-movements.create');
         Route::post('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'store'])->name('stock-movements.store');
+
+        // ==========================================
+        // ANNONCES & PUBLICITÉS — Super Admin
+        // ==========================================
+        Route::resource('announcements', \App\Http\Controllers\Dashboard\AnnouncementController::class);
+        Route::post('announcements/{announcement}/toggle', [\App\Http\Controllers\Dashboard\AnnouncementController::class, 'toggleActive'])->name('announcements.toggle');
+
+        // ==========================================
+        // ANNONCES & PUBLICITÉS — Entreprise
+        // ==========================================
+        Route::resource('enterprise-announcements', \App\Http\Controllers\Dashboard\EnterpriseAnnouncementController::class)
+            ->parameters(['enterprise-announcements' => 'enterpriseAnnouncement']);
+        Route::post('enterprise-announcements/{enterpriseAnnouncement}/toggle', [\App\Http\Controllers\Dashboard\EnterpriseAnnouncementController::class, 'toggleActive'])->name('enterprise-announcements.toggle');
     });
 
     // Routes Guest (Client)

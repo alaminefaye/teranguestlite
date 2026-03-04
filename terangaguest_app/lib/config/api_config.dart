@@ -82,10 +82,14 @@ class ApiConfig {
 
   // Tablette en chambre - code client (sans auth)
   static const String tabletSessionByRoom = '/tablet/session-by-room';
+
   /// Session + code client par room_number (auth requise) — pré-remplissage partout (résas, commandes, etc.)
   static const String meSessionByRoom = '/me/session-by-room';
   static const String tabletValidateCode = '/tablet/validate-code';
   static const String tabletValidateSession = '/tablet/validate-session';
   static const String tabletCheckout = '/tablet/checkout';
   static const String tabletHotelInfos = '/tablet/hotel-infos';
+
+  // Annonces & Publicités
+  static const String announcements = '/announcements';
 }

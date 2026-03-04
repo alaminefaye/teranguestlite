@@ -33,6 +33,7 @@ import 'providers/favorites_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
 import 'providers/chat_unread_provider.dart';
+import 'providers/announcements_provider.dart';
 import 'services/fcm_service.dart';
 import 'services/notifications_api.dart';
 import 'utils/navigation_helper.dart';
@@ -132,6 +133,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
         ChangeNotifierProvider(create: (_) => ChatUnreadProvider()),
+        ChangeNotifierProvider(create: (_) => AnnouncementsProvider()),
       ],
       child: const _LocalizedApp(),
     );

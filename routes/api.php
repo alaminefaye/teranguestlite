@@ -194,4 +194,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/conversations/{conversation}', [ApiChatController::class, 'staffDestroyConversation']);
         Route::delete('/conversations/{conversation}/messages/{message}', [ApiChatController::class, 'staffDestroyMessage']);
     });
+
+    // ==========================================
+    // ANNONCES & PUBLICITÉS
+    // ==========================================
+    Route::prefix('announcements')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
+        Route::post('/{id}/view', [\App\Http\Controllers\Api\AnnouncementController::class, 'recordView']);
+    });
 });

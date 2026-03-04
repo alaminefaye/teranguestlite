@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../config/theme.dart';
 import '../providers/tablet_session_provider.dart';
 import '../providers/cart_provider.dart';
@@ -11,6 +13,8 @@ import '../providers/spa_provider.dart';
 import '../providers/excursions_provider.dart';
 import '../providers/laundry_provider.dart';
 import '../providers/palace_provider.dart';
+import '../providers/announcements_provider.dart';
+import '../models/announcement.dart';
 
 /// Overlay de veille pour tablette en chambre.
 ///
@@ -95,6 +99,8 @@ class _IdleOverlayState extends State<IdleOverlay>
     if (!mounted) return;
     setState(() => _showOverlay = true);
     _fadeController.forward();
+    // Charger/rafraîchir les annonces au passage en veille
+    context.read<AnnouncementsProvider>().refresh();
   }
 
   Future<void> _onOverlayTap() async {
@@ -274,148 +280,321 @@ class _IdleScreenState extends State<_IdleScreen>
     }
     final logoWidth = isLandscape ? 200.0 : (w < 380 ? 140.0 : 160.0);
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Stack(
-          children: [
-            // Cercles décoratifs
-            Positioned(
-              top: -80,
-              right: -80,
-              child: _GlowCircle(size: 300, opacity: 0.07),
+    return Consumer<AnnouncementsProvider>(
+      builder: (context, announcementsProvider, _) {
+        final announcements = announcementsProvider.announcements;
+        final hasAnn = announcements.isNotEmpty;
+
+        return GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: AppTheme.backgroundGradient,
             ),
-            Positioned(
-              bottom: -60,
-              left: -60,
-              child: _GlowCircle(size: 250, opacity: 0.05),
-            ),
-            Positioned(
-              top: 220,
-              left: -40,
-              child: _GlowCircle(size: 140, opacity: 0.04),
-            ),
+            child: Stack(
+              children: [
+                // ── Séquenceur d'annonces en fond plein écran ──
+                if (hasAnn)
+                  _AnnouncementSequencePlayer(announcements: announcements),
 
-            // Contenu centré (prend toute la surface)
-            SizedBox.expand(
-              child: SafeArea(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo hôtel
-                      Image.asset('assets/logo.png', width: logoWidth),
+                // Cercles décoratifs (semi-transparents au-dessus de l'annonce)
+                Positioned(
+                  top: -80,
+                  right: -80,
+                  child: _GlowCircle(size: 300, opacity: hasAnn ? 0.03 : 0.07),
+                ),
+                Positioned(
+                  bottom: -60,
+                  left: -60,
+                  child: _GlowCircle(size: 250, opacity: hasAnn ? 0.02 : 0.05),
+                ),
+                Positioned(
+                  top: 220,
+                  left: -40,
+                  child: _GlowCircle(size: 140, opacity: hasAnn ? 0.02 : 0.04),
+                ),
 
-                      SizedBox(height: w < 380 ? 24 : 40),
-
-                      // Heure (FittedBox évite tout débordement)
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            _formatTime(widget.now),
-                            style: TextStyle(
-                              fontSize: timeSize,
-                              fontWeight: FontWeight.w200,
-                              color: Colors.white,
-                              letterSpacing: timeLetterSpacing,
-                              height: 1,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: w < 380 ? 8 : 12),
-
-                      // Date
-                      Text(
-                        _formatDate(widget.now),
-                        style: TextStyle(
-                          fontSize: w < 380 ? 13 : 16,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.w300,
-                          decoration: TextDecoration.none,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      SizedBox(height: w < 380 ? 32 : 52),
-
-                      // "Appuyez pour continuer" ou loading
-                      if (widget.isVerifying)
-                        SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.accentGold.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        )
-                      else
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) => Opacity(
-                            opacity: _pulseAnimation.value,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 36,
-                                vertical: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                border: Border.all(
-                                  color: AppTheme.accentGold,
-                                  width: 1.5,
+                // Contenu centré (prend toute la surface)
+                SizedBox.expand(
+                  child: SafeArea(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Logo + heure + date seulement si pas d'annonces
+                          if (!hasAnn) ...[
+                            Image.asset('assets/logo.png', width: logoWidth),
+                            SizedBox(height: w < 380 ? 24 : 40),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
                                 ),
-                                color: AppTheme.accentGold.withValues(
-                                  alpha: 0.18,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.touch_app_outlined,
+                                child: Text(
+                                  _formatTime(widget.now),
+                                  style: TextStyle(
+                                    fontSize: timeSize,
+                                    fontWeight: FontWeight.w200,
                                     color: Colors.white,
-                                    size: 20,
+                                    letterSpacing: timeLetterSpacing,
+                                    height: 1,
+                                    decoration: TextDecoration.none,
                                   ),
-                                  const SizedBox(width: 10),
-                                  const Text(
-                                    'Appuyez pour continuer',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                      letterSpacing: 1.2,
-                                      fontWeight: FontWeight.w400,
-                                      decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: w < 380 ? 8 : 12),
+                            Text(
+                              _formatDate(widget.now),
+                              style: TextStyle(
+                                fontSize: w < 380 ? 13 : 16,
+                                color: Colors.white,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w300,
+                                decoration: TextDecoration.none,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: w < 380 ? 32 : 52),
+                          ],
+
+                          // Bouton "Appuyez pour continuer" (toujours visible)
+                          if (widget.isVerifying)
+                            SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppTheme.accentGold.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            )
+                          else
+                            AnimatedBuilder(
+                              animation: _pulseAnimation,
+                              builder: (context, child) => Opacity(
+                                opacity: _pulseAnimation.value,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 36,
+                                    vertical: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                    border: Border.all(
+                                      color: AppTheme.accentGold,
+                                      width: 1.5,
+                                    ),
+                                    color: AppTheme.accentGold.withValues(
+                                      alpha: 0.18,
                                     ),
                                   ),
-                                ],
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.touch_app_outlined,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      const Text(
+                                        'Appuyez pour continuer',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          letterSpacing: 1.2,
+                                          fontWeight: FontWeight.w400,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
+// ─────────────────────────────────────────────
+// Séquenceur d'annonces plein écran (idle)
+// ─────────────────────────────────────────────
+
+/// Joue les annonces en boucle infinie sur l'écran de veille.
+/// Chaque annonce est affichée en plein écran (avec fit cover).
+/// Pour chaque annonce :
+///   - Vidéo : audio muet, avance automatiquement à la fin.
+///   - Affiche : affichée pendant displayDurationMinutes, puis passage suivant.
+/// Enregistre automatiquement une vue par passage.
+class _AnnouncementSequencePlayer extends StatefulWidget {
+  final List<Announcement> announcements;
+
+  const _AnnouncementSequencePlayer({required this.announcements});
+
+  @override
+  State<_AnnouncementSequencePlayer> createState() =>
+      _AnnouncementSequencePlayerState();
+}
+
+class _AnnouncementSequencePlayerState
+    extends State<_AnnouncementSequencePlayer> {
+  int _currentIndex = 0;
+  VideoPlayerController? _videoController;
+  bool _videoReady = false;
+  Timer? _posterTimer;
+
+  Announcement get _current => widget.announcements[_currentIndex];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrent();
+  }
+
+  @override
+  void dispose() {
+    _posterTimer?.cancel();
+    _disposeVideo();
+    super.dispose();
+  }
+
+  void _disposeVideo() {
+    _videoController?.removeListener(_onVideoProgress);
+    _videoController?.dispose();
+    _videoController = null;
+  }
+
+  void _loadCurrent() {
+    if (!mounted) return;
+    _posterTimer?.cancel();
+    _disposeVideo();
+
+    // Enregistrer vue
+    if (mounted) {
+      context.read<AnnouncementsProvider>().recordView(_current.id);
+    }
+
+    setState(() {
+      _videoReady = false;
+    });
+
+    final ann = _current;
+
+    if (ann.hasVideo) {
+      _videoController =
+          VideoPlayerController.networkUrl(
+              Uri.parse(ann.videoUrl!),
+              videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+            )
+            ..initialize()
+                .then((_) {
+                  if (!mounted) return;
+                  setState(() => _videoReady = true);
+                  _videoController!.setVolume(0);
+                  _videoController!.play();
+                  _videoController!.addListener(_onVideoProgress);
+                })
+                .catchError((_) {
+                  if (!mounted) return null;
+                  // Fallback : affiche ou passage direct
+                  _startPosterOrNext(ann);
+                });
+    } else {
+      _startPosterOrNext(ann);
+    }
+  }
+
+  void _startPosterOrNext(Announcement ann) {
+    if (ann.hasPoster) {
+      _posterTimer = Timer(ann.displayDuration, _next);
+    } else {
+      // Aucun média valide : passer directement
+      _next();
+    }
+  }
+
+  void _onVideoProgress() {
+    if (_videoController == null) return;
+    final pos = _videoController!.value.position;
+    final dur = _videoController!.value.duration;
+    if (_videoController!.value.isInitialized &&
+        dur > Duration.zero &&
+        pos >= dur - const Duration(milliseconds: 300)) {
+      _next();
+    }
+  }
+
+  void _next() {
+    if (!mounted) return;
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % widget.announcements.length;
+    });
+    _loadCurrent();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ann = _current;
+
+    return SizedBox.expand(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 800),
+        child: _buildContent(ann),
+      ),
+    );
+  }
+
+  Widget _buildContent(Announcement ann) {
+    // Vidéo initialisée
+    if (ann.hasVideo && _videoReady && _videoController != null) {
+      return FittedBox(
+        key: ValueKey('video-${ann.id}'),
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _videoController!.value.size.width,
+          height: _videoController!.value.size.height,
+          child: VideoPlayer(_videoController!),
+        ),
+      );
+    }
+
+    // Affiche
+    if (ann.hasPoster) {
+      return CachedNetworkImage(
+        key: ValueKey('poster-${ann.id}'),
+        imageUrl: ann.posterUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (_, _) => Container(color: Colors.black),
+        errorWidget: (_, _, _) => Container(color: Colors.grey[900]),
+      );
+    }
+
+    // Aucun média
+    return Container(key: ValueKey('empty-${ann.id}'), color: Colors.black);
+  }
+}
+
+// ─────────────────────────────────────────────
+// Cercle décoratif
+// ─────────────────────────────────────────────
 class _GlowCircle extends StatelessWidget {
   final double size;
   final double opacity;

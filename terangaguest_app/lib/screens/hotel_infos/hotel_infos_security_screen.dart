@@ -11,6 +11,7 @@ import 'hotel_infos_screen.dart';
 import 'assistance_emergency_screen.dart';
 import 'chatbot_screen.dart';
 import 'gallery_screen.dart';
+import '../../widgets/announcements_box.dart';
 
 /// Hub « HOTEL INFOS & SÉCURITÉ » : Hôtel Infos, Assistance & Urgence, Chatbot.
 class HotelInfosSecurityScreen extends StatefulWidget {
@@ -87,23 +88,35 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),
-                  child: GridView.builder(
-                    padding: EdgeInsets.symmetric(vertical: spacing),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: spacing,
-                      mainAxisSpacing: spacing,
-                      childAspectRatio: aspectRatio,
-                    ),
-                    itemCount: subServices.length,
-                    itemBuilder: (context, index) {
-                      final (title, icon, onTap) = subServices[index];
-                      return ServiceCard(
-                        title: title,
-                        icon: icon,
-                        onTap: onTap,
-                      );
-                    },
+                  child: ListView(
+                    children: [
+                      // Grille des services
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.symmetric(vertical: spacing),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: spacing,
+                          mainAxisSpacing: spacing,
+                          childAspectRatio: aspectRatio,
+                        ),
+                        itemCount: subServices.length,
+                        itemBuilder: (context, index) {
+                          final (title, icon, onTap) = subServices[index];
+                          return ServiceCard(
+                            title: title,
+                            icon: icon,
+                            onTap: onTap,
+                          );
+                        },
+                      ),
+
+                      // ── Annonces & Publicités ──
+                      const SizedBox(height: 24),
+                      const AnnouncementsBox(),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
               ),

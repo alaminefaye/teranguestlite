@@ -73,6 +73,9 @@ dependencies:
   path_provider: ^2.1.4
   http_parser: ^4.0.2
 
+  # Lecteur vidéo (annonces & publicités)
+  video_player: ^2.9.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
