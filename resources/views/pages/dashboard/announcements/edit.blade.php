@@ -37,7 +37,7 @@
                 @endif
                 <input type="file" name="poster" id="poster" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, WebP, GIF – max 20 Mo.</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, WebP, GIF – max 50 Mo.</p>
                 @error('poster')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
 
@@ -53,7 +53,7 @@
                 @endif
                 <input type="file" name="video" id="video" accept=".mp4,.webm,.mov,.ogv"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">MP4, WebM, MOV, OGV – max 20 Mo.</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">MP4, WebM, MOV, OGV – max 50 Mo.</p>
                 @error('video')<p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>@enderror
             </div>
 

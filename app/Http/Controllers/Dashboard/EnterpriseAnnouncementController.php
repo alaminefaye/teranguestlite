@@ -132,8 +132,8 @@ class EnterpriseAnnouncementController extends Controller
     {
         return $request->validate([
             'title' => 'nullable|string|max:255',
-            'poster' => 'nullable|image|mimes:jpeg,jpg,png,webp,gif|max:20480',
-            'video' => 'nullable|mimes:mp4,webm,mov,ogv|max:20480',
+            'poster' => 'nullable|image|mimes:jpeg,jpg,png,webp,gif|max:51200',
+            'video' => 'nullable|mimes:mp4,webm,mov,ogv|max:51200',
             'display_order' => 'nullable|integer|min:0',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
