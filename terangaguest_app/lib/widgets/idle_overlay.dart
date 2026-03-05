@@ -35,7 +35,7 @@ class IdleOverlay extends StatefulWidget {
   const IdleOverlay({
     super.key,
     required this.child,
-    this.idleDuration = const Duration(minutes: 10),
+    this.idleDuration = const Duration(minutes: 1),
     this.onSessionExpired,
   });
 
@@ -457,6 +457,7 @@ class _AnnouncementSequencePlayerState
   int _currentIndex = 0;
   VideoPlayerController? _videoController;
   bool _videoReady = false;
+  bool _nextCalled = false; // garde anti-boucle pour _onVideoProgress
   Timer? _posterTimer;
 
   Announcement get _current => widget.announcements[_currentIndex];
@@ -484,6 +485,7 @@ class _AnnouncementSequencePlayerState
     if (!mounted) return;
     _posterTimer?.cancel();
     _disposeVideo();
+    _nextCalled = false; // réinitialise la garde
 
     // Enregistrer vue
     if (mounted) {
@@ -530,12 +532,13 @@ class _AnnouncementSequencePlayerState
   }
 
   void _onVideoProgress() {
-    if (_videoController == null) return;
+    if (_videoController == null || _nextCalled) return;
     final pos = _videoController!.value.position;
     final dur = _videoController!.value.duration;
     if (_videoController!.value.isInitialized &&
         dur > Duration.zero &&
         pos >= dur - const Duration(milliseconds: 300)) {
+      _nextCalled = true; // garde : ne s'exécute qu'une seule fois
       _next();
     }
   }

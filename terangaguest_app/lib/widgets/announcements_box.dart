@@ -197,15 +197,103 @@ class _VideoPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[850],
-      child: Center(
-        child: Icon(
-          ann.hasVideo
-              ? Icons.play_circle_outline_rounded
-              : Icons.campaign_outlined,
-          color: Colors.white38,
-          size: 36,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A2235), Color(0xFF0D1520)],
         ),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Cercles décoratifs en arrière-plan
+          Positioned(
+            top: -20,
+            right: -20,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFC9A96E).withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -15,
+            left: -15,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFC9A96E).withValues(alpha: 0.06),
+              ),
+            ),
+          ),
+
+          // Icône centrale — play pour vidéo, megaphone pour annonce image
+          Center(
+            child: ann.hasVideo
+                ? Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFC9A96E), Color(0xFF8B6914)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFC9A96E).withValues(alpha: 0.4),
+                          blurRadius: 16,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  )
+                : const Icon(
+                    Icons.campaign_rounded,
+                    color: Color(0xFFC9A96E),
+                    size: 40,
+                  ),
+          ),
+
+          // Badge "VIDÉO" en haut à gauche
+          if (ann.hasVideo)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC9A96E).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: const Color(0xFFC9A96E).withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
+                ),
+                child: const Text(
+                  'VIDÉO',
+                  style: TextStyle(
+                    color: Color(0xFFC9A96E),
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

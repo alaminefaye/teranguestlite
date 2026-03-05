@@ -58,52 +58,54 @@ RemoteMessage? _pendingInitialFcmMessage;
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
-void main() async {
-  // IMPORTANT: Ensure bindings are initialized FIRST
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Pour le web, on ignore FCM car on veut juste afficher le site via QR Code.
-  if (!kIsWeb) {
-    // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
-    await Firebase.initializeApp();
-
-    // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-    // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
-    // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
-    if (platform_check.isAndroid) {
-      _pendingInitialFcmMessage = await FirebaseMessaging.instance
-          .getInitialMessage();
-    } else {
-      FirebaseMessaging.instance.getInitialMessage().then((msg) {
-        _pendingInitialFcmMessage = msg;
-      });
-    }
-  }
-
-  // Initialiser le locale français pour les dates
-  await initializeDateFormatting('fr_FR', null);
-
-  // Configuration de la barre de statut
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: AppTheme.primaryDark,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
-
-  // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-    DeviceOrientation.portraitUp,
-  ]);
-
+void main() {
   runZonedGuarded(
-    () {
+    () async {
+      // IMPORTANT: Ensure bindings are initialized FIRST, in the same zone as runApp
+      WidgetsFlutterBinding.ensureInitialized();
+
+      // Pour le web, on ignore FCM car on veut juste afficher le site via QR Code.
+      if (!kIsWeb) {
+        // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
+        await Firebase.initializeApp();
+
+        // Permet de recevoir les notifications push même quand l'app est fermée (terminated)
+        FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler,
+        );
+
+        // Android : il faut lire getInitialMessage() le plus tôt possible pour capturer l'intent (tap sur notif = app lancée).
+        // iOS : ne pas await ici sinon blocage du main → écran blanc ; on le récupère en arrière-plan.
+        if (platform_check.isAndroid) {
+          _pendingInitialFcmMessage = await FirebaseMessaging.instance
+              .getInitialMessage();
+        } else {
+          FirebaseMessaging.instance.getInitialMessage().then((msg) {
+            _pendingInitialFcmMessage = msg;
+          });
+        }
+      }
+
+      // Initialiser le locale français pour les dates
+      await initializeDateFormatting('fr_FR', null);
+
+      // Configuration de la barre de statut
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: AppTheme.primaryDark,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+      );
+
+      // Par défaut : mode paysage (tablette in-room), avec portrait autorisé si besoin
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.portraitUp,
+      ]);
+
       runApp(const MyApp());
     },
     (error, stackTrace) {
@@ -1688,7 +1690,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
                         ? TextDirection.rtl
                         : TextDirection.ltr,
                     child: IdleOverlay(
-                      idleDuration: const Duration(minutes: 10),
+                      idleDuration: const Duration(minutes: 1),
                       onSessionExpired: () {
                         // Session expirée → retour à l'accueil pour le prochain client
                         rootNavigatorKey.currentState?.pushAndRemoveUntil(
