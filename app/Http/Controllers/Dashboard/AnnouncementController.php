@@ -30,7 +30,7 @@ class AnnouncementController extends Controller
             'total_views' => Announcement::whereNull('enterprise_id')->sum('view_count'),
         ];
 
-        return view('pages.admin.announcements.index', [
+        return view('pages.dashboard.announcements.index', [
             'title' => 'Annonces (Super Admin)',
             'announcements' => $announcements,
             'stats' => $stats,
@@ -41,7 +41,7 @@ class AnnouncementController extends Controller
     {
         $enterprises = Enterprise::orderBy('name')->get(['id', 'name']);
 
-        return view('pages.admin.announcements.create', [
+        return view('pages.dashboard.announcements.create', [
             'title' => 'Nouvelle annonce',
             'enterprises' => $enterprises,
         ]);
@@ -73,7 +73,7 @@ class AnnouncementController extends Controller
     {
         $announcement->load('targetEnterprises');
 
-        return view('pages.admin.announcements.show', [
+        return view('pages.dashboard.announcements.show', [
             'title' => $announcement->title ?? 'Annonce #' . $announcement->id,
             'announcement' => $announcement,
         ]);
@@ -84,7 +84,7 @@ class AnnouncementController extends Controller
         $enterprises = Enterprise::orderBy('name')->get(['id', 'name']);
         $announcement->load('targetEnterprises');
 
-        return view('pages.admin.announcements.edit', [
+        return view('pages.dashboard.announcements.edit', [
             'title' => 'Modifier l\'annonce',
             'announcement' => $announcement,
             'enterprises' => $enterprises,
