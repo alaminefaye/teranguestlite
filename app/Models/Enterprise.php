@@ -107,6 +107,11 @@ class Enterprise extends Model
         return $this->hasMany(EnterpriseGalleryAlbum::class, 'enterprise_id');
     }
 
+    public function establishments()
+    {
+        return $this->hasMany(Establishment::class);
+    }
+
     public function announcements()
     {
         return $this->hasMany(\App\Models\Announcement::class);

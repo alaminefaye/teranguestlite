@@ -269,6 +269,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get galleryDesc => 'Photos de l\'établissement et albums';
 
   @override
+  String get ourEstablishments => 'Nos établissements';
+
+  @override
+  String get ourEstablishmentsDesc => 'Autres sites du groupe dans le pays';
+
+  @override
   String get wifiCode => 'Code Wi-Fi';
 
   @override

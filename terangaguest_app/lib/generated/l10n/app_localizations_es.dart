@@ -270,6 +270,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get galleryDesc => 'Fotos del establecimiento y álbumes';
 
   @override
+  String get ourEstablishments => 'Nuestros establecimientos';
+
+  @override
+  String get ourEstablishmentsDesc => 'Otros sitios del grupo en el país';
+
+  @override
   String get wifiCode => 'Code Wi-Fi';
 
   @override

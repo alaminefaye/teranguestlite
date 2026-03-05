@@ -196,6 +196,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ==========================================
+    // NOS ÉTABLISSEMENTS (autres sites du groupe — Hotel Infos)
+    // ==========================================
+    Route::prefix('establishments')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\EstablishmentController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\EstablishmentController::class, 'show']);
+    });
+
+    // ==========================================
     // ANNONCES & PUBLICITÉS
     // ==========================================
     Route::prefix('announcements')->group(function () {

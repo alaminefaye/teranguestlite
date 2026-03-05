@@ -600,6 +600,18 @@ abstract class AppLocalizations {
   /// **'Photos de l\'établissement et albums'**
   String get galleryDesc;
 
+  /// No description provided for @ourEstablishments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nos établissements'**
+  String get ourEstablishments;
+
+  /// No description provided for @ourEstablishmentsDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres sites du groupe dans le pays'**
+  String get ourEstablishmentsDesc;
+
   /// No description provided for @wifiCode.
   ///
   /// In fr, this message translates to:

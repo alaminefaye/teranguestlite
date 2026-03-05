@@ -90,6 +90,9 @@ class ApiConfig {
   static const String tabletCheckout = '/tablet/checkout';
   static const String tabletHotelInfos = '/tablet/hotel-infos';
 
+  // Nos établissements (autres sites du groupe — Hotel Infos)
+  static const String establishments = '/establishments';
+
   // Annonces & Publicités
   static const String announcements = '/announcements';
 

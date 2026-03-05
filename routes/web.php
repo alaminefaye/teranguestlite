@@ -110,6 +110,13 @@ Route::middleware(['auth'])->group(function () {
         Route::put('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'update'])->name('gallery-albums.photos.update');
         Route::delete('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'destroy'])->name('gallery-albums.photos.destroy');
 
+        // Nos établissements (autres sites du groupe)
+        Route::resource('establishments', \App\Http\Controllers\Dashboard\EstablishmentController::class);
+        Route::get('establishments/{establishment}/photos', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'index'])->name('establishments.photos.index');
+        Route::post('establishments/{establishment}/photos', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'store'])->name('establishments.photos.store');
+        Route::put('establishments/{establishment}/photos/{photo}', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'update'])->name('establishments.photos.update');
+        Route::delete('establishments/{establishment}/photos/{photo}', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'destroy'])->name('establishments.photos.destroy');
+
         // Chat invité (messages depuis les tablettes)
         Route::get('hotel-chat', [\App\Http\Controllers\Dashboard\ChatController::class, 'index'])->name('hotel-chat.index');
         Route::get('hotel-chat/{conversation}', [\App\Http\Controllers\Dashboard\ChatController::class, 'show'])->name('hotel-chat.show');

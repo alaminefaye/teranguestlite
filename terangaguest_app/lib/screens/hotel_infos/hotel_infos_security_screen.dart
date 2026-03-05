@@ -9,6 +9,7 @@ import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import 'hotel_infos_screen.dart';
 import 'gallery_screen.dart';
+import 'establishments_list_screen.dart';
 import '../../widgets/announcements_box.dart';
 
 /// Hub « HOTEL INFOS & SÉCURITÉ » : Hôtel Infos, Assistance & Urgence, Chatbot.
@@ -48,6 +49,14 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const GalleryScreen());
+        },
+      ),
+      (
+        l10n.ourEstablishments,
+        Icons.business_outlined,
+        () {
+          HapticHelper.lightImpact();
+          context.navigateTo(const EstablishmentsListScreen());
         },
       ),
     ];

@@ -267,6 +267,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get galleryDesc => 'صور المنشأة والألبومات';
 
   @override
+  String get ourEstablishments => 'منشآتنا';
+
+  @override
+  String get ourEstablishmentsDesc => 'مواقع أخرى للمجموعة في البلاد';
+
+  @override
   String get wifiCode => 'Code Wi-Fi';
 
   @override
