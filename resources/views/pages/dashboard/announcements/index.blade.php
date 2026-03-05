@@ -3,7 +3,7 @@
 @section('content')
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Annonces (Super Admin)</h1>
-        <a href="{{ route('dashboard.announcements.create') }}"
+        <a href="{{ route('admin.announcements.create') }}"
             class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+
             Nouvelle annonce</a>
     </div>
@@ -92,11 +92,11 @@
                 </p>
 
                 <div class="flex items-center gap-2">
-                    <x-action-buttons :showRoute="route('dashboard.announcements.show', $announcement)"
-                        :editRoute="route('dashboard.announcements.edit', $announcement)"
-                        :deleteRoute="route('dashboard.announcements.destroy', $announcement)"
+                    <x-action-buttons :showRoute="route('admin.announcements.show', $announcement)"
+                        :editRoute="route('admin.announcements.edit', $announcement)"
+                        :deleteRoute="route('admin.announcements.destroy', $announcement)"
                         deleteMessage="Supprimer cette annonce ?" />
-                    <form action="{{ route('dashboard.announcements.toggle', $announcement) }}" method="POST" class="inline">
+                    <form action="{{ route('admin.announcements.toggle', $announcement) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
                             class="inline-flex items-center px-2 py-1 text-xs {{ $announcement->is_active ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-success-600 dark:text-success-400 border-success-300 dark:border-success-700 hover:bg-success-50 dark:hover:bg-success-900/20' }} border rounded">
@@ -108,7 +108,7 @@
         @empty
             <div class="col-span-3 text-center py-12">
                 <p class="text-gray-600 dark:text-gray-400 mb-4">Aucune annonce super admin.</p>
-                <a href="{{ route('dashboard.announcements.create') }}"
+                <a href="{{ route('admin.announcements.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">Créer une
                     annonce</a>
             </div>

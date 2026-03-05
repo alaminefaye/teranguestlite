@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-6">
     <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-        <a href="{{ route('dashboard.announcements.index') }}" class="hover:text-brand-500">Annonces</a>
+        <a href="{{ route('admin.announcements.index') }}" class="hover:text-brand-500">Annonces</a>
         <span>/</span>
         <span>Modifier</span>
     </div>
@@ -11,7 +11,7 @@
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-    <form action="{{ route('dashboard.announcements.update', $announcement) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.announcements.update', $announcement) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -130,7 +130,7 @@
 
         <div class="mt-8 flex items-center gap-4">
             <button type="submit" class="inline-flex items-center px-6 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700">Enregistrer</button>
-            <a href="{{ route('dashboard.announcements.index') }}" class="inline-flex items-center px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Annuler</a>
+            <a href="{{ route('admin.announcements.index') }}" class="inline-flex items-center px-6 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">Annuler</a>
         </div>
     </form>
 </div>

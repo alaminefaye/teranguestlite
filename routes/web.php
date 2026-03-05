@@ -42,6 +42,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::resource('enterprises', EnterpriseController::class);
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+
+        // ==========================================
+        // ANNONCES & PUBLICITÉS — Super Admin
+        // ==========================================
+        Route::resource('announcements', \App\Http\Controllers\Dashboard\AnnouncementController::class);
+        Route::post('announcements/{announcement}/toggle', [\App\Http\Controllers\Dashboard\AnnouncementController::class, 'toggleActive'])->name('announcements.toggle');
     });
 
     // Routes Admin Hôtel
@@ -230,12 +236,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'index'])->name('stock-movements.index');
         Route::get('stock-movements/create', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'create'])->name('stock-movements.create');
         Route::post('stock-movements', [\App\Http\Controllers\Dashboard\StockMovementController::class, 'store'])->name('stock-movements.store');
-
-        // ==========================================
-        // ANNONCES & PUBLICITÉS — Super Admin
-        // ==========================================
-        Route::resource('announcements', \App\Http\Controllers\Dashboard\AnnouncementController::class);
-        Route::post('announcements/{announcement}/toggle', [\App\Http\Controllers\Dashboard\AnnouncementController::class, 'toggleActive'])->name('announcements.toggle');
 
         // ==========================================
         // ANNONCES & PUBLICITÉS — Entreprise
