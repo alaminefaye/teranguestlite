@@ -8,8 +8,6 @@ import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import 'hotel_infos_screen.dart';
-import 'assistance_emergency_screen.dart';
-import 'chatbot_screen.dart';
 import 'gallery_screen.dart';
 import '../../widgets/announcements_box.dart';
 
@@ -42,22 +40,6 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const HotelInfosScreen());
-        },
-      ),
-      (
-        l10n.assistanceEmergency,
-        Icons.emergency_outlined,
-        () {
-          HapticHelper.lightImpact();
-          context.navigateTo(const AssistanceEmergencyScreen());
-        },
-      ),
-      (
-        l10n.chatbotMultilingual,
-        Icons.smart_toy_outlined,
-        () {
-          HapticHelper.lightImpact();
-          context.navigateTo(const ChatbotScreen());
         },
       ),
       (

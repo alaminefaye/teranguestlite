@@ -30,6 +30,8 @@ import '../hotel_infos/hotel_infos_security_screen.dart';
 import '../laundry/laundry_list_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../palace/palace_list_screen.dart';
+import '../hotel_infos/assistance_emergency_screen.dart';
+import '../hotel_infos/chatbot_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -92,6 +94,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         break;
       case '/hotel-infos-security':
         context.navigateTo(const HotelInfosSecurityScreen());
+        break;
+      case '/assistance-emergency':
+        context.navigateTo(const AssistanceEmergencyScreen());
+        break;
+      case '/chatbot':
+        context.navigateTo(const ChatbotScreen());
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -526,31 +534,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'title': l10n.servicesChambreLogistique,
         'icon': Icons.room_service_outlined,
         'route': '/services-chambre-logistique',
+        'image': 'assets/images/box_room_service.png',
       },
       {
         'title': l10n.restaurantsBars,
         'icon': Icons.restaurant_menu_outlined,
         'route': '/restaurants',
+        'image': 'assets/images/box_restaurant.png',
       },
       {
         'title': l10n.wellnessSportLeisure,
         'icon': Icons.spa_outlined,
         'route': '/wellness-sport-leisure',
+        'image': 'assets/images/box_wellness.png',
       },
       {
         'title': l10n.palaceServices,
         'icon': Icons.auto_awesome_outlined,
         'route': '/palace',
+        'image': 'assets/images/box_autres_services.png',
       },
       {
         'title': l10n.explorationMobility,
         'icon': Icons.explore_outlined,
         'route': '/exploration-mobility',
+        'image': 'assets/images/box_exploration.png',
       },
       {
         'title': l10n.hotelInfosSecurity,
         'icon': Icons.info_outline_rounded,
         'route': '/hotel-infos-security',
+        'image': 'assets/images/box_hotel_infos.png',
+      },
+      {
+        'title': l10n.assistanceEmergency,
+        'icon': Icons.emergency_outlined,
+        'route': '/assistance-emergency',
+        'image': 'assets/images/box_assistance.png',
+      },
+      {
+        'title': l10n.chatbotMultilingual,
+        'icon': Icons.smart_toy_outlined,
+        'route': '/chatbot',
+        'image': 'assets/images/box_chatbot.png',
       },
     ];
 
@@ -579,6 +605,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 return ServiceCard(
                   title: service['title'] as String,
                   icon: service['icon'] as IconData,
+                  imagePath: service['image'] as String?,
                   badge: chatUnread.unreadCount > 0
                       ? '${chatUnread.unreadCount}'
                       : null,
@@ -596,6 +623,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           return ServiceCard(
             title: service['title'] as String,
             icon: service['icon'] as IconData,
+            imagePath: service['image'] as String?,
             onTap: () {
               _handleServiceTap(
                 context,
@@ -656,7 +684,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           decoration: BoxDecoration(
                             color: Colors.orange.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.orange, width: 1.5),
+                            border: Border.all(
+                              color: Colors.orange,
+                              width: 1.5,
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -734,11 +765,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (cart.isEmpty) return const SizedBox.shrink();
             final l10n = AppLocalizations.of(context);
             return Padding(
-              padding: EdgeInsets.only(
-                left: padH,
-                right: padH,
-                bottom: padV,
-              ),
+              padding: EdgeInsets.only(left: padH, right: padH, bottom: padV),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(

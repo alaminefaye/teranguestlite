@@ -23,6 +23,7 @@ class RoomAndLogisticsScreen extends StatelessWidget {
       (
         l10n.roomServiceRestauration,
         Icons.room_service_outlined,
+        'assets/images/box_room_service.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const CategoriesScreen());
@@ -31,6 +32,7 @@ class RoomAndLogisticsScreen extends StatelessWidget {
       (
         l10n.laundry,
         Icons.local_laundry_service_outlined,
+        'assets/images/sub_laundry.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const LaundryListScreen());
@@ -39,6 +41,7 @@ class RoomAndLogisticsScreen extends StatelessWidget {
       (
         l10n.amenitiesConcierge,
         Icons.bedroom_child_outlined,
+        'assets/images/box_autres_services.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const AmenitiesConciergeScreen());
@@ -70,10 +73,11 @@ class RoomAndLogisticsScreen extends StatelessWidget {
                     ),
                     itemCount: subServices.length,
                     itemBuilder: (context, index) {
-                      final (title, icon, onTap) = subServices[index];
+                      final (title, icon, image, onTap) = subServices[index];
                       return ServiceCard(
                         title: title,
                         icon: icon,
+                        imagePath: image,
                         onTap: onTap,
                       );
                     },

@@ -357,7 +357,7 @@ abstract class AppLocalizations {
   /// No description provided for @wellnessSportLeisure.
   ///
   /// In fr, this message translates to:
-  /// **'BIEN-ÊTRE, SPORT & LOISIRS'**
+  /// **'Bien-être, sport & loisirs'**
   String get wellnessSportLeisure;
 
   /// No description provided for @wellnessSportLeisureSubtitle.
@@ -459,7 +459,7 @@ abstract class AppLocalizations {
   /// No description provided for @explorationMobility.
   ///
   /// In fr, this message translates to:
-  /// **'EXPLORATION & MOBILITÉ'**
+  /// **'Exploration & mobilité'**
   String get explorationMobility;
 
   /// No description provided for @explorationMobilitySubtitle.
@@ -543,7 +543,7 @@ abstract class AppLocalizations {
   /// No description provided for @hotelInfosSecurity.
   ///
   /// In fr, this message translates to:
-  /// **'HOTEL INFOS & SÉCURITÉ'**
+  /// **'Hotel infos & sécurité'**
   String get hotelInfosSecurity;
 
   /// No description provided for @hotelInfosSecuritySubtitle.
@@ -717,7 +717,7 @@ abstract class AppLocalizations {
   /// No description provided for @servicesChambreLogistique.
   ///
   /// In fr, this message translates to:
-  /// **'SERVICES EN CHAMBRE & LOGISTIQUE'**
+  /// **'Service en chambre'**
   String get servicesChambreLogistique;
 
   /// No description provided for @roomServiceRestauration.
@@ -1829,6 +1829,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Inclus :'**
   String get included;
+
+  /// No description provided for @schedule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Horaires'**
+  String get schedule;
+
+  /// No description provided for @childrenAgeRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enfants (âge)'**
+  String get childrenAgeRange;
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis'**
+  String get reviewsTitle;
+
+  /// No description provided for @reviewsPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'À noter'**
+  String get reviewsPending;
+
+  /// No description provided for @reviewsMyReviews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes avis'**
+  String get reviewsMyReviews;
+
+  /// No description provided for @reviewsNoPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun avis à donner'**
+  String get reviewsNoPending;
+
+  /// No description provided for @reviewsNoPendingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les avis sont proposés après une commande livrée, un check-out, une demande traitée ou une excursion terminée.'**
+  String get reviewsNoPendingHint;
+
+  /// No description provided for @reviewsNoReviewsYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun avis'**
+  String get reviewsNoReviewsYet;
+
+  /// No description provided for @reviewsNoReviewsYetHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos avis apparaîtront ici.'**
+  String get reviewsNoReviewsYetHint;
+
+  /// No description provided for @rateYourExperience.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment s\'est passée votre expérience ?'**
+  String get rateYourExperience;
+
+  /// No description provided for @optionalComment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaire (optionnel)'**
+  String get optionalComment;
+
+  /// No description provided for @submit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get submit;
+
+  /// No description provided for @thankYouForReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci pour votre avis !'**
+  String get thankYouForReview;
 
   /// No description provided for @orderTracking.
   ///

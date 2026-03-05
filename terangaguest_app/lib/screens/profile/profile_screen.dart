@@ -18,6 +18,7 @@ import '../laundry/my_laundry_requests_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 import '../favorites/my_favorites_screen.dart';
 import '../invoices/invoices_list_screen.dart';
+import '../reviews/reviews_screen.dart';
 
 /// Email et téléphone du support (modifiables par l'hôtel).
 const String _supportEmail = 'support@kingfahdpalace.com';
@@ -350,6 +351,18 @@ class ProfileScreen extends StatelessWidget {
           onTap: () {
             HapticHelper.lightImpact();
             context.navigateTo(const MyPalaceRequestsScreen());
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Avis (satisfaction client)
+        _buildActionTile(
+          context: context,
+          icon: Icons.rate_review_outlined,
+          title: AppLocalizations.of(context).reviewsTitle,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(const ReviewsScreen());
           },
         ),
         const SizedBox(height: 24),

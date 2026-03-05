@@ -188,7 +188,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get palaceServices => 'خدمات أخرى';
 
   @override
-  String get explorationMobility => 'EXPLORATION & MOBILITÉ';
+  String get explorationMobility => 'Exploration & mobilité';
 
   @override
   String get explorationMobilitySubtitle =>
@@ -235,7 +235,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get callCenter => 'مركز الاتصالات';
 
   @override
-  String get hotelInfosSecurity => 'HOTEL INFOS & SÉCURITÉ';
+  String get hotelInfosSecurity => 'Hotel infos & sécurité';
 
   @override
   String get hotelInfosSecuritySubtitle =>
@@ -911,6 +911,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get included => 'مشمول:';
+
+  @override
+  String get schedule => 'الجدول';
+
+  @override
+  String get childrenAgeRange => 'الأطفال (العمر)';
+
+  @override
+  String get reviewsTitle => 'الآراء';
+
+  @override
+  String get reviewsPending => 'للتقييم';
+
+  @override
+  String get reviewsMyReviews => 'تقييماتي';
+
+  @override
+  String get reviewsNoPending => 'لا توجد تقييمات معلقة';
+
+  @override
+  String get reviewsNoPendingHint =>
+      'يُعرض التقييم بعد الطلب المُسلّم أو المغادرة أو الطلب المنجز أو الرحلة المنتهية.';
+
+  @override
+  String get reviewsNoReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get reviewsNoReviewsYetHint => 'ستظهر تقييماتك هنا.';
+
+  @override
+  String get rateYourExperience => 'كيف كانت تجربتك؟';
+
+  @override
+  String get optionalComment => 'تعليق (اختياري)';
+
+  @override
+  String get submit => 'إرسال';
+
+  @override
+  String get thankYouForReview => 'شكراً على تقييمك!';
 
   @override
   String get orderTracking => 'متابعة الطلب';

@@ -9,6 +9,11 @@ class Excursion {
   final bool isAvailable;
   final String? destination;
   final List<String>? inclusions;
+  /// Horaires et planning détaillé (ex: Départ 09h00, retour 18h)
+  final String? scheduleDescription;
+  /// Tranche d'âge applicable aux enfants (ex: 3-12 ans)
+  final String? childrenAgeRange;
+  final String? departureTime;
 
   Excursion({
     required this.id,
@@ -21,6 +26,9 @@ class Excursion {
     required this.isAvailable,
     this.destination,
     this.inclusions,
+    this.scheduleDescription,
+    this.childrenAgeRange,
+    this.departureTime,
   });
 
   static int _parseIntSafe(dynamic v) {
@@ -38,13 +46,18 @@ class Excursion {
       description: json['description'] as String?,
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
-      duration: _parseInt(json['duration']) ?? 0,
+      duration: _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
       destination: json['destination'] as String?,
       inclusions: json['inclusions'] != null
           ? List<String>.from(json['inclusions'] as List)
-          : null,
+          : (json['included'] != null
+              ? List<String>.from(json['included'] as List)
+              : null),
+      scheduleDescription: json['schedule_description'] as String?,
+      childrenAgeRange: json['children_age_range'] as String?,
+      departureTime: json['departure_time'] as String?,
     );
   }
 

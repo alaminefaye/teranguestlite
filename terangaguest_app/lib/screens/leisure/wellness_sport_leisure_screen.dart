@@ -28,6 +28,12 @@ class _WellnessSportLeisureScreenState
     return type == 'sport' ? Icons.sports_soccer_outlined : Icons.spa_outlined;
   }
 
+  static String? _imageForMainType(String type) {
+    if (type == 'sport') return 'assets/images/sub_sport.png';
+    if (type == 'loisirs') return 'assets/images/sub_loisirs.png';
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -150,6 +156,7 @@ class _WellnessSportLeisureScreenState
                             return ServiceCard(
                               title: mainCat.name,
                               icon: _iconForMainType(mainCat.type),
+                              imagePath: _imageForMainType(mainCat.type),
                               onTap: () {
                                 HapticHelper.lightImpact();
                                 context.navigateTo(

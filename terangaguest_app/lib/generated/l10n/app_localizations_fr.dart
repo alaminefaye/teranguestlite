@@ -137,7 +137,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get spaWellness => 'Spa et Bien-être';
 
   @override
-  String get wellnessSportLeisure => 'BIEN-ÊTRE, SPORT & LOISIRS';
+  String get wellnessSportLeisure => 'Bien-être, sport & loisirs';
 
   @override
   String get wellnessSportLeisureSubtitle => 'Spa, Golf, Tennis, Fitness';
@@ -190,7 +190,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get palaceServices => 'Autres services';
 
   @override
-  String get explorationMobility => 'EXPLORATION & MOBILITÉ';
+  String get explorationMobility => 'Exploration & mobilité';
 
   @override
   String get explorationMobilitySubtitle =>
@@ -237,7 +237,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get callCenter => 'Centre d\'Appels';
 
   @override
-  String get hotelInfosSecurity => 'HOTEL INFOS & SÉCURITÉ';
+  String get hotelInfosSecurity => 'Hotel infos & sécurité';
 
   @override
   String get hotelInfosSecuritySubtitle =>
@@ -333,7 +333,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le chatbot multilingue sera disponible prochainement.';
 
   @override
-  String get servicesChambreLogistique => 'SERVICES EN CHAMBRE & LOGISTIQUE';
+  String get servicesChambreLogistique => 'Service en chambre';
 
   @override
   String get roomServiceRestauration => 'Room Service & Restauration';
@@ -934,6 +934,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get included => 'Inclus :';
+
+  @override
+  String get schedule => 'Horaires';
+
+  @override
+  String get childrenAgeRange => 'Enfants (âge)';
+
+  @override
+  String get reviewsTitle => 'Avis';
+
+  @override
+  String get reviewsPending => 'À noter';
+
+  @override
+  String get reviewsMyReviews => 'Mes avis';
+
+  @override
+  String get reviewsNoPending => 'Aucun avis à donner';
+
+  @override
+  String get reviewsNoPendingHint =>
+      'Les avis sont proposés après une commande livrée, un check-out, une demande traitée ou une excursion terminée.';
+
+  @override
+  String get reviewsNoReviewsYet => 'Aucun avis';
+
+  @override
+  String get reviewsNoReviewsYetHint => 'Vos avis apparaîtront ici.';
+
+  @override
+  String get rateYourExperience => 'Comment s\'est passée votre expérience ?';
+
+  @override
+  String get optionalComment => 'Commentaire (optionnel)';
+
+  @override
+  String get submit => 'Envoyer';
+
+  @override
+  String get thankYouForReview => 'Merci pour votre avis !';
 
   @override
   String get orderTracking => 'Suivi de commande';

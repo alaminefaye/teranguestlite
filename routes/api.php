@@ -202,4 +202,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
         Route::post('/{id}/view', [\App\Http\Controllers\Api\AnnouncementController::class, 'recordView']);
     });
+
+    // ==========================================
+    // AVIS / SATISFACTION CLIENT
+    // ==========================================
+    Route::prefix('reviews')->group(function () {
+        Route::get('/pending', [\App\Http\Controllers\Api\GuestReviewController::class, 'pending']);
+        Route::get('/', [\App\Http\Controllers\Api\GuestReviewController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\GuestReviewController::class, 'store']);
+    });
 });

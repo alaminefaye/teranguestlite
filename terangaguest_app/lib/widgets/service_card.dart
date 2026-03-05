@@ -8,6 +8,9 @@ class ServiceCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTap;
 
+  /// Chemin asset local pour l'image de fond (ex: 'assets/images/box_restaurant.png')
+  final String? imagePath;
+
   const ServiceCard({
     super.key,
     required this.title,
@@ -15,29 +18,31 @@ class ServiceCard extends StatelessWidget {
     required this.onTap,
     this.badge,
     this.isLoading = false,
+    this.imagePath,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
-    final double iconDisplaySize = isMobile ? 46.0 : 70.0;
-    final double fontSize = isMobile ? 13.0 : 21.0;
+    final double fontSize = isMobile ? 12.0 : 16.0;
+    final hasImage = imagePath != null && imagePath!.isNotEmpty;
 
     return Semantics(
       button: true,
       label: title,
       child: GestureDetector(
         onTap: onTap,
-        child: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateX(-0.05)
-            ..rotateY(0.02),
-          alignment: Alignment.center,
-          child: Stack(
-            children: [
-              Container(
+        child: Stack(
+          children: [
+            // ── Carte principale ── style identique à palace_list_screen
+            Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateX(-0.05)
+                ..rotateY(0.02),
+              alignment: Alignment.center,
+              child: Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
@@ -45,7 +50,7 @@ class ServiceCard extends StatelessWidget {
                     colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.accentGold, width: 2),
+                  border: Border.all(color: AppTheme.accentGold, width: 1.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.4),
@@ -61,83 +66,96 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                // La Column remplit toute la hauteur de la carte (GridView cell)
-                // et répartit l'espace via Expanded : icône en haut (flex 3),
-                // texte en bas (flex 2) — uniformité garantie quelle que soit
-                // la longueur du titre.
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Icon(
-                            icon,
-                            size: iconDisplaySize,
-                            color: AppTheme.accentGold,
+                // ClipRRect sur l'enfant direct pour que l'image aille bord à bord
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14.5),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Image plein cadre
+                      hasImage
+                          ? Image.asset(
+                              imagePath!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (_, __, ___) =>
+                                  _buildIconFallback(),
+                            )
+                          : _buildIconFallback(),
+
+                      // Bande sombre en bas derrière le titre uniquement
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
                           ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.60),
+                          ),
                           child: Text(
                             title,
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.accentGold,
-                              height: 1.1,
-                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              if (badge != null && badge != '0')
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: _AnimatedBadge(label: badge!),
-                ),
-              if (isLoading)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.accentGold,
-                          ),
+            ),
+
+            // ── Badge (notifications) ──
+            if (badge != null && badge != '0')
+              Positioned(
+                top: 4,
+                right: 4,
+                child: _AnimatedBadge(label: badge!),
+              ),
+
+            // ── Loading overlay ──
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.accentGold,
                         ),
                       ),
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildIconFallback() {
+    return Container(
+      color: AppTheme.primaryDark.withValues(alpha: 0.5),
+      child: Center(child: Icon(icon, size: 48, color: AppTheme.accentGold)),
     );
   }
 }

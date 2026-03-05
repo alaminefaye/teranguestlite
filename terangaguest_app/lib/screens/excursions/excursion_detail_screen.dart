@@ -252,6 +252,17 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                             color: Colors.white,
                           ),
                         ),
+                        if (_excursion!.departureTime != null &&
+                            _excursion!.departureTime!.isNotEmpty) ...[
+                          const SizedBox(width: 12),
+                          Text(
+                            '• ${_excursion!.departureTime!}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textGray,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     Column(
@@ -280,7 +291,48 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                     ),
                   ],
                 ),
-                if (_excursion!.description != null) ...[
+                if (_excursion!.scheduleDescription != null &&
+                    _excursion!.scheduleDescription!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Divider(color: AppTheme.textGray, height: 1),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context).schedule,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _excursion!.scheduleDescription!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+                if (_excursion!.childrenAgeRange != null &&
+                    _excursion!.childrenAgeRange!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.child_care, size: 18, color: AppTheme.accentGold),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppLocalizations.of(context).childrenAgeRange}: ${_excursion!.childrenAgeRange!}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (_excursion!.description != null &&
+                    _excursion!.description!.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Divider(color: AppTheme.textGray, height: 1),
                   const SizedBox(height: 16),

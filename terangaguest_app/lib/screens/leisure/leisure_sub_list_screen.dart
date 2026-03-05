@@ -76,6 +76,17 @@ class LeisureSubListScreen extends StatelessWidget {
     return Icons.directions_run_outlined;
   }
 
+  static String? _imageForActivity(LeisureCategoryDto child) {
+    final n = child.name.toLowerCase();
+    final t = child.type;
+    // Spa & Loisirs → image loisirs
+    if (t == 'spa' || n.contains('spa') || n.contains('bien-être')) {
+      return 'assets/images/sub_loisirs.png';
+    }
+    // Sport : pas encore d'images individuelles — icônes pour l'instant
+    return null;
+  }
+
   void _onActivityTap(BuildContext context, LeisureCategoryDto child) {
     HapticHelper.lightImpact();
     if (child.type == 'spa') {
@@ -138,6 +149,7 @@ class LeisureSubListScreen extends StatelessWidget {
                             return ServiceCard(
                               title: child.name,
                               icon: _iconForActivity(child),
+                              imagePath: _imageForActivity(child),
                               onTap: () => _onActivityTap(context, child),
                             );
                           },

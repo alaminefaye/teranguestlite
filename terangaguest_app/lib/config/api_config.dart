@@ -92,4 +92,8 @@ class ApiConfig {
 
   // Annonces & Publicités
   static const String announcements = '/announcements';
+
+  // Avis / Satisfaction client
+  static const String reviewsPending = '/reviews/pending';
+  static const String reviews = '/reviews';
 }

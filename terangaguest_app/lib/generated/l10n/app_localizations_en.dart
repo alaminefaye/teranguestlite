@@ -188,7 +188,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get palaceServices => 'Other services';
 
   @override
-  String get explorationMobility => 'EXPLORATION & MOBILITY';
+  String get explorationMobility => 'Exploration & mobility';
 
   @override
   String get explorationMobilitySubtitle =>
@@ -235,7 +235,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callCenter => 'Call Center';
 
   @override
-  String get hotelInfosSecurity => 'HOTEL INFOS & SECURITY';
+  String get hotelInfosSecurity => 'Hotel infos & security';
 
   @override
   String get hotelInfosSecuritySubtitle =>
@@ -330,7 +330,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The multilingual chatbot will be available soon.';
 
   @override
-  String get servicesChambreLogistique => 'ROOM & LOGISTICS SERVICES';
+  String get servicesChambreLogistique => 'Room service';
 
   @override
   String get roomServiceRestauration => 'Room Service & Dining';
@@ -924,6 +924,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get included => 'Included:';
+
+  @override
+  String get schedule => 'Schedule';
+
+  @override
+  String get childrenAgeRange => 'Children (age)';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get reviewsPending => 'To rate';
+
+  @override
+  String get reviewsMyReviews => 'My reviews';
+
+  @override
+  String get reviewsNoPending => 'No reviews to submit';
+
+  @override
+  String get reviewsNoPendingHint =>
+      'Reviews are offered after a delivered order, checkout, completed request or finished excursion.';
+
+  @override
+  String get reviewsNoReviewsYet => 'No reviews yet';
+
+  @override
+  String get reviewsNoReviewsYetHint => 'Your reviews will appear here.';
+
+  @override
+  String get rateYourExperience => 'How was your experience?';
+
+  @override
+  String get optionalComment => 'Comment (optional)';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get thankYouForReview => 'Thank you for your review!';
 
   @override
   String get orderTracking => 'Order tracking';
