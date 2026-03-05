@@ -58,6 +58,11 @@ class MenuHelper
                         'name' => 'Utilisateurs',
                         'path' => '/admin/users',
                     ],
+                    [
+                        'icon' => 'campaign',
+                        'name' => 'Annonces & Vidéos',
+                        'path' => '/admin/announcements',
+                    ],
                 ],
             ],
             [
@@ -154,6 +159,7 @@ class MenuHelper
                             ['name' => 'Services Palace', 'path' => '/dashboard/palace-services'],
                             ['name' => 'Véhicules (location)', 'path' => '/dashboard/vehicles'],
                             ['name' => 'Excursions', 'path' => '/dashboard/excursions'],
+                            ['name' => 'Annonces & Vidéos', 'path' => '/dashboard/enterprise-announcements'],
                         ],
                     ],
                     [
@@ -322,6 +328,8 @@ class MenuHelper
             'tablet' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm5 13h2v-1h-2v1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
 
             'package' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7l9 5 9-5M12 22V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+
+            'campaign' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 11V15H17C17.5523 15 18 14.5523 18 14V12C18 11.4477 17.5523 11 17 11H16ZM14 11V15C14 16.1046 13.1046 17 12 17H8C6.89543 17 6 16.1046 6 15V13C6 11.8954 6.89543 11 8 11H10.1716L12.5858 8.58579C13.2167 7.95489 14.072 7.6006 14.9645 7.6006H15.0355V11ZM10 15H12C12.5523 15 13 14.5523 13 14V11.232C13 10.9668 12.8946 10.7126 12.7071 10.5251L10.7071 8.52513C10.5196 8.33758 10.2655 8.23223 10 8.23223H8C7.44772 8.23223 7 8.67994 7 9.23223V15ZM22 13C22 15.2091 20.2091 17 18 17H16.2923L16.292 17.0003L13.7071 19.5858C12.8123 20.4806 11.5992 21 10.3333 21H8C5.23858 21 3 18.7614 3 16V13C3 10.2386 5.23858 8 8 8H9.33333C10.5992 8 11.8123 7.48062 12.7071 6.58579L15.2929 4H18C20.2091 4 22 5.79086 22 8V13Z" fill="currentColor"></path></svg>',
 
             'services' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a7.4 7.4 0 0 0 .6-3c0-4-3.5-7-8-7s-8 3-8 7c0 1.2.3 2.3.6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4.6 15a7.4 7.4 0 0 1-.6-3c0-4 3.5-7 8-7s8 3 8 7c0 1.2-.3 2.3-.6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
         ];
