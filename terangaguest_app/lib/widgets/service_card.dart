@@ -79,7 +79,7 @@ class ServiceCard extends StatelessWidget {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
-                              errorBuilder: (_, __, ___) =>
+                              errorBuilder: (_, _, _) =>
                                   _buildIconFallback(),
                             )
                           : _buildIconFallback(),
