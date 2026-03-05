@@ -229,6 +229,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports', [\App\Http\Controllers\Dashboard\ReportsController::class, 'index'])->name('reports.index');
         Route::get('reports/{type}', [\App\Http\Controllers\Dashboard\ReportsController::class, 'show'])->name('reports.show')->where('type', 'global|overview|reservations|orders|billing|services|audit');
 
+        Route::get('guest-reviews', [\App\Http\Controllers\Dashboard\GuestReviewsController::class, 'index'])->name('guest-reviews.index');
+
         // Gestion des stocks (catégories, produits, mouvements, alertes)
         Route::get('stock', [\App\Http\Controllers\Dashboard\StockController::class, 'index'])->name('stock.index');
         Route::resource('stock-categories', \App\Http\Controllers\Dashboard\StockCategoryController::class)->names('stock-categories');
