@@ -93,8 +93,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       });
       HapticHelper.lightImpact();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Notifications masquées comme lues'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).notificationsMarkedAsRead),
           backgroundColor: AppTheme.primaryBlue,
         ),
       );
@@ -124,8 +124,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       });
       HapticHelper.lightImpact();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Notifications supprimées'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).notificationsDeleted),
           backgroundColor: AppTheme.primaryBlue,
         ),
       );

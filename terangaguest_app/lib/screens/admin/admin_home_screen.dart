@@ -152,8 +152,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (hasNewOrder) {
       // Le Service en Chambre ne gère pas les nouvelles commandes (seulement la livraison)
       final auth = context.read<AuthProvider>();
-      final isRoomServiceDept = auth.isStaff &&
-          (auth.user?.department ?? '') == 'Service en chambre';
+      final isRoomServiceDept =
+          auth.isStaff && (auth.user?.department ?? '') == 'Service en chambre';
       if (!isRoomServiceDept) {
         _enqueueNewOrdersForAlert(context);
         messages.add('Nouvelle commande Room Service à traiter');
@@ -556,7 +556,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: $e'),
+            content: Text('${AppLocalizations.of(context).generalError}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 10),
           ),

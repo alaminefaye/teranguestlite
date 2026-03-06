@@ -745,5 +745,7 @@
   "totalToPay": "TOTAL À PAYER",
   "taxesIncluded": "Toute taxe et frais de service inclus",
   "thankYouForOrder": "Merci pour votre commande !",
-  "invoiceRoomLabel": "CHAMBRE:"
+  "invoiceRoomLabel": "CHAMBRE:",
+  "notificationsMarkedAsRead": "Notifications marquées comme lues",
+  "notificationsDeleted": "Notifications supprimées"
 }

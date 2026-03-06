@@ -656,8 +656,8 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).statusUpdated),
           backgroundColor: Colors.green,
         ),
       );

@@ -591,8 +591,8 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
       );
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).statusUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -1121,9 +1121,10 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
         action: action,
         reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
+      // (StatelessWidget) pas de mounted check necessaire ici avec le l10n au prealable.
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(l10n.statusUpdated),
           backgroundColor: Colors.green,
         ),
       );

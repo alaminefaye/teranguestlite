@@ -714,8 +714,8 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         reason: action == 'cancel' ? reasonController.text.trim() : null,
       );
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(l10n.statusUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -1172,8 +1172,8 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
         );
 
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Statut mis à jour'),
+          SnackBar(
+            content: Text(l10n.statusUpdated),
             backgroundColor: Colors.green,
           ),
         );

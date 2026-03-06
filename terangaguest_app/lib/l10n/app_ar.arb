@@ -675,5 +675,7 @@
   "totalToPay": "الإجمالي للدفع",
   "taxesIncluded": "شامل جميع الضرائب ورسوم الخدمة",
   "thankYouForOrder": "شكرا لطلبك!",
-  "invoiceRoomLabel": "الغرفة:"
+  "invoiceRoomLabel": "الغرفة:",
+  "notificationsMarkedAsRead": "تم وضع علامة مقروءة على الإشعارات",
+  "notificationsDeleted": "تم حذف الإشعارات"
 }

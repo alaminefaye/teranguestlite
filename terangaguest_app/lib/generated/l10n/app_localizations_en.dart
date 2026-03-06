@@ -1823,4 +1823,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invoiceRoomLabel => 'ROOM:';
+
+  @override
+  String get notificationsMarkedAsRead => 'Notifications marked as read';
+
+  @override
+  String get notificationsDeleted => 'Notifications deleted';
 }

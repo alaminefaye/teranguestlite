@@ -311,8 +311,9 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                         itemBuilder: (context, index) {
                           final photo = d.photos[index];
                           final url = photo.url;
-                          if (url == null || url.isEmpty)
+                          if (url == null || url.isEmpty) {
                             return const SizedBox.shrink();
+                          }
                           return GestureDetector(
                             onTap: () {
                               HapticHelper.lightImpact();

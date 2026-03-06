@@ -1846,4 +1846,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get invoiceRoomLabel => 'CHAMBRE:';
+
+  @override
+  String get notificationsMarkedAsRead => 'Notifications marquées comme lues';
+
+  @override
+  String get notificationsDeleted => 'Notifications supprimées';
 }

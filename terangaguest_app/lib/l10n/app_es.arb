@@ -675,5 +675,7 @@
   "totalToPay": "TOTAL A PAGAR",
   "taxesIncluded": "Impuestos y cargos por servicio incluidos",
   "thankYouForOrder": "¡Gracias por su pedido!",
-  "invoiceRoomLabel": "HABITACIÓN:"
+  "invoiceRoomLabel": "HABITACIÓN:",
+  "notificationsMarkedAsRead": "Notificaciones marcadas como leídas",
+  "notificationsDeleted": "Notificaciones eliminadas"
 }

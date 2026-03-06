@@ -1803,4 +1803,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invoiceRoomLabel => 'الغرفة:';
+
+  @override
+  String get notificationsMarkedAsRead => 'تم وضع علامة مقروءة على الإشعارات';
+
+  @override
+  String get notificationsDeleted => 'تم حذف الإشعارات';
 }

@@ -3509,6 +3509,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'CHAMBRE:'**
   String get invoiceRoomLabel;
+
+  /// No description provided for @notificationsMarkedAsRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications marquées comme lues'**
+  String get notificationsMarkedAsRead;
+
+  /// No description provided for @notificationsDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications supprimées'**
+  String get notificationsDeleted;
 }
 
 class _AppLocalizationsDelegate
