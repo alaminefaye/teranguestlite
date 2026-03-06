@@ -956,11 +956,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     final kitchenActions = <Map<String, String>>[];
     if (!isRoomService) {
       if (status == 'pending') {
-        kitchenActions.add({'action': 'confirm', 'label': 'Confirmer la commande'});
+        kitchenActions.add({
+          'action': 'confirm',
+          'label': 'Confirmer la commande',
+        });
       } else if (status == 'confirmed') {
-        kitchenActions.add({'action': 'prepare', 'label': 'Lancer la préparation'});
+        kitchenActions.add({
+          'action': 'prepare',
+          'label': 'Lancer la préparation',
+        });
       } else if (status == 'preparing') {
-        kitchenActions.add({'action': 'mark_ready', 'label': 'Marquer comme prête'});
+        kitchenActions.add({
+          'action': 'mark_ready',
+          'label': 'Marquer comme prête',
+        });
       }
     }
 
@@ -969,9 +978,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     final deliveryActions = <Map<String, String>>[];
     if (isRoomService) {
       if (status == 'ready') {
-        deliveryActions.add({'action': 'deliver', 'label': 'Mettre en livraison'});
+        deliveryActions.add({
+          'action': 'deliver',
+          'label': 'Mettre en livraison',
+        });
       } else if (status == 'delivering') {
-        deliveryActions.add({'action': 'complete', 'label': 'Marquer comme livrée'});
+        deliveryActions.add({
+          'action': 'complete',
+          'label': 'Marquer comme livrée',
+        });
       }
     }
 
@@ -979,7 +994,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
     // Le bouton "Annuler" est visible pour admin + cuisine (pas service en chambre)
     // uniquement si la commande est encore annulable
-    final isCancellable = !isRoomService &&
+    final isCancellable =
+        !isRoomService &&
         ['pending', 'confirmed', 'preparing'].contains(status);
 
     if (allActions.isEmpty &&
@@ -1146,7 +1162,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Impossible d\'envoyer la notification : $e'),
+          content: Text(
+            AppLocalizations.of(context).cannotSendNotification(e.toString()),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -1180,7 +1198,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Statut de la commande mis à jour'),
+          content: Text(AppLocalizations.of(context).orderStatusUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -1330,8 +1348,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       if (!mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Commande annulée — le client a été notifié.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).orderCancelledNotified),
           backgroundColor: Colors.green,
         ),
       );
@@ -1347,7 +1365,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur : $message'),
+          content: Text('${AppLocalizations.of(context).errorPrefix}$message'),
           backgroundColor: Colors.red,
         ),
       );
@@ -1417,7 +1435,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
           scrollable: true,
-          title: const Text('Annuler la commande'),
+          title: Text(AppLocalizations.of(context).cancelOrder),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1462,7 +1480,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 Navigator.pop(ctx, true);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Oui, annuler'),
+              child: Text(AppLocalizations.of(context).yesCancel),
             ),
           ],
         ),
@@ -1477,8 +1495,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Commande annulée'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).orderCancelled),
           backgroundColor: Colors.green,
         ),
       );

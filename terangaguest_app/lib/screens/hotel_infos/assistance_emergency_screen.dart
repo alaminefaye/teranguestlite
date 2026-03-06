@@ -85,8 +85,8 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     final palaceProvider = context.read<PalaceProvider>();
     final roomInfo = user?.roomNumber != null && user!.roomNumber!.isNotEmpty
         ? '${l10n.roomLabel} ${user.roomNumber}'
-        : 'Chambre non identifiée';
-    final description = 'Demande depuis $roomInfo';
+        : l10n.unidentifiedRoom;
+    final description = l10n.requestFromRoom(roomInfo);
 
     String errorMessage(String raw) {
       if (raw.contains('séjour') ||

@@ -655,7 +655,7 @@ class _MyRestaurantReservationsScreenState
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: const Text('Statut mis à jour'),
+          content: Text(AppLocalizations.of(context).statusUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -1294,8 +1294,8 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
       );
       if (!context.mounted) return;
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).statusUpdated),
           backgroundColor: Colors.green,
         ),
       );

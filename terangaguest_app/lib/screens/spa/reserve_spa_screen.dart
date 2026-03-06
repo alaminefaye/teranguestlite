@@ -55,7 +55,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       await tabletSession.tryRestoreSessionFromRoom();
       if (!mounted) return;
       final code = tabletSession.clientCodeForPreFill;
-      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+      if (code != null &&
+          code.isNotEmpty &&
+          _clientCodeController.text.isEmpty) {
         _clientCodeController.text = code;
         setState(() {});
       }
@@ -169,9 +171,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Date',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).date,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
@@ -258,9 +260,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Heure',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).timeLabel,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
@@ -486,7 +488,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  AppLocalizations.of(context).reservationClientCodeBanner,
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
@@ -497,7 +499,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
             controller: _clientCodeController,
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
+              hintText: AppLocalizations.of(context).clientCodeHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.8),
               ),
@@ -548,9 +550,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.',
+                AppLocalizations.of(context).sessionExpiredNeedClientCode,
               ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 4),

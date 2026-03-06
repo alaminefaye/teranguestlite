@@ -90,19 +90,13 @@ class _VehicleRentalRequestScreenState
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     if (_serviceId == null) {
-      _showSnack(
-        'Service Location de véhicule non configuré. Contactez l\'établissement.',
-        isError: true,
-      );
+      _showSnack(l10n.vehicleRentalNotConfigured, isError: true);
       return;
     }
     final days = int.tryParse(_rentalDaysController.text.trim());
     final hours = int.tryParse(_rentalDurationController.text.trim());
     if ((days == null || days < 1) && (hours == null || hours < 1)) {
-      _showSnack(
-        'Indiquez le nombre de jours ou la durée en heures.',
-        isError: true,
-      );
+      _showSnack(l10n.durationOrDaysRequired, isError: true);
       return;
     }
 
@@ -250,7 +244,7 @@ class _VehicleRentalRequestScreenState
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: l10n.rentalDays,
-                          hintText: 'Ex: 2',
+                          hintText: l10n.exDays,
                           labelStyle: const TextStyle(
                             color: AppTheme.accentGold,
                           ),
@@ -275,7 +269,7 @@ class _VehicleRentalRequestScreenState
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: l10n.rentalDuration,
-                          hintText: 'Ex: 5 (demi-journée)',
+                          hintText: l10n.exHours,
                           labelStyle: const TextStyle(
                             color: AppTheme.accentGold,
                           ),

@@ -21,13 +21,16 @@ class SpaServicesListScreen extends StatefulWidget {
 class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
   String? _selectedCategory;
 
-  final List<Map<String, String>> _categoryFilters = [
-    {'value': '', 'label': 'Tous'},
-    {'value': 'massage', 'label': 'Massages'},
-    {'value': 'facial', 'label': 'Soins Visage'},
-    {'value': 'body', 'label': 'Soins Corps'},
-    {'value': 'hammam', 'label': 'Hammam'},
-  ];
+  List<Map<String, String>> _getCategoryFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      {'value': '', 'label': l10n.spaCategoryAll},
+      {'value': 'massage', 'label': l10n.spaCategoryMassage},
+      {'value': 'facial', 'label': l10n.spaCategoryFacial},
+      {'value': 'body', 'label': l10n.spaCategoryBody},
+      {'value': 'hammam', 'label': l10n.spaCategoryHammam},
+    ];
+  }
 
   @override
   void initState() {
@@ -80,7 +83,7 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Spa & Bien-être',
+                  AppLocalizations.of(context).spaAndWellness,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
@@ -88,9 +91,12 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Détente et relaxation',
-                  style: TextStyle(fontSize: 14, color: AppTheme.textGray),
+                Text(
+                  AppLocalizations.of(context).spaSubtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textGray,
+                  ),
                 ),
               ],
             ),
@@ -106,9 +112,9 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _categoryFilters.length,
+        itemCount: _getCategoryFilters(context).length,
         itemBuilder: (context, index) {
-          final filter = _categoryFilters[index];
+          final filter = _getCategoryFilters(context)[index];
           final isSelected =
               _selectedCategory == filter['value'] ||
               (_selectedCategory == null && filter['value'] == '');

@@ -161,7 +161,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
           Text(
-            _errorMessage ?? "Erreur",
+            _errorMessage ?? AppLocalizations.of(context).generalError,
             style: const TextStyle(color: Colors.black87),
             textAlign: TextAlign.center,
           ),
@@ -171,7 +171,10 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryDark,
             ),
-            child: const Text('Fermer', style: TextStyle(color: Colors.white)),
+            child: Text(
+              AppLocalizations.of(context).close,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -192,7 +195,8 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
     final address = enterprise?.address?.trim();
     final phone = enterprise?.phone?.trim();
     final email = enterprise?.email?.trim();
-    final hasAnyContact = (address != null && address.isNotEmpty) ||
+    final hasAnyContact =
+        (address != null && address.isNotEmpty) ||
         (phone != null && phone.isNotEmpty) ||
         (email != null && email.isNotEmpty);
 
@@ -246,20 +250,14 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
             if (address != null && address.isNotEmpty)
               Text(
                 address,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             if (phone != null && phone.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 phone,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -267,10 +265,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
               const SizedBox(height: 4),
               Text(
                 email,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -294,9 +289,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'REÇU DE COMMANDE',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).orderReceipt,
+                  style: const TextStyle(
                     color: AppTheme.accentGold,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -345,9 +340,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'HÔTEL:',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).hotelLabel,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -371,9 +366,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'CHAMBRE:',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).invoiceRoomLabel,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -393,9 +388,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'DATE COMMANDE:',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).orderDateLabel,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -415,9 +410,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'LIVRAISON:',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).deliveryLabel,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -440,17 +435,20 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
   Widget _buildItemsList() {
     final items = _order?.items ?? [];
     if (items.isEmpty) {
-      return const Center(
-        child: Text('Aucun article', style: TextStyle(color: Colors.black54)),
+      return Center(
+        child: Text(
+          AppLocalizations.of(context).noItems,
+          style: const TextStyle(color: Colors.black54),
+        ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'ARTICLES',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).itemsLabel,
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -517,9 +515,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'TOTAL À PAYER',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).totalToPay,
+              style: const TextStyle(
                 color: AppTheme.primaryDark,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -536,9 +534,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
           ],
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Toute taxe et frais de service inclus',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).taxesIncluded,
+          style: const TextStyle(
             color: Colors.black45,
             fontSize: 11,
             fontStyle: FontStyle.italic,
@@ -581,9 +579,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
       ),
       child: Column(
         children: [
-          const Text(
-            'Merci pour votre commande !',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).thankYouForOrder,
+            style: const TextStyle(
               color: Colors.black87,
               fontWeight: FontWeight.w600,
             ),

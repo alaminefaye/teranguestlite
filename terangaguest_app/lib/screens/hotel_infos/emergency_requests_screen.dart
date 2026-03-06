@@ -22,12 +22,13 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
   bool _loading = false;
   String _selectedPeriod = 'all';
 
-  List<Map<String, String>> _periodFilters() {
+  List<Map<String, String>> _periodFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': l10n.periodAllDates},
+      {'value': 'today', 'label': l10n.periodToday},
+      {'value': 'week', 'label': l10n.periodThisWeek},
+      {'value': 'month', 'label': l10n.periodThisMonth},
     ];
   }
 
@@ -90,7 +91,7 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Assistance & Urgence',
+                            l10n.assistanceEmergency,
                             style: TextStyle(
                               fontSize: titleSize,
                               fontWeight: FontWeight.bold,
@@ -100,8 +101,8 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             isStaffOrAdmin
-                                ? 'Alertes médecin / sécurité en cours'
-                                : 'Vos demandes Assistance & Urgence',
+                                ? l10n.staffEmergencySubtitle
+                                : l10n.guestEmergencySubtitle,
                             style: const TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
@@ -135,11 +136,10 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                           padding: LayoutHelper.horizontalPadding(context),
                           child: ListView(
                             padding: EdgeInsets.symmetric(vertical: spacing),
-                            children: const [
+                            children: [
                               EmptyStateWidget(
                                 icon: Icons.health_and_safety_outlined,
-                                title:
-                                    'Aucune alerte Assistance & Urgence en cours.',
+                                title: l10n.noEmergencyAlerts,
                               ),
                             ],
                           ),
@@ -195,7 +195,9 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                 final parts = <String>[];
                                 if (request.roomNumber != null &&
                                     request.roomNumber!.isNotEmpty) {
-                                  parts.add('Chambre ${request.roomNumber}');
+                                  parts.add(
+                                    '${l10n.identityRoom} ${request.roomNumber}',
+                                  );
                                 }
                                 if (request.guestName != null &&
                                     request.guestName!.isNotEmpty) {
@@ -411,14 +413,15 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                                                 request,
                                                                 'accept',
                                                               ),
-                                                          child: const Text(
-                                                            'Accepter',
-                                                            style: TextStyle(
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                            ),
+                                                          child: Text(
+                                                            l10n.accept,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
                                                           ),
                                                         ),
                                                       ),
@@ -444,14 +447,15 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                                                                 request,
                                                                 'cancel',
                                                               ),
-                                                          child: const Text(
-                                                            'Annuler',
-                                                            style: TextStyle(
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                            ),
+                                                          child: Text(
+                                                            l10n.cancel,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
                                                           ),
                                                         ),
                                                       ),
@@ -501,11 +505,11 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
     String title;
     String message;
     if (action == 'accept') {
-      title = 'Accepter la demande';
-      message = 'Accepter cette alerte Assistance & Urgence ?';
+      title = l10n.acceptRequestTitle;
+      message = l10n.acceptEmergencyAlertMessage;
     } else {
       title = l10n.cancel;
-      message = 'Annuler cette alerte ?';
+      message = l10n.cancelEmergencyAlertMessage;
     }
 
     final ok = await showDialog<bool>(
@@ -529,7 +533,7 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif (optionnel)",
+                    hintText: l10n.reasonOptional,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),
@@ -556,9 +560,7 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
                 if (action == 'cancel') {
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
-                    setDialogState(
-                      () => validationError = 'Veuillez préciser un motif.',
-                    );
+                    setDialogState(() => validationError = l10n.reasonRequired);
                     return;
                   }
                 }
@@ -588,8 +590,8 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Statut mis à jour'),
+        SnackBar(
+          content: Text(l10n.statusUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -613,9 +615,9 @@ class _EmergencyRequestsScreenState extends State<EmergencyRequestsScreen> {
         height: 40,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: _periodFilters().length,
+          itemCount: _periodFilters(context).length,
           itemBuilder: (context, index) {
-            final filter = _periodFilters()[index];
+            final filter = _periodFilters(context)[index];
             final isSelected = _selectedPeriod == filter['value'];
 
             return Padding(

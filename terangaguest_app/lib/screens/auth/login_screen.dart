@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // Mention développeur
                         Text(
-                          'Développé par Universal Technologies Africa',
+                          AppLocalizations.of(context).developedByUTA,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,

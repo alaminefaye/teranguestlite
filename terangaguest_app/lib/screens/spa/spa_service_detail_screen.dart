@@ -100,7 +100,8 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _service?.name ?? 'Service Spa',
+                  _service?.name ??
+                      AppLocalizations.of(context).spaServiceFallback,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,

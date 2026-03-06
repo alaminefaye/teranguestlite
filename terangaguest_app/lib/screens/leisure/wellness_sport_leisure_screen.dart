@@ -65,7 +65,7 @@ class _WellnessSportLeisureScreenState
     return [
       LeisureMainCategoryDto(
         id: 0,
-        name: 'Sport',
+        name: l10n.sportCategory,
         description: null,
         type: 'sport',
         displayOrder: 0,
@@ -95,7 +95,7 @@ class _WellnessSportLeisureScreenState
       ),
       LeisureMainCategoryDto(
         id: 0,
-        name: 'Loisirs',
+        name: l10n.leisureCategory,
         description: null,
         type: 'loisirs',
         displayOrder: 1,

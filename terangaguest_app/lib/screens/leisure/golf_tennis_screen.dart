@@ -178,17 +178,17 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
               FilledButton(
                 onPressed: () async {
                   final prefix = widget.sportType == 'tennis'
-                      ? 'Tennis'
-                      : 'Golf';
+                      ? l10n.tennisPrefix
+                      : l10n.golfPrefix;
                   final parts = <String>['$prefix - $optionLabel'];
                   if (selectedDate != null) {
                     parts.add(
-                      'Date: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}',
+                      '${l10n.datePrefix}${DateFormat('dd/MM/yyyy').format(selectedDate!)}',
                     );
                   }
                   if (selectedTime != null) {
                     parts.add(
-                      'Heure: ${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                      '${l10n.timePrefix}${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
                     );
                   }
                   final notes = notesController.text.trim();
@@ -229,9 +229,7 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                         )
                         .timeout(
                           const Duration(seconds: 25),
-                          onTimeout: () => throw Exception(
-                            'Délai dépassé. Vérifiez votre connexion.',
-                          ),
+                          onTimeout: () => throw Exception(l10n.timeoutError),
                         );
 
                     // Pop the loading dialog safely
@@ -305,9 +303,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                                 );
                               }
                             },
-                            child: const Text(
-                              'Voir mes demandes',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.viewMyRequests,
+                              style: const TextStyle(
                                 color: AppTheme.accentGold,
                                 fontWeight: FontWeight.bold,
                               ),

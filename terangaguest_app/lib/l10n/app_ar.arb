@@ -149,7 +149,13 @@
   "noExcursionAvailableHint": "ستُعرض الأنشطة والجولات هنا.",
   "noOrder": "لا طلبات",
   "noOrderForStatus": "لا طلبات {status}",
-  "@noOrderForStatus": {"placeholders": {"status": {"type": "String"}}},
+  "@noOrderForStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "noOrderSubtitle": "ستظهر طلبات خدمة الغرف هنا.",
   "orderStatusPending": "قيد الانتظار",
   "orderStatusConfirmed": "مؤكد",
@@ -158,7 +164,13 @@
   "orderStatusDelivered": "تم التوصيل",
   "noRestaurantAvailable": "لا مطعم متاح",
   "noRestaurantForType": "لا {type} متاح",
-  "@noRestaurantForType": {"placeholders": {"type": {"type": "String"}}},
+  "@noRestaurantForType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
   "noRestaurantSubtitle": "ستُعرض المطاعم والبارات هنا.",
   "typeRestaurant": "مطعم",
   "typeBar": "بار",
@@ -197,24 +209,48 @@
   "reservationsConfirmed": "حجوزات مؤكدة",
   "myRequests": "طلباتي",
   "requestNumber": "طلب #{id}",
-  "@requestNumber": {"placeholders": {"id": {"type": "int"}}},
+  "@requestNumber": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "palaceServicesSubtitle": "خدمات مميزة وكونسيرج",
   "spaWellnessSubtitle": "العافية والاسترخاء",
   "myReservations": "حجوزاتي",
   "discoverRegion": "اكتشف منطقتنا",
-  "spaSubtitle": "استرخاء وعافية",
+  "spaSubtitle": "راحة واسترخاء",
   "chooseCategory": "اختر فئة",
   "orderDetailTitle": "تفاصيل الطلب",
   "orderTrackingSubtitle": "متابعة طلبك",
   "adultPrice": "بالغ: {price}",
-  "@adultPrice": {"placeholders": {"price": {"type": "String"}}},
+  "@adultPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "childPrice": "طفل: {price}",
-  "@childPrice": {"placeholders": {"price": {"type": "String"}}},
+  "@childPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "book": "حجز",
   "unavailable": "غير متاح",
   "spaServiceDefaultName": "خدمة السبا",
   "capacityPeople": "السعة: {count} أشخاص",
-  "@capacityPeople": {"placeholders": {"count": {"type": "int"}}},
+  "@capacityPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "openingHours": "ساعات العمل",
   "bookTable": "حجز طاولة",
   "closed": "مغلق",
@@ -258,11 +294,23 @@
   "confirmReservation": "تأكيد الحجز",
   "reservationConfirmed": "تم تأكيد الحجز!",
   "excursionConfirmedMessage": "جولتك لـ {count} شخص(أشخاص) مؤكدة.",
-  "@excursionConfirmedMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@excursionConfirmedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "confirmationNotification": "ستتلقى تأكيداً عبر الإشعار.",
   "numberOfGuests": "عدد الأشخاص",
   "tableReservedMessage": "طاولتك لـ {count} شخص(أشخاص) محجوزة.",
-  "@tableReservedMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@tableReservedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "orderConfirmed": "تم تأكيد الطلب!",
   "itemsAddedToCart": "تمت إضافة العناصر إلى السلة!",
   "errorPrefix": "خطأ: ",
@@ -283,7 +331,7 @@
   "thankYouForReview": "شكراً على تقييمك!",
   "orderTracking": "متابعة الطلب",
   "orderItems": "العناصر المطلوبة",
-  "quantity": "الكمية:",
+  "quantity": "الكمية",
   "reorder": "إعادة الطلب",
   "laundryRequestSentMessage": "تم تسجيل طلب الغسيل.",
   "demand": "طلب",
@@ -293,13 +341,40 @@
   "categoryBody": "العناية بالجسم",
   "excursionsTitle": "الجولات",
   "articleCount": "{count} عنصر(عناصر)",
-  "@articleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@articleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "appNameVersion": "TerangaGuest {version} {v}",
-  "@appNameVersion": {"placeholders": {"version": {"type": "String"}, "v": {"type": "String"}}},
+  "@appNameVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "v": {
+        "type": "String"
+      }
+    }
+  },
   "orderLabel": "طلب {id}",
-  "@orderLabel": {"placeholders": {"id": {"type": "int"}}},
+  "@orderLabel": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "navigationTo": "الانتقال إلى {name}",
-  "@navigationTo": {"placeholders": {"name": {"type": "String"}}},
+  "@navigationTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "open": "مفتوح",
   "itemsLabel": "العناصر",
   "statusLabel": "الحالة",
@@ -323,7 +398,13 @@
   "myCart": "سلتي",
   "orderNotificationHint": "ستتلقى إشعاراً عند تأكيد الطلب من المطعم.",
   "spaReservationConfirmedMessage": "حجزك لـ {name} مؤكد.",
-  "@spaReservationConfirmedMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@spaReservationConfirmedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "excursion": "جولة",
   "verifyOrder": "تحقق من طلبك",
   "personsShort": "شخص",
@@ -333,7 +414,13 @@
   "time": "الوقت",
   "guests": "الأشخاص",
   "guestsCount": "{count} ضيف/ضيوف",
-  "@guestsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@guestsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dayMonday": "الإثنين",
   "dayTuesday": "الثلاثاء",
   "dayWednesday": "الأربعاء",
@@ -348,5 +435,245 @@
   "validate": "تحقق",
   "clientCode": "رمز العميل",
   "clientCodeHint": "رمز العميل (مثال: 123456)",
-  "specialRequests": "طلبات خاصة"
+  "specialRequests": "طلبات خاصة",
+  "developedByUTA": "تم التطوير بواسطة Universal Technologies Africa",
+  "tapToContinue": "اضغط للمتابعة",
+  "changeLanguage": "تغيير اللغة",
+  "monthJanuary": "يناير",
+  "monthFebruary": "فبراير",
+  "monthMarch": "مارس",
+  "monthApril": "أبريل",
+  "monthMay": "مايو",
+  "monthJune": "يونيو",
+  "monthJuly": "يوليو",
+  "monthAugust": "أغسطس",
+  "monthSeptember": "سبتمبر",
+  "monthOctober": "أكتوبر",
+  "monthNovember": "نوفمبر",
+  "monthDecember": "ديسمبر",
+  "reservationClientCodeBanner": "الحجوزات مقتصرة على الضيوف الذين لديهم إقامة صالحة. يرجى إدخال رمز العميل الخاص بك أدناه (تم استلامه عند تسجيل الدخول).",
+  "sessionExpiredNeedClientCode": "إقامتك لم تعد نشطة. أدخل رمز العميل الخاص بك للحجز.",
+  "periodAllDates": "كل التواريخ",
+  "periodToday": "اليوم",
+  "periodThisWeek": "هذا الأسبوع",
+  "periodThisMonth": "هذا الشهر",
+  "staffOrdersTitle": "طلبات خدمة الغرف",
+  "staffOrdersSubtitle": "تتبع ومعالجة طلبات خدمة الغرف",
+  "addedToCart": "تمت إضافة {itemName} إلى سلة التسوق",
+  "invalidSessionRetry": "جلسة غير صالحة أو منتهية الصلاحية. الرجاء إدخال الرمز الخاص بك مرة أخرى.",
+  "orderValidationError": "تعذر التحقق من صحة الطلب. يرجى التحقق من رمز العميل الخاص بك أو الاتصال بمكتب الاستقبال.",
+  "enterCodeToValidate": "أدخل الرمز المستلم عند تسجيل الوصول للتحقق من صحة الطلب.",
+  "roomNumberTablet": "رقم الغرفة (هذا الجهاز اللوحي)",
+  "roomIdRecommended": "معرّف الغرفة (موصى به - راجع لوحة القيادة > وصول الجهاز اللوحي)",
+  "multiHotelWarning": "في إعدادات الفنادق المتعددة، أدخل معرّف الغرفة لعرض بيانات فندقك فقط.",
+  "roomLabel": "الغرفة: {room}",
+  "code6Digits": "رمز مكون من 6 أرقام",
+  "enter6Digits": "أدخل الرمز المكون من 6 أرقام.",
+  "defineRoomTablet": "حدد رقم الغرفة لهذا الجهاز اللوحي.",
+  "confirmIdentity": "قم بتأكيد هويتك",
+  "verifyInfoBeforeOrder": "تحقق من معلوماتك قبل إرسال الطلب:",
+  "identityName": "الاسم",
+  "identityRoom": "الغرفة",
+  "identityPhone": "الهاتف",
+  "identityEmail": "البريد الإلكتروني",
+  "paymentMethodText": "طريقة الدفع",
+  "paymentCash": "نقدًا",
+  "paymentRoomBill": "أضف إلى فاتورة الغرفة",
+  "paymentWave": "Wave",
+  "paymentOrangeMoney": "Orange Money",
+  "confirmOrder": "تأكيد الطلب",
+  "@addedToCart": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "@roomLabel": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "statusUpdated": "تم تحديث الحالة",
+  "orderStatusUpdated": "تم تحديث حالة الطلب",
+  "cannotSendNotification": "تعذر إرسال الإشعار: {error}",
+  "orderCancelledNotified": "تم إلغاء الطلب - تم إخطار العميل.",
+  "orderCancelled": "تم إلغاء الطلب",
+  "cancelOrder": "إلغاء الطلب",
+  "yesCancel": "نعم، إلغاء",
+  "@cannotSendNotification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "spaCategoryAll": "الكل",
+  "spaCategoryMassage": "تدليك",
+  "spaCategoryFacial": "علاجات الوجه",
+  "spaCategoryBody": "علاجات الجسم",
+  "spaCategoryHammam": "حمام",
+  "spaAndWellness": "سبا وعافية",
+  "spaServiceFallback": "خدمة سبا",
+  "timeLabel": "الوقت",
+  "excursionFallback": "جولة",
+  "locationEnableSettings": "تفعيل الموقع في الإعدادات.",
+  "locationAccessDenied": "تم رفض الوصول إلى الموقع.",
+  "locationCurrentPos": "الموقع الحالي",
+  "locationError": "لا يمكن الحصول على الموقع",
+  "vehicleRequestType": "نوع الطلب",
+  "vehicleTypeTaxi": "سيارة أجرة",
+  "vehicleTypeRental": "تأجير",
+  "taxiPickup": "نصطحبكم من",
+  "taxiPickupHint": "العنوان أو الموقع",
+  "taxiMyLocation": "موقعي",
+  "taxiDestination": "الوجهة",
+  "taxiDestinationHint": "عنوان الوجهة",
+  "taxiDistanceOption": "المسافة (كم، اختياري)",
+  "taxiDistanceHint": "مثال: 5.2",
+  "rentalAllTypes": "كل الأنواع",
+  "rentalSedan": "سيدان",
+  "rentalSuv": "دفع رباعي",
+  "rentalMinibus": "حافلة صغيرة",
+  "rentalVan": "شاحنة صغيرة",
+  "rentalOther": "آخر",
+  "rentalChooseVehicle": "اختر سيارة",
+  "rentalTypeLabel": "النوع",
+  "rentalSeatsMin": "الحد الأدنى للمقاعد",
+  "rentalSeatsAll": "الكل",
+  "rentalSeatsCount": "{count} مقعد",
+  "@rentalSeatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalNoVehicleFound": "لا توجد مركبة لهذه المعايير.",
+  "rentalSeatsPl": "{count} مقاعد",
+  "@rentalSeatsPl": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalDays": "عدد الأيام",
+  "rentalDaysHint": "مثال: 2",
+  "rentalDurationHours": "المدة (ساعات)",
+  "rentalDurationHint": "مثال: 8 (نصف يوم اذا كان اقل من 5 ساعات)",
+  "rentalEstimate": "التقدير: {price} فرنك أفريقي",
+  "@rentalEstimate": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalErrorDestination": "أدخل عنوان الوجهة.",
+  "rentalErrorChooseVehicle": "اختر مركبة من القائمة.",
+  "rentalErrorVehicleOrDetails": "اختر سيارة أجرة أو إيجار، أو صف طلبك.",
+  "sessionExpiredNeedClientCodeRequest": "إقامتك لم تعد نشطة. أدخل رمز العميل لإرسال الطلب.",
+  "palaceConciergeServices": "خدمات القصر / الكونسيرج",
+  "palaceConciergeTracking": "تتبع طلبات القصر والكونسيرج",
+  "palaceConciergeServiceSingle": "خدمة القصر / الكونسيرج",
+  "scheduledForDate": "مقرر لـ {date}",
+  "@scheduledForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "requestDetailsOnly": "تفاصيل الطلب",
+  "cancellationReason": "سبب الإلغاء",
+  "acceptRequestTitle": "قبول الطلب",
+  "acceptRequestMessage": "قبول طلب خدمة القصر / الكونسيرج؟",
+  "completeRequestTitle": "إكمال الطلب",
+  "completeRequestMessage": "إكمال هذا الطلب؟",
+  "rejectRequestTitle": "رفض الطلب",
+  "rejectRequestMessage": "رفض طلب خدمة القصر؟",
+  "cancelRequestMessage": "إلغاء طلب خدمة القصر هذا؟",
+  "cancellationReasonHint": "سبب الإلغاء",
+  "validationReasonRequired": "يرجى تقديم سبب.",
+  "requestDetailTitle": "تفاصيل طلب القصر / الكونسيرج",
+  "laundryRequestDetailTitle": "تفاصيل طلب غسيل الملابس",
+  "laundryNoItemsInRequest": "لم يتم العثور على عناصر لهذا الطلب.",
+  "hotelMap": "خريطة",
+  "albumsTitle": "ألبومات",
+  "photoCount": "{count} صورة",
+  "@photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noPhoto": "لا توجد صورة",
+  "presentationTitle": "عرض",
+  "addressTitle": "عنوان",
+  "phoneAbbr": "هاتف",
+  "staffEmergencySubtitle": "تنبيهات الطبيب / الأمن النشطة",
+  "guestEmergencySubtitle": "طلبات المساعدة والطوارئ الخاصة بك",
+  "noEmergencyAlerts": "لا توجد تنبيهات مساعدة وطوارئ نشطة.",
+  "acceptEmergencyAlertMessage": "هل تقبل تنبيه المساعدة والطوارئ هذا؟",
+  "cancelEmergencyAlertMessage": "هل تريد إلغاء هذا التنبيه؟",
+  "reasonOptional": "السبب (اختياري)",
+  "reasonRequired": "يرجى تقديم سبب.",
+  "accept": "قبول",
+  "unidentifiedRoom": "غرفة غير محددة",
+  "requestFromRoom": "طلب من {roomInfo}",
+  "@requestFromRoom": {
+    "placeholders": {
+      "roomInfo": {
+        "type": "String"
+      }
+    }
+  },
+  "newStaffMessage": "رسالة جديدة من الموظفين",
+  "startConversation": "ابدأ المحادثة مع الاستقبال.",
+  "newMessageSingular": "رسالة جديدة واحدة",
+  "newMessagesPlural": "رسائل جديدة",
+  "yesterday": "أمس",
+  "imageUnavailable": "الصورة غير متوفرة",
+  "voiceMessage": "رسالة صوتية",
+  "microphonePermission": "اسمح بالوصول إلى الميكروفون لإرسال ملاحظة صوتية.",
+  "sportCategory": "رياضة",
+  "leisureCategory": "تسلية",
+  "timeoutError": "انتهت مهلة الطلب. يرجى التحقق من اتصالك.",
+  "viewMyRequests": "عرض طلباتي",
+  "datePrefix": "التاريخ: ",
+  "timePrefix": "الوقت: ",
+  "requestDemandeSuffix": " - طلب",
+  "sportFitnessCoachBooking": "الرياضة واللياقة - حجز مدرب شخصي",
+  "golfPrefix": "جولف",
+  "tennisPrefix": "تنس",
+  "guidedToursNotConfigured": "الجولات المصحوبة بمرشدين غير مهيأة. يجب أن تضيف المؤسسة خدمة الجولات المصحوبة بمرشدين مخصصة في لوحة القيادة.",
+  "transfersNotConfigured": "خدمة النقل غير مهيأة. اتصل بالمؤسسة.",
+  "pickupDestinationRequired": "يرجى تحديد مكان الالتقاء والوجهة.",
+  "exAirportHotel": "مثال: المطار، الفندق…",
+  "exDowntownAddress": "مثال: وسط المدينة، العنوان…",
+  "vehicleRentalNotConfigured": "خدمة تأجير السيارات غير مهيأة. اتصل بالمؤسسة.",
+  "durationOrDaysRequired": "يرجى تحديد عدد الأيام أو المدة بالساعات.",
+  "exDays": "مثال: 2",
+  "exHours": "مثال: 5 (نصف يوم)",
+  "profileRoom": "الغرفة",
+  "profileHotel": "الفندق",
+  "profileRole": "الدور",
+  "myInvoices": "فواتيري",
+  "phone": "رقم الهاتف",
+  "noInvoicesTitle": "لا توجد فواتير",
+  "noInvoicesSubtitle": "ليس لديك أي طلبات مكتملة بعد.",
+  "generalError": "خطأ",
+  "orderReceipt": "إيصال الطلب",
+  "hotelLabel": "الفندق:",
+  "orderDateLabel": "تاريخ الطلب:",
+  "deliveryLabel": "التوصيل:",
+  "noItems": "لا توجد عناصر",
+  "totalToPay": "الإجمالي للدفع",
+  "taxesIncluded": "شامل جميع الضرائب ورسوم الخدمة",
+  "thankYouForOrder": "شكرا لطلبك!",
+  "invoiceRoomLabel": "الغرفة:"
 }

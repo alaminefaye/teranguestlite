@@ -64,7 +64,10 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -79,7 +82,9 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                           Text(
                             l10n.ourEstablishments,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -87,7 +92,10 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                           const SizedBox(height: 4),
                           Text(
                             l10n.ourEstablishmentsDesc,
-                            style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textGray,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -107,7 +115,9 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
 
   Widget _buildContent(BuildContext context, AppLocalizations l10n) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.accentGold));
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.accentGold),
+      );
     }
     if (_error != null) {
       return Center(
@@ -116,9 +126,19 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_error!, style: const TextStyle(color: AppTheme.textGray, fontSize: 14), textAlign: TextAlign.center),
+              Text(
+                _error!,
+                style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
-              TextButton(onPressed: _load, child: const Text('Réessayer', style: TextStyle(color: AppTheme.accentGold))),
+              TextButton(
+                onPressed: _load,
+                child: Text(
+                  l10n.retry,
+                  style: const TextStyle(color: AppTheme.accentGold),
+                ),
+              ),
             ],
           ),
         ),
@@ -126,7 +146,12 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
     }
     final list = _list ?? [];
     if (list.isEmpty) {
-      return Center(child: Text(l10n.comingSoon, style: const TextStyle(color: AppTheme.textGray, fontSize: 16)));
+      return Center(
+        child: Text(
+          l10n.comingSoon,
+          style: const TextStyle(color: AppTheme.textGray, fontSize: 16),
+        ),
+      );
     }
     final padding = LayoutHelper.horizontalPaddingValue(context);
     return ListView.builder(
@@ -143,7 +168,10 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                 HapticHelper.lightImpact();
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (ctx) => EstablishmentDetailScreen(establishmentId: e.id, name: e.name),
+                    builder: (ctx) => EstablishmentDetailScreen(
+                      establishmentId: e.id,
+                      name: e.name,
+                    ),
                   ),
                 );
               },
@@ -151,7 +179,10 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.accentGold.withValues(alpha: 0.5), width: 1.5),
+                  border: Border.all(
+                    color: AppTheme.accentGold.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -164,27 +195,65 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                           height: 160,
                           fit: BoxFit.cover,
                           loadingBuilder: (context, child, progress) =>
-                              progress == null ? child : SizedBox(height: 160, child: Center(child: CircularProgressIndicator(color: AppTheme.accentGold))),
-                          errorBuilder: (context, error, stackTrace) => SizedBox(
-                            height: 160,
-                            child: Center(child: Icon(Icons.business_outlined, color: AppTheme.accentGold.withValues(alpha: 0.6), size: 48)),
-                          ),
+                              progress == null
+                              ? child
+                              : SizedBox(
+                                  height: 160,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: AppTheme.accentGold,
+                                    ),
+                                  ),
+                                ),
+                          errorBuilder: (context, error, stackTrace) =>
+                              SizedBox(
+                                height: 160,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.business_outlined,
+                                    color: AppTheme.accentGold.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                    size: 48,
+                                  ),
+                                ),
+                              ),
                         )
                       else
                         Container(
                           height: 160,
                           color: AppTheme.primaryBlue.withValues(alpha: 0.5),
-                          child: Center(child: Icon(Icons.business_outlined, color: AppTheme.accentGold.withValues(alpha: 0.6), size: 48)),
+                          child: Center(
+                            child: Icon(
+                              Icons.business_outlined,
+                              color: AppTheme.accentGold.withValues(alpha: 0.6),
+                              size: 48,
+                            ),
+                          ),
                         ),
                       Padding(
                         padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(e.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppTheme.accentGold)),
-                            if (e.location != null && e.location!.isNotEmpty) ...[
+                            Text(
+                              e.name,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.accentGold,
+                              ),
+                            ),
+                            if (e.location != null &&
+                                e.location!.isNotEmpty) ...[
                               const SizedBox(height: 4),
-                              Text(e.location!, style: const TextStyle(fontSize: 14, color: AppTheme.textGray)),
+                              Text(
+                                e.location!,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.textGray,
+                                ),
+                              ),
                             ],
                           ],
                         ),

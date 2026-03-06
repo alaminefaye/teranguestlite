@@ -41,12 +41,12 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     ];
   }
 
-  List<Map<String, String>> _periodFilters() {
+  List<Map<String, String>> _periodFilters(BuildContext context) {
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': AppLocalizations.of(context).periodAllDates},
+      {'value': 'today', 'label': AppLocalizations.of(context).periodToday},
+      {'value': 'week', 'label': AppLocalizations.of(context).periodThisWeek},
+      {'value': 'month', 'label': AppLocalizations.of(context).periodThisMonth},
     ];
   }
 
@@ -157,7 +157,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  isStaffOrAdmin ? 'Commandes Room Service' : l10n.myOrders,
+                  isStaffOrAdmin
+                      ? AppLocalizations.of(context).staffOrdersTitle
+                      : l10n.myOrders,
                   style: TextStyle(
                     fontSize: titleSize,
                     fontWeight: FontWeight.bold,
@@ -167,7 +169,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 const SizedBox(height: 4),
                 Text(
                   isStaffOrAdmin
-                      ? 'Suivi et traitement des commandes room service'
+                      ? AppLocalizations.of(context).staffOrdersSubtitle
                       : l10n.ordersHistorySubtitle,
                   style: const TextStyle(
                     fontSize: 13,
@@ -262,9 +264,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             height: 40,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: _periodFilters().length,
+              itemCount: _periodFilters(context).length,
               itemBuilder: (context, index) {
-                final filter = _periodFilters()[index];
+                final filter = _periodFilters(context)[index];
                 final isSelected = _selectedPeriod == filter['value'];
 
                 return Padding(

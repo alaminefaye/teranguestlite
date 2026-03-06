@@ -20,12 +20,13 @@ class MyPalaceRequestsScreen extends StatefulWidget {
 class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
   String _selectedPeriod = 'all';
 
-  List<Map<String, String>> _periodFilters() {
+  List<Map<String, String>> _periodFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': l10n.periodAllDates},
+      {'value': 'today', 'label': l10n.periodToday},
+      {'value': 'week', 'label': l10n.periodThisWeek},
+      {'value': 'month', 'label': l10n.periodThisMonth},
     ];
   }
 
@@ -84,7 +85,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                         children: [
                           Text(
                             isStaffOrAdmin
-                                ? 'Services Palace / Conciergerie'
+                                ? l10n.palaceConciergeServices
                                 : l10n.myRequests,
                             style: TextStyle(
                               fontSize: titleSize,
@@ -95,7 +96,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             isStaffOrAdmin
-                                ? 'Suivi des demandes palace & conciergerie'
+                                ? l10n.palaceConciergeTracking
                                 : l10n.palaceServices,
                             style: const TextStyle(
                               fontSize: 13,
@@ -124,9 +125,9 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
         height: 40,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: _periodFilters().length,
+          itemCount: _periodFilters(context).length,
           itemBuilder: (context, index) {
-            final filter = _periodFilters()[index];
+            final filter = _periodFilters(context)[index];
             final isSelected = _selectedPeriod == filter['value'];
 
             return Padding(
@@ -254,7 +255,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                     final parts = <String>[];
                     if (request.roomNumber != null &&
                         request.roomNumber!.isNotEmpty) {
-                      parts.add('Chambre ${request.roomNumber}');
+                      parts.add('${l10n.identityRoom} ${request.roomNumber}');
                     }
                     if (request.guestName != null &&
                         request.guestName!.isNotEmpty) {
@@ -737,11 +738,12 @@ class PalaceRequestDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final detailsText = (request.details ?? '').trim();
     final hasDetails = detailsText.isNotEmpty;
     final roomGuestParts = <String>[];
     if (request.roomNumber != null && request.roomNumber!.trim().isNotEmpty) {
-      roomGuestParts.add('Chambre ${request.roomNumber}');
+      roomGuestParts.add('${l10n.identityRoom} ${request.roomNumber}');
     }
     if (request.guestName != null && request.guestName!.trim().isNotEmpty) {
       roomGuestParts.add(request.guestName!.trim());
@@ -794,8 +796,8 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Détail de la demande palace / conciergerie',
+                          Text(
+                            l10n.requestDetailTitle,
                             style: TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
@@ -833,8 +835,8 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Service palace / conciergerie',
+                                  Text(
+                                    l10n.palaceConciergeServiceSingle,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: AppTheme.textGray,
@@ -876,14 +878,18 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           _PalaceInfoRow(
                             icon: Icons.schedule,
-                            text:
-                                'Prévue pour ${DateFormat('dd/MM/yyyy HH:mm', 'fr_FR').format(request.scheduledTime!)}',
+                            text: l10n.scheduledForDate(
+                              DateFormat(
+                                'dd/MM/yyyy HH:mm',
+                                'fr_FR',
+                              ).format(request.scheduledTime!),
+                            ),
                           ),
                         ],
                         if (hasDetails) ...[
                           const SizedBox(height: 16),
-                          const Text(
-                            'Détails de la demande',
+                          Text(
+                            l10n.requestDetailsOnly,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -903,8 +909,8 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                             request.cancellationReason != null &&
                             request.cancellationReason!.isNotEmpty) ...[
                           const SizedBox(height: 16),
-                          const Text(
-                            'Motif d\'annulation',
+                          Text(
+                            l10n.cancellationReason,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

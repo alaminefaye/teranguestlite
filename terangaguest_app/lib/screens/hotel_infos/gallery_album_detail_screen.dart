@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../models/user.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
 
 /// Affiche les photos d'un album de la galerie (depuis Hotel Infos).
@@ -11,6 +12,7 @@ class GalleryAlbumDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -28,7 +30,10 @@ class GalleryAlbumDetailScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -48,7 +53,8 @@ class GalleryAlbumDetailScreen extends StatelessWidget {
                               color: AppTheme.accentGold,
                             ),
                           ),
-                          if (album.description != null && album.description!.isNotEmpty)
+                          if (album.description != null &&
+                              album.description!.isNotEmpty)
                             Text(
                               album.description!,
                               style: const TextStyle(
@@ -66,20 +72,24 @@ class GalleryAlbumDetailScreen extends StatelessWidget {
               ),
               Expanded(
                 child: album.photos.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'Aucune photo',
-                          style: TextStyle(color: AppTheme.textGray),
+                          l10n.noPhoto,
+                          style: const TextStyle(color: AppTheme.textGray),
                         ),
                       )
                     : GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.85,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.85,
+                            ),
                         itemCount: album.photos.length,
                         itemBuilder: (context, index) {
                           final photo = album.photos[index];
@@ -90,12 +100,12 @@ class GalleryAlbumDetailScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                               loadingBuilder: (context, child, progress) =>
                                   progress == null
-                                      ? child
-                                      : const Center(
-                                          child: CircularProgressIndicator(
-                                            color: AppTheme.accentGold,
-                                          ),
-                                        ),
+                                  ? child
+                                  : const Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppTheme.accentGold,
+                                      ),
+                                    ),
                               errorBuilder: (context, error, stackTrace) =>
                                   const ColoredBox(
                                     color: Colors.white12,

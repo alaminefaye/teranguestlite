@@ -291,7 +291,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSecurityEmergency => 'Report security emergency';
 
   @override
-  String get roomLabel => 'Room';
+  String roomLabel(String room) {
+    return 'Room: $room';
+  }
 
   @override
   String get emergencyRequestSent => 'Request sent. The team will contact you.';
@@ -734,7 +736,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverRegion => 'Discover our region';
 
   @override
-  String get spaSubtitle => 'Relaxation and wellness';
+  String get spaSubtitle => 'Rest and relaxation';
 
   @override
   String get chooseCategory => 'Choose a category';
@@ -978,7 +980,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderItems => 'Ordered items';
 
   @override
-  String get quantity => 'Quantity:';
+  String get quantity => 'Quantity';
 
   @override
   String get reorder => 'Reorder';
@@ -1029,7 +1031,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get open => 'Open';
 
   @override
-  String get itemsLabel => 'Items';
+  String get itemsLabel => 'ITEMS';
 
   @override
   String get statusLabel => 'Status';
@@ -1260,4 +1262,565 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get specialRequests => 'Special requests';
+
+  @override
+  String get developedByUTA => 'Developed by Universal Technologies Africa';
+
+  @override
+  String get tapToContinue => 'Tap to continue';
+
+  @override
+  String get changeLanguage => 'Change language';
+
+  @override
+  String get monthJanuary => 'January';
+
+  @override
+  String get monthFebruary => 'February';
+
+  @override
+  String get monthMarch => 'March';
+
+  @override
+  String get monthApril => 'April';
+
+  @override
+  String get monthMay => 'May';
+
+  @override
+  String get monthJune => 'June';
+
+  @override
+  String get monthJuly => 'July';
+
+  @override
+  String get monthAugust => 'August';
+
+  @override
+  String get monthSeptember => 'September';
+
+  @override
+  String get monthOctober => 'October';
+
+  @override
+  String get monthNovember => 'November';
+
+  @override
+  String get monthDecember => 'December';
+
+  @override
+  String get reservationClientCodeBanner =>
+      'Reservations are restricted to guests with a valid stay. Please enter your client code below (received at check-in).';
+
+  @override
+  String get sessionExpiredNeedClientCode =>
+      'Your stay is no longer active. Enter your client code to book.';
+
+  @override
+  String get periodAllDates => 'All dates';
+
+  @override
+  String get periodToday => 'Today';
+
+  @override
+  String get periodThisWeek => 'This week';
+
+  @override
+  String get periodThisMonth => 'This month';
+
+  @override
+  String get staffOrdersTitle => 'Room Service Orders';
+
+  @override
+  String get staffOrdersSubtitle =>
+      'Tracking and processing room service orders';
+
+  @override
+  String addedToCart(String itemName) {
+    return '$itemName added to cart';
+  }
+
+  @override
+  String get invalidSessionRetry =>
+      'Invalid or expired session. Please enter your code again.';
+
+  @override
+  String get orderValidationError =>
+      'Unable to validate the order. Please check your client code or contact the reception.';
+
+  @override
+  String get enterCodeToValidate =>
+      'Enter the code received at check-in to validate the order.';
+
+  @override
+  String get roomNumberTablet => 'Room number (this tablet)';
+
+  @override
+  String get roomIdRecommended =>
+      'Room ID (recommended — see dashboard > Tablet access)';
+
+  @override
+  String get multiHotelWarning =>
+      'In multi-property setups, enter the Room ID to only display your hotel\'s data.';
+
+  @override
+  String get code6Digits => '6-digit code';
+
+  @override
+  String get enter6Digits => 'Enter the 6-digit code.';
+
+  @override
+  String get defineRoomTablet => 'Provide the room number for this tablet.';
+
+  @override
+  String get confirmIdentity => 'Verify your identity';
+
+  @override
+  String get verifyInfoBeforeOrder =>
+      'Verify your information before sending the order:';
+
+  @override
+  String get identityName => 'Name';
+
+  @override
+  String get identityRoom => 'Room';
+
+  @override
+  String get identityPhone => 'Phone';
+
+  @override
+  String get identityEmail => 'Email';
+
+  @override
+  String get paymentMethodText => 'Payment method';
+
+  @override
+  String get paymentCash => 'Cash';
+
+  @override
+  String get paymentRoomBill => 'Charge to room';
+
+  @override
+  String get paymentWave => 'Wave';
+
+  @override
+  String get paymentOrangeMoney => 'Orange Money';
+
+  @override
+  String get confirmOrder => 'Confirm order';
+
+  @override
+  String get statusUpdated => 'Status updated';
+
+  @override
+  String get orderStatusUpdated => 'Order status updated';
+
+  @override
+  String cannotSendNotification(String error) {
+    return 'Unable to send notification: $error';
+  }
+
+  @override
+  String get orderCancelledNotified => 'Order cancelled — customer notified.';
+
+  @override
+  String get orderCancelled => 'Order cancelled';
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get yesCancel => 'Yes, cancel';
+
+  @override
+  String get spaCategoryAll => 'All';
+
+  @override
+  String get spaCategoryMassage => 'Massages';
+
+  @override
+  String get spaCategoryFacial => 'Facials';
+
+  @override
+  String get spaCategoryBody => 'Body Treatments';
+
+  @override
+  String get spaCategoryHammam => 'Hammam';
+
+  @override
+  String get spaAndWellness => 'Spa & Wellness';
+
+  @override
+  String get spaServiceFallback => 'Spa Service';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get excursionFallback => 'Tour';
+
+  @override
+  String get locationEnableSettings => 'Enable location in settings.';
+
+  @override
+  String get locationAccessDenied => 'Location access denied.';
+
+  @override
+  String get locationCurrentPos => 'Current position';
+
+  @override
+  String get locationError => 'Cannot get location';
+
+  @override
+  String get vehicleRequestType => 'Request type';
+
+  @override
+  String get vehicleTypeTaxi => 'Taxi';
+
+  @override
+  String get vehicleTypeRental => 'Rental';
+
+  @override
+  String get taxiPickup => 'Pickup';
+
+  @override
+  String get taxiPickupHint => 'Address or location';
+
+  @override
+  String get taxiMyLocation => 'My location';
+
+  @override
+  String get taxiDestination => 'Destination';
+
+  @override
+  String get taxiDestinationHint => 'Destination address';
+
+  @override
+  String get taxiDistanceOption => 'Distance (km, optional)';
+
+  @override
+  String get taxiDistanceHint => 'E.g., 5.2';
+
+  @override
+  String get rentalAllTypes => 'All types';
+
+  @override
+  String get rentalSedan => 'Sedan';
+
+  @override
+  String get rentalSuv => 'SUV';
+
+  @override
+  String get rentalMinibus => 'Minibus';
+
+  @override
+  String get rentalVan => 'Van';
+
+  @override
+  String get rentalOther => 'Other';
+
+  @override
+  String get rentalChooseVehicle => 'Choose a vehicle';
+
+  @override
+  String get rentalTypeLabel => 'Type';
+
+  @override
+  String get rentalSeatsMin => 'Min spaces.';
+
+  @override
+  String get rentalSeatsAll => 'All';
+
+  @override
+  String rentalSeatsCount(String count) {
+    return '$count space(s)';
+  }
+
+  @override
+  String get rentalNoVehicleFound => 'No vehicle for these criteria.';
+
+  @override
+  String rentalSeatsPl(String count) {
+    return '$count sp.';
+  }
+
+  @override
+  String get rentalDaysHint => 'E.g., 2';
+
+  @override
+  String get rentalDurationHours => 'Duration (hours)';
+
+  @override
+  String get rentalDurationHint => 'E.g., 8 (half-day if ≤ 5 h)';
+
+  @override
+  String rentalEstimate(String price) {
+    return 'Estimate: $price FCFA';
+  }
+
+  @override
+  String get rentalErrorDestination => 'Provide the destination address.';
+
+  @override
+  String get rentalErrorChooseVehicle => 'Choose a vehicle from the list.';
+
+  @override
+  String get rentalErrorVehicleOrDetails =>
+      'Choose Taxi or Rental, or describe your request.';
+
+  @override
+  String get sessionExpiredNeedClientCodeRequest =>
+      'Your stay is no longer active. Enter your client code to send request.';
+
+  @override
+  String get palaceConciergeServices => 'Palace / Concierge Services';
+
+  @override
+  String get palaceConciergeTracking => 'Palace & Concierge requests tracking';
+
+  @override
+  String get palaceConciergeServiceSingle => 'Palace / Concierge service';
+
+  @override
+  String scheduledForDate(String date) {
+    return 'Scheduled for $date';
+  }
+
+  @override
+  String get requestDetailsOnly => 'Request details';
+
+  @override
+  String get cancellationReason => 'Cancellation reason';
+
+  @override
+  String get acceptRequestTitle => 'Accept request';
+
+  @override
+  String get acceptRequestMessage =>
+      'Accept this palace / concierge service request?';
+
+  @override
+  String get completeRequestTitle => 'Complete request';
+
+  @override
+  String get completeRequestMessage => 'Complete this request?';
+
+  @override
+  String get rejectRequestTitle => 'Reject request';
+
+  @override
+  String get rejectRequestMessage => 'Reject this palace service request?';
+
+  @override
+  String get cancelRequestMessage => 'Cancel this palace service request?';
+
+  @override
+  String get cancellationReasonHint => 'Reason for cancellation';
+
+  @override
+  String get validationReasonRequired => 'Please provide a reason.';
+
+  @override
+  String get requestDetailTitle => 'Palace / Concierge request detail';
+
+  @override
+  String get laundryRequestDetailTitle => 'Laundry Request Detail';
+
+  @override
+  String get laundryNoItemsInRequest => 'No items found for this request.';
+
+  @override
+  String get hotelMap => 'Map';
+
+  @override
+  String get albumsTitle => 'Albums';
+
+  @override
+  String photoCount(int count) {
+    return '$count photo(s)';
+  }
+
+  @override
+  String get noPhoto => 'No photo';
+
+  @override
+  String get presentationTitle => 'Presentation';
+
+  @override
+  String get addressTitle => 'Address';
+
+  @override
+  String get phoneAbbr => 'Tel.';
+
+  @override
+  String get staffEmergencySubtitle => 'Active doctor / security alerts';
+
+  @override
+  String get guestEmergencySubtitle => 'Your Assistance & Emergency requests';
+
+  @override
+  String get noEmergencyAlerts => 'No active Assistance & Emergency alerts.';
+
+  @override
+  String get acceptEmergencyAlertMessage =>
+      'Accept this Assistance & Emergency alert?';
+
+  @override
+  String get cancelEmergencyAlertMessage => 'Cancel this alert?';
+
+  @override
+  String get reasonOptional => 'Reason (optional)';
+
+  @override
+  String get reasonRequired => 'Please provide a reason.';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get unidentifiedRoom => 'Unidentified room';
+
+  @override
+  String requestFromRoom(String roomInfo) {
+    return 'Request from $roomInfo';
+  }
+
+  @override
+  String get newStaffMessage => 'New message from staff';
+
+  @override
+  String get startConversation => 'Start the conversation with the reception.';
+
+  @override
+  String get newMessageSingular => '1 new message';
+
+  @override
+  String get newMessagesPlural => 'new messages';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get imageUnavailable => 'Image unavailable';
+
+  @override
+  String get voiceMessage => 'Voice message';
+
+  @override
+  String get microphonePermission =>
+      'Allow microphone access to send a voice note.';
+
+  @override
+  String get sportCategory => 'Sport';
+
+  @override
+  String get leisureCategory => 'Leisure';
+
+  @override
+  String get timeoutError => 'Request timeout. Please check your connection.';
+
+  @override
+  String get viewMyRequests => 'View my requests';
+
+  @override
+  String get datePrefix => 'Date: ';
+
+  @override
+  String get timePrefix => 'Time: ';
+
+  @override
+  String get requestDemandeSuffix => ' - Request';
+
+  @override
+  String get sportFitnessCoachBooking =>
+      'Sport & Fitness - Personal coach booking';
+
+  @override
+  String get golfPrefix => 'Golf';
+
+  @override
+  String get tennisPrefix => 'Tennis';
+
+  @override
+  String get guidedToursNotConfigured =>
+      'Guided tours not configured. The establishment must add the service \'Custom Guided Tours\' in the dashboard (Palace Services).';
+
+  @override
+  String get transfersNotConfigured =>
+      'Transfers & VTC service not configured. Contact the establishment.';
+
+  @override
+  String get pickupDestinationRequired =>
+      'Please indicate the pick-up location and destination.';
+
+  @override
+  String get exAirportHotel => 'Ex: Airport, Hotel…';
+
+  @override
+  String get exDowntownAddress => 'Ex: Downtown, Address…';
+
+  @override
+  String get vehicleRentalNotConfigured =>
+      'Vehicle rental service not configured. Contact the establishment.';
+
+  @override
+  String get durationOrDaysRequired =>
+      'Please indicate the number of days or duration in hours.';
+
+  @override
+  String get exDays => 'Ex: 2';
+
+  @override
+  String get exHours => 'Ex: 5 (half-day)';
+
+  @override
+  String get profileRoom => 'Room';
+
+  @override
+  String get profileHotel => 'Hotel';
+
+  @override
+  String get profileRole => 'Role';
+
+  @override
+  String get myInvoices => 'My Invoices';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get noInvoicesTitle => 'No invoices';
+
+  @override
+  String get noInvoicesSubtitle => 'You don\'t have any completed orders yet.';
+
+  @override
+  String get generalError => 'Error';
+
+  @override
+  String get orderReceipt => 'ORDER RECEIPT';
+
+  @override
+  String get hotelLabel => 'HOTEL:';
+
+  @override
+  String get orderDateLabel => 'ORDER DATE:';
+
+  @override
+  String get deliveryLabel => 'DELIVERY:';
+
+  @override
+  String get noItems => 'No items';
+
+  @override
+  String get totalToPay => 'TOTAL TO PAY';
+
+  @override
+  String get taxesIncluded => 'All taxes and service fees included';
+
+  @override
+  String get thankYouForOrder => 'Thank you for your order!';
+
+  @override
+  String get invoiceRoomLabel => 'ROOM:';
 }

@@ -72,7 +72,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       await tabletSession.tryRestoreSessionFromRoom();
       if (!mounted) return;
       final code = tabletSession.clientCodeForPreFill;
-      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+      if (code != null &&
+          code.isNotEmpty &&
+          _clientCodeController.text.isEmpty) {
         _clientCodeController.text = code;
         setState(() {});
       }
@@ -127,7 +129,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if (mounted) _showSnack('Activez la localisation dans les paramètres.');
+        if (mounted) {
+          _showSnack(AppLocalizations.of(context).locationEnableSettings);
+        }
         return;
       }
       LocationPermission permission = await Geolocator.checkPermission();
@@ -135,7 +139,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.deniedForever) {
-        if (mounted) _showSnack('Accès à la position refusé.');
+        if (mounted) {
+          _showSnack(AppLocalizations.of(context).locationAccessDenied);
+        }
         return;
       }
       final pos = await Geolocator.getCurrentPosition();
@@ -144,14 +150,14 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           _pickupLat = pos.latitude;
           _pickupLng = pos.longitude;
           _pickupController.text =
-              'Position actuelle (${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)})';
+              '${AppLocalizations.of(context).locationCurrentPos} (${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)})';
           _loadingLocation = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() => _loadingLocation = false);
-        _showSnack('Impossible d\'obtenir la position: $e');
+        _showSnack('${AppLocalizations.of(context).locationError}: $e');
       }
     }
   }
@@ -176,7 +182,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Type de demande',
+            AppLocalizations.of(context).vehicleRequestType,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -188,7 +194,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             children: [
               Expanded(
                 child: _vehicleChip(
-                  label: 'Taxi',
+                  label: AppLocalizations.of(context).vehicleTypeTaxi,
                   selected: _vehicleType == VehicleRequestType.taxi,
                   onTap: () =>
                       setState(() => _vehicleType = VehicleRequestType.taxi),
@@ -197,7 +203,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _vehicleChip(
-                  label: 'Location',
+                  label: AppLocalizations.of(context).vehicleTypeRental,
                   selected: _vehicleType == VehicleRequestType.rental,
                   onTap: () {
                     setState(() => _vehicleType = VehicleRequestType.rental);
@@ -260,7 +266,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Prise en charge',
+            AppLocalizations.of(context).taxiPickup,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -276,7 +282,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                   readOnly: true,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Adresse ou position',
+                    hintText: AppLocalizations.of(context).taxiPickupHint,
                     hintStyle: TextStyle(
                       color: AppTheme.textGray.withValues(alpha: 0.6),
                       fontSize: 14,
@@ -313,7 +319,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                           color: AppTheme.accentGold,
                         ),
                   label: Text(
-                    'Ma position',
+                    AppLocalizations.of(context).taxiMyLocation,
                     style: TextStyle(
                       color: AppTheme.accentGold,
                       fontSize: 12,
@@ -326,7 +332,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Destination',
+            AppLocalizations.of(context).taxiDestination,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -338,7 +344,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             controller: _destinationController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Adresse de destination',
+              hintText: AppLocalizations.of(context).taxiDestinationHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.6),
               ),
@@ -354,7 +360,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Distance (km, optionnel)',
+            AppLocalizations.of(context).taxiDistanceOption,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -367,7 +373,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Ex: 5.2',
+              hintText: AppLocalizations.of(context).taxiDistanceHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.6),
               ),
@@ -386,14 +392,17 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     );
   }
 
-  static const List<MapEntry<String, String>> _vehicleTypeFilters = [
-    MapEntry('', 'Tous les types'),
-    MapEntry('berline', 'Berline'),
-    MapEntry('suv', 'SUV'),
-    MapEntry('minibus', 'Minibus'),
-    MapEntry('van', 'Van'),
-    MapEntry('other', 'Autre'),
-  ];
+  List<MapEntry<String, String>> _getVehicleTypeFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      MapEntry('', l10n.rentalAllTypes),
+      MapEntry('berline', l10n.rentalSedan),
+      MapEntry('suv', l10n.rentalSuv),
+      MapEntry('minibus', l10n.rentalMinibus),
+      MapEntry('van', l10n.rentalVan),
+      MapEntry('other', l10n.rentalOther),
+    ];
+  }
 
   Widget _buildRentalFields() {
     return Container(
@@ -409,7 +418,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choisir un véhicule',
+            AppLocalizations.of(context).rentalChooseVehicle,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -426,10 +435,10 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                     isExpanded: true,
                     dropdownColor: AppTheme.primaryBlue,
                     hint: Text(
-                      'Type',
+                      AppLocalizations.of(context).rentalTypeLabel,
                       style: TextStyle(color: AppTheme.textGray, fontSize: 14),
                     ),
-                    items: _vehicleTypeFilters
+                    items: _getVehicleTypeFilters(context)
                         .map(
                           (e) => DropdownMenuItem(
                             value: e.key,
@@ -462,14 +471,14 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                     isExpanded: true,
                     dropdownColor: AppTheme.primaryBlue,
                     hint: Text(
-                      'Places min.',
+                      AppLocalizations.of(context).rentalSeatsMin,
                       style: TextStyle(color: AppTheme.textGray, fontSize: 14),
                     ),
                     items: [
-                      const DropdownMenuItem<int?>(
+                      DropdownMenuItem<int?>(
                         value: null,
                         child: Text(
-                          'Toutes',
+                          AppLocalizations.of(context).rentalSeatsAll,
                           style: TextStyle(color: Colors.white, fontSize: 13),
                         ),
                       ),
@@ -477,7 +486,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                         (s) => DropdownMenuItem<int?>(
                           value: s,
                           child: Text(
-                            '$s place(s)',
+                            AppLocalizations.of(
+                              context,
+                            ).rentalSeatsCount(s.toString()),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -513,7 +524,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Aucun véhicule pour ces critères.',
+                AppLocalizations.of(context).rentalNoVehicleFound,
                 style: TextStyle(color: AppTheme.textGray, fontSize: 13),
               ),
             )
@@ -612,7 +623,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${v.vehicleTypeLabel} · ${v.numberOfSeats} pl.',
+                              '${v.vehicleTypeLabel} · ${AppLocalizations.of(context).rentalSeatsPl(v.numberOfSeats.toString())}',
                               style: TextStyle(
                                 color: AppTheme.textGray,
                                 fontSize: 10,
@@ -644,16 +655,16 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
             ),
           const SizedBox(height: 16),
           _labeledField(
-            label: 'Nombre de jours',
+            label: AppLocalizations.of(context).rentalDays,
             controller: _rentalDaysController,
-            hint: 'Ex: 2',
+            hint: AppLocalizations.of(context).rentalDaysHint,
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 12),
           _labeledField(
-            label: 'Durée (heures)',
+            label: AppLocalizations.of(context).rentalDurationHours,
             controller: _rentalDurationController,
-            hint: 'Ex: 8 (demi-journée si ≤ 5 h)',
+            hint: AppLocalizations.of(context).rentalDurationHint,
             keyboardType: TextInputType.number,
           ),
           if (_selectedVehicle != null) ...[
@@ -685,7 +696,9 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
           Icon(Icons.receipt_long, color: AppTheme.accentGold, size: 20),
           const SizedBox(width: 10),
           Text(
-            'Estimation : ${estimate.toInt()} FCFA',
+            AppLocalizations.of(
+              context,
+            ).rentalEstimate(estimate.toInt().toString()),
             style: TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -1030,7 +1043,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  AppLocalizations.of(context).reservationClientCodeBanner,
                   style: const TextStyle(
                     color: AppTheme.textGray,
                     fontSize: 14,
@@ -1100,7 +1113,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     if (_vehicleType == VehicleRequestType.taxi) {
       final dest = _destinationController.text.trim();
       if (dest.isEmpty) {
-        _showSnack('Indiquez l\'adresse de destination.');
+        _showSnack(AppLocalizations.of(context).rentalErrorDestination);
         return null;
       }
       final meta = <String, dynamic>{
@@ -1120,7 +1133,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     }
     if (_vehicleType == VehicleRequestType.rental) {
       if (_selectedVehicle == null) {
-        _showSnack('Choisissez un véhicule dans la liste.');
+        _showSnack(AppLocalizations.of(context).rentalErrorChooseVehicle);
         return null;
       }
       final meta = <String, dynamic>{
@@ -1142,7 +1155,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     final detailsText = _detailsController.text.trim();
     final hasDetails = detailsText.isNotEmpty;
     if (_isVehicleService && _vehicleType == null && !hasDetails) {
-      _showSnack('Choisissez Taxi ou Location, ou décrivez votre demande.');
+      _showSnack(AppLocalizations.of(context).rentalErrorVehicleOrDetails);
       return;
     }
     final metadata = _buildVehicleMetadata();
@@ -1163,9 +1176,11 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Votre séjour n\'est plus actif. Entrez votre code client pour effectuer la demande.',
+                AppLocalizations.of(
+                  context,
+                ).sessionExpiredNeedClientCodeRequest,
               ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 4),

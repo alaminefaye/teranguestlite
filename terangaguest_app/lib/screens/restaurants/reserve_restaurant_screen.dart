@@ -60,7 +60,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       await tabletSession.tryRestoreSessionFromRoom();
       if (!mounted) return;
       final code = tabletSession.clientCodeForPreFill;
-      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+      if (code != null &&
+          code.isNotEmpty &&
+          _clientCodeController.text.isEmpty) {
         _clientCodeController.text = code;
         setState(() {});
       }
@@ -195,9 +197,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Date',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).date,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
@@ -284,9 +286,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Heure',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).time,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,
@@ -593,7 +595,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  AppLocalizations.of(context).reservationClientCodeBanner,
                   style: const TextStyle(
                     color: AppTheme.textGray,
                     fontSize: 14,
@@ -610,7 +612,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
             controller: _clientCodeController,
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
+              hintText: AppLocalizations.of(context).clientCodeHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.8),
               ),
@@ -673,9 +675,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.',
+                AppLocalizations.of(context).sessionExpiredNeedClientCode,
               ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 4),
@@ -722,14 +724,14 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               borderRadius: BorderRadius.circular(16),
               side: const BorderSide(color: AppTheme.accentGold, width: 2),
             ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 32),
-                SizedBox(width: 12),
+                const Icon(Icons.check_circle, color: Colors.green, size: 32),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Réservation confirmée !',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    AppLocalizations.of(context).reservationConfirmed,
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
                 ),
               ],
@@ -739,7 +741,7 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Votre table pour $_guests personne${_guests > 1 ? 's' : ''} est réservée.',
+                  AppLocalizations.of(context).tableReservedMessage(_guests),
                   style: const TextStyle(color: AppTheme.textGray),
                 ),
                 const SizedBox(height: 16),
@@ -752,18 +754,18 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                       color: AppTheme.accentGold.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.notifications_active,
                         color: AppTheme.accentGold,
                         size: 20,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Vous recevrez une confirmation par notification.',
-                          style: TextStyle(
+                          AppLocalizations.of(context).confirmationNotification,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.textGray,
                           ),
@@ -781,16 +783,16 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   Navigator.pop(context); // Retour écran précédent
                   Navigator.pop(context); // Retour liste
                 },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context).ok,
+                  style: const TextStyle(
                     color: AppTheme.textGray,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               AnimatedButton(
-                text: 'Mes Réservations',
+                text: AppLocalizations.of(context).myReservations,
                 icon: Icons.restaurant,
                 onPressed: () {
                   Navigator.pop(context);

@@ -98,13 +98,19 @@
   "practicalInfo": "Practical information",
   "requestDoctor": "Request a doctor",
   "reportSecurityEmergency": "Report security emergency",
-  "roomLabel": "Room",
+  "roomLabel": "Room: {room}",
   "emergencyRequestSent": "Request sent. The team will contact you.",
   "noActiveStayForEmergency": "An active stay is required. Sign in with the room account or contact reception.",
   "assistanceDoctorNotConfigured": "Doctor assistance service is not configured for this property.",
   "assistanceSecurityNotConfigured": "Security emergency service is not configured for this property.",
   "confirmEmergencyAction": "Do you want to confirm: {action}?",
-  "@confirmEmergencyAction": {"placeholders": {"action": {"type": "String"}}},
+  "@confirmEmergencyAction": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "deleteConversationConfirm": "Delete this conversation?",
   "deleteConversation": "Delete conversation",
   "messageDeleted": "Message deleted",
@@ -185,7 +191,13 @@
   "noExcursionAvailableHint": "Activities and outings will be offered here.",
   "noOrder": "No orders",
   "noOrderForStatus": "No orders {status}",
-  "@noOrderForStatus": {"placeholders": {"status": {"type": "String"}}},
+  "@noOrderForStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "noOrderSubtitle": "Your room service orders will appear here.",
   "orderStatusPending": "pending",
   "orderStatusConfirmed": "confirmed",
@@ -194,7 +206,13 @@
   "orderStatusDelivered": "delivered",
   "noRestaurantAvailable": "No restaurant available",
   "noRestaurantForType": "No {type} available",
-  "@noRestaurantForType": {"placeholders": {"type": {"type": "String"}}},
+  "@noRestaurantForType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
   "noRestaurantSubtitle": "Restaurants and bars will be listed here.",
   "typeRestaurant": "restaurant",
   "typeBar": "bar",
@@ -235,24 +253,48 @@
   "reservationsConfirmed": "Confirmed reservations",
   "myRequests": "My Requests",
   "requestNumber": "Request #{id}",
-  "@requestNumber": {"placeholders": {"id": {"type": "int"}}},
+  "@requestNumber": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "palaceServicesSubtitle": "Premium services and concierge",
   "spaWellnessSubtitle": "Wellness & Relaxation",
   "myReservations": "My Reservations",
   "discoverRegion": "Discover our region",
-  "spaSubtitle": "Relaxation and wellness",
+  "spaSubtitle": "Rest and relaxation",
   "chooseCategory": "Choose a category",
   "orderDetailTitle": "Order Detail",
   "orderTrackingSubtitle": "Track your order",
   "adultPrice": "Adult: {price}",
-  "@adultPrice": {"placeholders": {"price": {"type": "String"}}},
+  "@adultPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "childPrice": "Child: {price}",
-  "@childPrice": {"placeholders": {"price": {"type": "String"}}},
+  "@childPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "book": "Book",
   "unavailable": "Unavailable",
   "spaServiceDefaultName": "Spa Service",
   "capacityPeople": "Capacity: {count} people",
-  "@capacityPeople": {"placeholders": {"count": {"type": "int"}}},
+  "@capacityPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "openingHours": "Opening hours",
   "bookTable": "Book a table",
   "closed": "Closed",
@@ -296,11 +338,23 @@
   "confirmReservation": "Confirm reservation",
   "reservationConfirmed": "Reservation confirmed!",
   "excursionConfirmedMessage": "Your excursion for {count} person(s) is confirmed.",
-  "@excursionConfirmedMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@excursionConfirmedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "confirmationNotification": "You will receive a confirmation by notification.",
   "numberOfGuests": "Number of guests",
   "tableReservedMessage": "Your table for {count} person(s) is reserved.",
-  "@tableReservedMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@tableReservedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "orderConfirmed": "Order confirmed!",
   "itemsAddedToCart": "Items added to cart!",
   "errorPrefix": "Error: ",
@@ -321,7 +375,7 @@
   "thankYouForReview": "Thank you for your review!",
   "orderTracking": "Order tracking",
   "orderItems": "Ordered items",
-  "quantity": "Quantity:",
+  "quantity": "Quantity",
   "reorder": "Reorder",
   "laundryRequestSentMessage": "Your laundry request has been recorded.",
   "demand": "Request",
@@ -331,15 +385,42 @@
   "categoryBody": "Body Care",
   "excursionsTitle": "Excursions",
   "articleCount": "{count} item(s)",
-  "@articleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@articleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "appNameVersion": "TerangaGuest {version} {v}",
-  "@appNameVersion": {"placeholders": {"version": {"type": "String"}, "v": {"type": "String"}}},
+  "@appNameVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "v": {
+        "type": "String"
+      }
+    }
+  },
   "orderLabel": "Order {id}",
-  "@orderLabel": {"placeholders": {"id": {"type": "int"}}},
+  "@orderLabel": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "navigationTo": "Navigate to {name}",
-  "@navigationTo": {"placeholders": {"name": {"type": "String"}}},
+  "@navigationTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "open": "Open",
-  "itemsLabel": "Items",
+  "itemsLabel": "ITEMS",
   "statusLabel": "Status",
   "laundrySubtitle": "Cleaning service",
   "spaHintExample": "E.g. Light pressure, lavender oil...",
@@ -361,7 +442,13 @@
   "myCart": "My Cart",
   "orderNotificationHint": "You will receive a notification once your order is confirmed by the restaurant.",
   "spaReservationConfirmedMessage": "Your reservation for {name} is confirmed.",
-  "@spaReservationConfirmedMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@spaReservationConfirmedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "excursion": "Excursion",
   "verifyOrder": "Check your order",
   "personsShort": "pax",
@@ -371,7 +458,13 @@
   "time": "Time",
   "guests": "Guests",
   "guestsCount": "{count} guest(s)",
-  "@guestsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@guestsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dayMonday": "Monday",
   "dayTuesday": "Tuesday",
   "dayWednesday": "Wednesday",
@@ -414,5 +507,243 @@
   "validate": "Validate",
   "clientCode": "Client code",
   "clientCodeHint": "Client code (e.g. 123456)",
-  "specialRequests": "Special requests"
+  "specialRequests": "Special requests",
+  "developedByUTA": "Developed by Universal Technologies Africa",
+  "tapToContinue": "Tap to continue",
+  "changeLanguage": "Change language",
+  "monthJanuary": "January",
+  "monthFebruary": "February",
+  "monthMarch": "March",
+  "monthApril": "April",
+  "monthMay": "May",
+  "monthJune": "June",
+  "monthJuly": "July",
+  "monthAugust": "August",
+  "monthSeptember": "September",
+  "monthOctober": "October",
+  "monthNovember": "November",
+  "monthDecember": "December",
+  "reservationClientCodeBanner": "Reservations are restricted to guests with a valid stay. Please enter your client code below (received at check-in).",
+  "sessionExpiredNeedClientCode": "Your stay is no longer active. Enter your client code to book.",
+  "periodAllDates": "All dates",
+  "periodToday": "Today",
+  "periodThisWeek": "This week",
+  "periodThisMonth": "This month",
+  "staffOrdersTitle": "Room Service Orders",
+  "staffOrdersSubtitle": "Tracking and processing room service orders",
+  "addedToCart": "{itemName} added to cart",
+  "invalidSessionRetry": "Invalid or expired session. Please enter your code again.",
+  "orderValidationError": "Unable to validate the order. Please check your client code or contact the reception.",
+  "enterCodeToValidate": "Enter the code received at check-in to validate the order.",
+  "roomNumberTablet": "Room number (this tablet)",
+  "roomIdRecommended": "Room ID (recommended — see dashboard > Tablet access)",
+  "multiHotelWarning": "In multi-property setups, enter the Room ID to only display your hotel's data.",
+  "code6Digits": "6-digit code",
+  "enter6Digits": "Enter the 6-digit code.",
+  "defineRoomTablet": "Provide the room number for this tablet.",
+  "confirmIdentity": "Verify your identity",
+  "verifyInfoBeforeOrder": "Verify your information before sending the order:",
+  "identityName": "Name",
+  "identityRoom": "Room",
+  "identityPhone": "Phone",
+  "identityEmail": "Email",
+  "paymentMethodText": "Payment method",
+  "paymentCash": "Cash",
+  "paymentRoomBill": "Charge to room",
+  "paymentWave": "Wave",
+  "paymentOrangeMoney": "Orange Money",
+  "confirmOrder": "Confirm order",
+  "@addedToCart": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "@roomLabel": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "statusUpdated": "Status updated",
+  "orderStatusUpdated": "Order status updated",
+  "cannotSendNotification": "Unable to send notification: {error}",
+  "orderCancelledNotified": "Order cancelled — customer notified.",
+  "orderCancelled": "Order cancelled",
+  "cancelOrder": "Cancel order",
+  "yesCancel": "Yes, cancel",
+  "@cannotSendNotification": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "spaCategoryAll": "All",
+  "spaCategoryMassage": "Massages",
+  "spaCategoryFacial": "Facials",
+  "spaCategoryBody": "Body Treatments",
+  "spaCategoryHammam": "Hammam",
+  "spaAndWellness": "Spa & Wellness",
+  "spaServiceFallback": "Spa Service",
+  "timeLabel": "Time",
+  "excursionFallback": "Tour",
+  "locationEnableSettings": "Enable location in settings.",
+  "locationAccessDenied": "Location access denied.",
+  "locationCurrentPos": "Current position",
+  "locationError": "Cannot get location",
+  "vehicleRequestType": "Request type",
+  "vehicleTypeTaxi": "Taxi",
+  "vehicleTypeRental": "Rental",
+  "taxiPickup": "Pickup",
+  "taxiPickupHint": "Address or location",
+  "taxiMyLocation": "My location",
+  "taxiDestination": "Destination",
+  "taxiDestinationHint": "Destination address",
+  "taxiDistanceOption": "Distance (km, optional)",
+  "taxiDistanceHint": "E.g., 5.2",
+  "rentalAllTypes": "All types",
+  "rentalSedan": "Sedan",
+  "rentalSuv": "SUV",
+  "rentalMinibus": "Minibus",
+  "rentalVan": "Van",
+  "rentalOther": "Other",
+  "rentalChooseVehicle": "Choose a vehicle",
+  "rentalTypeLabel": "Type",
+  "rentalSeatsMin": "Min spaces.",
+  "rentalSeatsAll": "All",
+  "rentalSeatsCount": "{count} space(s)",
+  "@rentalSeatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalNoVehicleFound": "No vehicle for these criteria.",
+  "rentalSeatsPl": "{count} sp.",
+  "@rentalSeatsPl": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalDaysHint": "E.g., 2",
+  "rentalDurationHours": "Duration (hours)",
+  "rentalDurationHint": "E.g., 8 (half-day if ≤ 5 h)",
+  "rentalEstimate": "Estimate: {price} FCFA",
+  "@rentalEstimate": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "rentalErrorDestination": "Provide the destination address.",
+  "rentalErrorChooseVehicle": "Choose a vehicle from the list.",
+  "rentalErrorVehicleOrDetails": "Choose Taxi or Rental, or describe your request.",
+  "sessionExpiredNeedClientCodeRequest": "Your stay is no longer active. Enter your client code to send request.",
+  "palaceConciergeServices": "Palace / Concierge Services",
+  "palaceConciergeTracking": "Palace & Concierge requests tracking",
+  "palaceConciergeServiceSingle": "Palace / Concierge service",
+  "scheduledForDate": "Scheduled for {date}",
+  "@scheduledForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "requestDetailsOnly": "Request details",
+  "cancellationReason": "Cancellation reason",
+  "acceptRequestTitle": "Accept request",
+  "acceptRequestMessage": "Accept this palace / concierge service request?",
+  "completeRequestTitle": "Complete request",
+  "completeRequestMessage": "Complete this request?",
+  "rejectRequestTitle": "Reject request",
+  "rejectRequestMessage": "Reject this palace service request?",
+  "cancelRequestMessage": "Cancel this palace service request?",
+  "cancellationReasonHint": "Reason for cancellation",
+  "validationReasonRequired": "Please provide a reason.",
+  "requestDetailTitle": "Palace / Concierge request detail",
+  "laundryRequestDetailTitle": "Laundry Request Detail",
+  "laundryNoItemsInRequest": "No items found for this request.",
+  "hotelMap": "Map",
+  "albumsTitle": "Albums",
+  "photoCount": "{count} photo(s)",
+  "@photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noPhoto": "No photo",
+  "presentationTitle": "Presentation",
+  "addressTitle": "Address",
+  "phoneAbbr": "Tel.",
+  "staffEmergencySubtitle": "Active doctor / security alerts",
+  "guestEmergencySubtitle": "Your Assistance & Emergency requests",
+  "noEmergencyAlerts": "No active Assistance & Emergency alerts.",
+  "acceptEmergencyAlertMessage": "Accept this Assistance & Emergency alert?",
+  "cancelEmergencyAlertMessage": "Cancel this alert?",
+  "reasonOptional": "Reason (optional)",
+  "reasonRequired": "Please provide a reason.",
+  "accept": "Accept",
+  "unidentifiedRoom": "Unidentified room",
+  "requestFromRoom": "Request from {roomInfo}",
+  "@requestFromRoom": {
+    "placeholders": {
+      "roomInfo": {
+        "type": "String"
+      }
+    }
+  },
+  "newStaffMessage": "New message from staff",
+  "startConversation": "Start the conversation with the reception.",
+  "newMessageSingular": "1 new message",
+  "newMessagesPlural": "new messages",
+  "yesterday": "Yesterday",
+  "imageUnavailable": "Image unavailable",
+  "voiceMessage": "Voice message",
+  "microphonePermission": "Allow microphone access to send a voice note.",
+  "sportCategory": "Sport",
+  "leisureCategory": "Leisure",
+  "timeoutError": "Request timeout. Please check your connection.",
+  "viewMyRequests": "View my requests",
+  "datePrefix": "Date: ",
+  "timePrefix": "Time: ",
+  "requestDemandeSuffix": " - Request",
+  "sportFitnessCoachBooking": "Sport & Fitness - Personal coach booking",
+  "golfPrefix": "Golf",
+  "tennisPrefix": "Tennis",
+  "guidedToursNotConfigured": "Guided tours not configured. The establishment must add the service 'Custom Guided Tours' in the dashboard (Palace Services).",
+  "transfersNotConfigured": "Transfers & VTC service not configured. Contact the establishment.",
+  "pickupDestinationRequired": "Please indicate the pick-up location and destination.",
+  "exAirportHotel": "Ex: Airport, Hotel…",
+  "exDowntownAddress": "Ex: Downtown, Address…",
+  "vehicleRentalNotConfigured": "Vehicle rental service not configured. Contact the establishment.",
+  "durationOrDaysRequired": "Please indicate the number of days or duration in hours.",
+  "exDays": "Ex: 2",
+  "exHours": "Ex: 5 (half-day)",
+  "profileRoom": "Room",
+  "profileHotel": "Hotel",
+  "profileRole": "Role",
+  "myInvoices": "My Invoices",
+  "phone": "Phone",
+  "noInvoicesTitle": "No invoices",
+  "noInvoicesSubtitle": "You don't have any completed orders yet.",
+  "generalError": "Error",
+  "orderReceipt": "ORDER RECEIPT",
+  "hotelLabel": "HOTEL:",
+  "orderDateLabel": "ORDER DATE:",
+  "deliveryLabel": "DELIVERY:",
+  "noItems": "No items",
+  "totalToPay": "TOTAL TO PAY",
+  "taxesIncluded": "All taxes and service fees included",
+  "thankYouForOrder": "Thank you for your order!",
+  "invoiceRoomLabel": "ROOM:"
 }

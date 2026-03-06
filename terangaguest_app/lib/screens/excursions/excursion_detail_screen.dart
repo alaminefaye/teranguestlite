@@ -102,7 +102,8 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
           SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Text(
-              _excursion?.name ?? 'Excursion',
+              _excursion?.name ??
+                  AppLocalizations.of(context).excursionFallback,
               style: TextStyle(
                 fontSize: titleSize,
                 fontWeight: FontWeight.bold,
@@ -319,7 +320,11 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.child_care, size: 18, color: AppTheme.accentGold),
+                      Icon(
+                        Icons.child_care,
+                        size: 18,
+                        color: AppTheme.accentGold,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         '${AppLocalizations.of(context).childrenAgeRange}: ${_excursion!.childrenAgeRange!}',

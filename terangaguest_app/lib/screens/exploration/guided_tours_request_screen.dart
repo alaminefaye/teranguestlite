@@ -77,10 +77,7 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     if (_serviceId == null) {
-      _showSnack(
-        'Visites guidées non configurées. Demandez à l\'établissement d\'ajouter le service « Visites guidées » dans le tableau de bord (Services Palace).',
-        isError: true,
-      );
+      _showSnack(l10n.guidedToursNotConfigured, isError: true);
       return;
     }
     setState(() => _sending = true);
@@ -224,7 +221,7 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'Visites guidées non configurées. L\'établissement doit ajouter le service « Visites guidées personnalisées » dans le tableau de bord (Services Palace).',
+                                  l10n.guidedToursNotConfigured,
                                   style: TextStyle(
                                     color: Colors.orange.shade100,
                                     fontSize: 13,

@@ -15,6 +15,7 @@ import '../providers/laundry_provider.dart';
 import '../providers/palace_provider.dart';
 import '../providers/announcements_provider.dart';
 import '../models/announcement.dart';
+import '../generated/l10n/app_localizations.dart';
 
 /// Overlay de veille pour tablette en chambre.
 ///
@@ -231,29 +232,30 @@ class _IdleScreenState extends State<_IdleScreen>
     return '$h:$m:$s';
   }
 
-  String _formatDate(DateTime dt) {
-    const jours = [
-      'Lundi',
-      'Mardi',
-      'Mercredi',
-      'Jeudi',
-      'Vendredi',
-      'Samedi',
-      'Dimanche',
+  String _formatDate(DateTime dt, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final jours = [
+      l10n.dayMonday,
+      l10n.dayTuesday,
+      l10n.dayWednesday,
+      l10n.dayThursday,
+      l10n.dayFriday,
+      l10n.daySaturday,
+      l10n.daySunday,
     ];
-    const mois = [
-      'janvier',
-      'février',
-      'mars',
-      'avril',
-      'mai',
-      'juin',
-      'juillet',
-      'août',
-      'septembre',
-      'octobre',
-      'novembre',
-      'décembre',
+    final mois = [
+      l10n.monthJanuary,
+      l10n.monthFebruary,
+      l10n.monthMarch,
+      l10n.monthApril,
+      l10n.monthMay,
+      l10n.monthJune,
+      l10n.monthJuly,
+      l10n.monthAugust,
+      l10n.monthSeptember,
+      l10n.monthOctober,
+      l10n.monthNovember,
+      l10n.monthDecember,
     ];
     final jour = jours[dt.weekday - 1];
     final moisNom = mois[dt.month - 1];
@@ -349,7 +351,7 @@ class _IdleScreenState extends State<_IdleScreen>
                             ),
                             SizedBox(height: w < 380 ? 8 : 12),
                             Text(
-                              _formatDate(widget.now),
+                              _formatDate(widget.now, context),
                               style: TextStyle(
                                 fontSize: w < 380 ? 13 : 16,
                                 color: Colors.white,
@@ -403,9 +405,11 @@ class _IdleScreenState extends State<_IdleScreen>
                                         size: 20,
                                       ),
                                       const SizedBox(width: 10),
-                                      const Text(
-                                        'Appuyez pour continuer',
-                                        style: TextStyle(
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        ).tapToContinue,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           color: Colors.white,
                                           letterSpacing: 1.2,

@@ -89,7 +89,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.pop(context);
@@ -104,7 +107,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           Text(
                             l10n.gallery,
                             style: TextStyle(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 18
+                                  : 28,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
@@ -123,9 +128,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: _buildContent(context, gallery),
-              ),
+              Expanded(child: _buildContent(context, gallery)),
             ],
           ),
         ),
@@ -169,7 +172,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
       );
     }
     if (gallery == null ||
-        (gallery.establishmentPhotoUrl == null || gallery.establishmentPhotoUrl!.isEmpty) &&
+        (gallery.establishmentPhotoUrl == null ||
+                gallery.establishmentPhotoUrl!.isEmpty) &&
             gallery.albums.isEmpty) {
       return Center(
         child: Padding(
@@ -188,6 +192,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   Widget _buildGalleryContent(BuildContext context, Gallery gallery) {
+    final l10n = AppLocalizations.of(context);
     final children = <Widget>[];
     if (gallery.establishmentPhotoUrl != null &&
         gallery.establishmentPhotoUrl!.isNotEmpty) {
@@ -199,17 +204,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
             fit: BoxFit.cover,
             width: double.infinity,
             height: 200,
-            loadingBuilder: (context, child, progress) =>
-                progress == null
-                    ? child
-                    : const SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: AppTheme.accentGold,
-                          ),
-                        ),
+            loadingBuilder: (context, child, progress) => progress == null
+                ? child
+                : const SizedBox(
+                    height: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppTheme.accentGold,
                       ),
+                    ),
+                  ),
             errorBuilder: (_, _, _) => const SizedBox(
               height: 200,
               child: Icon(
@@ -225,9 +229,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
     if (gallery.albums.isNotEmpty) {
       children.add(
-        const Text(
-          'Albums',
-          style: TextStyle(
+        Text(
+          l10n.albumsTitle,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: AppTheme.accentGold,
@@ -236,8 +240,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
       );
       children.add(const SizedBox(height: 12));
       for (final album in gallery.albums) {
-        final firstPhotoUrl =
-            album.photos.isNotEmpty ? album.photos.first.url : null;
+        final firstPhotoUrl = album.photos.isNotEmpty
+            ? album.photos.first.url
+            : null;
         children.add(
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
@@ -276,8 +281,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
                             errorBuilder: (_, _, _) => const SizedBox(
                               width: 72,
                               height: 72,
-                              child: Icon(Icons.photo_library,
-                                  color: AppTheme.textGray),
+                              child: Icon(
+                                Icons.photo_library,
+                                color: AppTheme.textGray,
+                              ),
                             ),
                           ),
                         )
@@ -285,8 +292,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         const SizedBox(
                           width: 72,
                           height: 72,
-                          child: Icon(Icons.photo_library,
-                              color: AppTheme.textGray),
+                          child: Icon(
+                            Icons.photo_library,
+                            color: AppTheme.textGray,
+                          ),
                         ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -303,7 +312,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                             ),
                             if (album.photos.isNotEmpty)
                               Text(
-                                '${album.photos.length} photo(s)',
+                                l10n.photoCount(album.photos.length),
                                 style: const TextStyle(
                                   color: AppTheme.textGray,
                                   fontSize: 13,

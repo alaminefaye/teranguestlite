@@ -83,11 +83,10 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
                       .toList();
 
                   if (deliveredOrders.isEmpty) {
-                    return const EmptyStateWidget(
+                    return EmptyStateWidget(
                       icon: Icons.receipt_long,
-                      title: 'Aucune facture',
-                      subtitle:
-                          "Vous n'avez pas encore de commandes terminées.",
+                      title: AppLocalizations.of(context).noInvoicesTitle,
+                      subtitle: AppLocalizations.of(context).noInvoicesSubtitle,
                     );
                   }
 
@@ -140,9 +139,9 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 12),
-          const Text(
-            'Mes Factures',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).myInvoices,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentGold,

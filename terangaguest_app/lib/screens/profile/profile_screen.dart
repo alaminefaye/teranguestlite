@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 30),
 
                   // Informations utilisateur
-                  _buildUserInfo(user),
+                  _buildUserInfo(context, user),
                   const SizedBox(height: 30),
 
                   // Actions
@@ -141,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfo(dynamic user) {
+  Widget _buildUserInfo(BuildContext context, dynamic user) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
@@ -206,14 +206,26 @@ class ProfileScreen extends StatelessWidget {
           if (user.roomNumber != null &&
               (user.roomNumber ?? '').isNotEmpty) ...[
             const Divider(color: AppTheme.textGray, height: 24),
-            _buildInfoRow(Icons.bed, 'Chambre', user.roomNumber ?? ''),
+            _buildInfoRow(
+              Icons.bed,
+              AppLocalizations.of(context).profileRoom,
+              user.roomNumber ?? '',
+            ),
           ],
           if (user.enterprise != null) ...[
             const SizedBox(height: 10),
-            _buildInfoRow(Icons.business, 'Hôtel', user.enterprise?.name ?? ''),
+            _buildInfoRow(
+              Icons.business,
+              AppLocalizations.of(context).profileHotel,
+              user.enterprise?.name ?? '',
+            ),
           ],
           const SizedBox(height: 10),
-          _buildInfoRow(Icons.badge, 'Rôle', user.displayRole),
+          _buildInfoRow(
+            Icons.badge,
+            AppLocalizations.of(context).profileRole,
+            user.displayRole,
+          ),
         ],
       ),
     );
@@ -287,7 +299,7 @@ class ProfileScreen extends StatelessWidget {
         _buildActionTile(
           context: context,
           icon: Icons.receipt_outlined,
-          title: 'Mes Factures',
+          title: AppLocalizations.of(context).myInvoices,
           onTap: () {
             HapticHelper.lightImpact();
             context.navigateTo(const InvoicesListScreen());
@@ -530,9 +542,9 @@ class ProfileScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Email',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context).email,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -576,9 +588,9 @@ class ProfileScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Téléphone',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context).phone,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                               ),

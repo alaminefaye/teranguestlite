@@ -76,21 +76,13 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
     final l10n = AppLocalizations.of(context);
     final ctx = context;
     if (_serviceId == null) {
-      _showSnack(
-        ctx,
-        'Service Transferts & VTC non configuré. Contactez l\'établissement.',
-        isError: true,
-      );
+      _showSnack(ctx, l10n.transfersNotConfigured, isError: true);
       return;
     }
     final pickup = _pickupController.text.trim();
     final destination = _destinationController.text.trim();
     if (pickup.isEmpty || destination.isEmpty) {
-      _showSnack(
-        ctx,
-        'Indiquez le lieu de prise en charge et la destination.',
-        isError: true,
-      );
+      _showSnack(ctx, l10n.pickupDestinationRequired, isError: true);
       return;
     }
     setState(() => _sending = true);
@@ -194,7 +186,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                           controller: _pickupController,
                           style: const TextStyle(color: Colors.white),
                           decoration: _inputDecoration(
-                            hint: 'Ex: Aéroport, Hôtel…',
+                            hint: l10n.exAirportHotel,
                           ),
                         ),
                       ),
@@ -205,7 +197,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                           controller: _destinationController,
                           style: const TextStyle(color: Colors.white),
                           decoration: _inputDecoration(
-                            hint: 'Ex: Centre-ville, Adresse…',
+                            hint: l10n.exDowntownAddress,
                           ),
                         ),
                       ),

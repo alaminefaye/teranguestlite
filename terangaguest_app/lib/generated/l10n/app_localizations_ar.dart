@@ -291,7 +291,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportSecurityEmergency => 'Signaler une urgence sécurité';
 
   @override
-  String get roomLabel => 'Chambre';
+  String roomLabel(String room) {
+    return 'الغرفة: $room';
+  }
 
   @override
   String get emergencyRequestSent =>
@@ -723,7 +725,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get discoverRegion => 'اكتشف منطقتنا';
 
   @override
-  String get spaSubtitle => 'استرخاء وعافية';
+  String get spaSubtitle => 'راحة واسترخاء';
 
   @override
   String get chooseCategory => 'اختر فئة';
@@ -965,7 +967,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderItems => 'العناصر المطلوبة';
 
   @override
-  String get quantity => 'الكمية:';
+  String get quantity => 'الكمية';
 
   @override
   String get reorder => 'إعادة الطلب';
@@ -1169,7 +1171,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rentalDuration => 'Durée (heures)';
 
   @override
-  String get rentalDays => 'Nombre de jours';
+  String get rentalDays => 'عدد الأيام';
 
   @override
   String get estimatedPrice => 'Prix estimé';
@@ -1245,4 +1247,560 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get specialRequests => 'طلبات خاصة';
+
+  @override
+  String get developedByUTA =>
+      'تم التطوير بواسطة Universal Technologies Africa';
+
+  @override
+  String get tapToContinue => 'اضغط للمتابعة';
+
+  @override
+  String get changeLanguage => 'تغيير اللغة';
+
+  @override
+  String get monthJanuary => 'يناير';
+
+  @override
+  String get monthFebruary => 'فبراير';
+
+  @override
+  String get monthMarch => 'مارس';
+
+  @override
+  String get monthApril => 'أبريل';
+
+  @override
+  String get monthMay => 'مايو';
+
+  @override
+  String get monthJune => 'يونيو';
+
+  @override
+  String get monthJuly => 'يوليو';
+
+  @override
+  String get monthAugust => 'أغسطس';
+
+  @override
+  String get monthSeptember => 'سبتمبر';
+
+  @override
+  String get monthOctober => 'أكتوبر';
+
+  @override
+  String get monthNovember => 'نوفمبر';
+
+  @override
+  String get monthDecember => 'ديسمبر';
+
+  @override
+  String get reservationClientCodeBanner =>
+      'الحجوزات مقتصرة على الضيوف الذين لديهم إقامة صالحة. يرجى إدخال رمز العميل الخاص بك أدناه (تم استلامه عند تسجيل الدخول).';
+
+  @override
+  String get sessionExpiredNeedClientCode =>
+      'إقامتك لم تعد نشطة. أدخل رمز العميل الخاص بك للحجز.';
+
+  @override
+  String get periodAllDates => 'كل التواريخ';
+
+  @override
+  String get periodToday => 'اليوم';
+
+  @override
+  String get periodThisWeek => 'هذا الأسبوع';
+
+  @override
+  String get periodThisMonth => 'هذا الشهر';
+
+  @override
+  String get staffOrdersTitle => 'طلبات خدمة الغرف';
+
+  @override
+  String get staffOrdersSubtitle => 'تتبع ومعالجة طلبات خدمة الغرف';
+
+  @override
+  String addedToCart(String itemName) {
+    return 'تمت إضافة $itemName إلى سلة التسوق';
+  }
+
+  @override
+  String get invalidSessionRetry =>
+      'جلسة غير صالحة أو منتهية الصلاحية. الرجاء إدخال الرمز الخاص بك مرة أخرى.';
+
+  @override
+  String get orderValidationError =>
+      'تعذر التحقق من صحة الطلب. يرجى التحقق من رمز العميل الخاص بك أو الاتصال بمكتب الاستقبال.';
+
+  @override
+  String get enterCodeToValidate =>
+      'أدخل الرمز المستلم عند تسجيل الوصول للتحقق من صحة الطلب.';
+
+  @override
+  String get roomNumberTablet => 'رقم الغرفة (هذا الجهاز اللوحي)';
+
+  @override
+  String get roomIdRecommended =>
+      'معرّف الغرفة (موصى به - راجع لوحة القيادة > وصول الجهاز اللوحي)';
+
+  @override
+  String get multiHotelWarning =>
+      'في إعدادات الفنادق المتعددة، أدخل معرّف الغرفة لعرض بيانات فندقك فقط.';
+
+  @override
+  String get code6Digits => 'رمز مكون من 6 أرقام';
+
+  @override
+  String get enter6Digits => 'أدخل الرمز المكون من 6 أرقام.';
+
+  @override
+  String get defineRoomTablet => 'حدد رقم الغرفة لهذا الجهاز اللوحي.';
+
+  @override
+  String get confirmIdentity => 'قم بتأكيد هويتك';
+
+  @override
+  String get verifyInfoBeforeOrder => 'تحقق من معلوماتك قبل إرسال الطلب:';
+
+  @override
+  String get identityName => 'الاسم';
+
+  @override
+  String get identityRoom => 'الغرفة';
+
+  @override
+  String get identityPhone => 'الهاتف';
+
+  @override
+  String get identityEmail => 'البريد الإلكتروني';
+
+  @override
+  String get paymentMethodText => 'طريقة الدفع';
+
+  @override
+  String get paymentCash => 'نقدًا';
+
+  @override
+  String get paymentRoomBill => 'أضف إلى فاتورة الغرفة';
+
+  @override
+  String get paymentWave => 'Wave';
+
+  @override
+  String get paymentOrangeMoney => 'Orange Money';
+
+  @override
+  String get confirmOrder => 'تأكيد الطلب';
+
+  @override
+  String get statusUpdated => 'تم تحديث الحالة';
+
+  @override
+  String get orderStatusUpdated => 'تم تحديث حالة الطلب';
+
+  @override
+  String cannotSendNotification(String error) {
+    return 'تعذر إرسال الإشعار: $error';
+  }
+
+  @override
+  String get orderCancelledNotified => 'تم إلغاء الطلب - تم إخطار العميل.';
+
+  @override
+  String get orderCancelled => 'تم إلغاء الطلب';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
+
+  @override
+  String get yesCancel => 'نعم، إلغاء';
+
+  @override
+  String get spaCategoryAll => 'الكل';
+
+  @override
+  String get spaCategoryMassage => 'تدليك';
+
+  @override
+  String get spaCategoryFacial => 'علاجات الوجه';
+
+  @override
+  String get spaCategoryBody => 'علاجات الجسم';
+
+  @override
+  String get spaCategoryHammam => 'حمام';
+
+  @override
+  String get spaAndWellness => 'سبا وعافية';
+
+  @override
+  String get spaServiceFallback => 'خدمة سبا';
+
+  @override
+  String get timeLabel => 'الوقت';
+
+  @override
+  String get excursionFallback => 'جولة';
+
+  @override
+  String get locationEnableSettings => 'تفعيل الموقع في الإعدادات.';
+
+  @override
+  String get locationAccessDenied => 'تم رفض الوصول إلى الموقع.';
+
+  @override
+  String get locationCurrentPos => 'الموقع الحالي';
+
+  @override
+  String get locationError => 'لا يمكن الحصول على الموقع';
+
+  @override
+  String get vehicleRequestType => 'نوع الطلب';
+
+  @override
+  String get vehicleTypeTaxi => 'سيارة أجرة';
+
+  @override
+  String get vehicleTypeRental => 'تأجير';
+
+  @override
+  String get taxiPickup => 'نصطحبكم من';
+
+  @override
+  String get taxiPickupHint => 'العنوان أو الموقع';
+
+  @override
+  String get taxiMyLocation => 'موقعي';
+
+  @override
+  String get taxiDestination => 'الوجهة';
+
+  @override
+  String get taxiDestinationHint => 'عنوان الوجهة';
+
+  @override
+  String get taxiDistanceOption => 'المسافة (كم، اختياري)';
+
+  @override
+  String get taxiDistanceHint => 'مثال: 5.2';
+
+  @override
+  String get rentalAllTypes => 'كل الأنواع';
+
+  @override
+  String get rentalSedan => 'سيدان';
+
+  @override
+  String get rentalSuv => 'دفع رباعي';
+
+  @override
+  String get rentalMinibus => 'حافلة صغيرة';
+
+  @override
+  String get rentalVan => 'شاحنة صغيرة';
+
+  @override
+  String get rentalOther => 'آخر';
+
+  @override
+  String get rentalChooseVehicle => 'اختر سيارة';
+
+  @override
+  String get rentalTypeLabel => 'النوع';
+
+  @override
+  String get rentalSeatsMin => 'الحد الأدنى للمقاعد';
+
+  @override
+  String get rentalSeatsAll => 'الكل';
+
+  @override
+  String rentalSeatsCount(String count) {
+    return '$count مقعد';
+  }
+
+  @override
+  String get rentalNoVehicleFound => 'لا توجد مركبة لهذه المعايير.';
+
+  @override
+  String rentalSeatsPl(String count) {
+    return '$count مقاعد';
+  }
+
+  @override
+  String get rentalDaysHint => 'مثال: 2';
+
+  @override
+  String get rentalDurationHours => 'المدة (ساعات)';
+
+  @override
+  String get rentalDurationHint => 'مثال: 8 (نصف يوم اذا كان اقل من 5 ساعات)';
+
+  @override
+  String rentalEstimate(String price) {
+    return 'التقدير: $price فرنك أفريقي';
+  }
+
+  @override
+  String get rentalErrorDestination => 'أدخل عنوان الوجهة.';
+
+  @override
+  String get rentalErrorChooseVehicle => 'اختر مركبة من القائمة.';
+
+  @override
+  String get rentalErrorVehicleOrDetails =>
+      'اختر سيارة أجرة أو إيجار، أو صف طلبك.';
+
+  @override
+  String get sessionExpiredNeedClientCodeRequest =>
+      'إقامتك لم تعد نشطة. أدخل رمز العميل لإرسال الطلب.';
+
+  @override
+  String get palaceConciergeServices => 'خدمات القصر / الكونسيرج';
+
+  @override
+  String get palaceConciergeTracking => 'تتبع طلبات القصر والكونسيرج';
+
+  @override
+  String get palaceConciergeServiceSingle => 'خدمة القصر / الكونسيرج';
+
+  @override
+  String scheduledForDate(String date) {
+    return 'مقرر لـ $date';
+  }
+
+  @override
+  String get requestDetailsOnly => 'تفاصيل الطلب';
+
+  @override
+  String get cancellationReason => 'سبب الإلغاء';
+
+  @override
+  String get acceptRequestTitle => 'قبول الطلب';
+
+  @override
+  String get acceptRequestMessage => 'قبول طلب خدمة القصر / الكونسيرج؟';
+
+  @override
+  String get completeRequestTitle => 'إكمال الطلب';
+
+  @override
+  String get completeRequestMessage => 'إكمال هذا الطلب؟';
+
+  @override
+  String get rejectRequestTitle => 'رفض الطلب';
+
+  @override
+  String get rejectRequestMessage => 'رفض طلب خدمة القصر؟';
+
+  @override
+  String get cancelRequestMessage => 'إلغاء طلب خدمة القصر هذا؟';
+
+  @override
+  String get cancellationReasonHint => 'سبب الإلغاء';
+
+  @override
+  String get validationReasonRequired => 'يرجى تقديم سبب.';
+
+  @override
+  String get requestDetailTitle => 'تفاصيل طلب القصر / الكونسيرج';
+
+  @override
+  String get laundryRequestDetailTitle => 'تفاصيل طلب غسيل الملابس';
+
+  @override
+  String get laundryNoItemsInRequest => 'لم يتم العثور على عناصر لهذا الطلب.';
+
+  @override
+  String get hotelMap => 'خريطة';
+
+  @override
+  String get albumsTitle => 'ألبومات';
+
+  @override
+  String photoCount(int count) {
+    return '$count صورة';
+  }
+
+  @override
+  String get noPhoto => 'لا توجد صورة';
+
+  @override
+  String get presentationTitle => 'عرض';
+
+  @override
+  String get addressTitle => 'عنوان';
+
+  @override
+  String get phoneAbbr => 'هاتف';
+
+  @override
+  String get staffEmergencySubtitle => 'تنبيهات الطبيب / الأمن النشطة';
+
+  @override
+  String get guestEmergencySubtitle => 'طلبات المساعدة والطوارئ الخاصة بك';
+
+  @override
+  String get noEmergencyAlerts => 'لا توجد تنبيهات مساعدة وطوارئ نشطة.';
+
+  @override
+  String get acceptEmergencyAlertMessage =>
+      'هل تقبل تنبيه المساعدة والطوارئ هذا؟';
+
+  @override
+  String get cancelEmergencyAlertMessage => 'هل تريد إلغاء هذا التنبيه؟';
+
+  @override
+  String get reasonOptional => 'السبب (اختياري)';
+
+  @override
+  String get reasonRequired => 'يرجى تقديم سبب.';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get unidentifiedRoom => 'غرفة غير محددة';
+
+  @override
+  String requestFromRoom(String roomInfo) {
+    return 'طلب من $roomInfo';
+  }
+
+  @override
+  String get newStaffMessage => 'رسالة جديدة من الموظفين';
+
+  @override
+  String get startConversation => 'ابدأ المحادثة مع الاستقبال.';
+
+  @override
+  String get newMessageSingular => 'رسالة جديدة واحدة';
+
+  @override
+  String get newMessagesPlural => 'رسائل جديدة';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String get imageUnavailable => 'الصورة غير متوفرة';
+
+  @override
+  String get voiceMessage => 'رسالة صوتية';
+
+  @override
+  String get microphonePermission =>
+      'اسمح بالوصول إلى الميكروفون لإرسال ملاحظة صوتية.';
+
+  @override
+  String get sportCategory => 'رياضة';
+
+  @override
+  String get leisureCategory => 'تسلية';
+
+  @override
+  String get timeoutError => 'انتهت مهلة الطلب. يرجى التحقق من اتصالك.';
+
+  @override
+  String get viewMyRequests => 'عرض طلباتي';
+
+  @override
+  String get datePrefix => 'التاريخ: ';
+
+  @override
+  String get timePrefix => 'الوقت: ';
+
+  @override
+  String get requestDemandeSuffix => ' - طلب';
+
+  @override
+  String get sportFitnessCoachBooking => 'الرياضة واللياقة - حجز مدرب شخصي';
+
+  @override
+  String get golfPrefix => 'جولف';
+
+  @override
+  String get tennisPrefix => 'تنس';
+
+  @override
+  String get guidedToursNotConfigured =>
+      'الجولات المصحوبة بمرشدين غير مهيأة. يجب أن تضيف المؤسسة خدمة الجولات المصحوبة بمرشدين مخصصة في لوحة القيادة.';
+
+  @override
+  String get transfersNotConfigured => 'خدمة النقل غير مهيأة. اتصل بالمؤسسة.';
+
+  @override
+  String get pickupDestinationRequired => 'يرجى تحديد مكان الالتقاء والوجهة.';
+
+  @override
+  String get exAirportHotel => 'مثال: المطار، الفندق…';
+
+  @override
+  String get exDowntownAddress => 'مثال: وسط المدينة، العنوان…';
+
+  @override
+  String get vehicleRentalNotConfigured =>
+      'خدمة تأجير السيارات غير مهيأة. اتصل بالمؤسسة.';
+
+  @override
+  String get durationOrDaysRequired =>
+      'يرجى تحديد عدد الأيام أو المدة بالساعات.';
+
+  @override
+  String get exDays => 'مثال: 2';
+
+  @override
+  String get exHours => 'مثال: 5 (نصف يوم)';
+
+  @override
+  String get profileRoom => 'الغرفة';
+
+  @override
+  String get profileHotel => 'الفندق';
+
+  @override
+  String get profileRole => 'الدور';
+
+  @override
+  String get myInvoices => 'فواتيري';
+
+  @override
+  String get phone => 'رقم الهاتف';
+
+  @override
+  String get noInvoicesTitle => 'لا توجد فواتير';
+
+  @override
+  String get noInvoicesSubtitle => 'ليس لديك أي طلبات مكتملة بعد.';
+
+  @override
+  String get generalError => 'خطأ';
+
+  @override
+  String get orderReceipt => 'إيصال الطلب';
+
+  @override
+  String get hotelLabel => 'الفندق:';
+
+  @override
+  String get orderDateLabel => 'تاريخ الطلب:';
+
+  @override
+  String get deliveryLabel => 'التوصيل:';
+
+  @override
+  String get noItems => 'لا توجد عناصر';
+
+  @override
+  String get totalToPay => 'الإجمالي للدفع';
+
+  @override
+  String get taxesIncluded => 'شامل جميع الضرائب ورسوم الخدمة';
+
+  @override
+  String get thankYouForOrder => 'شكرا لطلبك!';
+
+  @override
+  String get invoiceRoomLabel => 'الغرفة:';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../models/establishment.dart';
 import '../../services/establishments_api.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
 
 /// Fiche détail d'un établissement : présentation, adresse, galerie photos.
@@ -38,8 +39,7 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
       _error = null;
     });
     try {
-      final detail =
-          await _api.getEstablishmentDetail(widget.establishmentId);
+      final detail = await _api.getEstablishmentDetail(widget.establishmentId);
       if (mounted) {
         setState(() {
           _detail = detail;
@@ -70,6 +70,7 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -116,9 +117,7 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent(l10n)),
             ],
           ),
         ),
@@ -126,7 +125,7 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppLocalizations l10n) {
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.accentGold),
@@ -141,18 +140,15 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
             children: [
               Text(
                 _error!,
-                style: const TextStyle(
-                  color: AppTheme.textGray,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: AppTheme.textGray, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: _load,
-                child: const Text(
-                  'Réessayer',
-                  style: TextStyle(color: AppTheme.accentGold),
+                child: Text(
+                  l10n.retry,
+                  style: const TextStyle(color: AppTheme.accentGold),
                 ),
               ),
             ],
@@ -173,18 +169,18 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                 d.coverPhoto!,
                 height: 200,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) =>
-                    progress == null
-                        ? child
-                        : const SizedBox(
-                            height: 200,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: AppTheme.accentGold,
-                              ),
-                            ),
+                loadingBuilder: (context, child, progress) => progress == null
+                    ? child
+                    : const SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppTheme.accentGold,
                           ),
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                        ),
+                      ),
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
               ),
             ),
           if (d.coverPhoto != null && d.coverPhoto!.isNotEmpty)
@@ -192,17 +188,14 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
           if (d.location != null && d.location!.isNotEmpty) ...[
             Text(
               d.location!,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppTheme.textGray,
-              ),
+              style: const TextStyle(fontSize: 15, color: AppTheme.textGray),
             ),
             const SizedBox(height: 12),
           ],
           if (d.description != null && d.description!.isNotEmpty) ...[
-            const Text(
-              'Présentation',
-              style: TextStyle(
+            Text(
+              l10n.presentationTitle,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.accentGold,
@@ -220,9 +213,9 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
             const SizedBox(height: 16),
           ],
           if (d.address != null && d.address!.isNotEmpty) ...[
-            const Text(
-              'Adresse',
-              style: TextStyle(
+            Text(
+              l10n.addressTitle,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.accentGold,
@@ -231,20 +224,14 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
             const SizedBox(height: 6),
             Text(
               d.address!,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppTheme.textGray,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
             ),
             const SizedBox(height: 16),
           ],
           if (d.phone != null && d.phone!.isNotEmpty) ...[
             Text(
-              'Tél. ${d.phone!}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppTheme.textGray,
-              ),
+              '${l10n.phoneAbbr} ${d.phone!}',
+              style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
             ),
             const SizedBox(height: 8),
           ],
@@ -287,9 +274,9 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                         color: AppTheme.accentGold.withValues(alpha: 0.9),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Galerie',
-                        style: TextStyle(
+                      Text(
+                        l10n.gallery,
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.accentGold,
@@ -304,9 +291,12 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                       final width = constraints.maxWidth;
                       const maxCellSize = 80.0;
                       const spacing = 8.0;
-                      final n = ((width + spacing) / (maxCellSize + spacing)).floor();
+                      final n = ((width + spacing) / (maxCellSize + spacing))
+                          .floor();
                       final crossAxisCount = n.clamp(2, 4);
-                      final cellSize = (width - spacing * (crossAxisCount - 1)) / crossAxisCount;
+                      final cellSize =
+                          (width - spacing * (crossAxisCount - 1)) /
+                          crossAxisCount;
                       return GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -321,7 +311,8 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                         itemBuilder: (context, index) {
                           final photo = d.photos[index];
                           final url = photo.url;
-                          if (url == null || url.isEmpty) return const SizedBox.shrink();
+                          if (url == null || url.isEmpty)
+                            return const SizedBox.shrink();
                           return GestureDetector(
                             onTap: () {
                               HapticHelper.lightImpact();
@@ -351,22 +342,22 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                                   alignment: Alignment.center,
                                   loadingBuilder: (context, child, progress) =>
                                       progress == null
-                                          ? child
-                                          : Container(
-                                              width: cellSize,
-                                              height: cellSize,
-                                              color: Colors.white10,
-                                              child: const Center(
-                                                child: SizedBox(
-                                                  width: 20,
-                                                  height: 20,
-                                                  child: CircularProgressIndicator(
-                                                    color: AppTheme.accentGold,
-                                                    strokeWidth: 2,
-                                                  ),
-                                                ),
+                                      ? child
+                                      : Container(
+                                          width: cellSize,
+                                          height: cellSize,
+                                          color: Colors.white10,
+                                          child: const Center(
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                color: AppTheme.accentGold,
+                                                strokeWidth: 2,
                                               ),
                                             ),
+                                          ),
+                                        ),
                                   errorBuilder: (context, error, stackTrace) =>
                                       ColoredBox(
                                         color: Colors.white12,
@@ -420,22 +411,20 @@ class _PhotoPreviewPage extends StatelessWidget {
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.contain,
-                loadingBuilder: (context, child, progress) =>
-                    progress == null
-                        ? child
-                        : const Center(
-                            child: CircularProgressIndicator(
-                              color: AppTheme.accentGold,
-                            ),
-                          ),
-                errorBuilder: (context, error, stackTrace) =>
-                    const Center(
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        color: AppTheme.textGray,
-                        size: 48,
+                loadingBuilder: (context, child, progress) => progress == null
+                    ? child
+                    : const Center(
+                        child: CircularProgressIndicator(
+                          color: AppTheme.accentGold,
+                        ),
                       ),
-                    ),
+                errorBuilder: (context, error, stackTrace) => const Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: AppTheme.textGray,
+                    size: 48,
+                  ),
+                ),
               ),
             ),
           ),

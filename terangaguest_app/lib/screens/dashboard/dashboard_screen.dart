@@ -498,7 +498,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           side: BorderSide(color: AppTheme.accentGold.withValues(alpha: 0.5)),
         ),
         title: Text(
-          'Changer la langue',
+          AppLocalizations.of(context).changeLanguage,
           style: const TextStyle(color: AppTheme.accentGold),
         ),
         content: Column(

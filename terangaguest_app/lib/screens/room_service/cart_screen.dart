@@ -45,7 +45,8 @@ class _CartScreenState extends State<CartScreen> {
         await tabletSession.setRoomNumber(authRoomNumber);
         // Si la session en cours était pour une autre chambre, l'invalider pour forcer une re-validation
         final currentSession = tabletSession.session;
-        final sessionRoom = (currentSession != null ? currentSession.roomNumber : '').trim();
+        final sessionRoom =
+            (currentSession != null ? currentSession.roomNumber : '').trim();
         if (sessionRoom.isNotEmpty && sessionRoom != authRoomNumber) {
           await tabletSession.clearSession();
         }
@@ -112,9 +113,7 @@ class _CartScreenState extends State<CartScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Séjour invalide ou expiré. Entrez à nouveau votre code.',
-            ),
+            content: Text(_l10n(context).invalidSessionRetry),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
           ),
@@ -185,8 +184,7 @@ class _CartScreenState extends State<CartScreen> {
         !str.contains('validateStatus')) {
       return str;
     }
-    // Sinon message générique pour éviter d'afficher la stack technique
-    return 'Impossible de valider la commande. Vérifiez votre code client ou contactez la réception.';
+    return AppLocalizations.of(context).orderValidationError;
   }
 
   /// Affiche le dialogue "Entrez votre code client" pour la tablette.
@@ -212,7 +210,8 @@ class _CartScreenState extends State<CartScreen> {
             final loading = ts.isLoading;
             final error = ts.error;
             // Chambre affichée = celle de la session si on a une session, sinon celle configurée
-            final currentRoom = (ts.session?.roomNumber ?? ts.roomNumber ?? '').trim();
+            final currentRoom = (ts.session?.roomNumber ?? ts.roomNumber ?? '')
+                .trim();
             final showRoomSetup = currentRoom.isEmpty;
 
             return AlertDialog(
@@ -226,9 +225,12 @@ class _CartScreenState extends State<CartScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Entrez le code reçu à l\'enregistrement pour valider la commande.',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    Text(
+                      _l10n(context).enterCodeToValidate,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     // Chambre : lecture seule si déjà définie, sinon champs "Numéro" + "ID chambre" (recommandé en multi-établissement)
@@ -236,7 +238,7 @@ class _CartScreenState extends State<CartScreen> {
                       TextField(
                         controller: roomController,
                         decoration: InputDecoration(
-                          labelText: 'Numéro de chambre (cette tablette)',
+                          labelText: _l10n(context).roomNumberTablet,
                           labelStyle: const TextStyle(color: AppTheme.textGray),
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
@@ -251,7 +253,7 @@ class _CartScreenState extends State<CartScreen> {
                       TextField(
                         controller: roomIdController,
                         decoration: InputDecoration(
-                          labelText: 'ID chambre (recommandé — voir tableau de bord > Accès tablettes)',
+                          labelText: _l10n(context).roomIdRecommended,
                           labelStyle: const TextStyle(color: AppTheme.textGray),
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
@@ -263,8 +265,11 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'En multi-établissement, renseignez l\'ID chambre pour n\'afficher que les données de votre hôtel.',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                        _l10n(context).multiHotelWarning,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 12),
                     ] else ...[
@@ -289,7 +294,9 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'Chambre : ${ts.session?.roomNumber ?? ts.roomNumber ?? "—"}',
+                              _l10n(context).roomLabel(
+                                ts.session?.roomNumber ?? ts.roomNumber ?? "—",
+                              ),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -304,7 +311,7 @@ class _CartScreenState extends State<CartScreen> {
                     TextField(
                       controller: codeController,
                       decoration: InputDecoration(
-                        labelText: 'Code à 6 chiffres',
+                        labelText: _l10n(context).code6Digits,
                         labelStyle: const TextStyle(color: AppTheme.textGray),
                         filled: true,
                         fillColor: Colors.white.withValues(alpha: 0.1),
@@ -334,9 +341,9 @@ class _CartScreenState extends State<CartScreen> {
                   onPressed: loading
                       ? null
                       : () => Navigator.of(ctx).pop(false),
-                  child: const Text(
-                    'Annuler',
-                    style: TextStyle(color: Colors.white70),
+                  child: Text(
+                    _l10n(context).cancel,
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ),
                 FilledButton(
@@ -346,8 +353,8 @@ class _CartScreenState extends State<CartScreen> {
                           final c = (code ?? codeController.text.trim());
                           if (c.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
-                              const SnackBar(
-                                content: Text('Entrez le code à 6 chiffres.'),
+                              SnackBar(
+                                content: Text(_l10n(context).enter6Digits),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -358,10 +365,8 @@ class _CartScreenState extends State<CartScreen> {
                               : (ts.roomNumber ?? '').trim();
                           if (r.isEmpty) {
                             ScaffoldMessenger.of(ctx).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Définissez le numéro de chambre de cette tablette.',
-                                ),
+                              SnackBar(
+                                content: Text(_l10n(context).defineRoomTablet),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -418,12 +423,15 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   /// Résultat de la boîte de dialogue de confirmation (identité + moyen de paiement).
-  static const _paymentMethods = [
-    ('cash', 'Espèce'),
-    ('room_bill', 'Mettre sur la note de la chambre'),
-    ('wave', 'Wave'),
-    ('orange_money', 'Orange Money'),
-  ];
+  List<(String, String)> _getPaymentMethods(BuildContext context) {
+    final l10n = _l10n(context);
+    return [
+      ('cash', l10n.paymentCash),
+      ('room_bill', l10n.paymentRoomBill),
+      ('wave', l10n.paymentWave),
+      ('orange_money', l10n.paymentOrangeMoney),
+    ];
+  }
 
   /// Affiche les infos client (nom, chambre, tél) + choix du moyen de paiement avant envoi.
   Future<({bool confirmed, String? paymentMethod})> _showConfirmIdentityDialog(
@@ -442,31 +450,35 @@ class _CartScreenState extends State<CartScreen> {
               borderRadius: BorderRadius.circular(16),
               side: const BorderSide(color: AppTheme.accentGold, width: 1),
             ),
-            title: const Text(
-              'Confirmer que c\'est bien vous',
-              style: TextStyle(color: AppTheme.accentGold, fontSize: 20),
+            title: Text(
+              _l10n(context).confirmIdentity,
+              style: const TextStyle(color: AppTheme.accentGold, fontSize: 20),
             ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Vérifiez vos informations avant d\'envoyer la commande :',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  Text(
+                    _l10n(context).verifyInfoBeforeOrder,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 16),
                   _buildIdentityRow(
                     Icons.person_outline,
-                    'Nom',
+                    _l10n(context).identityName,
                     session.guestName,
                   ),
                   const SizedBox(height: 10),
-                  _buildIdentityRow(Icons.bed, 'Chambre', session.roomNumber),
+                  _buildIdentityRow(
+                    Icons.bed,
+                    _l10n(context).identityRoom,
+                    session.roomNumber,
+                  ),
                   const SizedBox(height: 10),
                   _buildIdentityRow(
                     Icons.phone_outlined,
-                    'Téléphone',
+                    _l10n(context).identityPhone,
                     (session.guestPhone ?? '').isNotEmpty
                         ? (session.guestPhone ?? '')
                         : '—',
@@ -475,14 +487,14 @@ class _CartScreenState extends State<CartScreen> {
                     const SizedBox(height: 10),
                     _buildIdentityRow(
                       Icons.email_outlined,
-                      'Email',
+                      _l10n(context).identityEmail,
                       session.guestEmail ?? '',
                     ),
                   ],
                   const SizedBox(height: 20),
-                  const Text(
-                    'Moyen de paiement',
-                    style: TextStyle(
+                  Text(
+                    _l10n(context).paymentMethodText,
+                    style: const TextStyle(
                       color: AppTheme.accentGold,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -496,7 +508,7 @@ class _CartScreenState extends State<CartScreen> {
                     },
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: _paymentMethods
+                      children: _getPaymentMethods(context)
                           .map(
                             (e) => RadioListTile<String>(
                               value: e.$1,
@@ -524,8 +536,8 @@ class _CartScreenState extends State<CartScreen> {
                   ctx,
                 ).pop((confirmed: false, paymentMethod: null as String?)),
                 child: Text(
-                  'Annuler',
-                  style: TextStyle(color: AppTheme.textGray),
+                  _l10n(context).cancel,
+                  style: const TextStyle(color: AppTheme.textGray),
                 ),
               ),
               FilledButton(
@@ -536,9 +548,9 @@ class _CartScreenState extends State<CartScreen> {
                   backgroundColor: AppTheme.accentGold,
                   foregroundColor: AppTheme.primaryDark,
                 ),
-                child: const Text(
-                  'Confirmer la commande',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Text(
+                  _l10n(context).confirmOrder,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],

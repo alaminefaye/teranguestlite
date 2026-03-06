@@ -651,8 +651,8 @@ abstract class AppLocalizations {
   /// No description provided for @roomLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Chambre'**
-  String get roomLabel;
+  /// **'Chambre : {room}'**
+  String roomLabel(String room);
 
   /// No description provided for @emergencyRequestSent.
   ///
@@ -1935,7 +1935,7 @@ abstract class AppLocalizations {
   /// No description provided for @quantity.
   ///
   /// In fr, this message translates to:
-  /// **'Quantité :'**
+  /// **'Quantité'**
   String get quantity;
 
   /// No description provided for @reorder.
@@ -2019,7 +2019,7 @@ abstract class AppLocalizations {
   /// No description provided for @itemsLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Articles'**
+  /// **'ARTICLES'**
   String get itemsLabel;
 
   /// No description provided for @statusLabel.
@@ -2459,6 +2459,1056 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demandes spéciales'**
   String get specialRequests;
+
+  /// No description provided for @developedByUTA.
+  ///
+  /// In fr, this message translates to:
+  /// **'Développé par Universal Technologies Africa'**
+  String get developedByUTA;
+
+  /// No description provided for @tapToContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appuyez pour continuer'**
+  String get tapToContinue;
+
+  /// No description provided for @changeLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la langue'**
+  String get changeLanguage;
+
+  /// No description provided for @monthJanuary.
+  ///
+  /// In fr, this message translates to:
+  /// **'janvier'**
+  String get monthJanuary;
+
+  /// No description provided for @monthFebruary.
+  ///
+  /// In fr, this message translates to:
+  /// **'février'**
+  String get monthFebruary;
+
+  /// No description provided for @monthMarch.
+  ///
+  /// In fr, this message translates to:
+  /// **'mars'**
+  String get monthMarch;
+
+  /// No description provided for @monthApril.
+  ///
+  /// In fr, this message translates to:
+  /// **'avril'**
+  String get monthApril;
+
+  /// No description provided for @monthMay.
+  ///
+  /// In fr, this message translates to:
+  /// **'mai'**
+  String get monthMay;
+
+  /// No description provided for @monthJune.
+  ///
+  /// In fr, this message translates to:
+  /// **'juin'**
+  String get monthJune;
+
+  /// No description provided for @monthJuly.
+  ///
+  /// In fr, this message translates to:
+  /// **'juillet'**
+  String get monthJuly;
+
+  /// No description provided for @monthAugust.
+  ///
+  /// In fr, this message translates to:
+  /// **'août'**
+  String get monthAugust;
+
+  /// No description provided for @monthSeptember.
+  ///
+  /// In fr, this message translates to:
+  /// **'septembre'**
+  String get monthSeptember;
+
+  /// No description provided for @monthOctober.
+  ///
+  /// In fr, this message translates to:
+  /// **'octobre'**
+  String get monthOctober;
+
+  /// No description provided for @monthNovember.
+  ///
+  /// In fr, this message translates to:
+  /// **'novembre'**
+  String get monthNovember;
+
+  /// No description provided for @monthDecember.
+  ///
+  /// In fr, this message translates to:
+  /// **'décembre'**
+  String get monthDecember;
+
+  /// No description provided for @reservationClientCodeBanner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).'**
+  String get reservationClientCodeBanner;
+
+  /// No description provided for @sessionExpiredNeedClientCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.'**
+  String get sessionExpiredNeedClientCode;
+
+  /// No description provided for @periodAllDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les dates'**
+  String get periodAllDates;
+
+  /// No description provided for @periodToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get periodToday;
+
+  /// No description provided for @periodThisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get periodThisWeek;
+
+  /// No description provided for @periodThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois'**
+  String get periodThisMonth;
+
+  /// No description provided for @staffOrdersTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commandes Room Service'**
+  String get staffOrdersTitle;
+
+  /// No description provided for @staffOrdersSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi et traitement des commandes room service'**
+  String get staffOrdersSubtitle;
+
+  /// No description provided for @addedToCart.
+  ///
+  /// In fr, this message translates to:
+  /// **'{itemName} ajouté au panier'**
+  String addedToCart(String itemName);
+
+  /// No description provided for @invalidSessionRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Séjour invalide ou expiré. Entrez à nouveau votre code.'**
+  String get invalidSessionRetry;
+
+  /// No description provided for @orderValidationError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de valider la commande. Vérifiez votre code client ou contactez la réception.'**
+  String get orderValidationError;
+
+  /// No description provided for @enterCodeToValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code reçu à l\'enregistrement pour valider la commande.'**
+  String get enterCodeToValidate;
+
+  /// No description provided for @roomNumberTablet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de chambre (cette tablette)'**
+  String get roomNumberTablet;
+
+  /// No description provided for @roomIdRecommended.
+  ///
+  /// In fr, this message translates to:
+  /// **'ID chambre (recommandé — voir tableau de bord > Accès tablettes)'**
+  String get roomIdRecommended;
+
+  /// No description provided for @multiHotelWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'En multi-établissement, renseignez l\'ID chambre pour n\'afficher que les données de votre hôtel.'**
+  String get multiHotelWarning;
+
+  /// No description provided for @code6Digits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 6 chiffres'**
+  String get code6Digits;
+
+  /// No description provided for @enter6Digits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez le code à 6 chiffres.'**
+  String get enter6Digits;
+
+  /// No description provided for @defineRoomTablet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Définissez le numéro de chambre de cette tablette.'**
+  String get defineRoomTablet;
+
+  /// No description provided for @confirmIdentity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer que c\'est bien vous'**
+  String get confirmIdentity;
+
+  /// No description provided for @verifyInfoBeforeOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez vos informations avant d\'envoyer la commande :'**
+  String get verifyInfoBeforeOrder;
+
+  /// No description provided for @identityName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get identityName;
+
+  /// No description provided for @identityRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre'**
+  String get identityRoom;
+
+  /// No description provided for @identityPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get identityPhone;
+
+  /// No description provided for @identityEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email'**
+  String get identityEmail;
+
+  /// No description provided for @paymentMethodText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyen de paiement'**
+  String get paymentMethodText;
+
+  /// No description provided for @paymentCash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèce'**
+  String get paymentCash;
+
+  /// No description provided for @paymentRoomBill.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre sur la note de la chambre'**
+  String get paymentRoomBill;
+
+  /// No description provided for @paymentWave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wave'**
+  String get paymentWave;
+
+  /// No description provided for @paymentOrangeMoney.
+  ///
+  /// In fr, this message translates to:
+  /// **'Orange Money'**
+  String get paymentOrangeMoney;
+
+  /// No description provided for @confirmOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la commande'**
+  String get confirmOrder;
+
+  /// No description provided for @statusUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut mis à jour'**
+  String get statusUpdated;
+
+  /// No description provided for @orderStatusUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut de la commande mis à jour'**
+  String get orderStatusUpdated;
+
+  /// No description provided for @cannotSendNotification.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'envoyer la notification : {error}'**
+  String cannotSendNotification(String error);
+
+  /// No description provided for @orderCancelledNotified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée — le client a été notifié.'**
+  String get orderCancelledNotified;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande annulée'**
+  String get orderCancelled;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la commande'**
+  String get cancelOrder;
+
+  /// No description provided for @yesCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui, annuler'**
+  String get yesCancel;
+
+  /// No description provided for @spaCategoryAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get spaCategoryAll;
+
+  /// No description provided for @spaCategoryMassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Massages'**
+  String get spaCategoryMassage;
+
+  /// No description provided for @spaCategoryFacial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soins Visage'**
+  String get spaCategoryFacial;
+
+  /// No description provided for @spaCategoryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soins Corps'**
+  String get spaCategoryBody;
+
+  /// No description provided for @spaCategoryHammam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hammam'**
+  String get spaCategoryHammam;
+
+  /// No description provided for @spaAndWellness.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spa & Bien-être'**
+  String get spaAndWellness;
+
+  /// No description provided for @spaServiceFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service Spa'**
+  String get spaServiceFallback;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure'**
+  String get timeLabel;
+
+  /// No description provided for @excursionFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excursion'**
+  String get excursionFallback;
+
+  /// No description provided for @locationEnableSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez la localisation dans les paramètres.'**
+  String get locationEnableSettings;
+
+  /// No description provided for @locationAccessDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès à la position refusé.'**
+  String get locationAccessDenied;
+
+  /// No description provided for @locationCurrentPos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position actuelle'**
+  String get locationCurrentPos;
+
+  /// No description provided for @locationError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'obtenir la position'**
+  String get locationError;
+
+  /// No description provided for @vehicleRequestType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de demande'**
+  String get vehicleRequestType;
+
+  /// No description provided for @vehicleTypeTaxi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taxi'**
+  String get vehicleTypeTaxi;
+
+  /// No description provided for @vehicleTypeRental.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location'**
+  String get vehicleTypeRental;
+
+  /// No description provided for @taxiPickup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prise en charge'**
+  String get taxiPickup;
+
+  /// No description provided for @taxiPickupHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse ou position'**
+  String get taxiPickupHint;
+
+  /// No description provided for @taxiMyLocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma position'**
+  String get taxiMyLocation;
+
+  /// No description provided for @taxiDestination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Destination'**
+  String get taxiDestination;
+
+  /// No description provided for @taxiDestinationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de destination'**
+  String get taxiDestinationHint;
+
+  /// No description provided for @taxiDistanceOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Distance (km, optionnel)'**
+  String get taxiDistanceOption;
+
+  /// No description provided for @taxiDistanceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 5.2'**
+  String get taxiDistanceHint;
+
+  /// No description provided for @rentalAllTypes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les types'**
+  String get rentalAllTypes;
+
+  /// No description provided for @rentalSedan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Berline'**
+  String get rentalSedan;
+
+  /// No description provided for @rentalSuv.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUV'**
+  String get rentalSuv;
+
+  /// No description provided for @rentalMinibus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minibus'**
+  String get rentalMinibus;
+
+  /// No description provided for @rentalVan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Van'**
+  String get rentalVan;
+
+  /// No description provided for @rentalOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get rentalOther;
+
+  /// No description provided for @rentalChooseVehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un véhicule'**
+  String get rentalChooseVehicle;
+
+  /// No description provided for @rentalTypeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get rentalTypeLabel;
+
+  /// No description provided for @rentalSeatsMin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Places min.'**
+  String get rentalSeatsMin;
+
+  /// No description provided for @rentalSeatsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get rentalSeatsAll;
+
+  /// No description provided for @rentalSeatsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} place(s)'**
+  String rentalSeatsCount(String count);
+
+  /// No description provided for @rentalNoVehicleFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun véhicule pour ces critères.'**
+  String get rentalNoVehicleFound;
+
+  /// No description provided for @rentalSeatsPl.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} pl.'**
+  String rentalSeatsPl(String count);
+
+  /// No description provided for @rentalDaysHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 2'**
+  String get rentalDaysHint;
+
+  /// No description provided for @rentalDurationHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée (heures)'**
+  String get rentalDurationHours;
+
+  /// No description provided for @rentalDurationHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 8 (demi-journée si ≤ 5 h)'**
+  String get rentalDurationHint;
+
+  /// No description provided for @rentalEstimate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Estimation : {price} FCFA'**
+  String rentalEstimate(String price);
+
+  /// No description provided for @rentalErrorDestination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez l\'adresse de destination.'**
+  String get rentalErrorDestination;
+
+  /// No description provided for @rentalErrorChooseVehicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un véhicule dans la liste.'**
+  String get rentalErrorChooseVehicle;
+
+  /// No description provided for @rentalErrorVehicleOrDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez Taxi ou Location, ou décrivez votre demande.'**
+  String get rentalErrorVehicleOrDetails;
+
+  /// No description provided for @sessionExpiredNeedClientCodeRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre séjour n\'est plus actif. Entrez votre code client pour effectuer la demande.'**
+  String get sessionExpiredNeedClientCodeRequest;
+
+  /// No description provided for @palaceConciergeServices.
+  ///
+  /// In fr, this message translates to:
+  /// **'Services Palace / Conciergerie'**
+  String get palaceConciergeServices;
+
+  /// No description provided for @palaceConciergeTracking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi des demandes palace & conciergerie'**
+  String get palaceConciergeTracking;
+
+  /// No description provided for @palaceConciergeServiceSingle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service palace / conciergerie'**
+  String get palaceConciergeServiceSingle;
+
+  /// No description provided for @scheduledForDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévue pour {date}'**
+  String scheduledForDate(String date);
+
+  /// No description provided for @requestDetailsOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails de la demande'**
+  String get requestDetailsOnly;
+
+  /// No description provided for @cancellationReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif d\'annulation'**
+  String get cancellationReason;
+
+  /// No description provided for @acceptRequestTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter la demande'**
+  String get acceptRequestTitle;
+
+  /// No description provided for @acceptRequestMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter cette demande de service palace / conciergerie ?'**
+  String get acceptRequestMessage;
+
+  /// No description provided for @completeRequestTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer la demande'**
+  String get completeRequestTitle;
+
+  /// No description provided for @completeRequestMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer cette demande ?'**
+  String get completeRequestMessage;
+
+  /// No description provided for @rejectRequestTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser la demande'**
+  String get rejectRequestTitle;
+
+  /// No description provided for @rejectRequestMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser cette demande de service palace ?'**
+  String get rejectRequestMessage;
+
+  /// No description provided for @cancelRequestMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler cette demande de service palace ?'**
+  String get cancelRequestMessage;
+
+  /// No description provided for @cancellationReasonHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif de l\'annulation'**
+  String get cancellationReasonHint;
+
+  /// No description provided for @validationReasonRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez préciser un motif.'**
+  String get validationReasonRequired;
+
+  /// No description provided for @requestDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de la demande palace / conciergerie'**
+  String get requestDetailTitle;
+
+  /// No description provided for @laundryRequestDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de la demande de blanchisserie'**
+  String get laundryRequestDetailTitle;
+
+  /// No description provided for @laundryNoItemsInRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun article trouvé pour cette demande.'**
+  String get laundryNoItemsInRequest;
+
+  /// No description provided for @hotelMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plan'**
+  String get hotelMap;
+
+  /// No description provided for @albumsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Albums'**
+  String get albumsTitle;
+
+  /// No description provided for @photoCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} photo(s)'**
+  String photoCount(int count);
+
+  /// No description provided for @noPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune photo'**
+  String get noPhoto;
+
+  /// No description provided for @presentationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Présentation'**
+  String get presentationTitle;
+
+  /// No description provided for @addressTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get addressTitle;
+
+  /// No description provided for @phoneAbbr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tél.'**
+  String get phoneAbbr;
+
+  /// No description provided for @staffEmergencySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes médecin / sécurité en cours'**
+  String get staffEmergencySubtitle;
+
+  /// No description provided for @guestEmergencySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos demandes Assistance & Urgence'**
+  String get guestEmergencySubtitle;
+
+  /// No description provided for @noEmergencyAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune alerte Assistance & Urgence en cours.'**
+  String get noEmergencyAlerts;
+
+  /// No description provided for @acceptEmergencyAlertMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter cette alerte Assistance & Urgence ?'**
+  String get acceptEmergencyAlertMessage;
+
+  /// No description provided for @cancelEmergencyAlertMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler cette alerte ?'**
+  String get cancelEmergencyAlertMessage;
+
+  /// No description provided for @reasonOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (optionnel)'**
+  String get reasonOptional;
+
+  /// No description provided for @reasonRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez préciser un motif.'**
+  String get reasonRequired;
+
+  /// No description provided for @accept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get accept;
+
+  /// No description provided for @unidentifiedRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre non identifiée'**
+  String get unidentifiedRoom;
+
+  /// No description provided for @requestFromRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande depuis {roomInfo}'**
+  String requestFromRoom(String roomInfo);
+
+  /// No description provided for @newStaffMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau message du staff'**
+  String get newStaffMessage;
+
+  /// No description provided for @startConversation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencez la conversation avec la réception.'**
+  String get startConversation;
+
+  /// No description provided for @newMessageSingular.
+  ///
+  /// In fr, this message translates to:
+  /// **'1 nouveau message'**
+  String get newMessageSingular;
+
+  /// No description provided for @newMessagesPlural.
+  ///
+  /// In fr, this message translates to:
+  /// **'nouveaux messages'**
+  String get newMessagesPlural;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get yesterday;
+
+  /// No description provided for @imageUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image indisponible'**
+  String get imageUnavailable;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message vocal'**
+  String get voiceMessage;
+
+  /// No description provided for @microphonePermission.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisez l’accès au micro pour envoyer une note vocale.'**
+  String get microphonePermission;
+
+  /// No description provided for @sportCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sport'**
+  String get sportCategory;
+
+  /// No description provided for @leisureCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loisirs'**
+  String get leisureCategory;
+
+  /// No description provided for @timeoutError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai dépassé. Vérifiez votre connexion.'**
+  String get timeoutError;
+
+  /// No description provided for @viewMyRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir mes demandes'**
+  String get viewMyRequests;
+
+  /// No description provided for @datePrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date: '**
+  String get datePrefix;
+
+  /// No description provided for @timePrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure: '**
+  String get timePrefix;
+
+  /// No description provided for @requestDemandeSuffix.
+  ///
+  /// In fr, this message translates to:
+  /// **' - Demande'**
+  String get requestDemandeSuffix;
+
+  /// No description provided for @sportFitnessCoachBooking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sport & Fitness - Réservation coach personnel'**
+  String get sportFitnessCoachBooking;
+
+  /// No description provided for @golfPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Golf'**
+  String get golfPrefix;
+
+  /// No description provided for @tennisPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tennis'**
+  String get tennisPrefix;
+
+  /// No description provided for @guidedToursNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visites guidées non configurées. L\'établissement doit ajouter le service « Visites guidées personnalisées » dans le tableau de bord (Services Palace).'**
+  String get guidedToursNotConfigured;
+
+  /// No description provided for @transfersNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service Transferts & VTC non configuré. Contactez l\'établissement.'**
+  String get transfersNotConfigured;
+
+  /// No description provided for @pickupDestinationRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le lieu de prise en charge et la destination.'**
+  String get pickupDestinationRequired;
+
+  /// No description provided for @exAirportHotel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: Aéroport, Hôtel…'**
+  String get exAirportHotel;
+
+  /// No description provided for @exDowntownAddress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: Centre-ville, Adresse…'**
+  String get exDowntownAddress;
+
+  /// No description provided for @vehicleRentalNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service Location de véhicule non configuré. Contactez l\'établissement.'**
+  String get vehicleRentalNotConfigured;
+
+  /// No description provided for @durationOrDaysRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le nombre de jours ou la durée en heures.'**
+  String get durationOrDaysRequired;
+
+  /// No description provided for @exDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 2'**
+  String get exDays;
+
+  /// No description provided for @exHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 5 (demi-journée)'**
+  String get exHours;
+
+  /// No description provided for @profileRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre'**
+  String get profileRoom;
+
+  /// No description provided for @profileHotel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hôtel'**
+  String get profileHotel;
+
+  /// No description provided for @profileRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle'**
+  String get profileRole;
+
+  /// No description provided for @myInvoices.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes Factures'**
+  String get myInvoices;
+
+  /// No description provided for @phone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get phone;
+
+  /// No description provided for @noInvoicesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune facture'**
+  String get noInvoicesTitle;
+
+  /// No description provided for @noInvoicesSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n\'avez pas encore de commandes terminées.'**
+  String get noInvoicesSubtitle;
+
+  /// No description provided for @generalError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur'**
+  String get generalError;
+
+  /// No description provided for @orderReceipt.
+  ///
+  /// In fr, this message translates to:
+  /// **'REÇU DE COMMANDE'**
+  String get orderReceipt;
+
+  /// No description provided for @hotelLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'HÔTEL:'**
+  String get hotelLabel;
+
+  /// No description provided for @orderDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'DATE COMMANDE:'**
+  String get orderDateLabel;
+
+  /// No description provided for @deliveryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'LIVRAISON:'**
+  String get deliveryLabel;
+
+  /// No description provided for @noItems.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun article'**
+  String get noItems;
+
+  /// No description provided for @totalToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'TOTAL À PAYER'**
+  String get totalToPay;
+
+  /// No description provided for @taxesIncluded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toute taxe et frais de service inclus'**
+  String get taxesIncluded;
+
+  /// No description provided for @thankYouForOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci pour votre commande !'**
+  String get thankYouForOrder;
+
+  /// No description provided for @invoiceRoomLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'CHAMBRE:'**
+  String get invoiceRoomLabel;
 }
 
 class _AppLocalizationsDelegate

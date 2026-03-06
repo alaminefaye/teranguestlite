@@ -21,12 +21,13 @@ class MyLaundryRequestsScreen extends StatefulWidget {
 class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
   String _selectedPeriod = 'all';
 
-  List<Map<String, String>> _periodFilters() {
+  List<Map<String, String>> _periodFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': l10n.periodAllDates},
+      {'value': 'today', 'label': l10n.periodToday},
+      {'value': 'week', 'label': l10n.periodThisWeek},
+      {'value': 'month', 'label': l10n.periodThisMonth},
     ];
   }
 
@@ -125,9 +126,9 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
         height: 40,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: _periodFilters().length,
+          itemCount: _periodFilters(context).length,
           itemBuilder: (context, index) {
-            final filter = _periodFilters()[index];
+            final filter = _periodFilters(context)[index];
             final isSelected = _selectedPeriod == filter['value'];
 
             return Padding(
@@ -249,7 +250,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                     final parts = <String>[];
                     if (request.roomNumber != null &&
                         request.roomNumber!.isNotEmpty) {
-                      parts.add('Chambre ${request.roomNumber}');
+                      parts.add('${l10n.identityRoom} ${request.roomNumber}');
                     }
                     if (request.guestName != null &&
                         request.guestName!.isNotEmpty) {
@@ -763,7 +764,7 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Détail de la demande de blanchisserie',
+                            l10n.laundryRequestDetailTitle,
                             style: const TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
@@ -831,7 +832,7 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                             request.roomNumber!.trim().isNotEmpty)
                           _InfoRow(
                             icon: Icons.meeting_room,
-                            text: 'Chambre ${request.roomNumber}',
+                            text: '${l10n.identityRoom} ${request.roomNumber}',
                           ),
                         if (request.guestName != null &&
                             request.guestName!.trim().isNotEmpty) ...[
@@ -885,9 +886,9 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                             },
                           )
                         else
-                          const Text(
-                            'Aucun article trouvé pour cette demande.',
-                            style: TextStyle(
+                          Text(
+                            l10n.laundryNoItemsInRequest,
+                            style: const TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
                             ),

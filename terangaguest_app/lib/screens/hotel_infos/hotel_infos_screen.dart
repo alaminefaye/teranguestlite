@@ -179,9 +179,9 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                   final session = context.read<TabletSessionProvider>().session;
                   if (session != null) _loadTabletInfos(session);
                 },
-                child: const Text(
-                  'Réessayer',
-                  style: TextStyle(color: AppTheme.accentGold),
+                child: Text(
+                  l10n.retry,
+                  style: const TextStyle(color: AppTheme.accentGold),
                 ),
               ),
             ],
@@ -217,7 +217,7 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                 ),
               ]),
             if (infos.mapUrl != null && infos.mapUrl!.isNotEmpty)
-              _section(context, 'Plan', [
+              _section(context, l10n.hotelMap, [
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -345,5 +345,4 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
       ),
     );
   }
-
 }

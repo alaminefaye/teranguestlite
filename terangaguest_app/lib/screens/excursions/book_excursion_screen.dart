@@ -44,7 +44,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       await tabletSession.tryRestoreSessionFromRoom();
       if (!mounted) return;
       final code = tabletSession.clientCodeForPreFill;
-      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+      if (code != null &&
+          code.isNotEmpty &&
+          _clientCodeController.text.isEmpty) {
         _clientCodeController.text = code;
         setState(() {});
       }
@@ -534,7 +536,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).',
+                  AppLocalizations.of(context).reservationClientCodeBanner,
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
@@ -545,7 +547,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
             controller: _clientCodeController,
             style: const TextStyle(color: Colors.white, fontSize: 16),
             decoration: InputDecoration(
-              hintText: 'Code client (ex: 123456)',
+              hintText: AppLocalizations.of(context).clientCodeHint,
               hintStyle: TextStyle(
                 color: AppTheme.textGray.withValues(alpha: 0.8),
               ),
@@ -596,9 +598,9 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
       if (auth.user?.canReserve != true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.',
+                AppLocalizations.of(context).sessionExpiredNeedClientCode,
               ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 4),

@@ -136,7 +136,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         if (hadNewStaffMessage && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Nouveau message du staff'),
+              content: Text(AppLocalizations.of(context).newStaffMessage),
               backgroundColor: AppTheme.accentGold,
               duration: const Duration(seconds: 3),
             ),
@@ -287,10 +287,8 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       if (!hasPermission) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Autorisez l’accès au micro pour envoyer une note vocale.',
-            ),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).microphonePermission),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -558,13 +556,13 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                             child: _messages.isEmpty
                                 ? ListView(
                                     padding: const EdgeInsets.all(24),
-                                    children: const [
-                                      SizedBox(height: 40),
+                                    children: [
+                                      const SizedBox(height: 40),
                                       Center(
                                         child: Text(
-                                          'Commencez la conversation avec la réception.',
+                                          l10n.startConversation,
                                           textAlign: TextAlign.center,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: AppTheme.textGray,
                                             fontSize: 15,
                                           ),
@@ -584,7 +582,10 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                                     itemBuilder: (context, index) {
                                       final entry = _chatEntries[index];
                                       if (entry.isDate) {
-                                        return _buildDateSeparator(entry.date!);
+                                        return _buildDateSeparator(
+                                          context,
+                                          entry.date!,
+                                        );
                                       }
                                       final message = entry.message!;
                                       return _buildMessageBubble(
@@ -645,8 +646,8 @@ class _ChatbotScreenState extends State<ChatbotScreen>
               const SizedBox(width: 8),
               Text(
                 _unreadCountBelow == 1
-                    ? '1 nouveau message'
-                    : '$_unreadCountBelow nouveaux messages',
+                    ? AppLocalizations.of(context).newMessageSingular
+                    : '$_unreadCountBelow ${AppLocalizations.of(context).newMessagesPlural}',
                 style: const TextStyle(
                   color: AppTheme.primaryDark,
                   fontWeight: FontWeight.w600,
@@ -675,17 +676,18 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     return list;
   }
 
-  String _formatDateLabel(DateTime d) {
+  String _formatDateLabel(BuildContext context, DateTime d) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final day = DateTime(d.year, d.month, d.day);
-    if (day == today) return 'Aujourd\'hui';
-    if (day == yesterday) return 'Hier';
+    if (day == today) return l10n.periodToday;
+    if (day == yesterday) return l10n.yesterday;
     return DateFormat('d MMMM yyyy', 'fr_FR').format(d);
   }
 
-  Widget _buildDateSeparator(DateTime date) {
+  Widget _buildDateSeparator(BuildContext context, DateTime date) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Center(
@@ -696,7 +698,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            _formatDateLabel(date),
+            _formatDateLabel(context, date),
             style: const TextStyle(
               color: AppTheme.textGray,
               fontSize: 13,
@@ -904,7 +906,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
         return Text(
           message.content?.isNotEmpty == true
               ? message.content!
-              : '[Image indisponible]',
+              : '[${AppLocalizations.of(context).imageUnavailable}]',
           style: TextStyle(color: textColor, fontSize: 16, height: 1.3),
         );
       }
@@ -938,8 +940,8 @@ class _ChatbotScreenState extends State<ChatbotScreen>
       final durationSeconds = meta != null ? meta['duration'] as int? : null;
       final isPlaying = _isPlayingAudio && _playingAudioMessageId == message.id;
       final label = durationSeconds != null && durationSeconds > 0
-          ? 'Message vocal ${_formatAudioDuration(durationSeconds)}'
-          : 'Message vocal';
+          ? '${AppLocalizations.of(context).voiceMessage} ${_formatAudioDuration(durationSeconds)}'
+          : AppLocalizations.of(context).voiceMessage;
       final pattern = [6.0, 16.0, 10.0, 18.0, 12.0];
       final shift = isPlaying ? _audioAnimationTick % pattern.length : 0;
 

@@ -293,7 +293,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportSecurityEmergency => 'Signaler une urgence sécurité';
 
   @override
-  String get roomLabel => 'Chambre';
+  String roomLabel(String room) {
+    return 'Chambre : $room';
+  }
 
   @override
   String get emergencyRequestSent =>
@@ -988,7 +990,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderItems => 'Articles commandés';
 
   @override
-  String get quantity => 'Quantité :';
+  String get quantity => 'Quantité';
 
   @override
   String get reorder => 'Recommander';
@@ -1039,7 +1041,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get open => 'Ouvert';
 
   @override
-  String get itemsLabel => 'Articles';
+  String get itemsLabel => 'ARTICLES';
 
   @override
   String get statusLabel => 'Statut';
@@ -1271,4 +1273,577 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get specialRequests => 'Demandes spéciales';
+
+  @override
+  String get developedByUTA => 'Développé par Universal Technologies Africa';
+
+  @override
+  String get tapToContinue => 'Appuyez pour continuer';
+
+  @override
+  String get changeLanguage => 'Changer la langue';
+
+  @override
+  String get monthJanuary => 'janvier';
+
+  @override
+  String get monthFebruary => 'février';
+
+  @override
+  String get monthMarch => 'mars';
+
+  @override
+  String get monthApril => 'avril';
+
+  @override
+  String get monthMay => 'mai';
+
+  @override
+  String get monthJune => 'juin';
+
+  @override
+  String get monthJuly => 'juillet';
+
+  @override
+  String get monthAugust => 'août';
+
+  @override
+  String get monthSeptember => 'septembre';
+
+  @override
+  String get monthOctober => 'octobre';
+
+  @override
+  String get monthNovember => 'novembre';
+
+  @override
+  String get monthDecember => 'décembre';
+
+  @override
+  String get reservationClientCodeBanner =>
+      'Les réservations sont réservées aux clients avec un séjour valide. Entrez votre code client ci-dessous (reçu à l\'enregistrement).';
+
+  @override
+  String get sessionExpiredNeedClientCode =>
+      'Votre séjour n\'est plus actif. Entrez votre code client pour réserver.';
+
+  @override
+  String get periodAllDates => 'Toutes les dates';
+
+  @override
+  String get periodToday => 'Aujourd\'hui';
+
+  @override
+  String get periodThisWeek => 'Cette semaine';
+
+  @override
+  String get periodThisMonth => 'Ce mois';
+
+  @override
+  String get staffOrdersTitle => 'Commandes Room Service';
+
+  @override
+  String get staffOrdersSubtitle =>
+      'Suivi et traitement des commandes room service';
+
+  @override
+  String addedToCart(String itemName) {
+    return '$itemName ajouté au panier';
+  }
+
+  @override
+  String get invalidSessionRetry =>
+      'Séjour invalide ou expiré. Entrez à nouveau votre code.';
+
+  @override
+  String get orderValidationError =>
+      'Impossible de valider la commande. Vérifiez votre code client ou contactez la réception.';
+
+  @override
+  String get enterCodeToValidate =>
+      'Entrez le code reçu à l\'enregistrement pour valider la commande.';
+
+  @override
+  String get roomNumberTablet => 'Numéro de chambre (cette tablette)';
+
+  @override
+  String get roomIdRecommended =>
+      'ID chambre (recommandé — voir tableau de bord > Accès tablettes)';
+
+  @override
+  String get multiHotelWarning =>
+      'En multi-établissement, renseignez l\'ID chambre pour n\'afficher que les données de votre hôtel.';
+
+  @override
+  String get code6Digits => 'Code à 6 chiffres';
+
+  @override
+  String get enter6Digits => 'Entrez le code à 6 chiffres.';
+
+  @override
+  String get defineRoomTablet =>
+      'Définissez le numéro de chambre de cette tablette.';
+
+  @override
+  String get confirmIdentity => 'Confirmer que c\'est bien vous';
+
+  @override
+  String get verifyInfoBeforeOrder =>
+      'Vérifiez vos informations avant d\'envoyer la commande :';
+
+  @override
+  String get identityName => 'Nom';
+
+  @override
+  String get identityRoom => 'Chambre';
+
+  @override
+  String get identityPhone => 'Téléphone';
+
+  @override
+  String get identityEmail => 'Email';
+
+  @override
+  String get paymentMethodText => 'Moyen de paiement';
+
+  @override
+  String get paymentCash => 'Espèce';
+
+  @override
+  String get paymentRoomBill => 'Mettre sur la note de la chambre';
+
+  @override
+  String get paymentWave => 'Wave';
+
+  @override
+  String get paymentOrangeMoney => 'Orange Money';
+
+  @override
+  String get confirmOrder => 'Confirmer la commande';
+
+  @override
+  String get statusUpdated => 'Statut mis à jour';
+
+  @override
+  String get orderStatusUpdated => 'Statut de la commande mis à jour';
+
+  @override
+  String cannotSendNotification(String error) {
+    return 'Impossible d\'envoyer la notification : $error';
+  }
+
+  @override
+  String get orderCancelledNotified =>
+      'Commande annulée — le client a été notifié.';
+
+  @override
+  String get orderCancelled => 'Commande annulée';
+
+  @override
+  String get cancelOrder => 'Annuler la commande';
+
+  @override
+  String get yesCancel => 'Oui, annuler';
+
+  @override
+  String get spaCategoryAll => 'Tous';
+
+  @override
+  String get spaCategoryMassage => 'Massages';
+
+  @override
+  String get spaCategoryFacial => 'Soins Visage';
+
+  @override
+  String get spaCategoryBody => 'Soins Corps';
+
+  @override
+  String get spaCategoryHammam => 'Hammam';
+
+  @override
+  String get spaAndWellness => 'Spa & Bien-être';
+
+  @override
+  String get spaServiceFallback => 'Service Spa';
+
+  @override
+  String get timeLabel => 'Heure';
+
+  @override
+  String get excursionFallback => 'Excursion';
+
+  @override
+  String get locationEnableSettings =>
+      'Activez la localisation dans les paramètres.';
+
+  @override
+  String get locationAccessDenied => 'Accès à la position refusé.';
+
+  @override
+  String get locationCurrentPos => 'Position actuelle';
+
+  @override
+  String get locationError => 'Impossible d\'obtenir la position';
+
+  @override
+  String get vehicleRequestType => 'Type de demande';
+
+  @override
+  String get vehicleTypeTaxi => 'Taxi';
+
+  @override
+  String get vehicleTypeRental => 'Location';
+
+  @override
+  String get taxiPickup => 'Prise en charge';
+
+  @override
+  String get taxiPickupHint => 'Adresse ou position';
+
+  @override
+  String get taxiMyLocation => 'Ma position';
+
+  @override
+  String get taxiDestination => 'Destination';
+
+  @override
+  String get taxiDestinationHint => 'Adresse de destination';
+
+  @override
+  String get taxiDistanceOption => 'Distance (km, optionnel)';
+
+  @override
+  String get taxiDistanceHint => 'Ex: 5.2';
+
+  @override
+  String get rentalAllTypes => 'Tous les types';
+
+  @override
+  String get rentalSedan => 'Berline';
+
+  @override
+  String get rentalSuv => 'SUV';
+
+  @override
+  String get rentalMinibus => 'Minibus';
+
+  @override
+  String get rentalVan => 'Van';
+
+  @override
+  String get rentalOther => 'Autre';
+
+  @override
+  String get rentalChooseVehicle => 'Choisir un véhicule';
+
+  @override
+  String get rentalTypeLabel => 'Type';
+
+  @override
+  String get rentalSeatsMin => 'Places min.';
+
+  @override
+  String get rentalSeatsAll => 'Toutes';
+
+  @override
+  String rentalSeatsCount(String count) {
+    return '$count place(s)';
+  }
+
+  @override
+  String get rentalNoVehicleFound => 'Aucun véhicule pour ces critères.';
+
+  @override
+  String rentalSeatsPl(String count) {
+    return '$count pl.';
+  }
+
+  @override
+  String get rentalDaysHint => 'Ex: 2';
+
+  @override
+  String get rentalDurationHours => 'Durée (heures)';
+
+  @override
+  String get rentalDurationHint => 'Ex: 8 (demi-journée si ≤ 5 h)';
+
+  @override
+  String rentalEstimate(String price) {
+    return 'Estimation : $price FCFA';
+  }
+
+  @override
+  String get rentalErrorDestination => 'Indiquez l\'adresse de destination.';
+
+  @override
+  String get rentalErrorChooseVehicle =>
+      'Choisissez un véhicule dans la liste.';
+
+  @override
+  String get rentalErrorVehicleOrDetails =>
+      'Choisissez Taxi ou Location, ou décrivez votre demande.';
+
+  @override
+  String get sessionExpiredNeedClientCodeRequest =>
+      'Votre séjour n\'est plus actif. Entrez votre code client pour effectuer la demande.';
+
+  @override
+  String get palaceConciergeServices => 'Services Palace / Conciergerie';
+
+  @override
+  String get palaceConciergeTracking =>
+      'Suivi des demandes palace & conciergerie';
+
+  @override
+  String get palaceConciergeServiceSingle => 'Service palace / conciergerie';
+
+  @override
+  String scheduledForDate(String date) {
+    return 'Prévue pour $date';
+  }
+
+  @override
+  String get requestDetailsOnly => 'Détails de la demande';
+
+  @override
+  String get cancellationReason => 'Motif d\'annulation';
+
+  @override
+  String get acceptRequestTitle => 'Accepter la demande';
+
+  @override
+  String get acceptRequestMessage =>
+      'Accepter cette demande de service palace / conciergerie ?';
+
+  @override
+  String get completeRequestTitle => 'Clôturer la demande';
+
+  @override
+  String get completeRequestMessage => 'Clôturer cette demande ?';
+
+  @override
+  String get rejectRequestTitle => 'Refuser la demande';
+
+  @override
+  String get rejectRequestMessage =>
+      'Refuser cette demande de service palace ?';
+
+  @override
+  String get cancelRequestMessage =>
+      'Annuler cette demande de service palace ?';
+
+  @override
+  String get cancellationReasonHint => 'Motif de l\'annulation';
+
+  @override
+  String get validationReasonRequired => 'Veuillez préciser un motif.';
+
+  @override
+  String get requestDetailTitle => 'Détail de la demande palace / conciergerie';
+
+  @override
+  String get laundryRequestDetailTitle =>
+      'Détail de la demande de blanchisserie';
+
+  @override
+  String get laundryNoItemsInRequest =>
+      'Aucun article trouvé pour cette demande.';
+
+  @override
+  String get hotelMap => 'Plan';
+
+  @override
+  String get albumsTitle => 'Albums';
+
+  @override
+  String photoCount(int count) {
+    return '$count photo(s)';
+  }
+
+  @override
+  String get noPhoto => 'Aucune photo';
+
+  @override
+  String get presentationTitle => 'Présentation';
+
+  @override
+  String get addressTitle => 'Adresse';
+
+  @override
+  String get phoneAbbr => 'Tél.';
+
+  @override
+  String get staffEmergencySubtitle => 'Alertes médecin / sécurité en cours';
+
+  @override
+  String get guestEmergencySubtitle => 'Vos demandes Assistance & Urgence';
+
+  @override
+  String get noEmergencyAlerts =>
+      'Aucune alerte Assistance & Urgence en cours.';
+
+  @override
+  String get acceptEmergencyAlertMessage =>
+      'Accepter cette alerte Assistance & Urgence ?';
+
+  @override
+  String get cancelEmergencyAlertMessage => 'Annuler cette alerte ?';
+
+  @override
+  String get reasonOptional => 'Motif (optionnel)';
+
+  @override
+  String get reasonRequired => 'Veuillez préciser un motif.';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get unidentifiedRoom => 'Chambre non identifiée';
+
+  @override
+  String requestFromRoom(String roomInfo) {
+    return 'Demande depuis $roomInfo';
+  }
+
+  @override
+  String get newStaffMessage => 'Nouveau message du staff';
+
+  @override
+  String get startConversation =>
+      'Commencez la conversation avec la réception.';
+
+  @override
+  String get newMessageSingular => '1 nouveau message';
+
+  @override
+  String get newMessagesPlural => 'nouveaux messages';
+
+  @override
+  String get yesterday => 'Hier';
+
+  @override
+  String get imageUnavailable => 'Image indisponible';
+
+  @override
+  String get voiceMessage => 'Message vocal';
+
+  @override
+  String get microphonePermission =>
+      'Autorisez l’accès au micro pour envoyer une note vocale.';
+
+  @override
+  String get sportCategory => 'Sport';
+
+  @override
+  String get leisureCategory => 'Loisirs';
+
+  @override
+  String get timeoutError => 'Délai dépassé. Vérifiez votre connexion.';
+
+  @override
+  String get viewMyRequests => 'Voir mes demandes';
+
+  @override
+  String get datePrefix => 'Date: ';
+
+  @override
+  String get timePrefix => 'Heure: ';
+
+  @override
+  String get requestDemandeSuffix => ' - Demande';
+
+  @override
+  String get sportFitnessCoachBooking =>
+      'Sport & Fitness - Réservation coach personnel';
+
+  @override
+  String get golfPrefix => 'Golf';
+
+  @override
+  String get tennisPrefix => 'Tennis';
+
+  @override
+  String get guidedToursNotConfigured =>
+      'Visites guidées non configurées. L\'établissement doit ajouter le service « Visites guidées personnalisées » dans le tableau de bord (Services Palace).';
+
+  @override
+  String get transfersNotConfigured =>
+      'Service Transferts & VTC non configuré. Contactez l\'établissement.';
+
+  @override
+  String get pickupDestinationRequired =>
+      'Indiquez le lieu de prise en charge et la destination.';
+
+  @override
+  String get exAirportHotel => 'Ex: Aéroport, Hôtel…';
+
+  @override
+  String get exDowntownAddress => 'Ex: Centre-ville, Adresse…';
+
+  @override
+  String get vehicleRentalNotConfigured =>
+      'Service Location de véhicule non configuré. Contactez l\'établissement.';
+
+  @override
+  String get durationOrDaysRequired =>
+      'Indiquez le nombre de jours ou la durée en heures.';
+
+  @override
+  String get exDays => 'Ex: 2';
+
+  @override
+  String get exHours => 'Ex: 5 (demi-journée)';
+
+  @override
+  String get profileRoom => 'Chambre';
+
+  @override
+  String get profileHotel => 'Hôtel';
+
+  @override
+  String get profileRole => 'Rôle';
+
+  @override
+  String get myInvoices => 'Mes Factures';
+
+  @override
+  String get phone => 'Téléphone';
+
+  @override
+  String get noInvoicesTitle => 'Aucune facture';
+
+  @override
+  String get noInvoicesSubtitle =>
+      'Vous n\'avez pas encore de commandes terminées.';
+
+  @override
+  String get generalError => 'Erreur';
+
+  @override
+  String get orderReceipt => 'REÇU DE COMMANDE';
+
+  @override
+  String get hotelLabel => 'HÔTEL:';
+
+  @override
+  String get orderDateLabel => 'DATE COMMANDE:';
+
+  @override
+  String get deliveryLabel => 'LIVRAISON:';
+
+  @override
+  String get noItems => 'Aucun article';
+
+  @override
+  String get totalToPay => 'TOTAL À PAYER';
+
+  @override
+  String get taxesIncluded => 'Toute taxe et frais de service inclus';
+
+  @override
+  String get thankYouForOrder => 'Merci pour votre commande !';
+
+  @override
+  String get invoiceRoomLabel => 'CHAMBRE:';
 }

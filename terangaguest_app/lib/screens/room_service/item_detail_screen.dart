@@ -79,7 +79,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                '${widget.item.name} ajouté au panier',
+                AppLocalizations.of(context).addedToCart(widget.item.name),
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -359,7 +359,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
           // Quantité
           Text(
-            'Quantité',
+            AppLocalizations.of(context).quantity,
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
               fontWeight: FontWeight.bold,
