@@ -185,8 +185,20 @@ class TabletSessionProvider with ChangeNotifier {
     try {
       final s = await _api.validateSession(_session!);
       _session = s;
+
+      // Mettre à jour le code client si le serveur le renvoie
+      if (s.clientCode != null && s.clientCode!.trim().isNotEmpty) {
+        _clientCodeForPreFill = s.clientCode!.trim();
+      }
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
+
+      // Persister le nouveau code client
+      if (_clientCodeForPreFill != null) {
+        await prefs.setString(_keyClientCode, _clientCodeForPreFill!);
+      }
+
       notifyListeners();
       return s;
     } catch (e) {

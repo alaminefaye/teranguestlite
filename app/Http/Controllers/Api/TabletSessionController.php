@@ -354,6 +354,7 @@ class TabletSessionController extends Controller
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number,
                 'validated_at' => $request->input('validated_at'),
+                'client_code' => $guest->access_code,
             ],
         ], 200);
     }

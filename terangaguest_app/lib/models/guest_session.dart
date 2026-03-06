@@ -13,6 +13,9 @@ class GuestSession {
   /// Date/heure de validation du code (ISO8601). Envoyée à validate-session pour rejet si code régénéré.
   final String? validatedAt;
 
+  /// Le code client (utilisé pour filtrer l'historique de ce client uniquement)
+  final String? clientCode;
+
   const GuestSession({
     required this.guestId,
     required this.guestName,
@@ -23,6 +26,7 @@ class GuestSession {
     required this.reservationId,
     required this.reservationNumber,
     this.validatedAt,
+    this.clientCode,
   });
 
   factory GuestSession.fromJson(Map<String, dynamic> json) {
@@ -36,6 +40,7 @@ class GuestSession {
       reservationId: json['reservation_id'] as int,
       reservationNumber: json['reservation_number'] as String? ?? '',
       validatedAt: json['validated_at'] as String?,
+      clientCode: json['client_code'] as String?,
     );
   }
 
@@ -49,5 +54,6 @@ class GuestSession {
     'reservation_id': reservationId,
     'reservation_number': reservationNumber,
     if (validatedAt != null) 'validated_at': validatedAt,
+    if (clientCode != null) 'client_code': clientCode,
   };
 }
