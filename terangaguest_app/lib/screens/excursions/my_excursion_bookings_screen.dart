@@ -6,6 +6,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../providers/excursions_provider.dart';
 import '../../models/excursion.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../utils/navigation_helper.dart';
@@ -34,6 +35,12 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      context.read<ExcursionsProvider>().setClientCode(clientCode);
       context.read<ExcursionsProvider>().fetchMyExcursionBookings();
     });
   }

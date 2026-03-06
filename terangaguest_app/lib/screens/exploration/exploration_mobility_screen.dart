@@ -23,6 +23,7 @@ class ExplorationMobilityScreen extends StatelessWidget {
       (
         l10n.vehicleRental,
         Icons.directions_car_outlined,
+        'assets/images/explor_vehicle.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const VehicleListScreen());
@@ -31,6 +32,7 @@ class ExplorationMobilityScreen extends StatelessWidget {
       (
         l10n.sitesTouristiques,
         Icons.place_outlined,
+        'assets/images/explor_decouverte.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const ExcursionsListScreen());
@@ -39,6 +41,7 @@ class ExplorationMobilityScreen extends StatelessWidget {
       (
         l10n.guidedTours,
         Icons.tour_outlined,
+        'assets/images/explor_visites_guidees.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const GuidedToursRequestScreen());
@@ -47,6 +50,7 @@ class ExplorationMobilityScreen extends StatelessWidget {
       (
         l10n.transfersVtc,
         Icons.local_taxi_outlined,
+        'assets/images/explor_transfert.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const TransfersRequestScreen());
@@ -82,10 +86,11 @@ class ExplorationMobilityScreen extends StatelessWidget {
                     ),
                     itemCount: subServices.length,
                     itemBuilder: (context, index) {
-                      final (title, icon, onTap) = subServices[index];
+                      final (title, icon, image, onTap) = subServices[index];
                       return ServiceCard(
                         title: title,
                         icon: icon,
+                        imagePath: image,
                         onTap: onTap,
                       );
                     },

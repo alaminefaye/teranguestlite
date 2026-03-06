@@ -13,6 +13,7 @@ class RestaurantsProvider with ChangeNotifier {
   String? _selectedType;
   String? _selectedReservationsPeriod;
   int _currentReservationsPage = 1;
+  String? _clientCode;
 
   List<Restaurant> get restaurants => _restaurants;
   List<RestaurantReservation> get reservations => _reservations;
@@ -21,6 +22,12 @@ class RestaurantsProvider with ChangeNotifier {
   String? get selectedType => _selectedType;
   bool get hasMoreReservationPages => _hasMoreReservationPages;
   String? get selectedReservationsPeriod => _selectedReservationsPeriod;
+  String? get clientCode => _clientCode;
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
+  }
 
   /// Récupère les restaurants
   Future<void> fetchRestaurants({String? type}) async {
@@ -106,6 +113,7 @@ class RestaurantsProvider with ChangeNotifier {
       final result = await _restaurantsApi.getMyReservations(
         period: effectivePeriod,
         page: _currentReservationsPage,
+        clientCode: _clientCode,
       );
 
       final newReservations =
@@ -183,6 +191,7 @@ class RestaurantsProvider with ChangeNotifier {
     _currentReservationsPage = 1;
     _hasMoreReservationPages = true;
     _selectedReservationsPeriod = null;
+    _clientCode = null;
     _errorMessage = null;
     notifyListeners();
   }

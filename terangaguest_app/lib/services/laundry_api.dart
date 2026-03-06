@@ -82,12 +82,17 @@ class LaundryApi {
     String? period,
     int page = 1,
     int perPage = 15,
+    String? clientCode,
   }) async {
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
       if (period != null && period.isNotEmpty && period != 'all') {
         queryParams['period'] = period;
+      }
+
+      if (clientCode != null && clientCode.trim().isNotEmpty) {
+        queryParams['client_code'] = clientCode.trim();
       }
 
       final response = await _apiService.get(

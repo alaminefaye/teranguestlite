@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/order.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -22,6 +23,12 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      context.read<OrdersProvider>().setClientCode(clientCode);
       context.read<OrdersProvider>().fetchOrders();
     });
     _scrollController.addListener(_onScroll);

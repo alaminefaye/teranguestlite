@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/laundry_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../models/laundry.dart';
@@ -33,6 +34,12 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      context.read<LaundryProvider>().setClientCode(clientCode);
       context.read<LaundryProvider>().fetchMyLaundryRequests();
     });
   }

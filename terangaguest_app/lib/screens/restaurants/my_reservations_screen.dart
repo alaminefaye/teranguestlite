@@ -7,6 +7,7 @@ import '../../models/restaurant.dart';
 import '../../widgets/empty_state.dart';
 import '../../providers/restaurants_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
 
@@ -35,6 +36,12 @@ class _MyRestaurantReservationsScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      context.read<RestaurantsProvider>().setClientCode(clientCode);
       context.read<RestaurantsProvider>().fetchMyReservations();
     });
   }

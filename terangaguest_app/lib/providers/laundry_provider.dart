@@ -12,6 +12,7 @@ class LaundryProvider with ChangeNotifier {
   String? _errorMessage;
   String? _selectedRequestsPeriod;
   int _currentRequestsPage = 1;
+  String? _clientCode;
 
   // État pour le formulaire de demande
   final Map<int, int> _selectedItems = {}; // serviceId: quantity
@@ -23,6 +24,12 @@ class LaundryProvider with ChangeNotifier {
   Map<int, int> get selectedItems => _selectedItems;
   bool get hasMoreRequestPages => _hasMoreRequestPages;
   String? get selectedRequestsPeriod => _selectedRequestsPeriod;
+  String? get clientCode => _clientCode;
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
+  }
 
   int getQuantityForService(int serviceId) => _selectedItems[serviceId] ?? 0;
 
@@ -131,6 +138,7 @@ class LaundryProvider with ChangeNotifier {
       final result = await _laundryApi.getMyLaundryRequests(
         period: effectivePeriod,
         page: _currentRequestsPage,
+        clientCode: _clientCode,
       );
 
       final newRequests = result['requests'] as List<LaundryRequest>? ?? [];
@@ -201,6 +209,7 @@ class LaundryProvider with ChangeNotifier {
     _currentRequestsPage = 1;
     _hasMoreRequestPages = true;
     _selectedRequestsPeriod = null;
+    _clientCode = null;
     _errorMessage = null;
     notifyListeners();
   }

@@ -13,6 +13,7 @@ class OrdersApi {
     String? period,
     int page = 1,
     int perPage = 15,
+    String? clientCode,
   }) async {
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
@@ -23,6 +24,10 @@ class OrdersApi {
 
       if (period != null && period.isNotEmpty && period != 'all') {
         queryParams['period'] = period;
+      }
+
+      if (clientCode != null && clientCode.trim().isNotEmpty) {
+        queryParams['client_code'] = clientCode.trim();
       }
 
       final response = await _apiService.get(
@@ -122,7 +127,9 @@ class OrdersApi {
   /// Notifie explicitement le personnel "Service en chambre" qu'une commande est prête à livrer.
   Future<void> notifyRoomService(int orderId) async {
     try {
-      await _apiService.post('${ApiConfig.orders}/$orderId/notify-room-service');
+      await _apiService.post(
+        '${ApiConfig.orders}/$orderId/notify-room-service',
+      );
     } on DioException catch (e) {
       debugPrint('❌ API Error notifyRoomService: $e');
       rethrow;

@@ -23,6 +23,13 @@ class PalaceProvider with ChangeNotifier {
   List<PalaceRequest> get emergencyRequests => _emergencyRequests;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? _clientCode;
+  String? get clientCode => _clientCode;
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
+  }
 
   /// Notifie après le build en cours pour éviter "setState/markNeedsBuild called during build".
   void _safeNotifyListeners() {
@@ -108,6 +115,7 @@ class PalaceProvider with ChangeNotifier {
       final result = await _palaceApi.getMyPalaceRequests(
         period: effectivePeriod,
         page: _currentRequestsPage,
+        clientCode: _clientCode,
       );
 
       final newRequests = result['requests'] as List<PalaceRequest>? ?? [];
@@ -245,6 +253,7 @@ class PalaceProvider with ChangeNotifier {
     _hasMoreEmergencyPages = true;
     _selectedRequestsPeriod = null;
     _selectedEmergencyPeriod = null;
+    _clientCode = null;
     _errorMessage = null;
     notifyListeners();
   }

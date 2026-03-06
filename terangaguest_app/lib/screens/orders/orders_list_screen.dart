@@ -5,6 +5,7 @@ import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/orders_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../widgets/order_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -60,6 +61,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
       } catch (_) {
         return;
       }
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      provider.setClientCode(clientCode);
       _loadOrders(provider);
     });
   }

@@ -12,6 +12,7 @@ class ExcursionsProvider with ChangeNotifier {
   String? _errorMessage;
   String? _selectedBookingsPeriod;
   int _currentBookingsPage = 1;
+  String? _clientCode;
 
   List<Excursion> get excursions => _excursions;
   List<ExcursionBooking> get bookings => _bookings;
@@ -19,6 +20,12 @@ class ExcursionsProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get hasMoreBookingPages => _hasMoreBookingPages;
   String? get selectedBookingsPeriod => _selectedBookingsPeriod;
+  String? get clientCode => _clientCode;
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
+  }
 
   /// Récupère les excursions
   Future<void> fetchExcursions() async {
@@ -103,6 +110,7 @@ class ExcursionsProvider with ChangeNotifier {
       final result = await _excursionsApi.getMyExcursionBookings(
         period: effectivePeriod,
         page: _currentBookingsPage,
+        clientCode: _clientCode,
       );
 
       final newBookings = result['bookings'] as List<ExcursionBooking>? ?? [];
@@ -173,6 +181,7 @@ class ExcursionsProvider with ChangeNotifier {
     _currentBookingsPage = 1;
     _hasMoreBookingPages = true;
     _selectedBookingsPeriod = null;
+    _clientCode = null;
     _errorMessage = null;
     notifyListeners();
   }

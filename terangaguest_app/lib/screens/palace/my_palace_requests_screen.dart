@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../models/palace.dart';
@@ -32,6 +33,12 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Injecter le code client du guest connecté (tablette)
+      final clientCode = context
+          .read<TabletSessionProvider>()
+          .clientCodeForPreFill;
+      context.read<PalaceProvider>().setClientCode(clientCode);
       context.read<PalaceProvider>().fetchMyPalaceRequests();
     });
   }

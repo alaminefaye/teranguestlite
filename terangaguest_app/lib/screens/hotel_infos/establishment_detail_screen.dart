@@ -56,6 +56,18 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
     }
   }
 
+  void _showPhotoPreview(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        barrierColor: Colors.black,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _PhotoPreviewPage(imageUrl: imageUrl);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -253,59 +265,207 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
             const SizedBox(height: 20),
           ],
           if (d.photos.isNotEmpty) ...[
-            const Text(
-              'Galerie',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.accentGold,
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.accentGold.withValues(alpha: 0.25),
+                  width: 1,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: d.photos.length,
-              itemBuilder: (context, index) {
-                final photo = d.photos[index];
-                final url = photo.url;
-                if (url == null || url.isEmpty) return const SizedBox.shrink();
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) =>
-                        progress == null
-                            ? child
-                            : const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppTheme.accentGold,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library_rounded,
+                        size: 20,
+                        color: AppTheme.accentGold.withValues(alpha: 0.9),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Galerie',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.accentGold,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      const maxCellSize = 80.0;
+                      const spacing = 8.0;
+                      final n = ((width + spacing) / (maxCellSize + spacing)).floor();
+                      final crossAxisCount = n.clamp(2, 4);
+                      final cellSize = (width - spacing * (crossAxisCount - 1)) / crossAxisCount;
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: spacing,
+                          crossAxisSpacing: spacing,
+                          childAspectRatio: 1.0,
+                          mainAxisExtent: cellSize,
+                        ),
+                        itemCount: d.photos.length,
+                        itemBuilder: (context, index) {
+                          final photo = d.photos[index];
+                          final url = photo.url;
+                          if (url == null || url.isEmpty) return const SizedBox.shrink();
+                          return GestureDetector(
+                            onTap: () {
+                              HapticHelper.lightImpact();
+                              _showPhotoPreview(context, url);
+                            },
+                            child: Container(
+                              width: cellSize,
+                              height: cellSize,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.white.withValues(alpha: 0.06),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  width: cellSize,
+                                  height: cellSize,
+                                  alignment: Alignment.center,
+                                  loadingBuilder: (context, child, progress) =>
+                                      progress == null
+                                          ? child
+                                          : Container(
+                                              width: cellSize,
+                                              height: cellSize,
+                                              color: Colors.white10,
+                                              child: const Center(
+                                                child: SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(
+                                                    color: AppTheme.accentGold,
+                                                    strokeWidth: 2,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      ColoredBox(
+                                        color: Colors.white12,
+                                        child: SizedBox(
+                                          width: cellSize,
+                                          height: cellSize,
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.broken_image_outlined,
+                                              color: AppTheme.textGray,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                 ),
                               ),
-                    errorBuilder: (context, error, stackTrace) =>
-                        const ColoredBox(
-                          color: Colors.white12,
-                          child: Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              color: AppTheme.textGray,
-                              size: 40,
                             ),
-                          ),
-                        ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                );
-              },
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+/// Aperçu plein écran d'une photo avec bouton fermer.
+class _PhotoPreviewPage extends StatelessWidget {
+  const _PhotoPreviewPage({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, progress) =>
+                    progress == null
+                        ? child
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: AppTheme.textGray,
+                        size: 48,
+                      ),
+                    ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Material(
+                  color: Colors.black54,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    onTap: () {
+                      HapticHelper.lightImpact();
+                      Navigator.of(context).pop();
+                    },
+                    customBorder: const CircleBorder(),
+                    child: const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Icon(
+                        Icons.close,
+                        color: AppTheme.accentGold,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

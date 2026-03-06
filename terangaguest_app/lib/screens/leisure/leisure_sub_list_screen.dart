@@ -79,11 +79,56 @@ class LeisureSubListScreen extends StatelessWidget {
   static String? _imageForActivity(LeisureCategoryDto child) {
     final n = child.name.toLowerCase();
     final t = child.type;
-    // Spa & Loisirs → image loisirs
+
+    // Loisirs : Spa
     if (t == 'spa' || n.contains('spa') || n.contains('bien-être')) {
       return 'assets/images/sub_loisirs.png';
     }
-    // Sport : pas encore d'images individuelles — icônes pour l'instant
+
+    // Sport : images individuelles par activité
+    if (t == 'golf' || n.contains('golf')) {
+      return 'assets/images/sport_golf.png';
+    }
+    if (t == 'tennis' || n.contains('tennis')) {
+      return 'assets/images/sport_tennis.png';
+    }
+    if (t == 'fitness' ||
+        n.contains('fitness') ||
+        n.contains('sport & fitness')) {
+      return 'assets/images/sport_fitness.png';
+    }
+    if (n.contains('squash')) {
+      return 'assets/images/sport_squash.png';
+    }
+    if (n.contains('piscine') ||
+        n.contains('pool') ||
+        n.contains('natation') && !n.contains('aquagym')) {
+      return 'assets/images/sport_piscine.png';
+    }
+    if (n.contains('yoga') || n.contains('pilates')) {
+      return 'assets/images/sport_yoga.png';
+    }
+    if (n.contains('aquagym') || n.contains('natation')) {
+      return 'assets/images/sport_aquagym.png';
+    }
+    if (n.contains('running') || n.contains('vtt') || n.contains('vélo')) {
+      return 'assets/images/sport_running.png';
+    }
+    if (n.contains('beach') || n.contains('volley')) {
+      return 'assets/images/sport_beachvolley.png';
+    }
+    if (n.contains('cours collectifs') ||
+        n.contains('groupe') ||
+        n.contains('collectif')) {
+      return 'assets/images/sport_cours_collectifs.png';
+    }
+    if (n.contains('foot') || n.contains('football') || n.contains('soccer')) {
+      return 'assets/images/sport_foot.png';
+    }
+    if (n.contains('basket')) {
+      return 'assets/images/sport_basket.png';
+    }
+
     return null;
   }
 

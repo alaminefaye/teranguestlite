@@ -12,6 +12,7 @@ class OrdersProvider with ChangeNotifier {
   bool _hasMorePages = true;
   String? _selectedStatus;
   String? _selectedPeriod;
+  String? _clientCode;
 
   List<Order> get orders => _orders;
   bool get isLoading => _isLoading;
@@ -19,6 +20,7 @@ class OrdersProvider with ChangeNotifier {
   bool get hasMorePages => _hasMorePages;
   String? get selectedStatus => _selectedStatus;
   String? get selectedPeriod => _selectedPeriod;
+  String? get clientCode => _clientCode;
 
   /// Nombre de commandes en cours (pending, confirmed, preparing, delivering)
   int get inProgressOrdersCount {
@@ -29,6 +31,11 @@ class OrdersProvider with ChangeNotifier {
   /// Charge les commandes pour le footer (sans filtre) — appelé au démarrage du dashboard
   Future<void> fetchOrdersForDashboard() async {
     await fetchOrders(status: null, period: null);
+  }
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
   }
 
   /// Récupère les commandes
@@ -51,6 +58,7 @@ class OrdersProvider with ChangeNotifier {
         status: status,
         period: loadMore ? _selectedPeriod : period,
         page: _currentPage,
+        clientCode: _clientCode,
       );
 
       final newOrders = result['orders'] as List<Order>;
@@ -160,6 +168,7 @@ class OrdersProvider with ChangeNotifier {
     _errorMessage = null;
     _currentPage = 1;
     _selectedPeriod = null;
+    _clientCode = null;
     _safeNotifyListeners();
   }
 }

@@ -13,6 +13,7 @@ class SpaProvider with ChangeNotifier {
   String? _selectedCategory;
   String? _selectedReservationsPeriod;
   int _currentReservationsPage = 1;
+  String? _clientCode;
 
   List<SpaService> get services => _services;
   List<SpaReservation> get reservations => _reservations;
@@ -21,6 +22,12 @@ class SpaProvider with ChangeNotifier {
   String? get selectedCategory => _selectedCategory;
   bool get hasMoreReservationPages => _hasMoreReservationPages;
   String? get selectedReservationsPeriod => _selectedReservationsPeriod;
+  String? get clientCode => _clientCode;
+
+  /// Définit le code client pour filtrer les historiques (guest connecté sur la tablette).
+  void setClientCode(String? code) {
+    _clientCode = code?.trim().isEmpty == true ? null : code?.trim();
+  }
 
   /// Récupère les services spa
   Future<void> fetchSpaServices({String? category}) async {
@@ -104,6 +111,7 @@ class SpaProvider with ChangeNotifier {
       final result = await _spaApi.getMySpaReservations(
         period: effectivePeriod,
         page: _currentReservationsPage,
+        clientCode: _clientCode,
       );
 
       final newReservations =
@@ -188,6 +196,7 @@ class SpaProvider with ChangeNotifier {
     _currentReservationsPage = 1;
     _hasMoreReservationPages = true;
     _selectedReservationsPeriod = null;
+    _clientCode = null;
     _errorMessage = null;
     notifyListeners();
   }

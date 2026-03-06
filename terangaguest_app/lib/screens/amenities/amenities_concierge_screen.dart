@@ -386,7 +386,31 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
 
     final useDynamic =
         _dynamicCategories != null && _dynamicCategories!.isNotEmpty;
-    final List<(String title, IconData icon, List<String>? itemLabels)> options;
+    final List<
+      (String title, IconData icon, String? image, List<String>? itemLabels)
+    >
+    options;
+
+    String? _imageForAmenity(String name) {
+      final n = name.toLowerCase();
+      if (n.contains('toilette') ||
+          n.contains('soap') ||
+          n.contains('shampoo') ||
+          n.contains('rasage') ||
+          n.contains('shav')) {
+        return n.contains('rasage') || n.contains('shav')
+            ? 'assets/images/amenity_shaving.png'
+            : 'assets/images/amenity_toiletries.png';
+      }
+      if (n.contains('oreiller') ||
+          n.contains('pillow') ||
+          n.contains('lit') ||
+          n.contains('bed')) {
+        return 'assets/images/amenity_pillows.png';
+      }
+      return 'assets/images/amenity_other.png';
+    }
+
     if (useDynamic) {
       options = _dynamicCategories!.asMap().entries.map((e) {
         final i = e.key;
@@ -395,14 +419,34 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
             ? _categoryIcons[i]
             : _categoryIcons.last;
         final itemLabels = cat.items.map((item) => item.name).toList();
-        return (cat.name, icon, itemLabels);
+        return (cat.name, icon, _imageForAmenity(cat.name), itemLabels);
       }).toList();
     } else {
       options = [
-        (l10n.amenityToiletries, Icons.soap_outlined, null),
-        (l10n.amenityPillows, Icons.bed_outlined, null),
-        (l10n.amenityShavingKit, Icons.content_cut_outlined, null),
-        (l10n.amenityOther, Icons.more_horiz, null),
+        (
+          l10n.amenityToiletries,
+          Icons.soap_outlined,
+          'assets/images/amenity_toiletries.png',
+          null,
+        ),
+        (
+          l10n.amenityPillows,
+          Icons.bed_outlined,
+          'assets/images/amenity_pillows.png',
+          null,
+        ),
+        (
+          l10n.amenityShavingKit,
+          Icons.content_cut_outlined,
+          'assets/images/amenity_shaving.png',
+          null,
+        ),
+        (
+          l10n.amenityOther,
+          Icons.more_horiz,
+          'assets/images/amenity_other.png',
+          null,
+        ),
       ];
     }
 
@@ -435,10 +479,12 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
                               ),
                           itemCount: options.length,
                           itemBuilder: (context, index) {
-                            final (title, icon, itemLabels) = options[index];
+                            final (title, icon, image, itemLabels) =
+                                options[index];
                             return ServiceCard(
                               title: title,
                               icon: icon,
+                              imagePath: image,
                               onTap: () => _onAmenityTap(
                                 context,
                                 label: title,
