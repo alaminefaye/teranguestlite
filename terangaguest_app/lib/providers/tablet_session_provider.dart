@@ -7,6 +7,7 @@ import '../services/tablet_session_api.dart';
 const _keySession = 'tablet_guest_session';
 const _keyRoomNumber = 'tablet_room_number';
 const _keyRoomId = 'tablet_room_id';
+const _keyClientCode = 'tablet_client_code';
 
 /// Gère la session client sur la tablette (code validé + chambre).
 /// En multi-établissement (SaaS), on doit envoyer room_id (pas seulement room_number)
@@ -22,8 +23,10 @@ class TabletSessionProvider with ChangeNotifier {
 
   GuestSession? get session => _session;
   String? get roomNumber => _roomNumber;
+
   /// ID chambre (prioritaire pour les API — évite les données d'un autre établissement).
   int? get roomId => _roomId ?? _session?.roomId;
+
   /// Code client pour pré-remplissage sur les écrans de réservation (spa, restaurant, etc.).
   String? get clientCodeForPreFill => _clientCodeForPreFill;
   bool get hasSession => _session != null;
@@ -74,6 +77,12 @@ class TabletSessionProvider with ChangeNotifier {
     await prefs.setString(_keySession, jsonEncode(result.session.toJson()));
     await prefs.setInt(_keyRoomId, result.session.roomId);
     await prefs.setString(_keyRoomNumber, result.session.roomNumber);
+    // Persister le code client pour le retrouver après redémarrage de l'app
+    if (result.clientCode != null && result.clientCode!.trim().isNotEmpty) {
+      await prefs.setString(_keyClientCode, result.clientCode!.trim());
+    } else {
+      await prefs.remove(_keyClientCode);
+    }
     notifyListeners();
     return true;
   }
@@ -82,6 +91,7 @@ class TabletSessionProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _roomNumber = prefs.getString(_keyRoomNumber);
     _roomId = prefs.getInt(_keyRoomId);
+    _clientCodeForPreFill = prefs.getString(_keyClientCode);
     final json = prefs.getString(_keySession);
     if (json != null) {
       try {
@@ -133,15 +143,25 @@ class TabletSessionProvider with ChangeNotifier {
       final s = await _api.validateCode(
         code: code,
         roomId: roomId,
-        roomNumber: (_roomNumber?.trim().isNotEmpty == true) ? _roomNumber : null,
+        roomNumber: (_roomNumber?.trim().isNotEmpty == true)
+            ? _roomNumber
+            : null,
       );
       _session = s;
       _roomId = s.roomId;
       _roomNumber = s.roomNumber;
+      // Le code saisit par le guest = son client_code
+      _clientCodeForPreFill = code.trim().isEmpty ? null : code.trim();
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keySession, jsonEncode(s.toJson()));
       await prefs.setInt(_keyRoomId, s.roomId);
       await prefs.setString(_keyRoomNumber, s.roomNumber);
+      // Persister le code client pour le retrouver après redémarrage de l'app
+      if (_clientCodeForPreFill != null) {
+        await prefs.setString(_keyClientCode, _clientCodeForPreFill!);
+      } else {
+        await prefs.remove(_keyClientCode);
+      }
       notifyListeners();
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -182,6 +202,7 @@ class TabletSessionProvider with ChangeNotifier {
     _error = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keySession);
+    await prefs.remove(_keyClientCode);
     // Ne pas supprimer _roomId / _keyRoomId : la tablette reste liée à cette chambre.
     notifyListeners();
   }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Guest;
 use App\Models\MenuItem;
 use App\Models\Reservation;
 use App\Models\Room;
@@ -58,13 +59,28 @@ class OrderController extends Controller
         if ($isStaffOrAdmin) {
             $query = Order::byType('room_service');
         } else {
-            $guestIds = $this->guestIdsForUserRoom($user);
-            $query = Order::where(function ($q) use ($user, $guestIds) {
-                $q->where('user_id', $user->id);
-                if (!empty($guestIds)) {
-                    $q->orWhereIn('guest_id', $guestIds);
+            // Si un client_code est fourni, ne montrer QUE les commandes de ce guest précis
+            $clientCode = trim((string) $request->input('client_code', ''));
+            if ($clientCode !== '') {
+                $guestId = Guest::withoutGlobalScope('enterprise')
+                    ->where('enterprise_id', $user->enterprise_id)
+                    ->where('access_code', $clientCode)
+                    ->value('id');
+                if ($guestId) {
+                    $query = Order::where('guest_id', $guestId);
+                } else {
+                    // Code invalide : renvoyer liste vide
+                    $query = Order::whereRaw('1 = 0');
                 }
-            });
+            } else {
+                $guestIds = $this->guestIdsForUserRoom($user);
+                $query = Order::where(function ($q) use ($user, $guestIds) {
+                    $q->where('user_id', $user->id);
+                    if (!empty($guestIds)) {
+                        $q->orWhereIn('guest_id', $guestIds);
+                    }
+                });
+            }
         }
 
         if ($request->filled('status')) {
@@ -470,12 +486,12 @@ class OrderController extends Controller
             }
 
             $data = [
-                'type'         => 'order_status',
-                'order_id'     => (string) $order->id,
+                'type' => 'order_status',
+                'order_id' => (string) $order->id,
                 'order_number' => $order->order_number,
-                'status'       => 'cancelled',
-                'reason'       => $reason,
-                'room_number'  => $roomNumber,
+                'status' => 'cancelled',
+                'reason' => $reason,
+                'room_number' => $roomNumber,
             ];
 
             if ($order->room_id) {
@@ -491,9 +507,9 @@ class OrderController extends Controller
             'success' => true,
             'message' => 'Commande annulée.',
             'data' => [
-                'id'           => $order->id,
+                'id' => $order->id,
                 'order_number' => $order->order_number,
-                'status'       => $order->status,
+                'status' => $order->status,
             ],
         ], 200);
     }

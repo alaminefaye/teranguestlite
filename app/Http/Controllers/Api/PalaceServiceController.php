@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Guest;
 use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
@@ -302,7 +303,21 @@ class PalaceServiceController extends Controller
             ->where('enterprise_id', $user->enterprise_id);
 
         if (!$isStaffOrAdmin) {
-            $query->where('user_id', $user->id);
+            // Si un client_code est fourni, ne montrer QUE les demandes de ce guest précis
+            $clientCode = trim((string) $request->input('client_code', ''));
+            if ($clientCode !== '') {
+                $guestId = Guest::withoutGlobalScope('enterprise')
+                    ->where('enterprise_id', $user->enterprise_id)
+                    ->where('access_code', $clientCode)
+                    ->value('id');
+                if ($guestId) {
+                    $query->where('guest_id', $guestId);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                $query->where('user_id', $user->id);
+            }
         }
 
         if ($request->boolean('emergency')) {

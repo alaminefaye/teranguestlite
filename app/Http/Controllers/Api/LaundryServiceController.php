@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Guest;
 use App\Models\LaundryService;
 use App\Models\LaundryRequest;
 use App\Models\Room;
@@ -69,7 +70,7 @@ class LaundryServiceController extends Controller
 
         foreach ($request->items as $item) {
             $service = LaundryService::active()->find($item['laundry_service_id']);
-            
+
             if (!$service || !$service->is_available) {
                 return response()->json([
                     'success' => false,
@@ -90,7 +91,7 @@ class LaundryServiceController extends Controller
         }
 
         // Calculer le temps de livraison (prendre le max des turnaround_hours)
-        $maxTurnaround = collect($request->items)->map(function($item) {
+        $maxTurnaround = collect($request->items)->map(function ($item) {
             return LaundryService::active()->find($item['laundry_service_id'])->turnaround_hours;
         })->max();
 
@@ -99,7 +100,7 @@ class LaundryServiceController extends Controller
 
         $user = $request->user();
         $stay = GuestReservationHelper::requireValidCodeOrActiveStay($user, $request->input('client_code'));
-        if (! $stay) {
+        if (!$stay) {
             $message = $request->filled('client_code') && trim((string) $request->input('client_code')) !== ''
                 ? GuestReservationHelper::MESSAGE_CLIENT_CODE_INVALID_OR_EXPIRED
                 : GuestReservationHelper::MESSAGE_REQUIRE_VALID_CLIENT;
@@ -154,7 +155,7 @@ class LaundryServiceController extends Controller
                 'request_number' => $laundryRequest->request_number,
                 'total_price' => $laundryRequest->total_price,
                 'formatted_total' => number_format($laundryRequest->total_price, 0, '', ' ') . ' FCFA',
-                'items' => collect($itemsData)->map(function($item) {
+                'items' => collect($itemsData)->map(function ($item) {
                     return [
                         'service' => [
                             'id' => $item['laundry_service_id'],
@@ -184,8 +185,22 @@ class LaundryServiceController extends Controller
 
         $query = LaundryRequest::with(['room', 'guest']);
 
-        if (! $isStaffOrAdmin) {
-            $query->where('user_id', $user->id);
+        if (!$isStaffOrAdmin) {
+            // Si un client_code est fourni, ne montrer QUE les demandes de ce guest précis
+            $clientCode = trim((string) $request->input('client_code', ''));
+            if ($clientCode !== '') {
+                $guestId = Guest::withoutGlobalScope('enterprise')
+                    ->where('enterprise_id', $user->enterprise_id)
+                    ->where('access_code', $clientCode)
+                    ->value('id');
+                if ($guestId) {
+                    $query->where('guest_id', $guestId);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                $query->where('user_id', $user->id);
+            }
         }
 
         if ($request->filled('status')) {
@@ -277,7 +292,7 @@ class LaundryServiceController extends Controller
 
         $laundryRequest = LaundryRequest::with(['room', 'guest'])->find($id);
 
-        if (! $laundryRequest || $laundryRequest->enterprise_id != $user->enterprise_id) {
+        if (!$laundryRequest || $laundryRequest->enterprise_id != $user->enterprise_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Demande non trouvée',
@@ -370,7 +385,7 @@ class LaundryServiceController extends Controller
         $date = now()->format('Ymd');
         $lastRequest = LaundryRequest::whereDate('created_at', today())->latest()->first();
         $sequence = $lastRequest ? (intval(substr($lastRequest->request_number, -3)) + 1) : 1;
-        
+
         return 'LAU-' . $date . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 }
