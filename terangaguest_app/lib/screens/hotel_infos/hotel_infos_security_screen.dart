@@ -38,6 +38,7 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
       (
         l10n.hotelInfos,
         Icons.info_outline,
+        'assets/images/info_hotel.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const HotelInfosScreen());
@@ -46,6 +47,7 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
       (
         l10n.gallery,
         Icons.photo_library_outlined,
+        'assets/images/info_galerie.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const GalleryScreen());
@@ -54,6 +56,7 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
       (
         l10n.ourEstablishments,
         Icons.business_outlined,
+        'assets/images/info_etablissements.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const EstablishmentsListScreen());
@@ -94,10 +97,12 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
                         ),
                         itemCount: subServices.length,
                         itemBuilder: (context, index) {
-                          final (title, icon, onTap) = subServices[index];
+                          final (title, icon, image, onTap) =
+                              subServices[index];
                           return ServiceCard(
                             title: title,
                             icon: icon,
+                            imagePath: image,
                             onTap: onTap,
                           );
                         },

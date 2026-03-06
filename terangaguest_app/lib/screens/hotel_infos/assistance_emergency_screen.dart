@@ -7,6 +7,7 @@ import '../../providers/palace_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
+import '../../widgets/service_card.dart';
 
 /// Assistance & Urgence : boutons Médecin et Urgence sécurité (chambre identifiée).
 class AssistanceEmergencyScreen extends StatefulWidget {
@@ -239,11 +240,12 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                           ),
                           children: [
                             if (doctorEnabled)
-                              _buildBoxCard(
-                                context,
-                                icon: Icons.medical_services_outlined,
+                              ServiceCard(
                                 title: l10n.requestDoctor,
-                                loading: _sendingDoctor,
+                                icon: Icons.medical_services_outlined,
+                                imagePath:
+                                    'assets/images/assistance_medecin.png',
+                                isLoading: _sendingDoctor,
                                 onTap: () {
                                   HapticHelper.lightImpact();
                                   _confirmAndSendRequest(
@@ -253,11 +255,12 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 },
                               ),
                             if (securityEnabled)
-                              _buildBoxCard(
-                                context,
-                                icon: Icons.security_outlined,
+                              ServiceCard(
                                 title: l10n.reportSecurityEmergency,
-                                loading: _sendingSecurity,
+                                icon: Icons.security_outlined,
+                                imagePath:
+                                    'assets/images/assistance_securite.png',
+                                isLoading: _sendingSecurity,
                                 onTap: () {
                                   HapticHelper.lightImpact();
                                   _confirmAndSendRequest(
@@ -284,90 +287,6 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  /// Carte style « boîte » comme sur Hotel Infos & Sécurité : icône au-dessus, titre en dessous.
-  Widget _buildBoxCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required bool loading,
-    required VoidCallback onTap,
-  }) {
-    final isMobile = MediaQuery.sizeOf(context).width < 600;
-    final iconSize = isMobile ? 46.0 : 70.0;
-    final fontSize = isMobile ? 13.0 : 21.0;
-
-    return GestureDetector(
-      onTap: loading ? null : onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.accentGold, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 20,
-              spreadRadius: 2,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: AppTheme.accentGold.withValues(alpha: 0.1),
-              blurRadius: 15,
-              spreadRadius: -2,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (loading)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.accentGold,
-                        ),
-                      ),
-                    ),
-                  )
-                else ...[
-                  Icon(icon, size: iconSize, color: AppTheme.accentGold),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.accentGold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
         ),
       ),
     );

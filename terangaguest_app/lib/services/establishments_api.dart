@@ -13,7 +13,7 @@ class EstablishmentsApi {
       final response = await _apiService.get(ApiConfig.establishments);
       final data = response.data['data'];
       if (data == null || data is! List) return [];
-      return (data as List)
+      return data
           .map((e) => Establishment.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {

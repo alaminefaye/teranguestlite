@@ -391,7 +391,7 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
     >
     options;
 
-    String? _imageForAmenity(String name) {
+    String? imageForAmenity(String name) {
       final n = name.toLowerCase();
       if (n.contains('toilette') ||
           n.contains('soap') ||
@@ -419,7 +419,7 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
             ? _categoryIcons[i]
             : _categoryIcons.last;
         final itemLabels = cat.items.map((item) => item.name).toList();
-        return (cat.name, icon, _imageForAmenity(cat.name), itemLabels);
+        return (cat.name, icon, imageForAmenity(cat.name), itemLabels);
       }).toList();
     } else {
       options = [

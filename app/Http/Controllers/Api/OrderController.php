@@ -262,7 +262,7 @@ class OrderController extends Controller
         $user = $request->user();
         $roomId = null;
         if ($user->room_number) {
-            $room = \App\Models\Room::where('enterprise_id', $user->enterprise_id)
+            $room = Room::where('enterprise_id', $user->enterprise_id)
                 ->where('room_number', $user->room_number)
                 ->first();
             $roomId = $room?->id;
@@ -301,7 +301,7 @@ class OrderController extends Controller
 
         // Notification au client de la chambre
         try {
-            $firebaseService = app(\App\Services\FirebaseNotificationService::class);
+            $firebaseService = app(FirebaseNotificationService::class);
             if ($newOrder->room_id) {
                 $firebaseService->sendNewOrderNotificationToRoom($newOrder);
             }
@@ -415,6 +415,7 @@ class OrderController extends Controller
                 ->has('fcmTokens')
                 ->get();
 
+            /** @var \App\Models\User $recipient */
             foreach ($recipients as $recipient) {
                 $firebaseService->sendToUser($recipient, 'Commande annulée par le client', $body, $data);
             }
@@ -729,6 +730,7 @@ class OrderController extends Controller
                 ->get();
 
             // Envoi FCM à chaque destinataire
+            /** @var \App\Models\User $recipient */
             foreach ($recipients as $recipient) {
                 $firebaseService->sendToUser($recipient, $title, $body, $data);
             }
