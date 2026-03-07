@@ -8,7 +8,7 @@ class ServiceCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTap;
 
-  /// Chemin asset local pour l'image de fond (ex: 'assets/images/box_restaurant.png')
+  /// Chemin asset local ou URL pour l'image de fond
   final String? imagePath;
 
   const ServiceCard({
@@ -74,14 +74,25 @@ class ServiceCard extends StatelessWidget {
                     children: [
                       // Image plein cadre
                       hasImage
-                          ? Image.asset(
-                              imagePath!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              errorBuilder: (_, _, _) =>
-                                  _buildIconFallback(),
-                            )
+                          ? (imagePath!.startsWith('http')
+                                ? Image.network(
+                                    imagePath!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            _buildIconFallback(),
+                                  )
+                                : Image.asset(
+                                    imagePath!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            _buildIconFallback(),
+                                  ))
                           : _buildIconFallback(),
 
                       // Bande sombre en bas derrière le titre uniquement

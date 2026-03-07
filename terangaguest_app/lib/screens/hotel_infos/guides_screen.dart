@@ -5,6 +5,8 @@ import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/navigation_helper.dart';
 import 'guide_items_screen.dart';
+import '../../widgets/service_card.dart';
+import '../../utils/layout_helper.dart';
 
 class GuidesScreen extends StatefulWidget {
   const GuidesScreen({super.key});
@@ -38,6 +40,22 @@ class _GuidesScreenState extends State<GuidesScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  String _getFallbackImagePath(String categoryName) {
+    if (categoryName.contains('urgence') || categoryName.contains('Urgences')) {
+      return 'assets/images/assistance_securite.png';
+    } else if (categoryName.contains('Santé') ||
+        categoryName.contains('Hôpitaux')) {
+      return 'assets/images/assistance_medecin.png';
+    } else if (categoryName.contains('Transport') ||
+        categoryName.contains('Déplacements')) {
+      return 'assets/images/explor_transfert.png';
+    } else if (categoryName.contains('Découvrir') ||
+        categoryName.contains('Tourisme')) {
+      return 'assets/images/explor_decouverte.png';
+    }
+    return 'assets/images/box_hotel_infos.png';
   }
 
   @override
@@ -100,37 +118,33 @@ class _GuidesScreenState extends State<GuidesScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
+    final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
+    final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
+    final spacing = LayoutHelper.gridSpacing(context);
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(20),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
+        childAspectRatio: aspectRatio,
+      ),
       itemCount: _categories!.length,
       itemBuilder: (context, index) {
         final category = _categories![index];
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.only(bottom: 16),
-          color: AppTheme.primaryBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            title: Text(
-              category.name,
-              style: const TextStyle(
-                color: AppTheme.textWhite,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            trailing: const Icon(
-              Icons.chevron_right,
-              color: AppTheme.accentGold,
-            ),
-            onTap: () {
-              HapticHelper.lightImpact();
-              context.navigateTo(GuideItemsScreen(category: category));
-            },
-          ),
+        final imagePath = category.image != null
+            ? 'https://teranguest.com/storage/${category.image}'
+            : _getFallbackImagePath(category.name);
+
+        return ServiceCard(
+          title: category.name,
+          icon: Icons.info_outline,
+          imagePath: imagePath,
+          onTap: () {
+            HapticHelper.lightImpact();
+            context.navigateTo(GuideItemsScreen(category: category));
+          },
         );
       },
     );

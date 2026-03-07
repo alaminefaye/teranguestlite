@@ -16,6 +16,7 @@ class GuideInfoSeeder extends Seeder
             [
                 'name' => 'Numéros d’urgence',
                 'order' => 1,
+                'image' => 'guides/urgences.png',
                 'items' => [
                     ['title' => 'Pompiers', 'phone' => '18'],
                     ['title' => 'Pompiers de Malick Sy', 'phone' => '+221 33 823 03 59'],
@@ -31,6 +32,7 @@ class GuideInfoSeeder extends Seeder
             [
                 'name' => 'Santé & Hôpitaux',
                 'order' => 2,
+                'image' => 'guides/sante.png',
                 'items' => [
                     ['title' => 'SOS Médecin', 'phone' => '+221 33 889 15 15'],
                     ['title' => 'Clinique de la Madeleine', 'address' => '18 Av des Jambaars, Dakar', 'phone' => '+221 33 889 94 70'],
@@ -46,6 +48,7 @@ class GuideInfoSeeder extends Seeder
             [
                 'name' => 'Transport',
                 'order' => 3,
+                'image' => 'guides/transport.png',
                 'items' => [
                     ['title' => 'Aéroport Blaise Diagne', 'phone' => '+221 33 939 59 00', 'description' => 'Départ ou arrivée des vols en temps réel : sur le site internet de l’aéroport'],
                     ['title' => 'Taxi urbain', 'description' => 'Très présent dans les grandes villes'],
@@ -57,6 +60,7 @@ class GuideInfoSeeder extends Seeder
             [
                 'name' => 'Pratique & Internet',
                 'order' => 4,
+                'image' => 'guides/pratique.png',
                 'items' => [
                     ['title' => 'Culture & respect', 'description' => "Le Sénégal est un pays reconnu pour la Teranga (hospitalité).\n\nQuelques conseils :\n- Respecter les lieux religieux\n- Adopter une tenue correcte dans les lieux publics et religieux\n- Demander l’autorisation avant de photographier certaines personnes"],
                     ['title' => 'Santé Pratique', 'description' => "Hôpitaux et cliniques modernes disponibles à Dakar et dans les grandes villes.\nPharmacies accessibles dans les zones urbaines.\nIl est conseillé de boire de l’eau en bouteille."],
@@ -66,6 +70,7 @@ class GuideInfoSeeder extends Seeder
             [
                 'name' => 'Découvrir le Sénégal',
                 'order' => 5,
+                'image' => 'guides/decouvrir.png',
                 'items' => [
                     ['title' => 'Ville de Dakar', 'latitude' => 14.7110139, 'longitude' => -17.5360373, 'description' => 'La capitale sénégalaise séduit d’abord par son patrimoine architectural, vestiges de la colonisation française. Dakar est une ville cosmopolite aux trésors multiples. De la pointe des Almadies au Cap Manuel, elle vibre au rythme des vagues, dévoilant ses lieux festifs, ses espaces culturels et ses marchés colorés.'],
                     ['title' => 'Gorée', 'latitude' => 14.6672883, 'longitude' => -17.4030526, 'description' => 'Trait d’union entre le passé et le présent, Gorée exerce une fascination extraordinaire sur ses visiteurs, célèbres et anonymes, qui, en déambulant dans les ruelles de l’île, marchent sur les empreintes laissées par les fantômes du passé. Un lieu unique chargé d’émotion où les maisons en vieux rose laissent deviner, à travers leurs fenêtres, l’histoire de tout un peuple.'],
@@ -93,16 +98,17 @@ class GuideInfoSeeder extends Seeder
         ];
 
         foreach ($data as $catData) {
-            $category = \App\Models\GuideCategory::firstOrCreate([
+            $category = \App\Models\GuideCategory::updateOrCreate([
                 'name' => $catData['name'],
             ], [
                 'order' => $catData['order'],
+                'image' => $catData['image'] ?? null,
                 'is_active' => true,
             ]);
 
             $order = 1;
             foreach ($catData['items'] as $itemData) {
-                \App\Models\GuideItem::firstOrCreate([
+                \App\Models\GuideItem::updateOrCreate([
                     'guide_category_id' => $category->id,
                     'title' => $itemData['title'],
                 ], array_merge($itemData, [
