@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
 import '../../models/guide.dart';
 import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
@@ -133,8 +134,14 @@ class _GuidesScreenState extends State<GuidesScreen> {
       itemCount: _categories!.length,
       itemBuilder: (context, index) {
         final category = _categories![index];
+        final baseUrlObj = Uri.parse(ApiConfig.baseUrl);
+        final storageBaseUrl =
+            '${baseUrlObj.scheme}://${baseUrlObj.host}${baseUrlObj.hasPort ? ':${baseUrlObj.port}' : ''}/storage/';
+
         final imagePath = category.image != null
-            ? 'https://teranguest.com/storage/${category.image}'
+            ? (category.image!.startsWith('http')
+                  ? category.image!
+                  : '$storageBaseUrl${category.image}')
             : _getFallbackImagePath(category.name);
 
         return ServiceCard(
