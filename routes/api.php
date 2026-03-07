@@ -145,6 +145,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/amenity-categories', [\App\Http\Controllers\Api\AmenityCategoryController::class, 'index']);
 
     // ==========================================
+    // GUIDES & INFOS (Numéros urgence, lieux, etc.)
+    // ==========================================
+    Route::get('/guides', [\App\Http\Controllers\GuideCategoryController::class, 'index']);
+
+    // ==========================================
     // BIEN-ÊTRE, SPORT & LOISIRS (Spa, Golf/Tennis, Fitness - dynamique)
     // ==========================================
     Route::get('/leisure-categories', [\App\Http\Controllers\Api\LeisureCategoryController::class, 'index']);

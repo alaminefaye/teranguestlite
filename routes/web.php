@@ -48,6 +48,12 @@ Route::middleware(['auth'])->group(function () {
         // ==========================================
         Route::resource('announcements', \App\Http\Controllers\Dashboard\AnnouncementController::class);
         Route::post('announcements/{announcement}/toggle', [\App\Http\Controllers\Dashboard\AnnouncementController::class, 'toggleActive'])->name('announcements.toggle');
+
+        // ==========================================
+        // GUIDES & INFOS — Super Admin (Global)
+        // ==========================================
+        Route::resource('guide-categories', \App\Http\Controllers\Admin\GuideCategoryController::class);
+        Route::resource('guide-items', \App\Http\Controllers\Admin\GuideItemController::class);
     });
 
     // Routes Admin Hôtel

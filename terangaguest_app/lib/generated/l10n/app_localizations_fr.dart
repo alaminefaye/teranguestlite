@@ -244,6 +244,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Livret d\'accueil, assistance urgence et chatbot';
 
   @override
+  String get guidesInfos => 'Guides & Infos';
+
+  @override
   String get hotelInfos => 'Hôtel Infos';
 
   @override

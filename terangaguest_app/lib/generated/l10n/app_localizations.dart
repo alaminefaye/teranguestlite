@@ -552,6 +552,12 @@ abstract class AppLocalizations {
   /// **'Livret d\'accueil, assistance urgence et chatbot'**
   String get hotelInfosSecuritySubtitle;
 
+  /// No description provided for @guidesInfos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Guides & Infos'**
+  String get guidesInfos;
+
   /// No description provided for @hotelInfos.
   ///
   /// In fr, this message translates to:

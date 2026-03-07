@@ -242,6 +242,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Welcome booklet, emergency assistance and chatbot';
 
   @override
+  String get guidesInfos => 'Guides & Infos';
+
+  @override
   String get hotelInfos => 'Hotel Infos';
 
   @override

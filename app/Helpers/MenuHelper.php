@@ -63,6 +63,11 @@ class MenuHelper
                         'name' => 'Annonces & Vidéos',
                         'path' => '/admin/announcements',
                     ],
+                    [
+                        'icon' => 'report', // Use report or a similar icon for now
+                        'name' => 'Guides & Infos',
+                        'path' => '/admin/guide-categories',
+                    ],
                 ],
             ],
             [
