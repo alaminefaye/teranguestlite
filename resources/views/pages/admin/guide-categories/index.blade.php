@@ -6,12 +6,13 @@
             <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Guides & Infos</h1>
             <p class="text-gray-600 dark:text-gray-400">Gérer les guides globaux affichés sur tablettes.</p>
         </div>
-        <button class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
+        <a href="{{ route('admin.guide-categories.create') }}"
+            class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Nouvelle Catégorie
-        </button>
+        </a>
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
@@ -39,20 +40,33 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $category->order }}</td>
                             <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                                    {{ $category->items_count }} éléments
-                                </span>
+                                <a href="{{ route('admin.guide-items.index', ['category' => $category->id]) }}"
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-brand-600 hover:bg-brand-50 dark:bg-gray-800 dark:text-brand-400 dark:hover:bg-gray-700">
+                                    {{ $category->items_count }} éléments &rarr;
+                                </a>
                             </td>
                             <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $category->is_active ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600' }}">
-                                    {{ $category->is_active ? 'Actif' : 'Inactif' }}
-                                </span>
+                                <form action="{{ route('admin.guide-categories.toggle', $category) }}" method="POST"
+                                    class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $category->is_active ? 'bg-success-50 text-success-600 hover:bg-success-100' : 'bg-error-50 text-error-600 hover:bg-error-100' }}">
+                                        {{ $category->is_active ? 'Actif' : 'Inactif' }}
+                                    </button>
+                                </form>
                             </td>
                             <td class="px-6 py-4">
-                                <!-- Placeholder pour actions -->
-                                <button class="text-brand-600 hover:text-brand-900 mx-1">Éditer (Bientôt)</button>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('admin.guide-categories.edit', $category) }}"
+                                        class="text-brand-600 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300">Éditer</a>
+                                    <form action="{{ route('admin.guide-categories.destroy', $category) }}" method="POST"
+                                        class="inline" onsubmit="return confirm('Vraiment supprimer cette catégorie ?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="text-error-600 hover:text-error-900 dark:text-error-400 dark:hover:text-error-300">Supprimer</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

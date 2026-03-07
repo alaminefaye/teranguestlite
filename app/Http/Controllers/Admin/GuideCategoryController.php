@@ -18,51 +18,85 @@ class GuideCategoryController extends Controller
         return view('pages.admin.guide-categories.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('pages.admin.guide-categories.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
+
+        $validated['is_active'] = $request->boolean('is_active', true);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('guides/categories', 'public');
+        }
+
+        GuideCategory::create($validated);
+
+        return redirect()->route('admin.guide-categories.index')
+            ->with('success', 'Catégorie créée avec succès !');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        // View items (Alternative: GuideItemController filter)
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(GuideCategory $guideCategory)
     {
-        //
+        return view('pages.admin.guide-categories.edit', compact('guideCategory'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, GuideCategory $guideCategory)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
+
+        $validated['is_active'] = $request->boolean('is_active', true);
+
+        if ($request->hasFile('image')) {
+            if ($guideCategory->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($guideCategory->image);
+            }
+            $validated['image'] = $request->file('image')->store('guides/categories', 'public');
+        }
+
+        if ($request->boolean('remove_image') && $guideCategory->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($guideCategory->image);
+            $validated['image'] = null;
+        }
+
+        $guideCategory->update($validated);
+
+        return redirect()->route('admin.guide-categories.index')
+            ->with('success', 'Catégorie mise à jour !');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(GuideCategory $guideCategory)
     {
-        //
+        if ($guideCategory->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($guideCategory->image);
+        }
+        $guideCategory->delete();
+
+        return redirect()->route('admin.guide-categories.index')
+            ->with('success', 'Catégorie supprimée.');
+    }
+
+    public function toggleActive(GuideCategory $guideCategory)
+    {
+        $guideCategory->update(['is_active' => !$guideCategory->is_active]);
+        $label = $guideCategory->is_active ? 'activée' : 'désactivée';
+        return redirect()->route('admin.guide-categories.index')
+            ->with('success', "Catégorie {$label}.");
     }
 }

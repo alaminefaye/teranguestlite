@@ -53,7 +53,10 @@ Route::middleware(['auth'])->group(function () {
         // GUIDES & INFOS — Super Admin (Global)
         // ==========================================
         Route::resource('guide-categories', \App\Http\Controllers\Admin\GuideCategoryController::class);
+        Route::post('guide-categories/{guide_category}/toggle', [\App\Http\Controllers\Admin\GuideCategoryController::class, 'toggleActive'])->name('guide-categories.toggle');
+
         Route::resource('guide-items', \App\Http\Controllers\Admin\GuideItemController::class);
+        Route::post('guide-items/{guide_item}/toggle', [\App\Http\Controllers\Admin\GuideItemController::class, 'toggleActive'])->name('guide-items.toggle');
     });
 
     // Routes Admin Hôtel
