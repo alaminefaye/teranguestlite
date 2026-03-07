@@ -134,14 +134,11 @@ class _GuidesScreenState extends State<GuidesScreen> {
       itemCount: _categories!.length,
       itemBuilder: (context, index) {
         final category = _categories![index];
-        final baseUrlObj = Uri.parse(ApiConfig.baseUrl);
-        final storageBaseUrl =
-            '${baseUrlObj.scheme}://${baseUrlObj.host}${baseUrlObj.hasPort ? ':${baseUrlObj.port}' : ''}/storage/';
 
         final imagePath = category.image != null
             ? (category.image!.startsWith('http')
                   ? category.image!
-                  : '$storageBaseUrl${category.image}')
+                  : ApiConfig.storageUrl(category.image!))
             : _getFallbackImagePath(category.name);
 
         return ServiceCard(
