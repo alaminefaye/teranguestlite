@@ -57,15 +57,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('admin.guide-categories.edit', $category) }}"
-                                        class="text-brand-600 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300">Éditer</a>
-                                    <form action="{{ route('admin.guide-categories.destroy', $category) }}" method="POST"
-                                        class="inline" onsubmit="return confirm('Vraiment supprimer cette catégorie ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="text-error-600 hover:text-error-900 dark:text-error-400 dark:hover:text-error-300">Supprimer</button>
-                                    </form>
+                                    <x-action-buttons :editRoute="route('admin.guide-categories.edit', $category)"
+                                        :deleteRoute="route('admin.guide-categories.destroy', $category)"
+                                        deleteMessage="Vraiment supprimer cette catégorie ?" />
                                 </div>
                             </td>
                         </tr>
