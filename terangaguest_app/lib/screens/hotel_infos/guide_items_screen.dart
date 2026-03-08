@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
-import '../../config/api_config.dart';
 import '../../models/guide.dart';
 
 class GuideItemsScreen extends StatelessWidget {
@@ -114,9 +113,7 @@ class GuideItemsScreen extends StatelessWidget {
           children: [
             if (item.image != null)
               Image.network(
-                item.image!.startsWith('http')
-                    ? item.image!
-                    : ApiConfig.storageUrl(item.image!),
+                'https://teranguest.com/storage/${item.image}',
                 height: 160,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>

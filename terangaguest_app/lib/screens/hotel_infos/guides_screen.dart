@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
-import '../../config/api_config.dart';
 import '../../models/guide.dart';
 import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
@@ -41,22 +40,6 @@ class _GuidesScreenState extends State<GuidesScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  String _getFallbackImagePath(String categoryName) {
-    if (categoryName.contains('urgence') || categoryName.contains('Urgences')) {
-      return 'assets/images/assistance_securite.png';
-    } else if (categoryName.contains('Santé') ||
-        categoryName.contains('Hôpitaux')) {
-      return 'assets/images/assistance_medecin.png';
-    } else if (categoryName.contains('Transport') ||
-        categoryName.contains('Déplacements')) {
-      return 'assets/images/explor_transfert.png';
-    } else if (categoryName.contains('Découvrir') ||
-        categoryName.contains('Tourisme')) {
-      return 'assets/images/explor_decouverte.png';
-    }
-    return 'assets/images/box_hotel_infos.png';
   }
 
   @override
@@ -134,17 +117,15 @@ class _GuidesScreenState extends State<GuidesScreen> {
       itemCount: _categories!.length,
       itemBuilder: (context, index) {
         final category = _categories![index];
-
         final imagePath = category.image != null
-            ? (category.image!.startsWith('http')
-                  ? category.image!
-                  : ApiConfig.storageUrl(category.image!))
-            : _getFallbackImagePath(category.name);
+            ? 'https://teranguest.com/storage/${category.image}'
+            : null;
 
         return ServiceCard(
           title: category.name,
           icon: Icons.info_outline,
-          imagePath: imagePath,
+          imagePath:
+              imagePath, // Note: ServiceCard would need to be able to handle network images instead of just assets to fully work here, but we will use the fallback for now if no image is given.
           onTap: () {
             HapticHelper.lightImpact();
             context.navigateTo(GuideItemsScreen(category: category));
