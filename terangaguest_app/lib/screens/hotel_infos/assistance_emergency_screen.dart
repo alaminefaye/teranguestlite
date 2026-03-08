@@ -84,7 +84,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
     final user = context.read<AuthProvider>().user;
     final palaceProvider = context.read<PalaceProvider>();
     final roomInfo = user?.roomNumber != null && user!.roomNumber!.isNotEmpty
-        ? '${l10n.roomLabel} ${user.roomNumber}'
+        ? l10n.roomLabel(user.roomNumber!)
         : l10n.unidentifiedRoom;
     final description = l10n.requestFromRoom(roomInfo);
 
@@ -209,7 +209,7 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
-                                '${l10n.roomLabel} $roomNumber',
+                                l10n.roomLabel(roomNumber),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: AppTheme.accentGold,

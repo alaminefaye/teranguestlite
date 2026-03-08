@@ -134,7 +134,7 @@
                                 </span>
                             </div>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                {{ $reservation->user->name }} • 
+                                {{ optional($reservation->user)->name ?? optional($reservation->guest)->name ?? 'Client' }} • 
                                 {{ $reservation->check_in->format('d/m/Y') }} - {{ $reservation->check_out->format('d/m/Y') }} 
                                 ({{ $reservation->nights_count }} nuit{{ $reservation->nights_count > 1 ? 's' : '' }})
                             </p>
