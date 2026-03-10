@@ -351,8 +351,22 @@ Route::get('/', function () {
         }
         return redirect()->route('guest.dashboard');
     }
-    return redirect()->route('login');
+    return view('pages.landing', [
+        'title' => 'Teranga Guest',
+    ]);
 });
+
+Route::get('/landing-assets/{file}', function (string $file) {
+    $allowed = ['ipad.png', 'iphone1.png', 'iphone2.png'];
+    abort_unless(in_array($file, $allowed, true), 404);
+
+    $path = base_path($file);
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path, [
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+})->name('landing.asset');
 
 // App Web Client (Flutter) — index.html pour /client et /client/*
 Route::get('/client', function () {

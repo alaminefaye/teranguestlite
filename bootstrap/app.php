@@ -12,14 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Enregistrer le middleware pour le filtrage par entreprise
+        // Enregistrer les middlewares aliasés
         $middleware->alias([
             'enterprise' => \App\Http\Middleware\EnsureUserBelongsToEnterprise::class,
+            'guest.web_stay' => \App\Http\Middleware\EnsureGuestWebTokenMatchesStay::class,
         ]);
-        
+
         // Ajouter le middleware pour vérifier le changement de mot de passe (global pour web)
         $middleware->web(append: [
             \App\Http\Middleware\EnsurePasswordChanged::class,
+        ]);
+
+        // Pour l'API : vérifier, pour les invités connectés via le Web,
+        // que le token correspond bien à un séjour actif de la chambre.
+        $middleware->api(prepend: [
+            'guest.web_stay',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
