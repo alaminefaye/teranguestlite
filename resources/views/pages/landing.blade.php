@@ -512,9 +512,6 @@
                                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Mobile</p>
                                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-white/90">Écran 1</p>
                                     </div>
-                                    <span class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white dark:bg-white dark:text-gray-900">
-                                        iPhone
-                                    </span>
                                 </div>
                                 <div class="flex h-[220px] items-center justify-center px-6 pb-8 sm:h-[260px]">
                                     <img src="{{ $landingAsset('iphone1.png') }}" alt="Capture iPhone 1" loading="lazy" decoding="async" class="h-full w-full object-contain" />
@@ -527,9 +524,6 @@
                                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Mobile</p>
                                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-white/90">Écran 2</p>
                                     </div>
-                                    <span class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white dark:bg-white dark:text-gray-900">
-                                        iPhone
-                                    </span>
                                 </div>
                                 <div class="flex h-[220px] items-center justify-center px-6 pb-8 sm:h-[260px]">
                                     <img src="{{ $landingAsset('iphone2.png') }}" alt="Capture iPhone 2" loading="lazy" decoding="async" class="h-full w-full object-contain" />
