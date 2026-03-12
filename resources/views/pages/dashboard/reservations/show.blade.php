@@ -127,11 +127,11 @@
                 Nouvelle date de départ <span class="text-error-500">*</span>
             </label>
             <input
-                type="date"
+                type="datetime-local"
                 id="new_check_out"
                 name="new_check_out"
                 required
-                min="{{ $reservation->check_out->addDay()->toDateString() }}"
+                min="{{ $reservation->check_out->addDay()->format('Y-m-d\TH:i') }}"
                 class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-warning-400 focus:ring-1 focus:ring-warning-400"
                 onchange="updateExtendPreview(this.value)"
             >
