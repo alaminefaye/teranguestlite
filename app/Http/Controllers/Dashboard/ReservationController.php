@@ -152,7 +152,7 @@ class ReservationController extends Controller
                 ->with('error', 'Cette chambre n\'est pas disponible pour la période sélectionnée.');
         }
 
-        $nights = $checkIn->diffInDays($checkOut, false) ?: 1;
+        $nights = (int) max(1, ceil($checkIn->floatDiffInDays($checkOut)));
         $validated['total_price'] = $room->price_per_night * $nights;
 
         $reservation = Reservation::create($validated);
@@ -339,7 +339,7 @@ class ReservationController extends Controller
         }
 
         $room = Room::findOrFail($validated['room_id']);
-        $nights = $checkIn->diffInDays($checkOut, false) ?: 1;
+        $nights = (int) max(1, ceil($checkIn->floatDiffInDays($checkOut)));
         $validated['total_price'] = $room->price_per_night * $nights;
 
         $reservation->update($validated);
@@ -448,11 +448,11 @@ class ReservationController extends Controller
         }
 
         // Recalcul du prix total : prix/nuit × nombre total de nuits
-        $totalNights = $reservation->check_in->diffInDays($newCheckOut) ?: 1;
+        $totalNights = (int) max(1, ceil($reservation->check_in->floatDiffInDays($newCheckOut)));
         $newTotalPrice = $reservation->room->price_per_night * $totalNights;
 
         $oldCheckOut = $reservation->check_out->format('d/m/Y');
-        $addedNights = $reservation->check_out->diffInDays($newCheckOut);
+        $addedNights = $totalNights - $reservation->nights_count;
 
         $reservation->update([
             'check_out'    => $newCheckOut,

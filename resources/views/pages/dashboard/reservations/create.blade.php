@@ -26,7 +26,7 @@
             if (this.checkIn && this.checkOut && this.roomId) {
                 const checkInDate = new Date(this.checkIn);
                 const checkOutDate = new Date(this.checkOut);
-                const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
                 if (nights > 0) {
                     return (this.pricePerNight * nights).toLocaleString('fr-FR') + ' FCFA';
                 }
@@ -37,10 +37,10 @@
             if (this.checkIn && this.checkOut) {
                 const checkInDate = new Date(this.checkIn);
                 const checkOutDate = new Date(this.checkOut);
-                const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-                return nights > 0 ? nights : 0;
+                const nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+                return nights > 0 ? nights : 1;
             }
-            return 0;
+            return 1;
         }
     }">
         @csrf

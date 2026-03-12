@@ -159,11 +159,12 @@ class Reservation extends Model
     }
 
     /**
-     * Calculer le nombre de nuits
+     * Calculer le nombre de nuits (arrondi supérieur, minimum 1)
      */
     public function getNightsCountAttribute()
     {
-        return $this->check_in->diffInDays($this->check_out, false);
+        $nights = ceil($this->check_in->floatDiffInDays($this->check_out));
+        return $nights < 1 ? 1 : (int) $nights;
     }
 
     /**
