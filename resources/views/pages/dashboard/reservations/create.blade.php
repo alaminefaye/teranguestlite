@@ -18,8 +18,8 @@
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     <form action="{{ route('dashboard.reservations.store') }}" method="POST" x-data="{
-        checkIn: '{{ old('check_in', date('Y-m-d\TH:i')) }}',
-        checkOut: '{{ old('check_out', date('Y-m-d\TH:i', strtotime('+1 day'))) }}',
+        checkIn: '{{ old('check_in', $defaultCheckIn ?? date('Y-m-d\TH:i')) }}',
+        checkOut: '{{ old('check_out', $defaultCheckOut ?? date('Y-m-d\TH:i', strtotime('+1 day'))) }}',
         roomId: '{{ old('room_id') }}',
         pricePerNight: 0,
         calculateTotal() {
