@@ -104,13 +104,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
     if (!_isVehicleService || _vehicleType != VehicleRequestType.rental) return;
     setState(() => _loadingVehicles = true);
     try {
-      final list = await _vehicleApi.getVehicles(
+      final result = await _vehicleApi.getVehicles(
         vehicleType: _filterVehicleType,
         minSeats: _filterMinSeats,
       );
       if (mounted) {
         setState(() {
-          _vehicles = list;
+          _vehicles = result.vehicles;
           _loadingVehicles = false;
         });
       }

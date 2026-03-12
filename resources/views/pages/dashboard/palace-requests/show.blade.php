@@ -14,6 +14,108 @@
 @endif
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+    {{-- ══ Informations du client ══════════════════════════════════ --}}
+    @php
+        $guest = $request->guest;
+        $guestRoom = $request->room;
+        // Réservation active de ce client pour cette chambre
+        $guestStay = $guest?->reservations()
+            ->where('room_id', $request->room_id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->orderByDesc('check_in')
+            ->first();
+    @endphp
+
+    @if($guest)
+    <div class="rounded-lg border-2 border-brand-500/40 bg-brand-50 p-6 dark:bg-brand-500/10 dark:border-brand-400/30 lg:col-span-2">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-white font-bold text-lg shrink-0">
+                {{ mb_substr($guest->name ?? '?', 0, 1) }}
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90">Informations du client</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Personne qui a effectué cette demande</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Nom complet</dt>
+                <dd class="font-semibold text-gray-900 dark:text-white/90">{{ $guest->name ?? '—' }}</dd>
+            </div>
+            @if($request->room)
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Chambre</dt>
+                <dd class="font-semibold text-gray-900 dark:text-white/90">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        Chambre {{ $request->room->room_number }}
+                    </span>
+                </dd>
+            </div>
+            @endif
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Code client</dt>
+                <dd class="font-mono font-bold text-brand-600 dark:text-brand-400 text-base">{{ $guest->access_code ?? '—' }}</dd>
+            </div>
+            @if($guest->phone)
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Téléphone</dt>
+                <dd class="font-medium text-gray-900 dark:text-white/90">
+                    <a href="tel:{{ $guest->phone }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ $guest->phone }}</a>
+                </dd>
+            </div>
+            @endif
+            @if($guest->email)
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Email</dt>
+                <dd class="font-medium text-gray-900 dark:text-white/90 truncate">
+                    <a href="mailto:{{ $guest->email }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ $guest->email }}</a>
+                </dd>
+            </div>
+            @endif
+            @if($guest->nationality)
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Nationalité</dt>
+                <dd class="font-medium text-gray-900 dark:text-white/90">{{ $guest->nationality }}</dd>
+            </div>
+            @endif
+            @if($guestStay)
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Séjour</dt>
+                <dd class="font-medium text-gray-900 dark:text-white/90">
+                    {{ $guestStay->check_in?->format('d/m/Y') }} → {{ $guestStay->check_out?->format('d/m/Y') }}
+                </dd>
+            </div>
+            <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">Statut séjour</dt>
+                <dd>
+                    @if($guestStay->status === 'checked_in')
+                        <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-xs font-medium text-success-600 dark:bg-success-500/10 dark:text-success-400">
+                            <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span> En séjour
+                        </span>
+                    @else
+                        <span class="inline-flex rounded-full bg-blue-light-50 px-2 py-0.5 text-xs font-medium text-blue-light-600 dark:bg-blue-light-500/10 dark:text-blue-light-400">Confirmé</span>
+                    @endif
+                </dd>
+            </div>
+            @endif
+        </div>
+
+        {{-- Lien vers la fiche client --}}
+        @if(Route::has('dashboard.clients.show'))
+        <div class="mt-4 pt-4 border-t border-brand-200 dark:border-brand-700/40">
+            <a href="{{ route('dashboard.clients.show', ['client' => $guest->id]) }}"
+               class="inline-flex items-center gap-1.5 text-sm text-brand-600 dark:text-brand-400 hover:underline font-medium">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Voir la fiche complète du client
+            </a>
+        </div>
+        @endif
+    </div>
+    @endif
+
     <!-- Infos générales -->
     <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Résumé</h2>

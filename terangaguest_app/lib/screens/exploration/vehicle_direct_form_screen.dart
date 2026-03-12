@@ -5,7 +5,9 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
 import '../../models/vehicle.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
+import '../../providers/tablet_session_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
@@ -27,6 +29,7 @@ typedef _DurationChoice = ({String label, String value, int? days, int? hours});
 
 class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
   final TextEditingController _detailsController = TextEditingController();
+  final TextEditingController _clientCodeController = TextEditingController();
 
   String? _selectedType; // null = tous / pas de filtre
   String _durationMode = 'half'; // 'half' | 'day' | 'multi'
@@ -38,8 +41,26 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _resolveServiceId());
     _multiDaysController.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _resolveServiceId();
+      if (!mounted) return;
+      // Auto-remplissage du code client (même logique que create_palace_request_screen)
+      context.read<AuthProvider>().loadUser();
+      final tabletSession = context.read<TabletSessionProvider>();
+      final auth = context.read<AuthProvider>();
+      await tabletSession.load();
+      if (!mounted) return;
+      final authRoom = auth.user?.roomNumber?.trim() ?? '';
+      if (authRoom.isNotEmpty) await tabletSession.setRoomNumber(authRoom);
+      await tabletSession.tryRestoreSessionFromRoom();
+      if (!mounted) return;
+      final code = tabletSession.clientCodeForPreFill;
+      if (code != null && code.isNotEmpty && _clientCodeController.text.isEmpty) {
+        _clientCodeController.text = code;
+        if (mounted) setState(() {});
+      }
+    });
   }
 
   Future<void> _resolveServiceId() async {
@@ -60,6 +81,7 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
   @override
   void dispose() {
     _detailsController.dispose();
+    _clientCodeController.dispose();
     _multiDaysController.dispose();
     super.dispose();
   }
@@ -137,6 +159,9 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
       _showSnack(l10n.durationOrDaysRequired, isError: true);
       return;
     }
+    final clientCode = _clientCodeController.text.trim().isEmpty
+        ? null
+        : _clientCodeController.text.trim();
 
     setState(() => _sending = true);
     try {
@@ -155,6 +180,7 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
                 : _detailsController.text.trim(),
             scheduledTime: _requestedFor,
             metadata: meta,
+            clientCode: clientCode,
           );
 
       if (mounted) {
@@ -312,6 +338,35 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
                         ),
                         const SizedBox(height: 20),
                       ],
+
+                      // ── Code client ───────────────────────────────────
+                      TextField(
+                        controller: _clientCodeController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Code client',
+                          hintText: 'Ex: ABC-123',
+                          labelStyle: const TextStyle(color: AppTheme.accentGold),
+                          hintStyle: TextStyle(
+                            color: AppTheme.textGray.withValues(alpha: 0.7),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.badge_outlined,
+                            color: AppTheme.accentGold,
+                            size: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppTheme.accentGold.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
                       // ── Date souhaitée ────────────────────────────────
                       _dateField(l10n),

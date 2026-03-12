@@ -55,7 +55,7 @@ class PalaceRequestsController extends Controller
 
     public function show(PalaceRequest $palaceRequest): View
     {
-        $palaceRequest->load(['palaceService', 'user', 'room']);
+        $palaceRequest->load(['palaceService', 'user', 'room', 'guest']);
         return view('pages.dashboard.palace-requests.show', [
             'request' => $palaceRequest,
         ]);
