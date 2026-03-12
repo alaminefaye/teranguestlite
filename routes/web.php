@@ -197,6 +197,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('palace-requests/{palaceRequest}/cancel', [\App\Http\Controllers\Dashboard\PalaceRequestsController::class, 'cancel'])->name('palace-requests.cancel');
 
         // Véhicules (location avec chauffeur)
+        // IMPORTANT : rental-mode doit être déclaré AVANT ::resource pour éviter
+        // que {vehicle} capture la chaîne "rental-mode".
+        Route::post('vehicles/rental-mode', [\App\Http\Controllers\Dashboard\VehicleController::class, 'updateRentalMode'])->name('vehicles.rental-mode');
         Route::resource('vehicles', \App\Http\Controllers\Dashboard\VehicleController::class);
         Route::post('vehicles/{vehicle}/toggle', [\App\Http\Controllers\Dashboard\VehicleController::class, 'toggleActive'])->name('vehicles.toggle');
 

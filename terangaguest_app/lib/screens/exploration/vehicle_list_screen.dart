@@ -8,9 +8,12 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
+import 'vehicle_direct_form_screen.dart';
 import 'vehicle_rental_request_screen.dart';
 
 /// Catalogue des véhicules disponibles (Location de Véhicule).
+/// Si le mode admin est "form", l'écran redirige automatiquement vers le
+/// formulaire direct sans afficher le catalogue.
 class VehicleListScreen extends StatefulWidget {
   const VehicleListScreen({super.key});
 
@@ -40,13 +43,26 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
       _error = null;
     });
     try {
-      final list = await _vehicleApi.getVehicles(
+      final result = await _vehicleApi.getVehicles(
         vehicleType: _filterType,
         minSeats: _filterMinSeats,
       );
+
+      // ── Mode formulaire direct activé par l'admin ─────────────────────
+      if (result.rentalMode == 'form' && mounted) {
+        // Remplace cet écran par le formulaire direct (popAndPushNamed).
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) =>
+                VehicleDirectFormScreen(vehicles: result.vehicles),
+          ),
+        );
+        return;
+      }
+
       if (mounted) {
         setState(() {
-          _vehicles = list;
+          _vehicles = result.vehicles;
           _loading = false;
         });
       }

@@ -6,7 +6,9 @@ import 'api_service.dart';
 class VehicleApi {
   final ApiService _apiService = ApiService();
 
-  Future<List<Vehicle>> getVehicles({
+  /// Retourne le mode de location et la liste des véhicules.
+  /// [rentalMode] : 'catalogue' (défaut) ou 'form' — défini côté admin web.
+  Future<({String rentalMode, List<Vehicle> vehicles})> getVehicles({
     String? vehicleType,
     int? minSeats,
   }) async {
@@ -22,11 +24,15 @@ class VehicleApi {
         '/vehicles',
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
-      final list = response.data['data'] as List?;
-      if (list == null) return [];
-      return list
+      final rentalMode =
+          (response.data['rental_mode'] as String?)?.trim() == 'form'
+              ? 'form'
+              : 'catalogue';
+      final list = response.data['data'] as List? ?? [];
+      final vehicles = list
           .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
           .toList();
+      return (rentalMode: rentalMode, vehicles: vehicles);
     } on DioException catch (e) {
       debugPrint('❌ VehicleApi Error: $e');
       rethrow;

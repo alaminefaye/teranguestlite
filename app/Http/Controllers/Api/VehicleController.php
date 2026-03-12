@@ -11,10 +11,17 @@ class VehicleController extends Controller
     /**
      * Liste des véhicules de l'établissement (pour formulaire Location).
      * Filtres optionnels : vehicle_type, seats (nombre minimum de places).
+     * Retourne également rental_mode (catalogue|form) depuis les settings entreprise.
      */
     public function index(Request $request)
     {
-        $query = Vehicle::where('enterprise_id', $request->user()->enterprise_id)
+        $enterprise = $request->user()->enterprise;
+        $settings   = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $rentalMode = in_array($settings['vehicle_rental_mode'] ?? '', ['form'], true)
+            ? 'form'
+            : 'catalogue';
+
+        $query = Vehicle::where('enterprise_id', $enterprise->id)
             ->available()
             ->ordered();
 
@@ -26,21 +33,22 @@ class VehicleController extends Controller
         }
 
         $vehicles = $query->get()->map(fn (Vehicle $v) => [
-            'id' => $v->id,
-            'name' => $v->name,
-            'vehicle_type' => $v->vehicle_type,
-            'vehicle_type_label' => $v->type_label,
-            'number_of_seats' => $v->number_of_seats,
-            'image' => $v->image ? url('storage/' . $v->image) : null,
-            'price_per_day' => $v->price_per_day !== null ? (float) $v->price_per_day : null,
-            'price_half_day' => $v->price_half_day !== null ? (float) $v->price_half_day : null,
+            'id'                      => $v->id,
+            'name'                    => $v->name,
+            'vehicle_type'            => $v->vehicle_type,
+            'vehicle_type_label'      => $v->type_label,
+            'number_of_seats'         => $v->number_of_seats,
+            'image'                   => $v->image ? url('storage/' . $v->image) : null,
+            'price_per_day'           => $v->price_per_day !== null ? (float) $v->price_per_day : null,
+            'price_half_day'          => $v->price_half_day !== null ? (float) $v->price_half_day : null,
             'formatted_price_per_day' => $v->formatted_price_per_day,
             'formatted_price_half_day' => $v->formatted_price_half_day,
         ]);
 
         return response()->json([
-            'success' => true,
-            'data' => $vehicles,
+            'success'     => true,
+            'rental_mode' => $rentalMode,
+            'data'        => $vehicles,
         ]);
     }
 }

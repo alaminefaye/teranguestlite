@@ -27,14 +27,36 @@ class VehicleController extends Controller
 
         $vehicles = $query->ordered()->paginate(12);
         $stats = [
-            'total' => Vehicle::count(),
+            'total'     => Vehicle::count(),
             'available' => Vehicle::available()->count(),
         ];
 
+        $enterprise  = auth()->user()->enterprise;
+        $settings    = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $rentalMode  = $settings['vehicle_rental_mode'] ?? 'catalogue';
+
         return view('pages.dashboard.vehicles.index', [
-            'vehicles' => $vehicles,
-            'stats' => $stats,
+            'vehicles'   => $vehicles,
+            'stats'      => $stats,
+            'rentalMode' => $rentalMode,
         ]);
+    }
+
+    /** Basculer le mode d'affichage location (catalogue ↔ form) dans l'app mobile. */
+    public function updateRentalMode(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'rental_mode' => 'required|in:catalogue,form',
+        ]);
+
+        $enterprise           = auth()->user()->enterprise;
+        $settings             = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $settings['vehicle_rental_mode'] = $request->rental_mode;
+        $enterprise->update(['settings' => $settings]);
+
+        $label = $request->rental_mode === 'form' ? 'Formulaire direct' : 'Catalogue';
+        return redirect()->route('dashboard.vehicles.index')
+            ->with('success', "Mode d'affichage location mis à jour : {$label}.");
     }
 
     public function create(): View
