@@ -26,9 +26,7 @@
             @endif
 
             @if($reservation->status === 'checked_in')
-                @php
-                    $canCheckout = ($totalRoomBill ?? 0) == 0;
-                @endphp
+                @php $canCheckout = ($totalRoomBill ?? 0) == 0; @endphp
                 @if($canCheckout)
                     <form action="{{ route('dashboard.reservations.checkout', $reservation) }}" method="POST" class="inline">
                         @csrf
@@ -47,6 +45,16 @@
                         Check-out (réglez la note d'abord)
                     </span>
                 @endif
+
+                {{-- ── Bouton Prolonger le séjour ── --}}
+                <button type="button"
+                        onclick="document.getElementById('extend-panel').classList.toggle('hidden')"
+                        class="inline-flex items-center px-4 py-2 bg-warning-500 text-white rounded-md hover:bg-warning-600">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Prolonger le séjour
+                </button>
             @endif
 
             @if($reservation->status === 'checked_out')
@@ -92,6 +100,83 @@
     <div class="mb-6 rounded-lg bg-error-50 p-4 text-error-600 dark:bg-error-500/10 dark:text-error-400">
         {{ session('error') }}
     </div>
+@endif
+
+{{-- ══ Panneau Prolongation (masqué par défaut) ═══════════════════════════════ --}}
+@if($reservation->status === 'checked_in')
+<div id="extend-panel" class="hidden mb-6 rounded-xl border-2 border-warning-400 bg-warning-50 dark:bg-warning-500/10 dark:border-warning-500/40 p-6">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-500 text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90">Prolonger le séjour</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Check-out actuel : <strong>{{ $reservation->check_out->format('d/m/Y') }}</strong>
+                · {{ $reservation->nights_count }} nuit(s) · {{ number_format($reservation->total_price, 0, ',', ' ') }} FCFA
+            </p>
+        </div>
+    </div>
+
+    <form action="{{ route('dashboard.reservations.extend', $reservation) }}" method="POST" class="flex flex-wrap items-end gap-4">
+        @csrf
+        <div class="flex-1 min-w-[220px]">
+            <label for="new_check_out" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Nouvelle date de départ <span class="text-error-500">*</span>
+            </label>
+            <input
+                type="date"
+                id="new_check_out"
+                name="new_check_out"
+                required
+                min="{{ $reservation->check_out->addDay()->toDateString() }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-warning-400 focus:ring-1 focus:ring-warning-400"
+                onchange="updateExtendPreview(this.value)"
+            >
+            @error('new_check_out')
+                <p class="mt-1 text-xs text-error-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="flex-1 min-w-[200px]">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Estimation du nouveau total</p>
+            <p id="extend-preview" class="text-xl font-bold text-warning-600 dark:text-warning-400">—</p>
+            <p id="extend-nights-preview" class="text-xs text-gray-500 dark:text-gray-400"></p>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit"
+                    class="inline-flex items-center px-5 py-2.5 bg-warning-500 text-white font-medium rounded-lg hover:bg-warning-600 transition"
+                    onclick="return confirm('Confirmer la prolongation du séjour ?')">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Confirmer la prolongation
+            </button>
+            <button type="button"
+                    onclick="document.getElementById('extend-panel').classList.add('hidden')"
+                    class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm">
+                Annuler
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateExtendPreview(newDate) {
+    if (!newDate) { document.getElementById('extend-preview').textContent = '—'; return; }
+    const checkIn  = new Date('{{ $reservation->check_in->toDateString() }}');
+    const checkOut = new Date(newDate);
+    const nights   = Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+    const pricePerNight = {{ (float) $reservation->room->price_per_night }};
+    const total = nights * pricePerNight;
+    const added = nights - {{ $reservation->nights_count }};
+    document.getElementById('extend-preview').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+    document.getElementById('extend-nights-preview').textContent = nights + ' nuit(s) au total (+' + added + ' nuit(s))';
+}
+</script>
 @endif
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -398,6 +398,71 @@ class ReservationController extends Controller
     }
 
     /**
+     * Prolonger le séjour (modifier la date de check-out).
+     */
+    public function extend(Request $request, Reservation $reservation): RedirectResponse
+    {
+        if ($reservation->status !== 'checked_in') {
+            return back()->with('error', 'La prolongation est uniquement possible pour les réservations en cours (Check-in effectué).');
+        }
+
+        $validated = $request->validate([
+            'new_check_out' => [
+                'required',
+                'date',
+                'after:' . $reservation->check_out->toDateString(),
+            ],
+        ], [
+            'new_check_out.required' => 'La nouvelle date de départ est obligatoire.',
+            'new_check_out.after'    => 'La nouvelle date de départ doit être postérieure à la date actuelle (' . $reservation->check_out->format('d/m/Y') . ').',
+        ]);
+
+        $newCheckOut = \Carbon\Carbon::parse($validated['new_check_out']);
+
+        // Vérifier qu'aucune autre réservation n'occupe la chambre entre l'ancien check-out et le nouveau
+        $conflict = Reservation::where('room_id', $reservation->room_id)
+            ->where('id', '!=', $reservation->id)
+            ->whereIn('status', ['confirmed', 'checked_in'])
+            ->where('check_in', '<', $newCheckOut)
+            ->where('check_out', '>', $reservation->check_out)
+            ->first();
+
+        if ($conflict) {
+            return back()->with('error',
+                'Impossible de prolonger : la chambre est réservée par ' .
+                ($conflict->guest?->name ?? 'un autre client') .
+                ' à partir du ' . $conflict->check_in->format('d/m/Y') . '.'
+            );
+        }
+
+        // Recalcul du prix total : prix/nuit × nombre total de nuits
+        $totalNights = $reservation->check_in->diffInDays($newCheckOut) ?: 1;
+        $newTotalPrice = $reservation->room->price_per_night * $totalNights;
+
+        $oldCheckOut = $reservation->check_out->format('d/m/Y');
+        $addedNights = $reservation->check_out->diffInDays($newCheckOut);
+
+        $reservation->update([
+            'check_out'    => $newCheckOut,
+            'total_price'  => $newTotalPrice,
+        ]);
+
+        ActivityLogger::log(
+            'reservation_extended',
+            'Prolongation réservation ' . $reservation->reservation_number .
+            ' : ' . $oldCheckOut . ' → ' . $newCheckOut->format('d/m/Y') .
+            ' (+' . $addedNights . ' nuit(s))',
+            $reservation
+        );
+
+        return back()->with('success',
+            'Séjour prolongé de ' . $addedNights . ' nuit(s). ' .
+            'Nouveau check-out : ' . $newCheckOut->format('d/m/Y') . '. ' .
+            'Nouveau total : ' . number_format($newTotalPrice, 0, ',', ' ') . ' FCFA.'
+        );
+    }
+
+    /**
      * Cancel action
      */
     public function cancel(Reservation $reservation)

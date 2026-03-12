@@ -78,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('reservations.cancel');
         Route::post('reservations/{reservation}/settle', [\App\Http\Controllers\Dashboard\ReservationController::class, 'settle'])
             ->name('reservations.settle');
+        Route::post('reservations/{reservation}/extend', [\App\Http\Controllers\Dashboard\ReservationController::class, 'extend'])
+            ->name('reservations.extend');
         Route::get('reservations/{reservation}/invoice', [\App\Http\Controllers\Dashboard\ReservationController::class, 'invoice'])
             ->name('reservations.invoice');
         Route::get('reservations/{reservation}/invoice/pdf', [\App\Http\Controllers\Dashboard\ReservationController::class, 'invoicePdf'])
