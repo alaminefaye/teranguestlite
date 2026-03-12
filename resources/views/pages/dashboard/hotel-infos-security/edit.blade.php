@@ -27,7 +27,36 @@
         @method('PUT')
 
         <div class="space-y-8">
+
+            {{-- ── Politiques Check-in / Check-out ── --}}
             <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-1">Horaires de check-in / check-out</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Ces horaires sont utilisés comme valeurs par défaut lors de la création d'une réservation.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="default_checkin_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Heure de check-in par défaut
+                        </label>
+                        <input type="time" name="default_checkin_time" id="default_checkin_time"
+                            value="{{ old('default_checkin_time', $infos['default_checkin_time'] ?? '14:00') }}"
+                            class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ex : 14:00 (2h de l'après-midi)</p>
+                        @error('default_checkin_time')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="default_checkout_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Heure de check-out par défaut
+                        </label>
+                        <input type="time" name="default_checkout_time" id="default_checkout_time"
+                            value="{{ old('default_checkout_time', $infos['default_checkout_time'] ?? '12:00') }}"
+                            class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ex : 12:00 (midi)</p>
+                        @error('default_checkout_time')<p class="mt-1 text-sm text-error-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90 mb-4">Hôtel Infos (livret d'accueil)</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Codes Wi-Fi, plans, règlement intérieur et informations pratiques.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

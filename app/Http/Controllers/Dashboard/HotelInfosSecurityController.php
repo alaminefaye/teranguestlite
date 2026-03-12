@@ -31,22 +31,26 @@ class HotelInfosSecurityController extends Controller
         }
 
         $request->validate([
-            'wifi_network' => 'nullable|string|max:255',
-            'wifi_password' => 'nullable|string|max:255',
-            'house_rules' => 'nullable|string|max:10000',
-            'map_file' => 'nullable|image|max:10240',
-            'practical_info' => 'nullable|string|max:5000',
-            'doctor_enabled' => 'nullable|boolean',
-            'security_enabled' => 'nullable|boolean',
-            'chatbot_url' => 'nullable|url|max:500',
+            'wifi_network'          => 'nullable|string|max:255',
+            'wifi_password'         => 'nullable|string|max:255',
+            'house_rules'           => 'nullable|string|max:10000',
+            'map_file'              => 'nullable|image|max:10240',
+            'practical_info'        => 'nullable|string|max:5000',
+            'doctor_enabled'        => 'nullable|boolean',
+            'security_enabled'      => 'nullable|boolean',
+            'chatbot_url'           => 'nullable|url|max:500',
+            'default_checkin_time'  => 'nullable|date_format:H:i',
+            'default_checkout_time' => 'nullable|date_format:H:i',
         ]);
 
         $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
         $hotelInfos = $settings['hotel_infos'] ?? [];
-        $hotelInfos['wifi_network'] = $request->input('wifi_network', '');
-        $hotelInfos['wifi_password'] = $request->input('wifi_password', '');
-        $hotelInfos['house_rules'] = $request->input('house_rules', '');
-        $hotelInfos['practical_info'] = $request->input('practical_info', '');
+        $hotelInfos['wifi_network']          = $request->input('wifi_network', '');
+        $hotelInfos['wifi_password']          = $request->input('wifi_password', '');
+        $hotelInfos['house_rules']            = $request->input('house_rules', '');
+        $hotelInfos['practical_info']         = $request->input('practical_info', '');
+        $hotelInfos['default_checkin_time']   = $request->input('default_checkin_time', '14:00');
+        $hotelInfos['default_checkout_time']  = $request->input('default_checkout_time', '12:00');
 
         if ($request->hasFile('map_file')) {
             if (!empty($hotelInfos['map_path'])) {

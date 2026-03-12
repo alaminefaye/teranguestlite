@@ -104,11 +104,23 @@ class ReservationController extends Controller
             }
         }
 
+        // Heures par défaut définies dans Hotel Infos & Sécurité
+        $enterprise   = auth()->user()->enterprise;
+        $hotelInfos   = is_array($enterprise?->settings) ? ($enterprise->settings['hotel_infos'] ?? []) : [];
+        $defaultCheckInTime  = $hotelInfos['default_checkin_time']  ?? '14:00';
+        $defaultCheckOutTime = $hotelInfos['default_checkout_time'] ?? '12:00';
+
+        // Valeurs par défaut : aujourd'hui à l'heure de check-in, demain à l'heure de check-out
+        $defaultCheckIn  = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
+        $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
+
         return view('pages.dashboard.reservations.create', [
-            'title' => 'Créer une réservation',
-            'rooms' => $rooms,
-            'guests' => $guests,
+            'title'             => 'Créer une réservation',
+            'rooms'             => $rooms,
+            'guests'            => $guests,
             'initialGuestLabel' => $initialGuestLabel,
+            'defaultCheckIn'    => $defaultCheckIn,
+            'defaultCheckOut'   => $defaultCheckOut,
         ]);
     }
 
