@@ -76,6 +76,22 @@ class LeisureSubListScreen extends StatelessWidget {
     return Icons.directions_run_outlined;
   }
 
+  static String _titleForActivityType(String type, AppLocalizations l10n) {
+    switch (type) {
+      case 'golf':
+      case 'golf_tennis':
+        return l10n.golfTitle;
+      case 'tennis':
+        return l10n.tennisTitle;
+      case 'fitness':
+        return l10n.sportFitnessTitle;
+      case 'spa':
+        return l10n.spaWellness;
+      default:
+        return l10n.leisureCategory;
+    }
+  }
+
   static String? _imageForActivity(LeisureCategoryDto child) {
     final n = child.name.toLowerCase();
     final t = child.type;
@@ -191,8 +207,11 @@ class LeisureSubListScreen extends StatelessWidget {
                           itemCount: children.length,
                           itemBuilder: (context, index) {
                             final child = children[index];
+                            final cardTitle = child.name.trim().isNotEmpty
+                                ? child.name
+                                : _titleForActivityType(child.type, l10n);
                             return ServiceCard(
-                              title: child.name,
+                              title: cardTitle,
                               icon: _iconForActivity(child),
                               imagePath: _imageForActivity(child),
                               onTap: () => _onActivityTap(context, child),
@@ -209,6 +228,16 @@ class LeisureSubListScreen extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = mainCategory.name.trim().isNotEmpty
+        ? mainCategory.name
+        : (mainCategory.type == 'sport'
+            ? l10n.sportCategory
+            : l10n.leisureCategory);
+    final subtitle = (mainCategory.description != null &&
+            mainCategory.description!.trim().isNotEmpty)
+        ? mainCategory.description!
+        : l10n.wellnessSportLeisureSubtitle;
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -227,7 +256,7 @@ class LeisureSubListScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  mainCategory.name,
+                  title,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
@@ -236,7 +265,7 @@ class LeisureSubListScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  mainCategory.description ?? '',
+                  subtitle,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,

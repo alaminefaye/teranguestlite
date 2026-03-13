@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -30,44 +31,47 @@ class _SplashScreenState extends State<SplashScreen>
   int _currentServiceIndex = 0;
   Timer? _serviceTimer;
 
-  final List<_ServiceItem> _services = [
-    _ServiceItem(
-      icon: Icons.hotel,
-      label: 'Chambre & Hébergement',
-      subtitle: 'Votre séjour, notre priorité',
-      color: const Color(0xFFD4AF37),
-    ),
-    _ServiceItem(
-      icon: Icons.restaurant,
-      label: 'Restaurant & Gastronomie',
-      subtitle: 'Saveurs et excellence culinaire',
-      color: const Color(0xFFE8C96A),
-    ),
-    _ServiceItem(
-      icon: Icons.room_service,
-      label: 'Room Service & Commandes',
-      subtitle: 'Livraison directement dans votre chambre',
-      color: const Color(0xFFD4AF37),
-    ),
-    _ServiceItem(
-      icon: Icons.spa,
-      label: 'Spa & Bien-Être',
-      subtitle: 'Relaxation et soin du corps',
-      color: const Color(0xFFE8C96A),
-    ),
-    _ServiceItem(
-      icon: Icons.explore,
-      label: 'Excursions & Découvertes',
-      subtitle: 'Explorez la région à votre rythme',
-      color: const Color(0xFFD4AF37),
-    ),
-    _ServiceItem(
-      icon: Icons.local_laundry_service,
-      label: 'Blanchisserie',
-      subtitle: 'Vêtements propres en toute simplicité',
-      color: const Color(0xFFE8C96A),
-    ),
-  ];
+  List<_ServiceItem> _services(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      _ServiceItem(
+        icon: Icons.hotel,
+        label: l10n.splashRoomAccommodation,
+        subtitle: l10n.splashRoomSubtitle,
+        color: const Color(0xFFD4AF37),
+      ),
+      _ServiceItem(
+        icon: Icons.restaurant,
+        label: l10n.splashRestaurant,
+        subtitle: l10n.splashRestaurantSubtitle,
+        color: const Color(0xFFE8C96A),
+      ),
+      _ServiceItem(
+        icon: Icons.room_service,
+        label: l10n.splashRoomService,
+        subtitle: l10n.splashRoomServiceSubtitle,
+        color: const Color(0xFFD4AF37),
+      ),
+      _ServiceItem(
+        icon: Icons.spa,
+        label: l10n.splashSpa,
+        subtitle: l10n.splashSpaSubtitle,
+        color: const Color(0xFFE8C96A),
+      ),
+      _ServiceItem(
+        icon: Icons.explore,
+        label: l10n.splashExcursions,
+        subtitle: l10n.splashExcursionsSubtitle,
+        color: const Color(0xFFD4AF37),
+      ),
+      _ServiceItem(
+        icon: Icons.local_laundry_service,
+        label: l10n.splashLaundry,
+        subtitle: l10n.splashLaundrySubtitle,
+        color: const Color(0xFFE8C96A),
+      ),
+    ];
+  }
 
   @override
   void initState() {
@@ -120,13 +124,15 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
+  static const int _servicesCount = 6;
+
   void _startServiceCycle() {
     _serviceTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       if (!mounted) return;
       _cardController.reverse().then((_) {
         if (!mounted) return;
         setState(() {
-          _currentServiceIndex = (_currentServiceIndex + 1) % _services.length;
+          _currentServiceIndex = (_currentServiceIndex + 1) % _servicesCount;
         });
         _cardController.forward();
       });
@@ -185,7 +191,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final service = _services[_currentServiceIndex];
+    final servicesList = _services(context);
+    final service = servicesList[_currentServiceIndex];
 
     return Scaffold(
       body: Container(
@@ -269,7 +276,7 @@ class _SplashScreenState extends State<SplashScreen>
                     opacity: _contentFade,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_services.length, (i) {
+                      children: List.generate(servicesList.length, (i) {
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.symmetric(horizontal: 4),

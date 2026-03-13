@@ -22,12 +22,13 @@ class MyExcursionBookingsScreen extends StatefulWidget {
 class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
   String _selectedPeriod = 'all';
 
-  List<Map<String, String>> _periodFilters() {
+  List<Map<String, String>> _periodFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': l10n.periodAllDates},
+      {'value': 'today', 'label': l10n.periodToday},
+      {'value': 'week', 'label': l10n.periodThisWeek},
+      {'value': 'month', 'label': l10n.periodThisMonth},
     ];
   }
 
@@ -85,7 +86,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                         children: [
                           Text(
                             isStaffOrAdmin
-                                ? 'Réservations Excursions & Activités'
+                                ? l10n.excursionStaffTitle
                                 : l10n.myExcursionsShort,
                             style: TextStyle(
                               fontSize: titleSize,
@@ -96,7 +97,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             isStaffOrAdmin
-                                ? 'Suivi des excursions & activités'
+                                ? l10n.excursionStaffSubtitle
                                 : l10n.reservationsConfirmed,
                             style: const TextStyle(
                               fontSize: 13,
@@ -109,7 +110,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                   ],
                 ),
               ),
-              if (isStaffOrAdmin) _buildFilters(),
+              if (isStaffOrAdmin) _buildFilters(context),
               Expanded(child: _buildContent(isStaffOrAdmin)),
             ],
           ),
@@ -118,16 +119,16 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(
         height: 40,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: _periodFilters().length,
+          itemCount: _periodFilters(context).length,
           itemBuilder: (context, index) {
-            final filter = _periodFilters()[index];
+            final filter = _periodFilters(context)[index];
             final isSelected = _selectedPeriod == filter['value'];
 
             return Padding(
@@ -254,6 +255,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
   }
 
   Widget _buildBookingCard(BuildContext context, ExcursionBooking booking) {
+    final l10n = AppLocalizations.of(context);
     final auth = context.read<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
     final hasRoomOrGuest =
@@ -261,7 +263,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     final roomGuestText = () {
       final parts = <String>[];
       if (booking.roomNumber != null && booking.roomNumber!.isNotEmpty) {
-        parts.add('Chambre ${booking.roomNumber}');
+        parts.add('${l10n.roomLabelShort} ${booking.roomNumber}');
       }
       if (booking.guestName != null && booking.guestName!.isNotEmpty) {
         if (parts.isNotEmpty) {
@@ -432,14 +434,15 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final actions = <Map<String, String>>[];
 
     if (booking.status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'confirm', 'label': l10n.excursionConfirmAction});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (booking.status == 'confirmed') {
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
-      actions.add({'action': 'complete', 'label': 'Marquer réalisée'});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
+      actions.add({'action': 'complete', 'label': l10n.excursionMarkCompletedAction});
     }
 
     if (actions.isEmpty) {
@@ -503,14 +506,14 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
     String? validationError;
 
     if (action == 'confirm') {
-      title = 'Confirmer la réservation';
-      message = 'Confirmer cette réservation excursion ?';
+      title = l10n.excursionConfirmReservationTitle;
+      message = l10n.excursionConfirmReservationMessage;
     } else if (action == 'cancel') {
       title = l10n.cancel;
       message = l10n.cancelReservationConfirm;
     } else if (action == 'complete') {
-      title = 'Marquer comme réalisée';
-      message = 'Marquer cette excursion comme réalisée ?';
+      title = l10n.excursionMarkCompletedTitle;
+      message = l10n.excursionMarkCompletedMessage;
     } else {
       return;
     }
@@ -536,7 +539,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif de l'annulation",
+                    hintText: l10n.cancellationReasonHint,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),
@@ -564,7 +567,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
                     setState(() {
-                      validationError = 'Veuillez préciser un motif.';
+                      validationError = l10n.validationReasonRequired;
                     });
                     return;
                   }
@@ -693,7 +696,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
 
     final roomGuestParts = <String>[];
     if (booking.roomNumber != null && booking.roomNumber!.isNotEmpty) {
-      roomGuestParts.add('Chambre ${booking.roomNumber}');
+      roomGuestParts.add('${l10n.roomLabelShort} ${booking.roomNumber}');
     }
     if (booking.guestName != null && booking.guestName!.isNotEmpty) {
       roomGuestParts.add(booking.guestName!);
@@ -748,9 +751,9 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Détail de la réservation',
-                            style: TextStyle(
+                          Text(
+                            l10n.reservationDetailTitle,
+                            style: const TextStyle(
                               fontSize: 13,
                               color: AppTheme.textGray,
                             ),
@@ -966,14 +969,15 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
   }
 
   Widget _buildStaffActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final actions = <Map<String, String>>[];
 
     if (booking.status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'confirm', 'label': l10n.excursionConfirmAction});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (booking.status == 'confirmed') {
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
-      actions.add({'action': 'complete', 'label': 'Marquer réalisée'});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
+      actions.add({'action': 'complete', 'label': l10n.excursionMarkCompletedAction});
     }
 
     if (actions.isEmpty) {
@@ -1035,14 +1039,14 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
     String? validationError;
 
     if (action == 'confirm') {
-      title = 'Confirmer la réservation';
-      message = 'Confirmer cette réservation excursion ?';
+      title = l10n.excursionConfirmReservationTitle;
+      message = l10n.excursionConfirmReservationMessage;
     } else if (action == 'cancel') {
       title = l10n.cancel;
       message = l10n.cancelReservationConfirm;
     } else if (action == 'complete') {
-      title = 'Marquer comme réalisée';
-      message = 'Marquer cette excursion comme réalisée ?';
+      title = l10n.excursionMarkCompletedTitle;
+      message = l10n.excursionMarkCompletedMessage;
     } else {
       return;
     }
@@ -1068,7 +1072,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif de l'annulation",
+                    hintText: l10n.cancellationReasonHint,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),
@@ -1096,7 +1100,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
                     setState(() {
-                      validationError = 'Veuillez préciser un motif.';
+                      validationError = l10n.validationReasonRequired;
                     });
                     return;
                   }

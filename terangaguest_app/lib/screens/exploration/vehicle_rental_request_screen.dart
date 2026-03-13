@@ -354,8 +354,8 @@ class _VehicleRentalRequestScreenState
                         controller: _clientCodeController,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Code client',
-                          hintText: 'Ex: ABC-123',
+                          labelText: AppLocalizations.of(context).clientCode,
+                          hintText: AppLocalizations.of(context).clientCodeExample,
                           labelStyle: const TextStyle(
                             color: AppTheme.accentGold,
                           ),

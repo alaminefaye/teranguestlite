@@ -161,9 +161,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   final session = context.read<TabletSessionProvider>().session;
                   if (session != null) _loadTabletGallery(session);
                 },
-                child: const Text(
-                  'Réessayer',
-                  style: TextStyle(color: AppTheme.accentGold),
+                child: Text(
+                  AppLocalizations.of(context).retry,
+                  style: const TextStyle(color: AppTheme.accentGold),
                 ),
               ),
             ],

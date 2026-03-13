@@ -179,7 +179,7 @@ class _CreateLaundryRequestScreenState
                         ),
                       ),
                       Text(
-                        '${subtotal.toStringAsFixed(0)} FCFA',
+                        '${subtotal.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -203,7 +203,7 @@ class _CreateLaundryRequestScreenState
                     ),
                   ),
                   Text(
-                    '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
+                    '${provider.getTotalPrice().toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,

@@ -555,14 +555,15 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final actions = <Map<String, String>>[];
 
     if (request.status == 'pending') {
-      actions.add({'action': 'accept', 'label': 'Accepter'});
-      actions.add({'action': 'cancel', 'label': 'Refuser'});
+      actions.add({'action': 'accept', 'label': l10n.accept});
+      actions.add({'action': 'cancel', 'label': l10n.rejectRequestLabel});
     } else if (request.status == 'in_progress') {
-      actions.add({'action': 'complete', 'label': 'Clôturer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'complete', 'label': l10n.completeRequestLabel});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     }
 
     if (actions.isEmpty) {
@@ -621,16 +622,16 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
     String? validationError;
 
     if (action == 'accept') {
-      title = 'Accepter la demande';
-      message = 'Accepter cette demande de service palace / conciergerie ?';
+      title = l10n.acceptRequestTitle;
+      message = l10n.acceptRequestMessage;
     } else if (action == 'complete') {
-      title = 'Clôturer la demande';
-      message = 'Clôturer cette demande ?';
+      title = l10n.completeRequestTitle;
+      message = l10n.completeRequestMessage;
     } else if (action == 'cancel') {
-      title = request.status == 'pending' ? 'Refuser la demande' : l10n.cancel;
+      title = request.status == 'pending' ? l10n.rejectRequestTitle : l10n.cancel;
       message = request.status == 'pending'
-          ? 'Refuser cette demande de service palace ?'
-          : 'Annuler cette demande de service palace ?';
+          ? l10n.rejectRequestMessage
+          : l10n.cancelRequestMessage;
     } else {
       return;
     }
@@ -660,7 +661,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif de l'annulation",
+                    hintText: l10n.cancellationReasonHint,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),
@@ -1054,19 +1055,18 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
 
     final actions = <Map<String, String>>[];
 
+    final l10n = AppLocalizations.of(context);
     if (request.status == 'pending') {
-      actions.add({'action': 'accept', 'label': 'Accepter'});
-      actions.add({'action': 'cancel', 'label': 'Refuser'});
+      actions.add({'action': 'accept', 'label': l10n.accept});
+      actions.add({'action': 'cancel', 'label': l10n.rejectRequestLabel});
     } else if (request.status == 'in_progress') {
-      actions.add({'action': 'complete', 'label': 'Clôturer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'complete', 'label': l10n.completeRequestLabel});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     }
 
     if (actions.isEmpty) {
       return const SizedBox.shrink();
     }
-
-    final l10n = AppLocalizations.of(context);
 
     Future<void> handleAction(String action) async {
       String title;
@@ -1075,18 +1075,18 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
       String? validationError;
 
       if (action == 'accept') {
-        title = 'Accepter la demande';
-        message = 'Accepter cette demande de service palace / conciergerie ?';
+        title = l10n.acceptRequestTitle;
+        message = l10n.acceptRequestMessage;
       } else if (action == 'complete') {
-        title = 'Clôturer la demande';
-        message = 'Clôturer cette demande ?';
+        title = l10n.completeRequestTitle;
+        message = l10n.completeRequestMessage;
       } else if (action == 'cancel') {
         title = request.status == 'pending'
-            ? 'Refuser la demande'
+            ? l10n.rejectRequestTitle
             : l10n.cancel;
         message = request.status == 'pending'
-            ? 'Refuser cette demande de service palace ?'
-            : 'Annuler cette demande de service palace ?';
+            ? l10n.rejectRequestMessage
+            : l10n.cancelRequestMessage;
       } else {
         return;
       }
@@ -1117,7 +1117,7 @@ class _PalaceStaffActionsForDetail extends StatelessWidget {
                     maxLines: 3,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: "Motif de l'annulation",
+                      hintText: l10n.cancellationReasonHint,
                       hintStyle: const TextStyle(color: AppTheme.textGray),
                       enabledBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: AppTheme.textGray),

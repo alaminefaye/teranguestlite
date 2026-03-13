@@ -326,7 +326,7 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
                                 ),
                               ),
                               Text(
-                                '${_estimatedPrice!.toInt()} FCFA',
+                                '${_estimatedPrice!.toInt()} ${AppLocalizations.of(context).currencyFcfa}',
                                 style: const TextStyle(
                                   color: AppTheme.accentGold,
                                   fontSize: 18,
@@ -344,8 +344,8 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
                         controller: _clientCodeController,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Code client',
-                          hintText: 'Ex: ABC-123',
+                          labelText: AppLocalizations.of(context).clientCode,
+                          hintText: AppLocalizations.of(context).clientCodeExample,
                           labelStyle: const TextStyle(color: AppTheme.accentGold),
                           hintStyle: TextStyle(
                             color: AppTheme.textGray.withValues(alpha: 0.7),

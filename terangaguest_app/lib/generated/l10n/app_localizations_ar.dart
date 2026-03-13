@@ -137,7 +137,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get spaWellness => 'السبا والعافية';
 
   @override
-  String get wellnessSportLeisure => 'العافية والرياضة والترفيه';
+  String get wellnessSportLeisure => 'العافية، الرياضة والترفيه';
 
   @override
   String get wellnessSportLeisureSubtitle => 'سبا، غولف، تنس، لياقة';
@@ -275,19 +275,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ourEstablishmentsDesc => 'مواقع أخرى للمجموعة في البلاد';
 
   @override
-  String get wifiCode => 'Code Wi-Fi';
+  String get wifiCode => 'رمز واي فاي';
 
   @override
-  String get wifiPassword => 'Mot de passe Wi-Fi';
+  String get wifiPassword => 'كلمة مرور واي فاي';
 
   @override
-  String get houseRules => 'Règlement intérieur';
+  String get houseRules => 'القواعد الداخلية';
 
   @override
-  String get practicalInfo => 'Informations pratiques';
+  String get practicalInfo => 'معلومات عملية';
 
   @override
-  String get requestDoctor => 'Solliciter un médecin';
+  String get requestDoctor => 'طلب طبيب';
 
   @override
   String get reportSecurityEmergency => 'الإبلاغ عن حالة طوارئ أمنية';
@@ -298,47 +298,46 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get emergencyRequestSent =>
-      'Demande envoyée. L\'équipe va vous contacter.';
+  String get emergencyRequestSent => 'تم إرسال الطلب. سيتصل بك الفريق.';
 
   @override
   String get noActiveStayForEmergency =>
-      'Un séjour actif est requis. Connectez-vous avec le compte de la chambre ou contactez la réception.';
+      'يجب أن يكون لديك إقامة نشطة. سجّل الدخول بحساب الغرفة أو اتصل بالاستقبال.';
 
   @override
   String get assistanceDoctorNotConfigured =>
-      'Le service Assistance médecin n\'est pas configuré pour cet établissement.';
+      'خدمة طلب الطبيب غير مفعلة لهذا المنشأة.';
 
   @override
   String get assistanceSecurityNotConfigured =>
-      'Le service Urgence sécurité n\'est pas configuré pour cet établissement.';
+      'خدمة طوارئ الأمن غير مفعلة لهذا المنشأة.';
 
   @override
   String confirmEmergencyAction(String action) {
-    return 'Voulez-vous confirmer : $action ?';
+    return 'هل تريد التأكيد: $action؟';
   }
 
   @override
-  String get deleteConversationConfirm => 'Supprimer cette conversation ?';
+  String get deleteConversationConfirm => 'حذف هذه المحادثة؟';
 
   @override
-  String get deleteConversation => 'Supprimer la conversation';
+  String get deleteConversation => 'حذف المحادثة';
 
   @override
-  String get messageDeleted => 'Message supprimé';
+  String get messageDeleted => 'تم حذف الرسالة';
 
   @override
-  String get reply => 'Répondre';
+  String get reply => 'رد';
 
   @override
-  String get deleteMessage => 'Supprimer le message';
+  String get deleteMessage => 'حذف الرسالة';
 
   @override
-  String get chatbotComingSoon => 'Bientôt disponible';
+  String get chatbotComingSoon => 'قريباً';
 
   @override
   String get chatbotComingSoonHint =>
-      'Le chatbot multilingue sera disponible prochainement.';
+      'الشات بوت متعدد اللغات سيكون متاحاً قريباً.';
 
   @override
   String get servicesChambreLogistique => 'خدمة الغرف';
@@ -351,25 +350,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'قائمة رقمية لطلب وجبات الطعام والمشروبات مع تتبع التحضير في الوقت الفعلي.';
 
   @override
-  String get laundryDesc =>
-      'Grille tarifaire interactive et demande de ramassage immédiate du linge.';
+  String get laundryDesc => 'جدول أسعار تفاعلي وطلب استلام فوري للملابس.';
 
   @override
-  String get amenitiesConcierge => 'Amenities & Conciergerie';
+  String get amenitiesConcierge => 'وسائل الراحة والكونسيرج';
 
   @override
   String get amenitiesConciergeDesc =>
-      'Demande simplifiée d\'articles de toilette, oreillers supplémentaires, kit de rasage ou tout autre service sans passer par le téléphone.';
+      'طلب مبسط لمستلزمات الحمام أو وسائد إضافية أو طقم حلاقة أو أي خدمة أخرى دون الحاجة للاتصال.';
 
   @override
-  String get minibarIntelligent => 'Mini-bar Intelligent';
+  String get minibarIntelligent => 'ميني بار ذكي';
 
   @override
   String get minibarIntelligentDesc =>
-      'Inventaire digital des produits et déclaration simplifiée des consommations.';
+      'جرد رقمي للمنتجات وإعلان مبسط للاستهلاك.';
 
   @override
-  String get comingSoon => 'Bientôt disponible';
+  String get comingSoon => 'قريباً';
 
   @override
   String get amenityToiletries => 'مستلزمات الحمام';
@@ -1154,90 +1152,86 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vehicleRentalTitle => 'تأجير السيارات';
 
   @override
-  String get vehicleRentalSubtitle =>
-      'Choisissez un véhicule et envoyez votre demande de réservation.';
+  String get vehicleRentalSubtitle => 'اختر مركبة وأرسل طلب الاستئجار.';
 
   @override
-  String get noVehicleAvailable => 'Aucun véhicule disponible';
+  String get noVehicleAvailable => 'لا توجد مركبات متاحة';
 
   @override
-  String get noVehicleAvailableHint =>
-      'Les véhicules seront bientôt proposés par l\'établissement.';
+  String get noVehicleAvailableHint => 'ستعرض المنشأة المركبات قريباً.';
 
   @override
-  String get requestVehicleRental => 'Demander cette location';
+  String get requestVehicleRental => 'طلب هذه الاستئارة';
 
   @override
-  String get rentalDate => 'Date souhaitée';
+  String get rentalDate => 'التاريخ المفضل';
 
   @override
-  String get rentalDuration => 'Durée (heures)';
+  String get rentalDuration => 'المدة (ساعات)';
 
   @override
   String get rentalDays => 'عدد الأيام';
 
   @override
-  String get estimatedPrice => 'Prix estimé';
+  String get estimatedPrice => 'السعر التقديري';
 
   @override
-  String get guidedToursTitle => 'Visites Guidées Personnalisées';
+  String get guidedToursTitle => 'جولات سياحية مخصصة';
 
   @override
-  String get guidedToursSubtitle =>
-      'Indiquez la date, le type de circuit et le nombre de personnes.';
+  String get guidedToursSubtitle => 'أدخل التاريخ ونوع الجولة وعدد الأشخاص.';
 
   @override
-  String get tourType => 'Type de circuit';
+  String get tourType => 'نوع الجولة';
 
   @override
-  String get tourTypeCultural => 'Culturel';
+  String get tourTypeCultural => 'ثقافي';
 
   @override
-  String get tourTypeGastronomic => 'Gastronomique';
+  String get tourTypeGastronomic => 'تذوق الطعام';
 
   @override
-  String get tourTypeHistorical => 'Historique';
+  String get tourTypeHistorical => 'تاريخي';
 
   @override
   String get transfersVtcTitle => 'نقل وسيارات خاصة';
 
   @override
   String get transfersVtcSubtitle =>
-      'Navette aéroport ou chauffeur privé. Indiquez lieu de prise en charge et destination.';
+      'نقل من المطار أو سائق خاص. أدخل مكان الانطلاق والوجهة.';
 
   @override
-  String get pickupPlace => 'Lieu de prise en charge';
+  String get pickupPlace => 'مكان الانطلاق';
 
   @override
-  String get destinationPlace => 'Destination';
+  String get destinationPlace => 'الوجهة';
 
   @override
-  String get sitesTouristiquesTitle => 'Découverte & Sites Touristiques';
+  String get sitesTouristiquesTitle => 'اكتشاف والمواقع السياحية';
 
   @override
-  String get sitesTouristiquesSubtitle =>
-      'Vitrine des lieux incontournables avec photos et descriptifs.';
+  String get sitesTouristiquesSubtitle => 'أهم الأماكن مع صور ووصف.';
 
   @override
-  String get filterVehicleType => 'Type';
+  String get filterVehicleType => 'النوع';
 
   @override
-  String get filterMinSeats => 'Places min.';
+  String get filterMinSeats => 'الحد الأدنى للمقاعد';
 
   @override
-  String get vehicleTypeBerline => 'Berline';
+  String get vehicleTypeBerline => 'سيدان';
 
   @override
-  String get vehicleTypeSuv => 'SUV';
+  String get vehicleTypeSuv => 'دفع رباعي';
 
   @override
-  String get vehicleTypeMinibus => 'Minibus';
+  String get vehicleTypeMinibus => 'ميني باص';
 
   @override
-  String get vehicleTypeVan => 'Van';
+  String get vehicleTypeVan => 'فان';
 
   @override
-  String get vehicleTypeOther => 'Autre';
+  String get vehicleTypeOther => 'أخرى';
 
   @override
   String get validate => 'تحقق';
@@ -1697,10 +1691,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'اسمح بالوصول إلى الميكروفون لإرسال ملاحظة صوتية.';
 
   @override
-  String get sportCategory => 'رياضة';
+  String get sportCategory => 'الرياضة';
 
   @override
-  String get leisureCategory => 'تسلية';
+  String get leisureCategory => 'الترفيه';
 
   @override
   String get timeoutError => 'انتهت مهلة الطلب. يرجى التحقق من اتصالك.';
@@ -1781,6 +1775,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get generalError => 'خطأ';
 
   @override
+  String displayError(String message) {
+    return 'خطأ في العرض: $message';
+  }
+
+  @override
   String get orderReceipt => 'إيصال الطلب';
 
   @override
@@ -1824,4 +1823,185 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allOption => 'الكل';
+
+  @override
+  String get currencyFcfa => 'فرنك CFA';
+
+  @override
+  String get currencyFcfaPerPiece => 'فرنك CFA/قطعة';
+
+  @override
+  String get scrollToTop => 'العودة للأعلى';
+
+  @override
+  String get staffLaundryRequestsTitle => 'طلبات الغسيل';
+
+  @override
+  String get staffLaundryRequestsSubtitle => 'متابعة طلبات الغسيل';
+
+  @override
+  String get call => 'اتصال';
+
+  @override
+  String get getDirections => 'كيفية الوصول';
+
+  @override
+  String get splashRoomAccommodation => 'الغرفة والإقامة';
+
+  @override
+  String get splashRoomSubtitle => 'إقامتك، أولويتنا';
+
+  @override
+  String get splashRestaurant => 'المطعم والمأكولات';
+
+  @override
+  String get splashRestaurantSubtitle => 'النكهات والتميز في المطبخ';
+
+  @override
+  String get splashRoomService => 'خدمة الغرف والطلبات';
+
+  @override
+  String get splashRoomServiceSubtitle => 'التوصيل مباشرة إلى غرفتك';
+
+  @override
+  String get splashSpa => 'السبا والعافية';
+
+  @override
+  String get splashSpaSubtitle => 'استرخاء وعناية بالجسم';
+
+  @override
+  String get splashExcursions => 'الجولات والاستكشاف';
+
+  @override
+  String get splashExcursionsSubtitle => 'استكشف المنطقة بوتيرتك';
+
+  @override
+  String get splashLaundry => 'الغسيل';
+
+  @override
+  String get splashLaundrySubtitle => 'ملابس نظيفة بكل بساطة';
+
+  @override
+  String get notificationOrdersPending => 'طلبات خدمة الغرف قيد الانتظار';
+
+  @override
+  String get notificationRestaurantsPending => 'حجوزات المطاعم قيد الانتظار';
+
+  @override
+  String get notificationSpaPending => 'حجوزات السبا والعافية قيد الانتظار';
+
+  @override
+  String get notificationExcursionsPending => 'الجولات والأنشطة قيد الانتظار';
+
+  @override
+  String get notificationLaundryPending => 'طلبات الغسيل قيد الانتظار';
+
+  @override
+  String get notificationPalacePending => 'خدمات القصر والكونسيرج قيد الانتظار';
+
+  @override
+  String get notificationEmergency => 'المساعدة والطوارئ';
+
+  @override
+  String get notificationChat => 'الرسائل / دردشة العميل';
+
+  @override
+  String get acceptNewSchedule => 'قبول الموعد الجديد';
+
+  @override
+  String get hotelFallback => 'الفندق';
+
+  @override
+  String get roomNumberHint => 'مثال: 101';
+
+  @override
+  String get tableNumberHint => 'مثال: 42';
+
+  @override
+  String get clientCodeExample => 'مثال: ABC-123';
+
+  @override
+  String get takeCharge => 'التكفل';
+
+  @override
+  String get markReady => 'تحديد جاهزة';
+
+  @override
+  String get markDelivered => 'تحديد مُسلّمة';
+
+  @override
+  String get completeRequestLabel => 'إغلاق';
+
+  @override
+  String get rejectRequestLabel => 'رفض';
+
+  @override
+  String get noGuideAvailable => 'لا دليل متاح';
+
+  @override
+  String get openAction => 'فتح';
+
+  @override
+  String get adminNewEmergencyAlertTitle => 'تنبيه جديد للمساعدة والطوارئ';
+
+  @override
+  String get adminNewEmergencyAlertMessage => 'تنبيه مساعدة/طوارئ جديد مفتوح.';
+
+  @override
+  String get adminNewChatMessageTitle => 'رسالة عميل جديدة';
+
+  @override
+  String get adminNewChatMessageMessage => 'لديك رسالة عميل جديدة في الدردشة.';
+
+  @override
+  String get reservationDetailTitle => 'تفاصيل الحجز';
+
+  @override
+  String get roomLabelShort => 'الغرفة';
+
+  @override
+  String get laundryTakeChargeConfirm => 'التكفل بهذا الطلب من الغسيل؟';
+
+  @override
+  String get laundryMarkReadyConfirm => 'تحديد هذا الطلب كجاهز؟';
+
+  @override
+  String get laundryMarkDeliveredConfirm => 'تحديد هذا الطلب كمسلّم؟';
+
+  @override
+  String get laundryCancelConfirm => 'إلغاء هذا الطلب من الغسيل؟';
+
+  @override
+  String get spaRescheduleConfirmMessage =>
+      'تأكيد هذا الموعد الجديد لحجز السبا؟';
+
+  @override
+  String get spaCancellationPolicy => 'الإلغاء ممكن حتى 24 ساعة قبل الموعد.';
+
+  @override
+  String get excursionConfirmReservationTitle => 'تأكيد الحجز';
+
+  @override
+  String get excursionConfirmReservationMessage => 'تأكيد حجز هذه الجولة؟';
+
+  @override
+  String get excursionMarkCompletedTitle => 'تحديد منفذة';
+
+  @override
+  String get excursionMarkCompletedMessage => 'تحديد هذه الجولة كمنفذة؟';
+
+  @override
+  String get excursionStaffTitle => 'حجوزات الجولات والأنشطة';
+
+  @override
+  String get excursionStaffSubtitle => 'متابعة الجولات والأنشطة';
+
+  @override
+  String get excursionConfirmAction => 'تأكيد';
+
+  @override
+  String get excursionMarkCompletedAction => 'تحديد منفذة';
+
+  @override
+  String get guidesScreenTitle => 'أدلة ومعلومات';
 }

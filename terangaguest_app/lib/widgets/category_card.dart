@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/menu_category.dart';
+import '../generated/l10n/app_localizations.dart';
 
 class CategoryCard extends StatelessWidget {
   final MenuCategory category;
@@ -104,7 +105,7 @@ class CategoryCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${category.itemsCount} article${category.itemsCount > 1 ? 's' : ''}',
+                                AppLocalizations.of(context).articleCount(category.itemsCount),
                                 style: TextStyle(
                                   fontSize: subFontSize,
                                   fontWeight: FontWeight.w600,

@@ -365,7 +365,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         } catch (e, st) {
           debugPrint('OrderDetail build error: $e\n$st');
           return ErrorStateWidget(
-            message: 'Erreur d\'affichage: ${e.toString()}',
+            message: AppLocalizations.of(context).displayError(e.toString()),
             hint: AppLocalizations.of(context).errorHint,
             onRetry: _loadOrderDetail,
           );
@@ -1232,6 +1232,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
         return AlertDialog(
           backgroundColor: AppTheme.primaryBlue,
           shape: RoundedRectangleBorder(
@@ -1278,7 +1279,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 maxLength: 255,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Motif de l\'annulation…',
+                  hintText: dialogL10n.cancellationReasonHint,
                   hintStyle: const TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: Colors.white10,
@@ -1450,7 +1451,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: "Motif de l'annulation",
+                  hintText: l10n.cancellationReasonHint,
                   hintStyle: const TextStyle(color: AppTheme.textGray),
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppTheme.textGray),

@@ -153,8 +153,13 @@ class _WellnessSportLeisureScreenState
                           itemCount: list.length,
                           itemBuilder: (context, index) {
                             final mainCat = list[index];
+                            final cardTitle = mainCat.name.trim().isNotEmpty
+                                ? mainCat.name
+                                : (mainCat.type == 'sport'
+                                    ? l10n.sportCategory
+                                    : l10n.leisureCategory);
                             return ServiceCard(
-                              title: mainCat.name,
+                              title: cardTitle,
                               icon: _iconForMainType(mainCat.type),
                               imagePath: _imageForMainType(mainCat.type),
                               onTap: () {

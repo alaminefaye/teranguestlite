@@ -1801,6 +1801,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalError => 'Error';
 
   @override
+  String displayError(String message) {
+    return 'Display error: $message';
+  }
+
+  @override
   String get orderReceipt => 'ORDER RECEIPT';
 
   @override
@@ -1844,4 +1849,191 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allOption => 'All';
+
+  @override
+  String get currencyFcfa => 'FCFA';
+
+  @override
+  String get currencyFcfaPerPiece => 'FCFA/piece';
+
+  @override
+  String get scrollToTop => 'Scroll to top';
+
+  @override
+  String get staffLaundryRequestsTitle => 'Laundry Requests';
+
+  @override
+  String get staffLaundryRequestsSubtitle => 'Track laundry requests';
+
+  @override
+  String get call => 'Call';
+
+  @override
+  String get getDirections => 'Get directions';
+
+  @override
+  String get splashRoomAccommodation => 'Room & Accommodation';
+
+  @override
+  String get splashRoomSubtitle => 'Your stay, our priority';
+
+  @override
+  String get splashRestaurant => 'Restaurant & Dining';
+
+  @override
+  String get splashRestaurantSubtitle => 'Flavors and culinary excellence';
+
+  @override
+  String get splashRoomService => 'Room Service & Orders';
+
+  @override
+  String get splashRoomServiceSubtitle => 'Delivery straight to your room';
+
+  @override
+  String get splashSpa => 'Spa & Wellness';
+
+  @override
+  String get splashSpaSubtitle => 'Relaxation and body care';
+
+  @override
+  String get splashExcursions => 'Excursions & Discovery';
+
+  @override
+  String get splashExcursionsSubtitle => 'Explore the region at your pace';
+
+  @override
+  String get splashLaundry => 'Laundry';
+
+  @override
+  String get splashLaundrySubtitle => 'Clean clothes made simple';
+
+  @override
+  String get notificationOrdersPending => 'Room Service orders pending';
+
+  @override
+  String get notificationRestaurantsPending =>
+      'Restaurant reservations pending';
+
+  @override
+  String get notificationSpaPending => 'Spa & Wellness reservations pending';
+
+  @override
+  String get notificationExcursionsPending => 'Excursions & Activities pending';
+
+  @override
+  String get notificationLaundryPending => 'Laundry requests pending';
+
+  @override
+  String get notificationPalacePending => 'Palace / Concierge services pending';
+
+  @override
+  String get notificationEmergency => 'Assistance & Emergency';
+
+  @override
+  String get notificationChat => 'Messages / Client chat';
+
+  @override
+  String get acceptNewSchedule => 'Accept new schedule';
+
+  @override
+  String get hotelFallback => 'Hotel';
+
+  @override
+  String get roomNumberHint => 'E.g. 101';
+
+  @override
+  String get tableNumberHint => 'E.g. 42';
+
+  @override
+  String get clientCodeExample => 'E.g. ABC-123';
+
+  @override
+  String get takeCharge => 'Take charge';
+
+  @override
+  String get markReady => 'Mark as ready';
+
+  @override
+  String get markDelivered => 'Mark as delivered';
+
+  @override
+  String get completeRequestLabel => 'Complete';
+
+  @override
+  String get rejectRequestLabel => 'Reject';
+
+  @override
+  String get noGuideAvailable => 'No guide available';
+
+  @override
+  String get openAction => 'Open';
+
+  @override
+  String get adminNewEmergencyAlertTitle => 'New Assistance & Emergency alert';
+
+  @override
+  String get adminNewEmergencyAlertMessage =>
+      'A new assistance/emergency alert is open.';
+
+  @override
+  String get adminNewChatMessageTitle => 'New client message';
+
+  @override
+  String get adminNewChatMessageMessage =>
+      'You have a new client message in chat.';
+
+  @override
+  String get reservationDetailTitle => 'Reservation details';
+
+  @override
+  String get roomLabelShort => 'Room';
+
+  @override
+  String get laundryTakeChargeConfirm => 'Take charge of this laundry request?';
+
+  @override
+  String get laundryMarkReadyConfirm => 'Mark this request as ready?';
+
+  @override
+  String get laundryMarkDeliveredConfirm => 'Mark this request as delivered?';
+
+  @override
+  String get laundryCancelConfirm => 'Cancel this laundry request?';
+
+  @override
+  String get spaRescheduleConfirmMessage =>
+      'Confirm this new time for your spa reservation?';
+
+  @override
+  String get spaCancellationPolicy =>
+      'Cancellation is possible up to 24 hours before the appointment.';
+
+  @override
+  String get excursionConfirmReservationTitle => 'Confirm reservation';
+
+  @override
+  String get excursionConfirmReservationMessage =>
+      'Confirm this excursion reservation?';
+
+  @override
+  String get excursionMarkCompletedTitle => 'Mark as completed';
+
+  @override
+  String get excursionMarkCompletedMessage =>
+      'Mark this excursion as completed?';
+
+  @override
+  String get excursionStaffTitle => 'Excursions & Activities reservations';
+
+  @override
+  String get excursionStaffSubtitle => 'Excursions & activities tracking';
+
+  @override
+  String get excursionConfirmAction => 'Confirm';
+
+  @override
+  String get excursionMarkCompletedAction => 'Mark completed';
+
+  @override
+  String get guidesScreenTitle => 'Guides & Info';
 }

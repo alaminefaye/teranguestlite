@@ -86,7 +86,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                         children: [
                           Text(
                             isStaffOrAdmin
-                                ? 'Demandes Blanchisserie'
+                                ? l10n.staffLaundryRequestsTitle
                                 : l10n.myRequests,
                             style: TextStyle(
                               fontSize: titleSize,
@@ -97,7 +97,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             isStaffOrAdmin
-                                ? 'Suivi des demandes de blanchisserie'
+                                ? l10n.staffLaundryRequestsSubtitle
                                 : l10n.laundry,
                             style: const TextStyle(
                               fontSize: 13,
@@ -393,7 +393,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                                     ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    request.formattedTotalPrice,
+                                    '${request.totalPrice.toStringAsFixed(0)} ${l10n.currencyFcfa}',
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -521,17 +521,18 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final actions = <Map<String, String>>[];
 
     if (request.status == 'pending') {
-      actions.add({'action': 'pickup', 'label': 'Prendre en charge'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'pickup', 'label': l10n.takeCharge});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (request.status == 'picked_up') {
-      actions.add({'action': 'ready', 'label': 'Marquer comme prête'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'ready', 'label': l10n.markReady});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (request.status == 'ready') {
-      actions.add({'action': 'deliver', 'label': 'Marquer comme livrée'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'deliver', 'label': l10n.markDelivered});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     }
 
     if (actions.isEmpty) {
@@ -590,17 +591,17 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
     String? validationError;
 
     if (action == 'pickup') {
-      title = 'Prendre en charge';
-      message = 'Prendre en charge cette demande de blanchisserie ?';
+      title = l10n.takeCharge;
+      message = l10n.laundryTakeChargeConfirm;
     } else if (action == 'ready') {
-      title = 'Marquer comme prête';
-      message = 'Marquer cette demande comme prête ?';
+      title = l10n.markReady;
+      message = l10n.laundryMarkReadyConfirm;
     } else if (action == 'deliver') {
-      title = 'Marquer comme livrée';
-      message = 'Marquer cette demande comme livrée ?';
+      title = l10n.markDelivered;
+      message = l10n.laundryMarkDeliveredConfirm;
     } else if (action == 'cancel') {
       title = l10n.cancel;
-      message = 'Annuler cette demande de blanchisserie ?';
+      message = l10n.laundryCancelConfirm;
     } else {
       return;
     }
@@ -626,7 +627,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif de l'annulation",
+                    hintText: l10n.cancellationReasonHint,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),
@@ -654,7 +655,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
                     setState(() {
-                      validationError = 'Veuillez préciser un motif.';
+                      validationError = l10n.validationReasonRequired;
                     });
                     return;
                   }
@@ -943,7 +944,7 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              request.formattedTotalPrice,
+                              '${request.totalPrice.toStringAsFixed(0)} ${l10n.currencyFcfa}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -980,24 +981,24 @@ class _StaffActionsForDetail extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final actions = <Map<String, String>>[];
 
     if (request.status == 'pending') {
-      actions.add({'action': 'pickup', 'label': 'Prendre en charge'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'pickup', 'label': l10n.takeCharge});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (request.status == 'picked_up') {
-      actions.add({'action': 'ready', 'label': 'Marquer comme prête'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'ready', 'label': l10n.markReady});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (request.status == 'ready') {
-      actions.add({'action': 'deliver', 'label': 'Marquer comme livrée'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'deliver', 'label': l10n.markDelivered});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     }
 
     if (actions.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final laundryProvider = context.read<LaundryProvider>();
@@ -1008,17 +1009,17 @@ class _StaffActionsForDetail extends StatelessWidget {
       String message;
 
       if (action == 'pickup') {
-        title = 'Prendre en charge';
-        message = 'Prendre en charge cette demande de blanchisserie ?';
+        title = l10n.takeCharge;
+        message = l10n.laundryTakeChargeConfirm;
       } else if (action == 'ready') {
-        title = 'Marquer comme prête';
-        message = 'Marquer cette demande comme prête ?';
+        title = l10n.markReady;
+        message = l10n.laundryMarkReadyConfirm;
       } else if (action == 'deliver') {
-        title = 'Marquer comme livrée';
-        message = 'Marquer cette demande comme livrée ?';
+        title = l10n.markDelivered;
+        message = l10n.laundryMarkDeliveredConfirm;
       } else if (action == 'cancel') {
         title = l10n.cancel;
-        message = 'Annuler cette demande de blanchisserie ?';
+        message = l10n.laundryCancelConfirm;
       } else {
         return;
       }

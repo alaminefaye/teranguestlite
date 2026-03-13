@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/guide.dart';
 
 class GuideItemsScreen extends StatelessWidget {
@@ -174,7 +175,7 @@ class GuideItemsScreen extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () => _makePhoneCall(item.phone!),
                             icon: const Icon(Icons.phone, size: 20),
-                            label: const Text("Appeler"),
+                            label: Text(AppLocalizations.of(context).call),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green.withValues(
                                 alpha: 0.2,
@@ -199,7 +200,7 @@ class GuideItemsScreen extends StatelessWidget {
                             onPressed: () =>
                                 _openMap(item.latitude!, item.longitude!),
                             icon: const Icon(Icons.map, size: 20),
-                            label: const Text("Y aller"),
+                            label: Text(AppLocalizations.of(context).getDirections),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.accentGold.withValues(
                                 alpha: 0.1,

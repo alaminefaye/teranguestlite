@@ -599,7 +599,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Motif de l'annulation",
+                    hintText: l10n.cancellationReasonHint,
                     hintStyle: const TextStyle(color: AppTheme.textGray),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppTheme.textGray),

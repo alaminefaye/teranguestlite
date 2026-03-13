@@ -177,7 +177,7 @@ class OrderConfirmationScreen extends StatelessWidget {
           _buildDetailRow(
             icon: Icons.payments,
             label: AppLocalizations.of(context).total,
-            value: total is String ? total : '$total FCFA',
+            value: total is String ? total : '$total ${AppLocalizations.of(context).currencyFcfa}',
             valueColor: AppTheme.accentGold,
             valueFontSize: 20,
             valueFontWeight: FontWeight.bold,

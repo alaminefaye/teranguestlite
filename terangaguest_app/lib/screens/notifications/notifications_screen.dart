@@ -209,7 +209,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.room_service_outlined,
-            title: 'Commandes Room Service en attente',
+            title: l10n.notificationOrdersPending,
             detail:
                 '${summary.ordersPending} commande(s) à traiter pour le room service.',
             routeKey: 'admin-room-service',
@@ -220,7 +220,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.restaurant_menu_outlined,
-            title: 'Réservations Restaurants en attente',
+            title: l10n.notificationRestaurantsPending,
             detail:
                 '${summary.restaurantPending} réservation(s) restaurant à confirmer.',
             routeKey: 'admin-restaurants',
@@ -231,7 +231,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.spa_outlined,
-            title: 'Réservations Spa & Bien-être en attente',
+            title: l10n.notificationSpaPending,
             detail:
                 '${summary.spaPending} réservation(s) spa à prendre en charge.',
             routeKey: 'admin-spa',
@@ -242,7 +242,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.hiking_outlined,
-            title: 'Excursions & Activités en attente',
+            title: l10n.notificationExcursionsPending,
             detail:
                 '${summary.excursionsPending} demande(s) d’excursions à traiter.',
             routeKey: 'admin-excursions',
@@ -253,7 +253,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.local_laundry_service_outlined,
-            title: 'Demandes Blanchisserie en attente',
+            title: l10n.notificationLaundryPending,
             detail:
                 '${summary.laundryPending} demande(s) blanchisserie à prendre en charge.',
             routeKey: 'admin-laundry',
@@ -264,7 +264,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.workspace_premium_outlined,
-            title: 'Services Palace / Conciergerie en attente',
+            title: l10n.notificationPalacePending,
             detail:
                 '${summary.palacePending} demande(s) palace / conciergerie en cours.',
             routeKey: 'admin-palace',
@@ -275,7 +275,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.health_and_safety_outlined,
-            title: 'Assistance & Urgence',
+            title: l10n.notificationEmergency,
             detail:
                 '${summary.emergencyOpen} alerte(s) Assistance & Urgence ouvertes.',
             routeKey: 'admin-emergency',
@@ -286,7 +286,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         notifications.add(
           _NotificationItem(
             icon: Icons.chat_bubble_outline,
-            title: 'Messages / Chat client',
+            title: l10n.notificationChat,
             detail:
                 '${summary.chatUnreadConversations} conversation(s) client non lue(s).',
             routeKey: 'admin-chat',

@@ -51,6 +51,15 @@ class _AdminEventAlert {
   });
 }
 
+String _adminEmergencyAlertTitle(BuildContext context) =>
+    AppLocalizations.of(context).adminNewEmergencyAlertTitle;
+String _adminEmergencyAlertMessage(BuildContext context) =>
+    AppLocalizations.of(context).adminNewEmergencyAlertMessage;
+String _adminChatAlertTitle(BuildContext context) =>
+    AppLocalizations.of(context).adminNewChatMessageTitle;
+String _adminChatAlertMessage(BuildContext context) =>
+    AppLocalizations.of(context).adminNewChatMessageMessage;
+
 /// Page d'accueil pour les administrateurs / staff dans l'app mobile.
 /// Affiche des boxes pour accéder aux différents modules de gestion.
 class AdminHomeScreen extends StatefulWidget {
@@ -187,11 +196,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       messages.add('Nouvelle demande Palace / Conciergerie à traiter');
     }
     if (newSummary.emergencyOpen > oldSummary.emergencyOpen) {
-      messages.add('Nouvelle alerte Assistance & Urgence');
+      messages.add(_adminEmergencyAlertTitle(context));
       _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouvelle alerte Assistance & Urgence',
-          message: 'Une nouvelle alerte assistance/urgence est ouverte.',
+        _AdminEventAlert(
+          title: _adminEmergencyAlertTitle(context),
+          message: _adminEmergencyAlertMessage(context),
           icon: Icons.warning_amber_rounded,
           routeKey: 'admin-emergency',
         ),
@@ -199,11 +208,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (newSummary.chatUnreadConversations >
         oldSummary.chatUnreadConversations) {
-      messages.add('Nouveau message client dans le chat');
+      messages.add(_adminChatAlertTitle(context));
       _adminEventQueue.add(
-        const _AdminEventAlert(
-          title: 'Nouveau message client',
-          message: 'Vous avez un nouveau message client dans le chat.',
+        _AdminEventAlert(
+          title: _adminChatAlertTitle(context),
+          message: _adminChatAlertMessage(context),
           icon: Icons.chat_bubble_outline,
           routeKey: 'admin-chat',
         ),
@@ -271,9 +280,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 onPressed: () {
                   Navigator.of(dialogContext, rootNavigator: true).pop(false);
                 },
-                child: const Text(
-                  'Fermer',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context).close,
+                  style: const TextStyle(
                     color: AppTheme.textGray,
                     fontWeight: FontWeight.w600,
                   ),
@@ -284,8 +293,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   onPressed: () {
                     Navigator.of(dialogContext, rootNavigator: true).pop(true);
                   },
-                  child: const Text(
-                    'Ouvrir',
+                  child: Text(
+                    AppLocalizations.of(context).openAction,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -944,59 +953,60 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     const sectionEmergency = 'assistance_emergency';
     const sectionChat = 'chat_messages';
 
+    final l10n = AppLocalizations.of(context);
     final allTiles = [
       _AdminTile(
         icon: Icons.room_service_outlined,
-        label: 'Commandes Room Service',
+        label: l10n.notificationOrdersPending,
         routeKey: 'admin-room-service',
         sectionKey: sectionRoomService,
         badge: _summary?.ordersPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.restaurant_menu_outlined,
-        label: 'Réservations Restaurants',
+        label: l10n.notificationRestaurantsPending,
         routeKey: 'admin-restaurants',
         sectionKey: sectionRestaurants,
         badge: _summary?.restaurantPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.spa_outlined,
-        label: 'Réservations Spa & Bien-être',
+        label: l10n.notificationSpaPending,
         routeKey: 'admin-spa',
         sectionKey: sectionSpa,
         badge: _summary?.spaPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.hiking_outlined,
-        label: 'Excursions & Activités',
+        label: l10n.notificationExcursionsPending,
         routeKey: 'admin-excursions',
         sectionKey: sectionExcursions,
         badge: _summary?.excursionsPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.local_laundry_service_outlined,
-        label: 'Demandes Blanchisserie',
+        label: l10n.notificationLaundryPending,
         routeKey: 'admin-laundry',
         sectionKey: sectionLaundry,
         badge: _summary?.laundryPending ?? 0,
       ),
       _AdminTile(
         icon: Icons.workspace_premium_outlined,
-        label: 'Services Palace / Conciergerie',
+        label: l10n.notificationPalacePending,
         routeKey: 'admin-palace',
         sectionKey: sectionPalace,
         badge: _summary?.palacePending ?? 0,
       ),
       _AdminTile(
         icon: Icons.health_and_safety_outlined,
-        label: 'Assistance & Urgence',
+        label: l10n.notificationEmergency,
         routeKey: 'admin-emergency',
         sectionKey: sectionEmergency,
         badge: _summary?.emergencyOpen ?? 0,
       ),
       _AdminTile(
         icon: Icons.chat_bubble_outline,
-        label: 'Messages / Chat client',
+        label: l10n.notificationChat,
         routeKey: 'admin-chat',
         sectionKey: sectionChat,
         badge: _summary?.chatUnreadConversations ?? 0,

@@ -333,7 +333,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
 
     // Nom de l'hôtel depuis le profil de l'utilisateur connecté
     final authProvider = context.read<AuthProvider>();
-    final hotelName = authProvider.user?.enterprise?.name ?? 'Hôtel';
+    final hotelName = authProvider.user?.enterprise?.name ?? AppLocalizations.of(context).hotelFallback;
 
     return Column(
       children: [
@@ -524,7 +524,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
               ),
             ),
             Text(
-              _order?.formattedTotal ?? '0 FCFA',
+              _order != null
+                  ? '${_order!.total.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}'
+                  : '0 ${AppLocalizations.of(context).currencyFcfa}',
               style: const TextStyle(
                 color: AppTheme.primaryDark,
                 fontSize: 20,

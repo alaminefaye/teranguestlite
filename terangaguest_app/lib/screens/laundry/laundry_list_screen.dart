@@ -208,7 +208,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    service.formattedPrice,
+                                    '${service.pricePerItem.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfaPerPiece}',
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: AppTheme.textGray,
@@ -320,7 +320,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                               ),
                             ),
                             Text(
-                              '${provider.getTotalPrice().toStringAsFixed(0)} FCFA',
+                              '${provider.getTotalPrice().toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,

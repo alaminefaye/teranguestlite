@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/animated_button.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -169,7 +170,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
       ),
       textAlign: TextAlign.center,
       decoration: InputDecoration(
-        labelText: "Code Client",
+        labelText: AppLocalizations.of(context).clientCode,
         labelStyle: TextStyle(
           color: AppTheme.textGray,
           fontSize: fontSize,

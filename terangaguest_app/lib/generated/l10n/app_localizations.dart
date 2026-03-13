@@ -3462,6 +3462,12 @@ abstract class AppLocalizations {
   /// **'Erreur'**
   String get generalError;
 
+  /// No description provided for @displayError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur d\'affichage: {message}'**
+  String displayError(String message);
+
   /// No description provided for @orderReceipt.
   ///
   /// In fr, this message translates to:
@@ -3551,6 +3557,366 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tous'**
   String get allOption;
+
+  /// No description provided for @currencyFcfa.
+  ///
+  /// In fr, this message translates to:
+  /// **'FCFA'**
+  String get currencyFcfa;
+
+  /// No description provided for @currencyFcfaPerPiece.
+  ///
+  /// In fr, this message translates to:
+  /// **'FCFA/pièce'**
+  String get currencyFcfaPerPiece;
+
+  /// No description provided for @scrollToTop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remonter en haut'**
+  String get scrollToTop;
+
+  /// No description provided for @staffLaundryRequestsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes Blanchisserie'**
+  String get staffLaundryRequestsTitle;
+
+  /// No description provided for @staffLaundryRequestsSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi des demandes de blanchisserie'**
+  String get staffLaundryRequestsSubtitle;
+
+  /// No description provided for @call.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler'**
+  String get call;
+
+  /// No description provided for @getDirections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Y aller'**
+  String get getDirections;
+
+  /// No description provided for @splashRoomAccommodation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre & Hébergement'**
+  String get splashRoomAccommodation;
+
+  /// No description provided for @splashRoomSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre séjour, notre priorité'**
+  String get splashRoomSubtitle;
+
+  /// No description provided for @splashRestaurant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurant & Gastronomie'**
+  String get splashRestaurant;
+
+  /// No description provided for @splashRestaurantSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saveurs et excellence culinaire'**
+  String get splashRestaurantSubtitle;
+
+  /// No description provided for @splashRoomService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Room Service & Commandes'**
+  String get splashRoomService;
+
+  /// No description provided for @splashRoomServiceSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison directement dans votre chambre'**
+  String get splashRoomServiceSubtitle;
+
+  /// No description provided for @splashSpa.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spa & Bien-Être'**
+  String get splashSpa;
+
+  /// No description provided for @splashSpaSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relaxation et soin du corps'**
+  String get splashSpaSubtitle;
+
+  /// No description provided for @splashExcursions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excursions & Découvertes'**
+  String get splashExcursions;
+
+  /// No description provided for @splashExcursionsSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Explorez la région à votre rythme'**
+  String get splashExcursionsSubtitle;
+
+  /// No description provided for @splashLaundry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Blanchisserie'**
+  String get splashLaundry;
+
+  /// No description provided for @splashLaundrySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vêtements propres en toute simplicité'**
+  String get splashLaundrySubtitle;
+
+  /// No description provided for @notificationOrdersPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commandes Room Service en attente'**
+  String get notificationOrdersPending;
+
+  /// No description provided for @notificationRestaurantsPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservations Restaurants en attente'**
+  String get notificationRestaurantsPending;
+
+  /// No description provided for @notificationSpaPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservations Spa & Bien-être en attente'**
+  String get notificationSpaPending;
+
+  /// No description provided for @notificationExcursionsPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excursions & Activités en attente'**
+  String get notificationExcursionsPending;
+
+  /// No description provided for @notificationLaundryPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes Blanchisserie en attente'**
+  String get notificationLaundryPending;
+
+  /// No description provided for @notificationPalacePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Services Palace / Conciergerie en attente'**
+  String get notificationPalacePending;
+
+  /// No description provided for @notificationEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistance & Urgence'**
+  String get notificationEmergency;
+
+  /// No description provided for @notificationChat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages / Chat client'**
+  String get notificationChat;
+
+  /// No description provided for @acceptNewSchedule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter le nouvel horaire'**
+  String get acceptNewSchedule;
+
+  /// No description provided for @hotelFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hôtel'**
+  String get hotelFallback;
+
+  /// No description provided for @roomNumberHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 101'**
+  String get roomNumberHint;
+
+  /// No description provided for @tableNumberHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: 42'**
+  String get tableNumberHint;
+
+  /// No description provided for @clientCodeExample.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: ABC-123'**
+  String get clientCodeExample;
+
+  /// No description provided for @takeCharge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre en charge'**
+  String get takeCharge;
+
+  /// No description provided for @markReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme prête'**
+  String get markReady;
+
+  /// No description provided for @markDelivered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme livrée'**
+  String get markDelivered;
+
+  /// No description provided for @completeRequestLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer'**
+  String get completeRequestLabel;
+
+  /// No description provided for @rejectRequestLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get rejectRequestLabel;
+
+  /// No description provided for @noGuideAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun guide disponible'**
+  String get noGuideAvailable;
+
+  /// No description provided for @openAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir'**
+  String get openAction;
+
+  /// No description provided for @adminNewEmergencyAlertTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle alerte Assistance & Urgence'**
+  String get adminNewEmergencyAlertTitle;
+
+  /// No description provided for @adminNewEmergencyAlertMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une nouvelle alerte assistance/urgence est ouverte.'**
+  String get adminNewEmergencyAlertMessage;
+
+  /// No description provided for @adminNewChatMessageTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau message client'**
+  String get adminNewChatMessageTitle;
+
+  /// No description provided for @adminNewChatMessageMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez un nouveau message client dans le chat.'**
+  String get adminNewChatMessageMessage;
+
+  /// No description provided for @reservationDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de la réservation'**
+  String get reservationDetailTitle;
+
+  /// No description provided for @roomLabelShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre'**
+  String get roomLabelShort;
+
+  /// No description provided for @laundryTakeChargeConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre en charge cette demande de blanchisserie ?'**
+  String get laundryTakeChargeConfirm;
+
+  /// No description provided for @laundryMarkReadyConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer cette demande comme prête ?'**
+  String get laundryMarkReadyConfirm;
+
+  /// No description provided for @laundryMarkDeliveredConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer cette demande comme livrée ?'**
+  String get laundryMarkDeliveredConfirm;
+
+  /// No description provided for @laundryCancelConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler cette demande de blanchisserie ?'**
+  String get laundryCancelConfirm;
+
+  /// No description provided for @spaRescheduleConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer ce nouvel horaire pour votre réservation spa ?'**
+  String get spaRescheduleConfirmMessage;
+
+  /// No description provided for @spaCancellationPolicy.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'annulation est possible jusqu\'à 24 h avant le rendez-vous.'**
+  String get spaCancellationPolicy;
+
+  /// No description provided for @excursionConfirmReservationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la réservation'**
+  String get excursionConfirmReservationTitle;
+
+  /// No description provided for @excursionConfirmReservationMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer cette réservation excursion ?'**
+  String get excursionConfirmReservationMessage;
+
+  /// No description provided for @excursionMarkCompletedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme réalisée'**
+  String get excursionMarkCompletedTitle;
+
+  /// No description provided for @excursionMarkCompletedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer cette excursion comme réalisée ?'**
+  String get excursionMarkCompletedMessage;
+
+  /// No description provided for @excursionStaffTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservations Excursions & Activités'**
+  String get excursionStaffTitle;
+
+  /// No description provided for @excursionStaffSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi des excursions & activités'**
+  String get excursionStaffSubtitle;
+
+  /// No description provided for @excursionConfirmAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get excursionConfirmAction;
+
+  /// No description provided for @excursionMarkCompletedAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer réalisée'**
+  String get excursionMarkCompletedAction;
+
+  /// No description provided for @guidesScreenTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Guides & Infos'**
+  String get guidesScreenTitle;
 }
 
 class _AppLocalizationsDelegate

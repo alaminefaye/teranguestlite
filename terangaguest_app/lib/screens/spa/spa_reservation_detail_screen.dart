@@ -117,9 +117,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Détail de la réservation',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
+                Text(
+                  l10n.reservationDetailTitle,
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
                 ),
               ],
             ),
@@ -153,7 +153,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
             _buildInfoRow(
               Icons.meeting_room,
-              'Chambre ${reservation.roomNumber}',
+              '${l10n.roomLabelShort} ${reservation.roomNumber}',
             ),
           ],
           if (reservation.guestName != null &&
@@ -265,9 +265,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
                 size: 22,
                 color: AppTheme.primaryDark,
               ),
-              label: const Text(
-                'Accepter le nouvel horaire',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              label: Text(
+                l10n.acceptNewSchedule,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentGold,
@@ -343,7 +343,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'L\'annulation est possible jusqu\'à 24 h avant le rendez-vous.',
+                    l10n.spaCancellationPolicy,
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.orange.shade100,
@@ -364,12 +364,12 @@ class SpaReservationDetailScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.primaryBlue,
-        title: const Text(
-          'Accepter le nouvel horaire',
-          style: TextStyle(color: AppTheme.accentGold),
+        title: Text(
+          l10n.acceptNewSchedule,
+          style: const TextStyle(color: AppTheme.accentGold),
         ),
         content: const Text(
-          'Confirmer ce nouvel horaire pour votre réservation spa ?',
+          l10n.spaRescheduleConfirmMessage,
           style: TextStyle(color: Colors.white),
         ),
         actions: [
@@ -449,7 +449,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: "Motif de l'annulation",
+                  hintText: l10n.cancellationReasonHint,
                   hintStyle: const TextStyle(color: AppTheme.textGray),
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppTheme.textGray),
@@ -475,7 +475,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
                 final text = reasonController.text.trim();
                 if (text.isEmpty) {
                   setState(() {
-                    validationError = 'Veuillez préciser un motif.';
+                    validationError = l10n.validationReasonRequired;
                   });
                   return;
                 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../../models/guide.dart';
 import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
@@ -47,9 +48,9 @@ class _GuidesScreenState extends State<GuidesScreen> {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
       appBar: AppBar(
-        title: const Text(
-          'Guides & Infos',
-          style: TextStyle(color: AppTheme.accentGold),
+        title: Text(
+          AppLocalizations.of(context).guidesScreenTitle,
+          style: const TextStyle(color: AppTheme.accentGold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -86,7 +87,7 @@ class _GuidesScreenState extends State<GuidesScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentGold,
               ),
-              child: const Text('Réessayer'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -94,10 +95,10 @@ class _GuidesScreenState extends State<GuidesScreen> {
     }
 
     if (_categories == null || _categories!.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Aucun guide disponible',
-          style: TextStyle(color: AppTheme.textGray),
+          AppLocalizations.of(context).noGuideAvailable,
+          style: const TextStyle(color: AppTheme.textGray),
         ),
       );
     }

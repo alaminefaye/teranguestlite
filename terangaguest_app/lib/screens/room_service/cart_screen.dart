@@ -243,7 +243,7 @@ class _CartScreenState extends State<CartScreen> {
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
                           border: const OutlineInputBorder(),
-                          hintText: 'Ex: 101',
+                          hintText: AppLocalizations.of(context).roomNumberHint,
                         ),
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
@@ -258,7 +258,7 @@ class _CartScreenState extends State<CartScreen> {
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.1),
                           border: const OutlineInputBorder(),
-                          hintText: 'Ex: 42',
+                          hintText: AppLocalizations.of(context).tableNumberHint,
                         ),
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white),
@@ -990,7 +990,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    cart.formattedTotal,
+                    '${cart.totalAmount.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -1000,7 +1000,7 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
               Text(
-                '${cart.totalItemsQuantity} article${cart.totalItemsQuantity > 1 ? 's' : ''}',
+                AppLocalizations.of(context).articleCount(cart.totalItemsQuantity),
                 style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
               ),
             ],

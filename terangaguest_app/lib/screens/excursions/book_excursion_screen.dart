@@ -490,7 +490,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
           const Divider(height: 24, color: AppTheme.textGray),
           _buildSummaryRow(
             l10n.total,
-            '${_totalPrice.toStringAsFixed(0)} FCFA',
+            '${_totalPrice.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
           ),
         ],
       ),
