@@ -28,9 +28,11 @@ class GuideCategoryController extends Controller
                 'name' => $category->name,
                 'image' => $category->image,
                 'order' => $category->order,
+                'is_active' => $category->is_active,
                 'items' => $category->items->map(function ($item) {
                     return [
                         'id' => $item->id,
+                        'guide_category_id' => $item->guide_category_id,
                         'title' => $item->title,
                         'description' => $item->description,
                         'phone' => $item->phone,
@@ -39,6 +41,7 @@ class GuideCategoryController extends Controller
                         'longitude' => $item->longitude,
                         'image' => $item->image,
                         'order' => $item->order,
+                        'is_active' => $item->is_active,
                     ];
                 })->values()->all(),
             ];
