@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
 
 const String _keyLocale = 'app_locale';
 
@@ -17,7 +18,9 @@ class LocaleProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final code = prefs.getString(_keyLocale) ?? 'fr';
-      _locale = Locale(_supported(code));
+      final validCode = _supported(code);
+      _locale = Locale(validCode);
+      ApiService().setLanguage(validCode);
       _loaded = true;
       notifyListeners();
     } catch (e) {
@@ -35,9 +38,11 @@ class LocaleProvider with ChangeNotifier {
   Future<void> setLocale(Locale value) async {
     if (_locale == value) return;
     _locale = value;
+    final validCode = _supported(value.languageCode);
+    ApiService().setLanguage(validCode);
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyLocale, _supported(value.languageCode));
+      await prefs.setString(_keyLocale, validCode);
     } catch (e) {
       debugPrint('LocaleProvider.setLocale error: $e');
     }

@@ -19,6 +19,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Accept-Language': 'fr', // Par défaut
         },
       ),
     );
@@ -61,6 +62,11 @@ class ApiService {
   // Définir le token d'authentification
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+
+  // Définir la langue pour l'API
+  void setLanguage(String languageCode) {
+    _dio.options.headers['Accept-Language'] = languageCode;
   }
 
   // Supprimer le token
