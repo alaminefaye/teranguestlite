@@ -445,6 +445,10 @@
   "validate": "تحقق",
   "clientCode": "رمز العميل",
   "clientCodeHint": "رمز العميل (مثال: 123456)",
+  "invalidClientCode": "رمز عميل غير صالح",
+  "clientLoginTitle": "تسجيل دخول العميل",
+  "pleaseEnterClientCode": "يرجى إدخال رمز العميل",
+  "accessMyRoom": "الدخول إلى غرفتي",
   "specialRequests": "طلبات خاصة",
   "developedByUTA": "تم التطوير بواسطة Universal Technologies Africa",
   "tapToContinue": "اضغط للمتابعة",
@@ -813,5 +817,64 @@
   "excursionStaffSubtitle": "متابعة الجولات والأنشطة",
   "excursionConfirmAction": "تأكيد",
   "excursionMarkCompletedAction": "تحديد منفذة",
-  "guidesScreenTitle": "أدلة ومعلومات"
+  "guidesScreenTitle": "أدلة ومعلومات",
+  "adminRoomServiceDepartment": "خدمة الغرف",
+  "adminNewRoomServiceToProcess": "طلب خدمة غرف جديد للمعالجة",
+  "adminNewRestaurantToProcess": "حجز مطعم جديد للمعالجة",
+  "adminNewSpaToProcess": "حجز سبا وعافية جديد للمعالجة",
+  "adminNewExcursionToProcess": "طلب جولات وأنشطة جديد للمعالجة",
+  "adminNewLaundryToProcess": "طلب غسيل جديد للمعالجة",
+  "adminNewPalaceToProcess": "طلب قصر/كونسيرج جديد للمعالجة",
+  "adminNoSectionAssigned": "لا يوجد قسم معين. تواصل مع المسؤول لإدارة صلاحياتك.",
+  "adminSpaceTitle": "مساحة الإدارة",
+  "yourEstablishment": "منشأتك",
+  "adminAlertDismissMinute": "ستختفي هذه التنبيه تلقائياً خلال دقيقة.",
+  "adminAlertDismissAuto": "ستختفي هذه التنبيه تلقائياً.",
+  "openOrder": "فتح الطلب",
+  "openRequest": "فتح الطلب",
+  "viewDetails": "عرض التفاصيل",
+  "clientUnknown": "عميل غير معروف",
+  "roomUnspecified": "غرفة غير محددة",
+  "newRoomServiceOrder": "طلب خدمة غرف جديد",
+  "orderNumberShort": "طلب {number}",
+  "@orderNumberShort": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "newLaundryRequest": "طلب غسيل جديد",
+  "requestIdShort": "طلب #{id}",
+  "@requestIdShort": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "newPalaceRequest": "طلب قصر/كونسيرج جديد",
+  "newRestaurantReservation": "حجز مطعم جديد",
+  "reservationIdShort": "حجز #{id}",
+  "@reservationIdShort": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "newExcursionRequest": "طلب جولات وأنشطة جديد",
+  "newSpaReservation": "حجز سبا وعافية جديد",
+  "spaReservationCancelledTitle": "تم إلغاء حجز السبا",
+  "spaServiceLabel": "خدمة السبا",
+  "reasonPrefix": "السبب: {reason}",
+  "@reasonPrefix": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "spaScheduleAcceptedTitle": "السبا: تم قبول الموعد",
+  "newScheduleConfirmed": "تم تأكيد الموعد الجديد",
+  "adminSectionInPreparation": "القسم \"{label}\" قيد التحضير لإصدار الموظفين على الجوال.",
+  "@adminSectionInPreparation": {
+    "placeholders": {
+      "label": {"type": "String"}
+    }
+  },
+  "clientWillBeNotifiedWithReason": "سيتم إخطار العميل بالسبب المقدم.",
+  "confirmCancellation": "تأكيد الإلغاء"
 }

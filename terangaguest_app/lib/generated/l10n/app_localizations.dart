@@ -2460,6 +2460,30 @@ abstract class AppLocalizations {
   /// **'Code client (ex: 123456)'**
   String get clientCodeHint;
 
+  /// No description provided for @invalidClientCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code client invalide'**
+  String get invalidClientCode;
+
+  /// No description provided for @clientLoginTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion Client'**
+  String get clientLoginTitle;
+
+  /// No description provided for @pleaseEnterClientCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer votre code client'**
+  String get pleaseEnterClientCode;
+
+  /// No description provided for @accessMyRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accéder à ma chambre'**
+  String get accessMyRoom;
+
   /// No description provided for @specialRequests.
   ///
   /// In fr, this message translates to:
@@ -3917,6 +3941,210 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Guides & Infos'**
   String get guidesScreenTitle;
+
+  /// No description provided for @adminRoomServiceDepartment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service en chambre'**
+  String get adminRoomServiceDepartment;
+
+  /// No description provided for @adminNewRoomServiceToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle commande Room Service à traiter'**
+  String get adminNewRoomServiceToProcess;
+
+  /// No description provided for @adminNewRestaurantToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle réservation restaurant à traiter'**
+  String get adminNewRestaurantToProcess;
+
+  /// No description provided for @adminNewSpaToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle réservation Spa & Bien-être à traiter'**
+  String get adminNewSpaToProcess;
+
+  /// No description provided for @adminNewExcursionToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Excursions & Activités à traiter'**
+  String get adminNewExcursionToProcess;
+
+  /// No description provided for @adminNewLaundryToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Blanchisserie à traiter'**
+  String get adminNewLaundryToProcess;
+
+  /// No description provided for @adminNewPalaceToProcess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Palace / Conciergerie à traiter'**
+  String get adminNewPalaceToProcess;
+
+  /// No description provided for @adminNoSectionAssigned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune section assignée. Contactez l\'administrateur pour gérer vos accès.'**
+  String get adminNoSectionAssigned;
+
+  /// No description provided for @adminSpaceTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espace Administrateur'**
+  String get adminSpaceTitle;
+
+  /// No description provided for @yourEstablishment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre établissement'**
+  String get yourEstablishment;
+
+  /// No description provided for @adminAlertDismissMinute.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette alerte disparaîtra automatiquement dans une minute.'**
+  String get adminAlertDismissMinute;
+
+  /// No description provided for @adminAlertDismissAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette alerte disparaîtra automatiquement.'**
+  String get adminAlertDismissAuto;
+
+  /// No description provided for @openOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la commande'**
+  String get openOrder;
+
+  /// No description provided for @openRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir la demande'**
+  String get openRequest;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir détails'**
+  String get viewDetails;
+
+  /// No description provided for @clientUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client inconnu'**
+  String get clientUnknown;
+
+  /// No description provided for @roomUnspecified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre non spécifiée'**
+  String get roomUnspecified;
+
+  /// No description provided for @newRoomServiceOrder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle commande Room Service'**
+  String get newRoomServiceOrder;
+
+  /// No description provided for @orderNumberShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commande {number}'**
+  String orderNumberShort(String number);
+
+  /// No description provided for @newLaundryRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Blanchisserie'**
+  String get newLaundryRequest;
+
+  /// No description provided for @requestIdShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande #{id}'**
+  String requestIdShort(String id);
+
+  /// No description provided for @newPalaceRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Palace / Conciergerie'**
+  String get newPalaceRequest;
+
+  /// No description provided for @newRestaurantReservation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle réservation restaurant'**
+  String get newRestaurantReservation;
+
+  /// No description provided for @reservationIdShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation #{id}'**
+  String reservationIdShort(String id);
+
+  /// No description provided for @newExcursionRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande Excursions & Activités'**
+  String get newExcursionRequest;
+
+  /// No description provided for @newSpaReservation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle réservation Spa & Bien-être'**
+  String get newSpaReservation;
+
+  /// No description provided for @spaReservationCancelledTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation Spa annulée'**
+  String get spaReservationCancelledTitle;
+
+  /// No description provided for @spaServiceLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service Spa'**
+  String get spaServiceLabel;
+
+  /// No description provided for @reasonPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif : {reason}'**
+  String reasonPrefix(String reason);
+
+  /// No description provided for @spaScheduleAcceptedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Spa : Horaire Accepté'**
+  String get spaScheduleAcceptedTitle;
+
+  /// No description provided for @newScheduleConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel horaire confirmé'**
+  String get newScheduleConfirmed;
+
+  /// No description provided for @adminSectionInPreparation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Section \"{label}\" en préparation pour la version staff mobile.'**
+  String adminSectionInPreparation(String label);
+
+  /// No description provided for @clientWillBeNotifiedWithReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client sera notifié avec le motif saisi.'**
+  String get clientWillBeNotifiedWithReason;
+
+  /// No description provided for @confirmCancellation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer l\'annulation'**
+  String get confirmCancellation;
 }
 
 class _AppLocalizationsDelegate

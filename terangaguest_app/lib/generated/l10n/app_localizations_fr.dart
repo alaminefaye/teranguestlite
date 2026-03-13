@@ -1275,6 +1275,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clientCodeHint => 'Code client (ex: 123456)';
 
   @override
+  String get invalidClientCode => 'Code client invalide';
+
+  @override
+  String get clientLoginTitle => 'Connexion Client';
+
+  @override
+  String get pleaseEnterClientCode => 'Veuillez entrer votre code client';
+
+  @override
+  String get accessMyRoom => 'Accéder à ma chambre';
+
+  @override
   String get specialRequests => 'Demandes spéciales';
 
   @override
@@ -2067,4 +2079,126 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guidesScreenTitle => 'Guides & Infos';
+
+  @override
+  String get adminRoomServiceDepartment => 'Service en chambre';
+
+  @override
+  String get adminNewRoomServiceToProcess =>
+      'Nouvelle commande Room Service à traiter';
+
+  @override
+  String get adminNewRestaurantToProcess =>
+      'Nouvelle réservation restaurant à traiter';
+
+  @override
+  String get adminNewSpaToProcess =>
+      'Nouvelle réservation Spa & Bien-être à traiter';
+
+  @override
+  String get adminNewExcursionToProcess =>
+      'Nouvelle demande Excursions & Activités à traiter';
+
+  @override
+  String get adminNewLaundryToProcess =>
+      'Nouvelle demande Blanchisserie à traiter';
+
+  @override
+  String get adminNewPalaceToProcess =>
+      'Nouvelle demande Palace / Conciergerie à traiter';
+
+  @override
+  String get adminNoSectionAssigned =>
+      'Aucune section assignée. Contactez l\'administrateur pour gérer vos accès.';
+
+  @override
+  String get adminSpaceTitle => 'Espace Administrateur';
+
+  @override
+  String get yourEstablishment => 'Votre établissement';
+
+  @override
+  String get adminAlertDismissMinute =>
+      'Cette alerte disparaîtra automatiquement dans une minute.';
+
+  @override
+  String get adminAlertDismissAuto =>
+      'Cette alerte disparaîtra automatiquement.';
+
+  @override
+  String get openOrder => 'Ouvrir la commande';
+
+  @override
+  String get openRequest => 'Ouvrir la demande';
+
+  @override
+  String get viewDetails => 'Voir détails';
+
+  @override
+  String get clientUnknown => 'Client inconnu';
+
+  @override
+  String get roomUnspecified => 'Chambre non spécifiée';
+
+  @override
+  String get newRoomServiceOrder => 'Nouvelle commande Room Service';
+
+  @override
+  String orderNumberShort(String number) {
+    return 'Commande $number';
+  }
+
+  @override
+  String get newLaundryRequest => 'Nouvelle demande Blanchisserie';
+
+  @override
+  String requestIdShort(String id) {
+    return 'Demande #$id';
+  }
+
+  @override
+  String get newPalaceRequest => 'Nouvelle demande Palace / Conciergerie';
+
+  @override
+  String get newRestaurantReservation => 'Nouvelle réservation restaurant';
+
+  @override
+  String reservationIdShort(String id) {
+    return 'Réservation #$id';
+  }
+
+  @override
+  String get newExcursionRequest => 'Nouvelle demande Excursions & Activités';
+
+  @override
+  String get newSpaReservation => 'Nouvelle réservation Spa & Bien-être';
+
+  @override
+  String get spaReservationCancelledTitle => 'Réservation Spa annulée';
+
+  @override
+  String get spaServiceLabel => 'Service Spa';
+
+  @override
+  String reasonPrefix(String reason) {
+    return 'Motif : $reason';
+  }
+
+  @override
+  String get spaScheduleAcceptedTitle => 'Spa : Horaire Accepté';
+
+  @override
+  String get newScheduleConfirmed => 'Nouvel horaire confirmé';
+
+  @override
+  String adminSectionInPreparation(String label) {
+    return 'Section \"$label\" en préparation pour la version staff mobile.';
+  }
+
+  @override
+  String get clientWillBeNotifiedWithReason =>
+      'Le client sera notifié avec le motif saisi.';
+
+  @override
+  String get confirmCancellation => 'Confirmer l\'annulation';
 }

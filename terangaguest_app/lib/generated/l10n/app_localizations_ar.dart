@@ -1243,6 +1243,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clientCodeHint => 'رمز العميل (مثال: 123456)';
 
   @override
+  String get invalidClientCode => 'رمز عميل غير صالح';
+
+  @override
+  String get clientLoginTitle => 'تسجيل دخول العميل';
+
+  @override
+  String get pleaseEnterClientCode => 'يرجى إدخال رمز العميل';
+
+  @override
+  String get accessMyRoom => 'الدخول إلى غرفتي';
+
+  @override
   String get specialRequests => 'طلبات خاصة';
 
   @override
@@ -2004,4 +2016,119 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get guidesScreenTitle => 'أدلة ومعلومات';
+
+  @override
+  String get adminRoomServiceDepartment => 'خدمة الغرف';
+
+  @override
+  String get adminNewRoomServiceToProcess => 'طلب خدمة غرف جديد للمعالجة';
+
+  @override
+  String get adminNewRestaurantToProcess => 'حجز مطعم جديد للمعالجة';
+
+  @override
+  String get adminNewSpaToProcess => 'حجز سبا وعافية جديد للمعالجة';
+
+  @override
+  String get adminNewExcursionToProcess => 'طلب جولات وأنشطة جديد للمعالجة';
+
+  @override
+  String get adminNewLaundryToProcess => 'طلب غسيل جديد للمعالجة';
+
+  @override
+  String get adminNewPalaceToProcess => 'طلب قصر/كونسيرج جديد للمعالجة';
+
+  @override
+  String get adminNoSectionAssigned =>
+      'لا يوجد قسم معين. تواصل مع المسؤول لإدارة صلاحياتك.';
+
+  @override
+  String get adminSpaceTitle => 'مساحة الإدارة';
+
+  @override
+  String get yourEstablishment => 'منشأتك';
+
+  @override
+  String get adminAlertDismissMinute =>
+      'ستختفي هذه التنبيه تلقائياً خلال دقيقة.';
+
+  @override
+  String get adminAlertDismissAuto => 'ستختفي هذه التنبيه تلقائياً.';
+
+  @override
+  String get openOrder => 'فتح الطلب';
+
+  @override
+  String get openRequest => 'فتح الطلب';
+
+  @override
+  String get viewDetails => 'عرض التفاصيل';
+
+  @override
+  String get clientUnknown => 'عميل غير معروف';
+
+  @override
+  String get roomUnspecified => 'غرفة غير محددة';
+
+  @override
+  String get newRoomServiceOrder => 'طلب خدمة غرف جديد';
+
+  @override
+  String orderNumberShort(String number) {
+    return 'طلب $number';
+  }
+
+  @override
+  String get newLaundryRequest => 'طلب غسيل جديد';
+
+  @override
+  String requestIdShort(String id) {
+    return 'طلب #$id';
+  }
+
+  @override
+  String get newPalaceRequest => 'طلب قصر/كونسيرج جديد';
+
+  @override
+  String get newRestaurantReservation => 'حجز مطعم جديد';
+
+  @override
+  String reservationIdShort(String id) {
+    return 'حجز #$id';
+  }
+
+  @override
+  String get newExcursionRequest => 'طلب جولات وأنشطة جديد';
+
+  @override
+  String get newSpaReservation => 'حجز سبا وعافية جديد';
+
+  @override
+  String get spaReservationCancelledTitle => 'تم إلغاء حجز السبا';
+
+  @override
+  String get spaServiceLabel => 'خدمة السبا';
+
+  @override
+  String reasonPrefix(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get spaScheduleAcceptedTitle => 'السبا: تم قبول الموعد';
+
+  @override
+  String get newScheduleConfirmed => 'تم تأكيد الموعد الجديد';
+
+  @override
+  String adminSectionInPreparation(String label) {
+    return 'القسم \"$label\" قيد التحضير لإصدار الموظفين على الجوال.';
+  }
+
+  @override
+  String get clientWillBeNotifiedWithReason =>
+      'سيتم إخطار العميل بالسبب المقدم.';
+
+  @override
+  String get confirmCancellation => 'تأكيد الإلغاء';
 }

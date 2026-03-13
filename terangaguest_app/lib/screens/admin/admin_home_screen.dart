@@ -156,6 +156,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     AdminSummary newSummary,
   ) async {
     if (oldSummary == null) return;
+    final l10n = AppLocalizations.of(context);
     final messages = <String>[];
     final hasNewOrder = newSummary.ordersPending > oldSummary.ordersPending;
     if (hasNewOrder) {
@@ -165,16 +166,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           auth.isStaff && (auth.user?.department ?? '') == 'Service en chambre';
       if (!isRoomServiceDept) {
         _enqueueNewOrdersForAlert(context);
-        messages.add('Nouvelle commande Room Service à traiter');
+        messages.add(l10n.adminNewRoomServiceToProcess);
       }
     }
     if (newSummary.restaurantPending > oldSummary.restaurantPending) {
       _enqueueNewRestaurantReservationsForAlert(context);
-      messages.add('Nouvelle réservation restaurant à traiter');
+      messages.add(l10n.adminNewRestaurantToProcess);
     }
     if (newSummary.spaPending > oldSummary.spaPending) {
       _enqueueNewSpaReservationsForAlert(context);
-      messages.add('Nouvelle réservation Spa & Bien-être à traiter');
+      messages.add(l10n.adminNewSpaToProcess);
     }
     if (newSummary.spaCancelledToday > oldSummary.spaCancelledToday) {
       _enqueueCancelledSpaReservationsForAlert(context);
@@ -185,15 +186,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
     if (newSummary.excursionsPending > oldSummary.excursionsPending) {
       _enqueueNewExcursionBookingsForAlert(context);
-      messages.add('Nouvelle demande Excursions & Activités à traiter');
+      messages.add(l10n.adminNewExcursionToProcess);
     }
     if (newSummary.laundryPending > oldSummary.laundryPending) {
       _enqueueNewLaundryRequestsForAlert(context);
-      messages.add('Nouvelle demande Blanchisserie à traiter');
+      messages.add(l10n.adminNewLaundryToProcess);
     }
     if (newSummary.palacePending > oldSummary.palacePending) {
       _enqueueNewPalaceRequestsForAlert(context);
-      messages.add('Nouvelle demande Palace / Conciergerie à traiter');
+      messages.add(l10n.adminNewPalaceToProcess);
     }
     if (newSummary.emergencyOpen > oldSummary.emergencyOpen) {
       messages.add(_adminEmergencyAlertTitle(context));
@@ -942,7 +943,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final user = context.watch<AuthProvider>().user;
-    final enterpriseName = user?.enterprise?.name ?? 'Votre établissement';
+    final enterpriseName = user?.enterprise?.name ?? l10n.yourEstablishment;
 
     const sectionRoomService = 'room_service_orders';
     const sectionRestaurants = 'restaurant_reservations';
@@ -953,7 +954,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     const sectionEmergency = 'assistance_emergency';
     const sectionChat = 'chat_messages';
 
-    final l10n = AppLocalizations.of(context);
     final allTiles = [
       _AdminTile(
         icon: Icons.room_service_outlined,
@@ -1039,7 +1039,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(24.0),
                           child: Text(
-                            'Aucune section assignée. Contactez l\'administrateur pour gérer vos accès.',
+                            AppLocalizations.of(context).adminNoSectionAssigned,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,
@@ -1293,9 +1293,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   ),
                 ],
               ),
-              child: const Text(
-                'Espace Administrateur',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context).adminSpaceTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1452,7 +1452,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Section "${tile.label}" en préparation pour la version staff mobile.',
+              l10n.adminSectionInPreparation(tile.label),
             ),
             backgroundColor: AppTheme.accentGold,
             duration: const Duration(seconds: 2),
@@ -1524,13 +1524,14 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final order = _currentOrder;
     final roomLabel = order.roomNumber != null && order.roomNumber!.isNotEmpty
-        ? 'Chambre ${order.roomNumber}'
-        : 'Chambre';
+        ? '${l10n.roomLabelShort} ${order.roomNumber}'
+        : l10n.roomLabelShort;
     final guestName = order.guestName != null && order.guestName!.isNotEmpty
         ? order.guestName!
-        : 'Client';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -1555,10 +1556,10 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle commande Room Service',
-              style: TextStyle(
+              l10n.newRoomServiceOrder,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -1613,7 +1614,7 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
             ),
           if (order.orderNumber.isNotEmpty)
             Text(
-              'Commande ${order.orderNumber}',
+              l10n.orderNumberShort(order.orderNumber),
               style: const TextStyle(
                 color: AppTheme.accentGold,
                 fontSize: 14,
@@ -1699,10 +1700,10 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -1711,9 +1712,9 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -1724,9 +1725,9 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
             final order = widget.orders[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(order);
           },
-          child: const Text(
-            'Ouvrir la commande',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openOrder,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -1780,14 +1781,15 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final request = _currentRequest;
     final roomLabel =
         request.roomNumber != null && request.roomNumber!.isNotEmpty
-        ? 'Chambre ${request.roomNumber}'
-        : 'Chambre';
+        ? '${l10n.roomLabelShort} ${request.roomNumber}'
+        : l10n.roomLabelShort;
     final guestName = request.guestName != null && request.guestName!.isNotEmpty
         ? request.guestName!
-        : 'Client';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -1812,9 +1814,9 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle demande Blanchisserie',
+              l10n.newLaundryRequest,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -1829,7 +1831,7 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Demande #${request.id}',
+            l10n.requestIdShort(request.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -1991,10 +1993,10 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -2003,9 +2005,9 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -2016,9 +2018,9 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
             final request = widget.requests[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(request);
           },
-          child: const Text(
-            'Ouvrir la demande',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openRequest,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -2075,14 +2077,15 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final request = _currentRequest;
     final roomLabel =
         request.roomNumber != null && request.roomNumber!.isNotEmpty
-        ? 'Chambre ${request.roomNumber}'
-        : 'Chambre';
+        ? '${l10n.roomLabelShort} ${request.roomNumber}'
+        : l10n.roomLabelShort;
     final guestName = request.guestName != null && request.guestName!.isNotEmpty
         ? request.guestName!
-        : 'Client';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -2107,9 +2110,9 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle demande Palace / Conciergerie',
+              l10n.newPalaceRequest,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -2124,9 +2127,11 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            request.requestNumber != null && request.requestNumber!.isNotEmpty
-                ? 'Demande #${request.requestNumber}'
-                : 'Demande #${request.id}',
+            l10n.requestIdShort(
+              request.requestNumber != null && request.requestNumber!.isNotEmpty
+                  ? request.requestNumber!
+                  : request.id.toString(),
+            ),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -2270,10 +2275,10 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -2282,9 +2287,9 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -2295,9 +2300,9 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
             final request = widget.requests[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(request);
           },
-          child: const Text(
-            'Ouvrir la demande',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openRequest,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -2353,15 +2358,16 @@ class _NewRestaurantCarouselDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final reservation = _currentReservation;
     final roomLabel =
         reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
-        ? 'Chambre ${reservation.roomNumber}'
-        : 'Chambre non spécifiée';
+        ? '${l10n.roomLabelShort} ${reservation.roomNumber}'
+        : l10n.roomUnspecified;
     final guestName =
         reservation.guestName != null && reservation.guestName!.isNotEmpty
         ? reservation.guestName!
-        : 'Client inconnu';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -2386,10 +2392,10 @@ class _NewRestaurantCarouselDialogState
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle réservation restaurant',
-              style: TextStyle(
+              l10n.newRestaurantReservation,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -2403,7 +2409,7 @@ class _NewRestaurantCarouselDialogState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservation #${reservation.id}',
+            l10n.reservationIdShort(reservation.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -2535,10 +2541,10 @@ class _NewRestaurantCarouselDialogState
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -2547,9 +2553,9 @@ class _NewRestaurantCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -2560,9 +2566,9 @@ class _NewRestaurantCarouselDialogState
             final reservation = widget.reservations[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(reservation);
           },
-          child: const Text(
-            'Ouvrir',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openAction,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -2617,14 +2623,15 @@ class _NewExcursionCarouselDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final booking = _currentBooking;
     final roomLabel =
         booking.roomNumber != null && booking.roomNumber!.isNotEmpty
-        ? 'Chambre ${booking.roomNumber}'
-        : 'Chambre non spécifiée';
+        ? '${l10n.roomLabelShort} ${booking.roomNumber}'
+        : l10n.roomUnspecified;
     final guestName = booking.guestName != null && booking.guestName!.isNotEmpty
         ? booking.guestName!
-        : 'Client inconnu';
+        : l10n.clientUnknown;
     final dateStr = booking.date.toIso8601String().split('T')[0];
 
     return AlertDialog(
@@ -2650,10 +2657,10 @@ class _NewExcursionCarouselDialogState
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle demande Excursions & Activités',
-              style: TextStyle(
+              l10n.newExcursionRequest,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -2667,7 +2674,7 @@ class _NewExcursionCarouselDialogState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservation #${booking.id}',
+            l10n.reservationIdShort(booking.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -2804,10 +2811,10 @@ class _NewExcursionCarouselDialogState
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -2816,9 +2823,9 @@ class _NewExcursionCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -2829,9 +2836,9 @@ class _NewExcursionCarouselDialogState
             final booking = widget.bookings[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(booking);
           },
-          child: const Text(
-            'Ouvrir',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openAction,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -2884,15 +2891,16 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final reservation = _currentReservation;
     final roomLabel =
         reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
-        ? 'Chambre ${reservation.roomNumber}'
-        : 'Chambre non spécifiée';
+        ? '${l10n.roomLabelShort} ${reservation.roomNumber}'
+        : l10n.roomUnspecified;
     final guestName =
         reservation.guestName != null && reservation.guestName!.isNotEmpty
         ? reservation.guestName!
-        : 'Client inconnu';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -2914,10 +2922,10 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
             child: const Icon(Icons.spa, color: AppTheme.accentGold),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Nouvelle réservation Spa & Bien-être',
-              style: TextStyle(
+              l10n.newSpaReservation,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -2931,7 +2939,7 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservation #${reservation.id}',
+            l10n.reservationIdShort(reservation.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -3059,10 +3067,10 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement dans une minute.',
+          Text(
+            l10n.adminAlertDismissMinute,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -3071,9 +3079,9 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -3084,9 +3092,9 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
             final reservation = widget.reservations[_currentIndex];
             Navigator.of(context, rootNavigator: true).pop(reservation);
           },
-          child: const Text(
-            'Ouvrir',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.openAction,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -3148,18 +3156,19 @@ class _CancelledSpaCarouselDialogState
   @override
   Widget build(BuildContext context) {
     if (widget.reservations.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
     if (_currentIndex >= widget.reservations.length) {
       _currentIndex = 0; // fallback if list size changes unexpectedly
     }
     final reservation = widget.reservations[_currentIndex];
     final roomLabel =
         reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
-        ? 'Chambre ${reservation.roomNumber}'
-        : 'Chambre non spécifiée';
+        ? '${l10n.roomLabelShort} ${reservation.roomNumber}'
+        : l10n.roomUnspecified;
     final guestName =
         reservation.guestName != null && reservation.guestName!.isNotEmpty
         ? reservation.guestName!
-        : 'Client inconnu';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -3184,10 +3193,10 @@ class _CancelledSpaCarouselDialogState
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Réservation Spa annulée',
-              style: TextStyle(
+              l10n.spaReservationCancelledTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -3201,7 +3210,7 @@ class _CancelledSpaCarouselDialogState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservation #${reservation.id}',
+            l10n.reservationIdShort(reservation.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -3236,7 +3245,7 @@ class _CancelledSpaCarouselDialogState
                   child: Text(
                     reservation.serviceName.isNotEmpty
                         ? reservation.serviceName
-                        : 'Service Spa',
+                        : l10n.spaServiceLabel,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -3270,7 +3279,7 @@ class _CancelledSpaCarouselDialogState
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Motif : ${reservation.specialRequests!}',
+                      l10n.reasonPrefix(reservation.specialRequests!),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
@@ -3331,10 +3340,10 @@ class _CancelledSpaCarouselDialogState
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement.',
+          Text(
+            l10n.adminAlertDismissAuto,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -3343,9 +3352,9 @@ class _CancelledSpaCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -3355,9 +3364,9 @@ class _CancelledSpaCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop(reservation);
           },
-          child: const Text(
-            'Voir détails',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.viewDetails,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -3418,16 +3427,16 @@ class _RescheduledSpaCarouselDialogState
   @override
   Widget build(BuildContext context) {
     if (widget.reservations.isEmpty) return const SizedBox.shrink();
-
+    final l10n = AppLocalizations.of(context);
     final reservation = widget.reservations[_currentIndex];
     final roomLabel =
         reservation.roomNumber != null && reservation.roomNumber!.isNotEmpty
-        ? 'Chambre ${reservation.roomNumber}'
-        : 'Chambre non spécifiée';
+        ? '${l10n.roomLabelShort} ${reservation.roomNumber}'
+        : l10n.roomUnspecified;
     final guestName =
         reservation.guestName != null && reservation.guestName!.isNotEmpty
         ? reservation.guestName!
-        : 'Client inconnu';
+        : l10n.clientUnknown;
 
     return AlertDialog(
       backgroundColor: AppTheme.primaryBlue,
@@ -3449,10 +3458,10 @@ class _RescheduledSpaCarouselDialogState
             child: const Icon(Icons.update_rounded, color: AppTheme.accentGold),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Spa : Horaire Accepté',
-              style: TextStyle(
+              l10n.spaScheduleAcceptedTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -3466,7 +3475,7 @@ class _RescheduledSpaCarouselDialogState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Réservation #${reservation.id}',
+            l10n.reservationIdShort(reservation.id.toString()),
             style: const TextStyle(
               color: AppTheme.accentGold,
               fontSize: 14,
@@ -3501,7 +3510,7 @@ class _RescheduledSpaCarouselDialogState
                   child: Text(
                     reservation.serviceName.isNotEmpty
                         ? reservation.serviceName
-                        : 'Service Spa',
+                        : l10n.spaServiceLabel,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -3531,10 +3540,10 @@ class _RescheduledSpaCarouselDialogState
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Nouvel horaire confirmé',
-                    style: TextStyle(
+                    l10n.newScheduleConfirmed,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
                       fontStyle: FontStyle.italic,
@@ -3593,10 +3602,10 @@ class _RescheduledSpaCarouselDialogState
               ),
             ),
           const SizedBox(height: 10),
-          const Text(
-            'Cette alerte disparaîtra automatiquement.',
+          Text(
+            l10n.adminAlertDismissAuto,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textGray, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textGray, fontSize: 12),
           ),
         ],
       ),
@@ -3605,9 +3614,9 @@ class _RescheduledSpaCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
           },
-          child: const Text(
-            'Fermer',
-            style: TextStyle(
+          child: Text(
+            l10n.close,
+            style: const TextStyle(
               color: AppTheme.accentGold,
               fontWeight: FontWeight.w600,
             ),
@@ -3617,9 +3626,9 @@ class _RescheduledSpaCarouselDialogState
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop(reservation);
           },
-          child: const Text(
-            'Voir détails',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          child: Text(
+            l10n.viewDetails,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),
       ],

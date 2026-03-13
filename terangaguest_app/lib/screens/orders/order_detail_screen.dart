@@ -1239,14 +1239,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             borderRadius: BorderRadius.circular(16),
             side: const BorderSide(color: Colors.redAccent, width: 1.5),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
-              SizedBox(width: 8),
+              const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Annuler la commande',
-                  style: TextStyle(
+                  dialogL10n.cancelOrder,
+                  style: const TextStyle(
                     color: Colors.redAccent,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -1260,16 +1260,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Commande #${_order!.orderNumber}',
+                dialogL10n.orderNumberShort(_order!.orderNumber),
                 style: const TextStyle(
                   color: AppTheme.accentGold,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Le client sera notifié avec le motif saisi.',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
+              Text(
+                dialogL10n.clientWillBeNotifiedWithReason,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -1303,9 +1303,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text(
-                'Annuler',
-                style: TextStyle(color: Colors.white54),
+              child: Text(
+                dialogL10n.cancel,
+                style: const TextStyle(color: Colors.white54),
               ),
             ),
             TextButton(
@@ -1313,9 +1313,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 if (reasonController.text.trim().isEmpty) return;
                 Navigator.of(dialogContext).pop(true);
               },
-              child: const Text(
-                'Confirmer l\'annulation',
-                style: TextStyle(
+              child: Text(
+                dialogL10n.confirmCancellation,
+                style: const TextStyle(
                   color: Colors.redAccent,
                   fontWeight: FontWeight.bold,
                 ),

@@ -508,6 +508,10 @@
   "validate": "Valider",
   "clientCode": "Code client",
   "clientCodeHint": "Code client (ex: 123456)",
+  "invalidClientCode": "Code client invalide",
+  "clientLoginTitle": "Connexion Client",
+  "pleaseEnterClientCode": "Veuillez entrer votre code client",
+  "accessMyRoom": "Accéder à ma chambre",
   "specialRequests": "Demandes spéciales",
   "developedByUTA": "Développé par Universal Technologies Africa",
   "tapToContinue": "Appuyez pour continuer",
@@ -820,5 +824,64 @@
   "excursionStaffSubtitle": "Suivi des excursions & activités",
   "excursionConfirmAction": "Confirmer",
   "excursionMarkCompletedAction": "Marquer réalisée",
-  "guidesScreenTitle": "Guides & Infos"
+  "guidesScreenTitle": "Guides & Infos",
+  "adminRoomServiceDepartment": "Service en chambre",
+  "adminNewRoomServiceToProcess": "Nouvelle commande Room Service à traiter",
+  "adminNewRestaurantToProcess": "Nouvelle réservation restaurant à traiter",
+  "adminNewSpaToProcess": "Nouvelle réservation Spa & Bien-être à traiter",
+  "adminNewExcursionToProcess": "Nouvelle demande Excursions & Activités à traiter",
+  "adminNewLaundryToProcess": "Nouvelle demande Blanchisserie à traiter",
+  "adminNewPalaceToProcess": "Nouvelle demande Palace / Conciergerie à traiter",
+  "adminNoSectionAssigned": "Aucune section assignée. Contactez l'administrateur pour gérer vos accès.",
+  "adminSpaceTitle": "Espace Administrateur",
+  "yourEstablishment": "Votre établissement",
+  "adminAlertDismissMinute": "Cette alerte disparaîtra automatiquement dans une minute.",
+  "adminAlertDismissAuto": "Cette alerte disparaîtra automatiquement.",
+  "openOrder": "Ouvrir la commande",
+  "openRequest": "Ouvrir la demande",
+  "viewDetails": "Voir détails",
+  "clientUnknown": "Client inconnu",
+  "roomUnspecified": "Chambre non spécifiée",
+  "newRoomServiceOrder": "Nouvelle commande Room Service",
+  "orderNumberShort": "Commande {number}",
+  "@orderNumberShort": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "newLaundryRequest": "Nouvelle demande Blanchisserie",
+  "requestIdShort": "Demande #{id}",
+  "@requestIdShort": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "newPalaceRequest": "Nouvelle demande Palace / Conciergerie",
+  "newRestaurantReservation": "Nouvelle réservation restaurant",
+  "reservationIdShort": "Réservation #{id}",
+  "@reservationIdShort": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "newExcursionRequest": "Nouvelle demande Excursions & Activités",
+  "newSpaReservation": "Nouvelle réservation Spa & Bien-être",
+  "spaReservationCancelledTitle": "Réservation Spa annulée",
+  "spaServiceLabel": "Service Spa",
+  "reasonPrefix": "Motif : {reason}",
+  "@reasonPrefix": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "spaScheduleAcceptedTitle": "Spa : Horaire Accepté",
+  "newScheduleConfirmed": "Nouvel horaire confirmé",
+  "adminSectionInPreparation": "Section \"{label}\" en préparation pour la version staff mobile.",
+  "@adminSectionInPreparation": {
+    "placeholders": {
+      "label": {"type": "String"}
+    }
+  },
+  "clientWillBeNotifiedWithReason": "Le client sera notifié avec le motif saisi.",
+  "confirmCancellation": "Confirmer l'annulation"
 }

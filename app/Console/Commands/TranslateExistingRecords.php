@@ -11,9 +11,7 @@ class TranslateExistingRecords extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'translate:backfill
-                            {--model= : Nom du modèle spécifique à traduire (ex: SpaService)}
-                            {--dry-run : Afficher ce qui serait traduit sans sauvegarder}';
+    protected $signature = 'translate:backfill {--model= : Modèle (ex: SpaService)} {--dry-run : Afficher sans sauvegarder}';
 
     /**
      * The console command description.
@@ -46,6 +44,9 @@ class TranslateExistingRecords extends Command
      */
     public function handle(): int
     {
+        $this->info('Démarrage translate:backfill...');
+        $this->output->write('', true);
+
         $targetLanguages = ['en', 'es', 'ar'];
         $dryRun = $this->option('dry-run');
         $onlyModel = $this->option('model');
@@ -54,6 +55,20 @@ class TranslateExistingRecords extends Command
             $this->warn('Mode DRY-RUN activé : aucune donnée ne sera sauvegardée.');
         }
 
+        try {
+            $this->runBackfill($targetLanguages, $dryRun, $onlyModel);
+        } catch (\Throwable $e) {
+            $this->error('Erreur : ' . $e->getMessage());
+            Log::error('translate:backfill exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return self::FAILURE;
+        }
+
+        $this->info('✅ Rétro-traduction terminée !');
+        return self::SUCCESS;
+    }
+
+    protected function runBackfill(array $targetLanguages, bool $dryRun, ?string $onlyModel): void
+    {
         foreach ($this->models as $modelClass) {
             $shortName = class_basename($modelClass);
 
@@ -126,9 +141,5 @@ class TranslateExistingRecords extends Command
             $this->newLine();
             $this->info("  → {$translatedCount} enregistrement(s) traduit(s) sur {$records->count()}.");
         }
-
-        $this->info('✅ Rétro-traduction terminée !');
-
-        return self::SUCCESS;
     }
 }

@@ -13,12 +13,13 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orderLabel = AppLocalizations.of(context).orderLabel(order.id);
+    final l10n = AppLocalizations.of(context);
+    final orderLabel = l10n.orderLabel(order.id);
     final hasRoomOrGuest = order.roomNumber != null || order.guestName != null;
     final roomGuestText = () {
       final parts = <String>[];
       if (order.roomNumber != null && order.roomNumber!.isNotEmpty) {
-        parts.add('Chambre ${order.roomNumber}');
+        parts.add('${l10n.roomLabelShort} ${order.roomNumber}');
       }
       if (order.guestName != null && order.guestName!.isNotEmpty) {
         if (parts.isNotEmpty) {

@@ -64,7 +64,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? "Code client invalide"),
+          content: Text(authProvider.errorMessage ?? AppLocalizations.of(context).invalidClientCode),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -108,18 +108,18 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildLogo(logoWidth, titleFontSize),
+                        _buildLogo(context, logoWidth, titleFontSize),
                         SizedBox(height: spacingLogo),
 
-                        _buildCodeField(fieldFontSize, iconSize, borderRadius),
+                        _buildCodeField(context, fieldFontSize, iconSize, borderRadius),
                         SizedBox(height: spacingButton),
 
-                        _buildLoginButton(buttonHeight, buttonFontSize),
+                        _buildLoginButton(context, buttonHeight, buttonFontSize),
 
                         SizedBox(height: isMobile ? 24.0 : 36.0),
 
                         Text(
-                          'Développé par Universal Technologies Africa',
+                          AppLocalizations.of(context).developedByUTA,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -140,13 +140,13 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     );
   }
 
-  Widget _buildLogo(double logoWidth, double titleFontSize) {
+  Widget _buildLogo(BuildContext context, double logoWidth, double titleFontSize) {
     return Column(
       children: [
         Image.asset('assets/logo.png', width: logoWidth),
         const SizedBox(height: 12),
         Text(
-          "Connexion Client",
+          AppLocalizations.of(context).clientLoginTitle,
           style: TextStyle(fontSize: titleFontSize, color: AppTheme.textGray),
         ),
       ],
@@ -154,6 +154,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
   }
 
   Widget _buildCodeField(
+    BuildContext context,
     double fontSize,
     double iconSize,
     double borderRadius,
@@ -211,7 +212,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return "Veuillez entrer votre code client";
+          return AppLocalizations.of(context).pleaseEnterClientCode;
         }
         return null;
       },
@@ -219,9 +220,9 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     );
   }
 
-  Widget _buildLoginButton(double height, double fontSize) {
+  Widget _buildLoginButton(BuildContext context, double height, double fontSize) {
     return AnimatedButton(
-      text: "Accéder à ma chambre",
+      text: AppLocalizations.of(context).accessMyRoom,
       onPressed: _isLoading ? null : _handleLogin,
       isLoading: _isLoading,
       width: double.infinity,

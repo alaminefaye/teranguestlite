@@ -87,6 +87,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final w = MediaQuery.sizeOf(context).width;
     final isMobile = w < 600;
     final titleSize = isMobile ? 20.0 : 24.0;
@@ -130,6 +131,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
   }
 
   Widget _buildCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -368,9 +370,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
           l10n.acceptNewSchedule,
           style: const TextStyle(color: AppTheme.accentGold),
         ),
-        content: const Text(
+        content: Text(
           l10n.spaRescheduleConfirmMessage,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         actions: [
           TextButton(
