@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class AmenityCategory extends Model
 {
-    use EnterpriseScopeTrait;
+    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+
+    public array $translatable = ['name'];
 
     protected $fillable = ['enterprise_id', 'name', 'display_order', 'is_active'];
 

@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // que le token correspond bien à un séjour actif de la chambre.
         $middleware->api(prepend: [
             'guest.web_stay',
+            \App\Http\Middleware\SetLocaleFromHeader::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

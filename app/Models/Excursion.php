@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Excursion extends Model
 {
-    use EnterpriseScopeTrait;
+    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+
+    public array $translatable = ['name', 'description'];
 
     protected $fillable = ['enterprise_id', 'name', 'type', 'description', 'image', 'price_adult', 'price_child', 'children_age_range', 'duration_hours', 'departure_time', 'schedule_description', 'included', 'not_included', 'min_participants', 'max_participants', 'status', 'is_featured', 'display_order', 'is_active'];
 

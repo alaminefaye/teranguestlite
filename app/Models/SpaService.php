@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Scopes\EnterpriseScopeTrait;
+use Spatie\Translatable\HasTranslations;
 
 class SpaService extends Model
 {
-    use HasFactory, EnterpriseScopeTrait;
+    use HasFactory, EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+
+    public array $translatable = ['name', 'description'];
 
     protected $fillable = [
         'enterprise_id',

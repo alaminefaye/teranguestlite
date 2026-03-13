@@ -3,18 +3,23 @@
 namespace App\Models;
 
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Room extends Model
 {
-    use HasFactory, EnterpriseScopeTrait;
+    use HasFactory, EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+
+    public array $translatable = ['type_name', 'description'];
 
     protected $fillable = [
         'enterprise_id',
         'room_number',
         'floor',
         'type',
+        'type_name',
         'status',
         'price_per_night',
         'capacity',
@@ -123,16 +128,32 @@ class Room extends Model
     /**
      * Obtenir le nom complet du type
      */
-    public function getTypeNameAttribute()
+    /**
+     * Retourne le libellé traduit du type de chambre.
+     * En lecture seule depuis le dashboard (locale=fr), c'est le nom français.
+     * Via l'API, Spatie retourne automatiquement la langue demandée.
+     *
+     * Note : au premier accès, on s'assure que la valeur FR est stockée dans le champ JSON.
+     */
+    public function getTypeNameAttribute(): mixed
     {
-        return match($this->type) {
-            'single' => 'Chambre Simple',
-            'double' => 'Chambre Double',
-            'suite' => 'Suite',
-            'deluxe' => 'Deluxe',
-            'presidential' => 'Suite Présidentielle',
-            default => ucfirst($this->type),
-        };
+        // Si la valeur FR n'est pas encore définie pour ce champ, on la calcule et on la stocke.
+        $stored = $this->getTranslation('type_name', 'fr', false);
+        if (empty($stored) && ! empty($this->type)) {
+            $label = match($this->type) {
+                'single'       => 'Chambre Simple',
+                'double'       => 'Chambre Double',
+                'suite'        => 'Suite',
+                'deluxe'       => 'Deluxe',
+                'presidential' => 'Suite Présidentielle',
+                default        => ucfirst($this->type),
+            };
+            $this->setTranslation('type_name', 'fr', $label);
+        }
+
+        // Retourne la traduction selon la locale courante (gérée par Spatie).
+        return $this->getTranslations('type_name')[app()->getLocale()]
+            ?? $this->getTranslation('type_name', 'fr', true);
     }
 
     /**
