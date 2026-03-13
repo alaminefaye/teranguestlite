@@ -86,8 +86,11 @@ void main() {
         }
       }
 
-      // Initialiser le locale français pour les dates
+      // Initialiser les locales pour les dates
       await initializeDateFormatting('fr_FR', null);
+      await initializeDateFormatting('en_US', null);
+      await initializeDateFormatting('es_ES', null);
+      await initializeDateFormatting('ar_SA', null);
 
       // Configuration de la barre de statut
       SystemChrome.setSystemUIOverlayStyle(

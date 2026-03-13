@@ -1855,4 +1855,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notificationsDeleted => 'Notifications supprimées';
+
+  @override
+  String get halfDayOption => 'Demi-journée';
+
+  @override
+  String get fullDayOption => '1 Journée';
+
+  @override
+  String get multipleDaysOption => 'Plusieurs jours';
+
+  @override
+  String get allOption => 'Tous';
 }

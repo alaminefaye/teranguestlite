@@ -339,7 +339,7 @@ class _MyLaundryRequestsScreenState extends State<MyLaundryRequestsScreen> {
                                         child: Text(
                                           DateFormat(
                                             'dd/MM/yyyy',
-                                            'fr_FR',
+                                            Localizations.localeOf(context).languageCode,
                                           ).format(request.createdAt),
                                           style: const TextStyle(
                                             fontSize: 12,
@@ -813,7 +813,7 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                                   Text(
                                     DateFormat(
                                       'dd/MM/yyyy à HH:mm',
-                                      'fr_FR',
+                                      Localizations.localeOf(context).languageCode,
                                     ).format(request.createdAt),
                                     style: const TextStyle(
                                       fontSize: 14,

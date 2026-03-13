@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
+use Spatie\Translatable\HasTranslations;
 
 class LeisureCategory extends Model
 {
-    use EnterpriseScopeTrait;
+    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+
+    public array $translatable = ['name', 'description'];
 
     /** Catégories principales (écran 1) */
     public const TYPE_SPORT = 'sport';

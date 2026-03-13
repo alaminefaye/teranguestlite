@@ -355,7 +355,7 @@ class _MyExcursionBookingsScreenState extends State<MyExcursionBookingsScreen> {
                           child: Text(
                             DateFormat(
                               'dd/MM/yyyy',
-                              'fr_FR',
+                              Localizations.localeOf(context).languageCode,
                             ).format(booking.date),
                             style: const TextStyle(
                               fontSize: 12,
@@ -792,7 +792,7 @@ class ExcursionBookingDetailScreen extends StatelessWidget {
     AppLocalizations l10n,
     String? roomGuestText,
   ) {
-    final dateLabel = DateFormat('EEEE d MMMM yyyy', 'fr_FR')
+    final dateLabel = DateFormat('EEEE d MMMM yyyy', Localizations.localeOf(context).languageCode)
         .format(booking.date)
         .replaceFirstMapped(RegExp(r'^\w'), (m) => m.group(0)!.toUpperCase());
 

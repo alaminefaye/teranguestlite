@@ -447,13 +447,14 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
       );
 
   Widget _typeSelector() {
+    final l10n = AppLocalizations.of(context);
     final items = _types;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         // Chip "Tous"
-        _typeChip(null, 'Tous'),
+        _typeChip(null, l10n.allOption ?? 'Tous'),
         for (final t in items) _typeChip(t.value, t.label),
       ],
     );
@@ -497,9 +498,9 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
 
   Widget _durationSelector(AppLocalizations l10n) {
     final options = [
-      (value: 'half', label: 'Demi-journée'),
-      (value: 'day', label: '1 Journée'),
-      (value: 'multi', label: 'Plusieurs jours'),
+      (value: 'half', label: l10n.halfDayOption ?? 'Demi-journée'),
+      (value: 'day', label: l10n.fullDayOption ?? '1 Journée'),
+      (value: 'multi', label: l10n.multipleDaysOption ?? 'Plusieurs jours'),
     ];
     return Row(
       children: options

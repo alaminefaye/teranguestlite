@@ -362,7 +362,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                         child: Text(
                                           DateFormat(
                                             'dd/MM/yyyy HH:mm',
-                                            'fr_FR',
+                                            Localizations.localeOf(context).languageCode,
                                           ).format(request.createdAt),
                                           style: const TextStyle(
                                             fontSize: 12,
@@ -386,7 +386,7 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
                                           child: Text(
                                             DateFormat(
                                               'dd/MM HH:mm',
-                                              'fr_FR',
+                                              Localizations.localeOf(context).languageCode,
                                             ).format(request.scheduledTime!),
                                             style: const TextStyle(
                                               fontSize: 12,
@@ -854,7 +854,7 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                                   Text(
                                     DateFormat(
                                       'dd/MM/yyyy à HH:mm',
-                                      'fr_FR',
+                                      Localizations.localeOf(context).languageCode,
                                     ).format(request.createdAt),
                                     style: const TextStyle(
                                       fontSize: 13,
@@ -881,7 +881,7 @@ class PalaceRequestDetailScreen extends StatelessWidget {
                             text: l10n.scheduledForDate(
                               DateFormat(
                                 'dd/MM/yyyy HH:mm',
-                                'fr_FR',
+                                Localizations.localeOf(context).languageCode,
                               ).format(request.scheduledTime!),
                             ),
                           ),

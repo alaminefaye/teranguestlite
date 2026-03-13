@@ -51,7 +51,7 @@
   "roomService": "Servicio a la habitación",
   "restaurantsBars": "Restaurantes y Bares",
   "spaWellness": "Spa y Bienestar",
-  "wellnessSportLeisure": "Bienestar, deporte y ocio",
+  "wellnessSportLeisure": "Bienestar, Deporte y Ocio",
   "wellnessSportLeisureSubtitle": "Spa, Golf, Tenis, Fitness",
   "golfTitle": "Golf",
   "golfSubtitle": "Reserva Tee-time y alquiler de material",
@@ -687,5 +687,17 @@
   "thankYouForOrder": "¡Gracias por su pedido!",
   "invoiceRoomLabel": "HABITACIÓN:",
   "notificationsMarkedAsRead": "Notificaciones marcadas como leídas",
-  "notificationsDeleted": "Notificaciones eliminadas"
+  "notificationsDeleted": "Notificaciones eliminadas",
+  "reportSecurityEmergency": "Reportar emergencia de seguridad",
+  "roomServiceRestauration": "Servicio de Habitaciones y Restaurantes",
+  "roomServiceRestaurationDesc": "Menú digital para ordenar comidas y bebidas con seguimiento en tiempo real.",
+  "servicesChambreLogistique": "Servicio a la habitación",
+  "vehicleRentalTitle": "Alquiler de vehículos",
+  "transfersVtcTitle": "Traslados y Transporte privado",
+  "halfDayOption": "Medio día",
+  "fullDayOption": "1 Día",
+  "multipleDaysOption": "Varios días",
+  "allOption": "Todos",
+  "requestDoctor": "Solicitar un médico",
+  "amenitiesConcierge": "Amenities y Conserjería"
 }

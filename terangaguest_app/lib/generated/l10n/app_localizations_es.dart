@@ -295,7 +295,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get requestDoctor => 'Solliciter un médecin';
 
   @override
-  String get reportSecurityEmergency => 'Signaler une urgence sécurité';
+  String get reportSecurityEmergency => 'Reportar emergencia de seguridad';
 
   @override
   String roomLabel(String room) {
@@ -346,14 +346,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Le chatbot multilingue sera disponible prochainement.';
 
   @override
-  String get servicesChambreLogistique => 'Service en chambre';
+  String get servicesChambreLogistique => 'Servicio a la habitación';
 
   @override
-  String get roomServiceRestauration => 'Room Service & Restauration';
+  String get roomServiceRestauration =>
+      'Servicio a la habitación y Restaurante';
 
   @override
   String get roomServiceRestaurationDesc =>
-      'Menu digital haute définition permettant de commander repas et boissons avec suivi en temps réel de la préparation.';
+      'Menú digital para ordenar comidas y bebidas con seguimiento en tiempo real.';
 
   @override
   String get laundryDesc =>
@@ -1176,7 +1177,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cancelReservationConfirm => '¿Cancelar esta reserva?';
 
   @override
-  String get vehicleRentalTitle => 'Location de Véhicule';
+  String get vehicleRentalTitle => 'Alquiler de vehículos';
 
   @override
   String get vehicleRentalSubtitle =>
@@ -1224,7 +1225,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tourTypeHistorical => 'Historique';
 
   @override
-  String get transfersVtcTitle => 'Transferts & VTC';
+  String get transfersVtcTitle => 'Traslados y Transporte privado';
 
   @override
   String get transfersVtcSubtitle =>
@@ -1852,4 +1853,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationsDeleted => 'Notificaciones eliminadas';
+
+  @override
+  String get halfDayOption => 'Medio día';
+
+  @override
+  String get fullDayOption => '1 Día';
+
+  @override
+  String get multipleDaysOption => 'Varios días';
+
+  @override
+  String get allOption => 'Todos';
 }

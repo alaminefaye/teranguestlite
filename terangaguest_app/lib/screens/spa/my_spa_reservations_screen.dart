@@ -377,7 +377,7 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
                         child: Text(
                           DateFormat(
                             'dd/MM/yyyy',
-                            'fr_FR',
+                            Localizations.localeOf(context).languageCode,
                           ).format(reservation.date),
                           style: const TextStyle(
                             fontSize: 12,

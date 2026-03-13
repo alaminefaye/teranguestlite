@@ -1832,4 +1832,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsDeleted => 'Notifications deleted';
+
+  @override
+  String get halfDayOption => 'Half-day';
+
+  @override
+  String get fullDayOption => '1 Day';
+
+  @override
+  String get multipleDaysOption => 'Multiple days';
+
+  @override
+  String get allOption => 'All';
 }

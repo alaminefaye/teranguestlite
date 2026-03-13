@@ -1194,7 +1194,7 @@ class _AdminChatConversationScreenState
     final day = DateTime(d.year, d.month, d.day);
     if (day == today) return 'Aujourd\'hui';
     if (day == yesterday) return 'Hier';
-    return DateFormat('d MMMM yyyy', 'fr_FR').format(d);
+    return DateFormat('d MMMM yyyy', Localizations.localeOf(context).languageCode).format(d);
   }
 
   Widget _buildDateSeparator(DateTime date) {

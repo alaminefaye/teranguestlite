@@ -107,7 +107,7 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                           ? l10n.selectDate
                           : DateFormat(
                               'EEEE d MMMM',
-                              'fr_FR',
+                              Localizations.localeOf(context).languageCode,
                             ).format(selectedDate!),
                       style: const TextStyle(color: Colors.white),
                     ),

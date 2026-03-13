@@ -994,7 +994,7 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
                     _scheduledTime != null
                         ? DateFormat(
                             'dd/MM/yyyy HH:mm',
-                            'fr_FR',
+                            Localizations.localeOf(context).languageCode,
                           ).format(_scheduledTime!)
                         : AppLocalizations.of(context).selectDateAndTime,
                     style: TextStyle(

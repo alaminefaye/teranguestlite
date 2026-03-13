@@ -324,7 +324,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
   }
 
   Widget _buildOrderInfo() {
-    final dateFormat = DateFormat('dd/MM/yyyy • HH:mm', 'fr_FR');
+    final dateFormat = DateFormat('dd/MM/yyyy • HH:mm', Localizations.localeOf(context).languageCode);
     final formattedDate = dateFormat.format(_order!.createdAt);
 
     // Utiliser delivered_at réel si disponible, sinon l'heure actuelle (cas popup notification)

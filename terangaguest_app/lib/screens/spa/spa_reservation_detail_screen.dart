@@ -144,7 +144,7 @@ class SpaReservationDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildInfoRow(
             Icons.calendar_today,
-            DateFormat('EEEE d MMMM yyyy', 'fr_FR').format(reservation.date),
+            DateFormat('EEEE d MMMM yyyy', Localizations.localeOf(context).languageCode).format(reservation.date),
           ),
           const SizedBox(height: 10),
           _buildInfoRow(Icons.access_time, reservation.time),

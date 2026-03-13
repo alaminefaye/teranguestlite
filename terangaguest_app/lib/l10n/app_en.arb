@@ -748,5 +748,9 @@
   "thankYouForOrder": "Thank you for your order!",
   "invoiceRoomLabel": "ROOM:",
   "notificationsMarkedAsRead": "Notifications marked as read",
-  "notificationsDeleted": "Notifications deleted"
+  "notificationsDeleted": "Notifications deleted",
+  "halfDayOption": "Half-day",
+  "fullDayOption": "1 Day",
+  "multipleDaysOption": "Multiple days",
+  "allOption": "All"
 }

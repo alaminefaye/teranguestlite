@@ -740,7 +740,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             SizedBox(width: isCompact ? 10 : 14),
                             Text(
-                              DateFormat('EEEE d MMMM', 'fr_FR').format(now),
+                              DateFormat('EEEE d MMMM', Localizations.localeOf(context).languageCode).format(now),
                               style: TextStyle(
                                 fontSize: dateSize,
                                 fontWeight: FontWeight.w400,

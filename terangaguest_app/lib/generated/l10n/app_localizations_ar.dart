@@ -290,7 +290,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get requestDoctor => 'Solliciter un médecin';
 
   @override
-  String get reportSecurityEmergency => 'Signaler une urgence sécurité';
+  String get reportSecurityEmergency => 'الإبلاغ عن حالة طوارئ أمنية';
 
   @override
   String roomLabel(String room) {
@@ -341,14 +341,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'Le chatbot multilingue sera disponible prochainement.';
 
   @override
-  String get servicesChambreLogistique => 'Service en chambre';
+  String get servicesChambreLogistique => 'خدمة الغرف';
 
   @override
-  String get roomServiceRestauration => 'Room Service & Restauration';
+  String get roomServiceRestauration => 'خدمة الغرف والمطاعم';
 
   @override
   String get roomServiceRestaurationDesc =>
-      'Menu digital haute définition permettant de commander repas et boissons avec suivi en temps réel de la préparation.';
+      'قائمة رقمية لطلب وجبات الطعام والمشروبات مع تتبع التحضير في الوقت الفعلي.';
 
   @override
   String get laundryDesc =>
@@ -1151,7 +1151,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelReservationConfirm => 'إلغاء هذا الحجز؟';
 
   @override
-  String get vehicleRentalTitle => 'Location de Véhicule';
+  String get vehicleRentalTitle => 'تأجير السيارات';
 
   @override
   String get vehicleRentalSubtitle =>
@@ -1199,7 +1199,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tourTypeHistorical => 'Historique';
 
   @override
-  String get transfersVtcTitle => 'Transferts & VTC';
+  String get transfersVtcTitle => 'نقل وسيارات خاصة';
 
   @override
   String get transfersVtcSubtitle =>
@@ -1812,4 +1812,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notificationsDeleted => 'تم حذف الإشعارات';
+
+  @override
+  String get halfDayOption => 'نصف يوم';
+
+  @override
+  String get fullDayOption => 'يوم واحد';
+
+  @override
+  String get multipleDaysOption => 'أيام متعددة';
+
+  @override
+  String get allOption => 'الكل';
 }

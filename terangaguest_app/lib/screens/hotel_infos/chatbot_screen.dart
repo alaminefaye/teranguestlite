@@ -684,7 +684,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     final day = DateTime(d.year, d.month, d.day);
     if (day == today) return l10n.periodToday;
     if (day == yesterday) return l10n.yesterday;
-    return DateFormat('d MMMM yyyy', 'fr_FR').format(d);
+    return DateFormat('d MMMM yyyy', Localizations.localeOf(context).languageCode).format(d);
   }
 
   Widget _buildDateSeparator(BuildContext context, DateTime date) {

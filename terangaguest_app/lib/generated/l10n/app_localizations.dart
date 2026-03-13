@@ -3527,6 +3527,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Notifications supprimées'**
   String get notificationsDeleted;
+
+  /// No description provided for @halfDayOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demi-journée'**
+  String get halfDayOption;
+
+  /// No description provided for @fullDayOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'1 Journée'**
+  String get fullDayOption;
+
+  /// No description provided for @multipleDaysOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plusieurs jours'**
+  String get multipleDaysOption;
+
+  /// No description provided for @allOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get allOption;
 }
 
 class _AppLocalizationsDelegate

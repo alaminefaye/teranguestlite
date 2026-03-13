@@ -415,7 +415,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 Text(
                   DateFormat(
                     'dd/MM/yyyy à HH:mm',
-                    'fr_FR',
+                    Localizations.localeOf(context).languageCode,
                   ).format(_order!.createdAt),
                   style: TextStyle(
                     fontSize: isMobile ? 12 : 13,

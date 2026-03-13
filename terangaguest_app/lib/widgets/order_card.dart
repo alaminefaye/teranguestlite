@@ -106,7 +106,7 @@ class OrderCard extends StatelessWidget {
                           Text(
                             DateFormat(
                               'dd/MM/yyyy HH:mm',
-                              'fr_FR',
+                              Localizations.localeOf(context).languageCode,
                             ).format(order.createdAt),
                             style: TextStyle(
                               fontSize: detailSize,

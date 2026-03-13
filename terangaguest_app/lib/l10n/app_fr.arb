@@ -748,5 +748,9 @@
   "thankYouForOrder": "Merci pour votre commande !",
   "invoiceRoomLabel": "CHAMBRE:",
   "notificationsMarkedAsRead": "Notifications marquées comme lues",
-  "notificationsDeleted": "Notifications supprimées"
+  "notificationsDeleted": "Notifications supprimées",
+  "halfDayOption": "Demi-journée",
+  "fullDayOption": "1 Journée",
+  "multipleDaysOption": "Plusieurs jours",
+  "allOption": "Tous"
 }

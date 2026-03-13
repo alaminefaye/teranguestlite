@@ -37,6 +37,7 @@ class TranslateExistingRecords extends Command
         \App\Models\GuideCategory::class,
         \App\Models\GuideItem::class,
         \App\Models\Announcement::class,
+        \App\Models\LeisureCategory::class,
         \App\Models\Room::class,
     ];
 

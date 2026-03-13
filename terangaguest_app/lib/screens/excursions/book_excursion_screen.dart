@@ -224,7 +224,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
                     _selectedDate != null
                         ? DateFormat(
                             'dd MMMM yyyy',
-                            'fr_FR',
+                            Localizations.localeOf(context).languageCode,
                           ).format(_selectedDate!)
                         : AppLocalizations.of(context).selectDate,
                     style: TextStyle(
@@ -481,7 +481,7 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
           const SizedBox(height: 12),
           _buildSummaryRow(
             l10n.date,
-            DateFormat('EEEE dd MMMM yyyy', 'fr_FR').format(_selectedDate!),
+            DateFormat('EEEE dd MMMM yyyy', Localizations.localeOf(context).languageCode).format(_selectedDate!),
           ),
           const SizedBox(height: 12),
           _buildSummaryRow(l10n.adults, '$_adultsCount'),
