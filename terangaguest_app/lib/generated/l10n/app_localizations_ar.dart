@@ -185,45 +185,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gymHoursDefault => 'استفسر من الاستقبال عن الساعات.';
 
   @override
-  String get palaceServices => 'خدمات أخرى';
+  String get palaceServices => 'خدمات القصر';
 
   @override
-  String get explorationMobility => 'Exploration & mobilité';
+  String get explorationMobility => 'الاستكشاف والتنقل';
 
   @override
   String get explorationMobilitySubtitle =>
-      'Location véhicule, découverte, visites guidées et transferts';
+      'تأجير السيارات، استكشاف، جولات ونقل';
 
   @override
-  String get vehicleRental => 'Location de Véhicule';
+  String get vehicleRental => 'تأجير سيارات';
 
   @override
   String get vehicleRentalDesc =>
-      'Catalogue de véhicules (berlines, 4x4, citadines) avec réservation et options de confort.';
+      'كتالوج تفاعلي للسيارات مع حجز مباشر وخيارات راحة.';
 
   @override
-  String get sitesTouristiques => 'Découverte & Sites Touristiques';
+  String get sitesTouristiques => 'استكشاف ومواقع سياحية';
 
   @override
   String get sitesTouristiquesDesc =>
-      'Lieux incontournables : Lac Rose, Île de Gorée, Plateau… Photos et descriptifs.';
+      'أماكن لا تفوت: بحيرة ريتبا، جزيرة غوريه، بلاتو... صور ووصف مفصل.';
 
   @override
-  String get guidedTours => 'Visites Guidées Personnalisées';
+  String get guidedTours => 'جولات سياحية مخصصة';
 
   @override
   String get guidedToursDesc =>
-      'Réservation de guides certifiés pour circuits culturels, gastronomiques ou historiques.';
+      'احجز مرشدين معتمدين لجولات ثقافية، تذوق الطعام أو تاريخية.';
 
   @override
-  String get transfersVtc => 'Transferts & VTC';
+  String get transfersVtc => 'نقل وسائق خاص';
 
   @override
-  String get transfersVtcDesc =>
-      'Navettes aéroport ou chauffeurs privés pour des trajets sécurisés.';
+  String get transfersVtcDesc => 'نقل من وإلى المطار أو سائق خاص لرحلات آمنة.';
 
   @override
-  String get excursions => 'الجولات';
+  String get excursions => 'جولات';
 
   @override
   String get laundry => 'الغسيل';
@@ -235,33 +234,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get callCenter => 'مركز الاتصالات';
 
   @override
-  String get hotelInfosSecurity => 'Hotel infos & sécurité';
+  String get hotelInfosSecurity => 'معلومات الفندق والأمن';
 
   @override
   String get hotelInfosSecuritySubtitle =>
-      'Livret d\'accueil, assistance urgence et chatbot';
+      'كتيب الترحيب، المساعدة والطوارئ والشات بوت';
 
   @override
-  String get guidesInfos => 'Guides & Infos';
+  String get guidesInfos => 'أدلة ومعلومات';
 
   @override
-  String get hotelInfos => 'Hôtel Infos';
+  String get hotelInfos => 'معلومات الفندق';
 
   @override
-  String get hotelInfosDesc => 'Wi-Fi, plans, règlement et infos pratiques';
+  String get hotelInfosDesc => 'واي فاي، خرائط، قواعد المنزل ومعلومات عملية';
 
   @override
-  String get assistanceEmergency => 'Assistance & Urgence';
+  String get assistanceEmergency => 'المساعدة والطوارئ';
 
   @override
   String get assistanceEmergencyDesc =>
-      'Médecin ou urgence sécurité (chambre identifiée)';
+      'طلب طبيب أو الإبلاغ عن حالة طوارئ أمنية (غرفة محددة)';
 
   @override
-  String get chatbotMultilingual => 'Chatbot IA Multilingue';
+  String get chatbotMultilingual => 'روبوت محادثة متعدد اللغات';
 
   @override
-  String get chatbotDesc => 'Assistant digital 24/7';
+  String get chatbotDesc => 'مساعد رقمي متاح 24/7';
 
   @override
   String get gallery => 'المعرض';
@@ -342,34 +341,35 @@ class AppLocalizationsAr extends AppLocalizations {
       'Le chatbot multilingue sera disponible prochainement.';
 
   @override
-  String get servicesChambreLogistique => 'خدمات الغرفة واللوجستيات';
+  String get servicesChambreLogistique => 'Service en chambre';
 
   @override
-  String get roomServiceRestauration => 'خدمة الغرفة والمطعم';
+  String get roomServiceRestauration => 'Room Service & Restauration';
 
   @override
   String get roomServiceRestaurationDesc =>
-      'قائمة رقمية عالية الوضوح لطلب الوجبات والمشروبات مع متابعة التحضير في الوقت الفعلي.';
+      'Menu digital haute définition permettant de commander repas et boissons avec suivi en temps réel de la préparation.';
 
   @override
-  String get laundryDesc => 'قائمة أسعار تفاعلية وطلب استلام فوري للملابس.';
+  String get laundryDesc =>
+      'Grille tarifaire interactive et demande de ramassage immédiate du linge.';
 
   @override
-  String get amenitiesConcierge => 'المرافق والكونسيرج';
+  String get amenitiesConcierge => 'Amenities & Conciergerie';
 
   @override
   String get amenitiesConciergeDesc =>
-      'طلب مبسط لمستلزمات الحمام، وسائد إضافية، طقم حلاقة أو أي خدمة أخرى دون الاتصال.';
+      'Demande simplifiée d\'articles de toilette, oreillers supplémentaires, kit de rasage ou tout autre service sans passer par le téléphone.';
 
   @override
-  String get minibarIntelligent => 'ميني بار ذكي';
+  String get minibarIntelligent => 'Mini-bar Intelligent';
 
   @override
   String get minibarIntelligentDesc =>
-      'جرد رقمي للمنتجات وإعلان مبسط للاستهلاك.';
+      'Inventaire digital des produits et déclaration simplifiée des consommations.';
 
   @override
-  String get comingSoon => 'قريباً';
+  String get comingSoon => 'Bientôt disponible';
 
   @override
   String get amenityToiletries => 'مستلزمات الحمام';

@@ -1234,7 +1234,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 right: pad + 8,
               ),
               child: Text(
-                'Bienvenue au ${displayName.isNotEmpty ? displayName : l10n.welcomeTitle}',
+                displayName.isNotEmpty ? l10n.welcomeToEnterprise(displayName) : l10n.welcomeTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: nameOnBannerSize,

@@ -303,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 right: pad + 8,
               ),
               child: Text(
-                'Bienvenue au ${enterpriseName.isNotEmpty ? enterpriseName : l10n.welcomeTitle}',
+                enterpriseName.isNotEmpty ? l10n.welcomeToEnterprise(enterpriseName) : l10n.welcomeTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: nameOnBannerSize,

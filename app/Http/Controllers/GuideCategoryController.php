@@ -22,6 +22,28 @@ class GuideCategoryController extends Controller
             ->orderBy('order', 'asc')
             ->get();
 
-        return response()->json($categories);
+        $data = $categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'image' => $category->image,
+                'order' => $category->order,
+                'items' => $category->items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'title' => $item->title,
+                        'description' => $item->description,
+                        'phone' => $item->phone,
+                        'address' => $item->address,
+                        'latitude' => $item->latitude,
+                        'longitude' => $item->longitude,
+                        'image' => $item->image,
+                        'order' => $item->order,
+                    ];
+                })->values()->all(),
+            ];
+        });
+
+        return response()->json($data);
     }
 }
