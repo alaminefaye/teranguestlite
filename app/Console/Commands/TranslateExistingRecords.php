@@ -11,12 +11,12 @@ class TranslateExistingRecords extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'translate:backfill {--model= : Modèle (ex: SpaService)} {--dry-run : Afficher sans sauvegarder}';
+    protected $signature = 'translate:backfill {--model= : Modèle (ex: SpaService)} {--dry-run : Afficher sans sauvegarder} {--force : Tout retraduire depuis le FR}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Traduit automatiquement EN/ES/AR les enregistrements existants dont la traduction anglaise est vide.';
+    protected $description = 'Traduit automatiquement EN/ES/AR les enregistrements existants (--force pour tout retraduire).';
 
     /**
      * Modèles à traiter avec leurs champs translatables.
@@ -49,14 +49,18 @@ class TranslateExistingRecords extends Command
 
         $targetLanguages = ['en', 'es', 'ar'];
         $dryRun = $this->option('dry-run');
+        $force = $this->option('force');
         $onlyModel = $this->option('model');
 
         if ($dryRun) {
             $this->warn('Mode DRY-RUN activé : aucune donnée ne sera sauvegardée.');
         }
+        if ($force) {
+            $this->warn('Mode FORCE activé : toutes les traductions EN/ES/AR seront réécrites depuis le français.');
+        }
 
         try {
-            $this->runBackfill($targetLanguages, $dryRun, $onlyModel);
+            $this->runBackfill($targetLanguages, $dryRun, $force, $onlyModel);
         } catch (\Throwable $e) {
             $this->error('Erreur : ' . $e->getMessage());
             Log::error('translate:backfill exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
@@ -67,7 +71,7 @@ class TranslateExistingRecords extends Command
         return self::SUCCESS;
     }
 
-    protected function runBackfill(array $targetLanguages, bool $dryRun, ?string $onlyModel): void
+    protected function runBackfill(array $targetLanguages, bool $dryRun, bool $force, ?string $onlyModel): void
     {
         foreach ($this->models as $modelClass) {
             $shortName = class_basename($modelClass);
@@ -103,10 +107,12 @@ class TranslateExistingRecords extends Command
                         continue;
                     }
 
-                    // Si la traduction EN est déjà présente, on passe
-                    $enValue = $record->getTranslation($field, 'en', false);
-                    if (! empty($enValue)) {
-                        continue;
+                    // Sans --force : si la traduction EN est déjà présente, on passe
+                    if (! $force) {
+                        $enValue = $record->getTranslation($field, 'en', false);
+                        if (! empty($enValue)) {
+                            continue;
+                        }
                     }
 
                     // Traduire vers toutes les langues cibles
