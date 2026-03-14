@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -15,47 +16,53 @@ class RoomController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Room::query();
+        try {
+            $query = Room::query();
 
-        // Filtres
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
+            if ($request->filled('type')) {
+                $query->where('type', $request->type);
+            }
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            if ($request->filled('search')) {
+                $query->where('room_number', 'like', '%' . $request->search . '%');
+            }
+
+            $sort = $request->get('sort', 'room_number_asc');
+            if ($sort === 'room_number_desc') {
+                $query->orderBy('room_number', 'desc');
+            } elseif ($sort === 'type_asc') {
+                $query->orderBy('type', 'asc')->orderBy('room_number', 'asc');
+            } elseif ($sort === 'status_asc') {
+                $query->orderBy('status', 'asc')->orderBy('room_number', 'asc');
+            } else {
+                $query->orderBy('room_number', 'asc');
+            }
+
+            $rooms = $query->with('tabletAccessUser')->paginate(10);
+
+            $stats = [
+                'total' => Room::count(),
+                'available' => Room::available()->count(),
+                'occupied' => Room::occupied()->count(),
+                'maintenance' => Room::maintenance()->count(),
+            ];
+
+            return view('pages.dashboard.rooms.index', [
+                'title' => 'Chambres',
+                'rooms' => $rooms,
+                'stats' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('RoomController::index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return redirect()->route('dashboard.index')
+                ->with('error', 'Impossible de charger les chambres. Erreur : ' . $e->getMessage());
         }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('search')) {
-            $query->where('room_number', 'like', '%' . $request->search . '%');
-        }
-
-        $sort = $request->get('sort', 'room_number_asc');
-        if ($sort === 'room_number_desc') {
-            $query->orderBy('room_number', 'desc');
-        } elseif ($sort === 'type_asc') {
-            $query->orderBy('type', 'asc')->orderBy('room_number', 'asc');
-        } elseif ($sort === 'status_asc') {
-            $query->orderBy('status', 'asc')->orderBy('room_number', 'asc');
-        } else {
-            $query->orderBy('room_number', 'asc');
-        }
-
-        $rooms = $query->with('tabletAccessUser')->paginate(10);
-
-        // Statistiques
-        $stats = [
-            'total' => Room::count(),
-            'available' => Room::available()->count(),
-            'occupied' => Room::occupied()->count(),
-            'maintenance' => Room::maintenance()->count(),
-        ];
-
-        return view('pages.dashboard.rooms.index', [
-            'title' => 'Chambres',
-            'rooms' => $rooms,
-            'stats' => $stats,
-        ]);
     }
 
     /**

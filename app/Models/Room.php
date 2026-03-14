@@ -126,34 +126,42 @@ class Room extends Model
     }
 
     /**
-     * Obtenir le nom complet du type
-     */
-    /**
      * Retourne le libellé traduit du type de chambre.
      * En lecture seule depuis le dashboard (locale=fr), c'est le nom français.
      * Via l'API, Spatie retourne automatiquement la langue demandée.
-     *
-     * Note : au premier accès, on s'assure que la valeur FR est stockée dans le champ JSON.
+     * En cas d'erreur (JSON invalide en base), retourne un fallback sans lever d'exception.
      */
     public function getTypeNameAttribute(): mixed
     {
-        // Si la valeur FR n'est pas encore définie pour ce champ, on la calcule et on la stocke.
-        $stored = $this->getTranslation('type_name', 'fr', false);
-        if (empty($stored) && ! empty($this->type)) {
-            $label = match($this->type) {
+        try {
+            $stored = $this->getTranslation('type_name', 'fr', false);
+            if (empty($stored) && ! empty($this->type)) {
+                $label = match($this->type) {
+                    'single'       => 'Chambre Simple',
+                    'double'       => 'Chambre Double',
+                    'suite'        => 'Suite',
+                    'deluxe'       => 'Deluxe',
+                    'presidential' => 'Suite Présidentielle',
+                    default        => ucfirst($this->type),
+                };
+                $this->setTranslation('type_name', 'fr', $label);
+            }
+            return $this->getTranslations('type_name')[app()->getLocale()]
+                ?? $this->getTranslation('type_name', 'fr', true);
+        } catch (\Throwable $e) {
+            $type = $this->attributes['type'] ?? null;
+            if ($type === null) {
+                $type = $this->type ?? '';
+            }
+            return match((string) $type) {
                 'single'       => 'Chambre Simple',
                 'double'       => 'Chambre Double',
                 'suite'        => 'Suite',
                 'deluxe'       => 'Deluxe',
                 'presidential' => 'Suite Présidentielle',
-                default        => ucfirst($this->type),
+                default        => $type !== '' && $type !== null ? ucfirst((string) $type) : '—',
             };
-            $this->setTranslation('type_name', 'fr', $label);
         }
-
-        // Retourne la traduction selon la locale courante (gérée par Spatie).
-        return $this->getTranslations('type_name')[app()->getLocale()]
-            ?? $this->getTranslation('type_name', 'fr', true);
     }
 
     /**

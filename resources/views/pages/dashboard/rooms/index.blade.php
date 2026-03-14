@@ -152,10 +152,10 @@
                     @foreach($rooms as $room)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $room->room_number }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->type_name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->type_name ?? $room->type ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->floor ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->capacity }} pers.</td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format($room->price_per_night, 0, ',', ' ') }} FCFA</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->capacity ?? 0 }} pers.</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format((float) ($room->price_per_night ?? 0), 0, ',', ' ') }} FCFA</td>
                             <td class="px-6 py-4">
                                 @php
                                     $statusColors = [
@@ -165,8 +165,8 @@
                                         'reserved' => 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
                                     ];
                                 @endphp
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$room->status] ?? 'bg-gray-50 text-gray-600' }}">
-                                    {{ $room->status_name }}
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusColors[$room->status ?? ''] ?? 'bg-gray-50 text-gray-600' }}">
+                                    {{ $room->status_name ?? ucfirst($room->status ?? '—') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm">
