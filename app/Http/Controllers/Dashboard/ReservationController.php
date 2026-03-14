@@ -101,7 +101,7 @@ class ReservationController extends Controller
         });
         try {
             file_put_contents($debugLog, date('c') . " [create] START\n", FILE_APPEND);
-            $rooms = Room::available()->orderBy('room_number')->get();
+            $rooms = Room::available()->orderBy('room_number')->limit(500)->get();
             file_put_contents($debugLog, date('c') . " [create] rooms ok\n", FILE_APPEND);
             // Préparer les chambres en tableau simple (évite erreurs Spatie/Translatable dans la vue)
             $roomsForSelect = [];
