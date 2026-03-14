@@ -11,6 +11,18 @@ use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
+    /** Libellés des types de chambre (évite d'accéder au JSON type_name Spatie sur la liste = 500 / lenteur). */
+    private static function roomTypeLabels(): array
+    {
+        return [
+            'single' => 'Chambre Simple',
+            'double' => 'Chambre Double',
+            'suite' => 'Suite',
+            'deluxe' => 'Deluxe',
+            'presidential' => 'Suite Présidentielle',
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -40,7 +52,7 @@ class RoomController extends Controller
                 $query->orderBy('room_number', 'asc');
             }
 
-            $rooms = $query->with('tabletAccessUser')->paginate(10);
+            $rooms = $query->with('tabletAccessUser:id,room_id,name,email')->paginate(10);
 
             $stats = [
                 'total' => Room::count(),
@@ -53,6 +65,7 @@ class RoomController extends Controller
                 'title' => 'Chambres',
                 'rooms' => $rooms,
                 'stats' => $stats,
+                'typeLabels' => self::roomTypeLabels(),
             ]);
         } catch (\Throwable $e) {
             Log::error('RoomController::index error: ' . $e->getMessage(), [

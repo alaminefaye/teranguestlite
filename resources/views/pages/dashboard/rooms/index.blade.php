@@ -152,7 +152,7 @@
                     @foreach($rooms as $room)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ $room->room_number }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->type_name ?? $room->type ?? '—' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ ($typeLabels ?? [])[$room->type ?? ''] ?? $room->type ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->floor ?? 'N/A' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $room->capacity ?? 0 }} pers.</td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format((float) ($room->price_per_night ?? 0), 0, ',', ' ') }} FCFA</td>
