@@ -32,5 +32,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Toujours écrire les exceptions dans un fichier dédié (au cas où laravel.log est vide / permissions)
+        $exceptions->report(function (\Throwable $e) {
+            $logDir = storage_path('logs');
+            if (!is_dir($logDir) || !is_writable($logDir)) {
+                return;
+            }
+            $file = $logDir . '/debug_500.log';
+            $line = date('c') . ' ' . $e->getMessage() . "\n  at " . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString() . "\n---\n";
+            @file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
+        });
     })->create();

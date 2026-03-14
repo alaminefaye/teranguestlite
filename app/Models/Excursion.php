@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\SafeTranslatableRead;
 use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class Excursion extends Model
 {
-    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically, SafeTranslatableRead;
 
     public array $translatable = ['name', 'description'];
 
