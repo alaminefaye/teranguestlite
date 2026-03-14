@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -10,7 +9,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Announcement extends Model
 {
-    use HasFactory, HasTranslations, TranslatesAutomatically;
+    use HasFactory, HasTranslations;
 
     public array $translatable = ['title'];
 

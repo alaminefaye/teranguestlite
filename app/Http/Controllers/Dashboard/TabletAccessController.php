@@ -150,6 +150,7 @@ class TabletAccessController extends Controller
             'title' => 'Créer un accès tablette',
             'rooms' => $rooms,
             'preselectedRoomId' => $preselectedRoomId,
+            'roomTypeLabels' => Room::roomTypeLabels(),
         ]);
     }
 
@@ -228,11 +229,14 @@ class TabletAccessController extends Controller
             ->orderBy('room_number')
             ->get();
 
+        $roomTypeLabels = Room::roomTypeLabels();
+
         return view('pages.dashboard.tablet-accesses.edit', [
             'title' => 'Modifier l\'accès tablette',
             'user' => $user,
             'rooms' => $rooms,
             'currentRoomId' => $currentRoomId,
+            'roomTypeLabels' => $roomTypeLabels,
         ]);
     }
 

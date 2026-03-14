@@ -187,7 +187,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chambre</label>
                     <p class="text-gray-800 dark:text-white/90">{{ $order->room?->room_number ?? '—' }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $order->room?->type_name ?? '—' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ ($roomTypeLabels ?? [])[$order->room?->type ?? ''] ?? '—' }}</p>
                 </div>
 
                 <div>

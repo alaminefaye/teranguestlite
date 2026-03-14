@@ -34,6 +34,18 @@ class Room extends Model
         'price_per_night' => 'decimal:2',
     ];
 
+    /** Libellés des types de chambre (partagés par dashboard et API). */
+    public static function roomTypeLabels(): array
+    {
+        return [
+            'single' => 'Chambre Simple',
+            'double' => 'Chambre Double',
+            'suite' => 'Suite',
+            'deluxe' => 'Deluxe',
+            'presidential' => 'Suite Présidentielle',
+        ];
+    }
+
     /**
      * Relation avec l'entreprise
      */

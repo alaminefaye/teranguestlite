@@ -454,7 +454,7 @@ function updateExtendPreview(newDate) {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $roomTypeLabel ?? $reservation->room?->type_name ?? '—' }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $roomTypeLabel ?? '—' }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Capacité</label>

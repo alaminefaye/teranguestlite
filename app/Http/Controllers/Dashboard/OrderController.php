@@ -162,6 +162,7 @@ class OrderController extends Controller
         return view('pages.dashboard.orders.show', [
             'title' => 'Commande #' . $order->order_number,
             'order' => $order,
+            'roomTypeLabels' => Room::roomTypeLabels(),
         ]);
     }
 

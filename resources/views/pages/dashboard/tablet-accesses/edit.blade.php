@@ -37,7 +37,7 @@
             <select name="room_id" id="room_id" required class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
                 @foreach($rooms as $room)
                     <option value="{{ $room->id }}" {{ old('room_id', $currentRoomId) == $room->id ? 'selected' : '' }}>
-                        {{ $room->room_number }} ({{ $room->type_name }})
+                        {{ $room->room_number }} ({{ ($roomTypeLabels ?? [])[$room->type ?? ''] ?? '—' }})
                     </option>
                 @endforeach
             </select>

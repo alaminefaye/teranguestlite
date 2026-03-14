@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class GuideItem extends Model
 {
-    use HasTranslations, TranslatesAutomatically;
+    use HasTranslations;
 
     public array $translatable = ['title', 'description'];
 

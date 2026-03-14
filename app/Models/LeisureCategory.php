@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Scopes\EnterpriseScopeTrait;
-use App\Models\Traits\TranslatesAutomatically;
 use Spatie\Translatable\HasTranslations;
 
 class LeisureCategory extends Model
 {
-    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
+    use EnterpriseScopeTrait, HasTranslations;
 
     public array $translatable = ['name', 'description'];
 

@@ -37,6 +37,7 @@ class TabletController extends Controller
         return view('pages.dashboard.tablets.create', [
             'title' => 'Ajouter une tablette',
             'rooms' => $rooms,
+            'roomTypeLabels' => Room::roomTypeLabels(),
         ]);
     }
 

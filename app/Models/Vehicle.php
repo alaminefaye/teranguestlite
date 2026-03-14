@@ -4,14 +4,13 @@ namespace App\Models;
 
 use App\Models\Scopes\EnterpriseScopeTrait;
 use App\Models\Traits\SafeTranslatableRead;
-use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Translatable\HasTranslations;
 
 class Vehicle extends Model
 {
-    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically, SafeTranslatableRead;
+    use EnterpriseScopeTrait, HasTranslations, SafeTranslatableRead;
 
     public array $translatable = ['name'];
 
