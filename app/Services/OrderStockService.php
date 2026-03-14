@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class OrderStockService
 {
     /**
-     * À la livraison d'une commande : déduire le stock pour chaque article de menu lié à un produit stock.
+     * À la livraisons d'une commande : déduire le stock pour chaque article de menu lié à un produit stock.
      */
     public function deductStockForOrder(Order $order): void
     {
