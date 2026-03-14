@@ -92,8 +92,17 @@ class ReservationController extends Controller
      */
     public function create()
     {
+        $debugLog = storage_path('logs/reservation-create-debug.log');
+        register_shutdown_function(function () use ($debugLog) {
+            $err = error_get_last();
+            if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+                @file_put_contents($debugLog, date('c') . " [FATAL] " . ($err['message'] ?? '') . " in " . ($err['file'] ?? '') . " line " . ($err['line'] ?? '') . "\n", FILE_APPEND);
+            }
+        });
         try {
+            file_put_contents($debugLog, date('c') . " [create] START\n", FILE_APPEND);
             $rooms = Room::available()->orderBy('room_number')->get();
+            file_put_contents($debugLog, date('c') . " [create] rooms ok\n", FILE_APPEND);
             // Préparer les chambres en tableau simple (évite erreurs Spatie/Translatable dans la vue)
             $roomsForSelect = [];
             foreach ($rooms as $r) {
@@ -156,7 +165,8 @@ class ReservationController extends Controller
                 'searchUrl' => route('dashboard.guests.search'),
             ];
 
-            return view('pages.dashboard.reservations.create', [
+            file_put_contents($debugLog, date('c') . " [create] before view\n", FILE_APPEND);
+            $response = view('pages.dashboard.reservations.create', [
                 'title'             => 'Créer une réservation',
                 'roomsForSelect'    => $roomsForSelect,
                 'guests'            => $guests,
@@ -165,7 +175,10 @@ class ReservationController extends Controller
                 'defaultCheckIn'    => $defaultCheckIn,
                 'defaultCheckOut'   => $defaultCheckOut,
             ]);
+            file_put_contents($debugLog, date('c') . " [create] view() returned\n", FILE_APPEND);
+            return $response;
         } catch (\Throwable $e) {
+            file_put_contents($debugLog, date('c') . " [create] CATCH: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
             Log::error('ReservationController::create error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),

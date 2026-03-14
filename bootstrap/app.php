@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'enterprise' => \App\Http\Middleware\EnsureUserBelongsToEnterprise::class,
             'guest.web_stay' => \App\Http\Middleware\EnsureGuestWebTokenMatchesStay::class,
+            'log.reservation.create' => \App\Http\Middleware\LogReservationCreateDebug::class,
         ]);
 
         // Ajouter le middleware pour vérifier le changement de mot de passe (global pour web)

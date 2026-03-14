@@ -66,8 +66,11 @@ Route::middleware(['auth'])->group(function () {
         // Chambres
         Route::resource('rooms', \App\Http\Controllers\Dashboard\RoomController::class);
 
-        // Réservations
-        Route::resource('reservations', \App\Http\Controllers\Dashboard\ReservationController::class);
+        // Réservations (create en premier avec middleware debug pour tracer les 500)
+        Route::get('reservations/create', [\App\Http\Controllers\Dashboard\ReservationController::class, 'create'])
+            ->name('reservations.create')
+            ->middleware('log.reservation.create');
+        Route::resource('reservations', \App\Http\Controllers\Dashboard\ReservationController::class)->except(['create']);
 
         // Actions réservations
         Route::post('reservations/{reservation}/checkin', [\App\Http\Controllers\Dashboard\ReservationController::class, 'checkIn'])
