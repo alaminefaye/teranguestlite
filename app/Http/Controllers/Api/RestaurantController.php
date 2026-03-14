@@ -9,6 +9,7 @@ use App\Models\Guest;
 use App\Models\Restaurant;
 use App\Models\RestaurantReservation;
 use App\Models\Room;
+use App\Http\Helpers\TranslatableApiHelper;
 use App\Services\GuestReservationHelper;
 
 class RestaurantController extends Controller
@@ -32,10 +33,10 @@ class RestaurantController extends Controller
             'data' => $restaurants->map(function ($restaurant) {
                 return [
                     'id' => $restaurant->id,
-                    'name' => $restaurant->name,
+                    'name' => TranslatableApiHelper::translationsFor($restaurant, 'name'),
                     'type' => $restaurant->type,
                     'type_label' => $restaurant->type_label,
-                    'description' => $restaurant->description,
+                    'description' => TranslatableApiHelper::translationsFor($restaurant, 'description'),
                     'cuisine_type' => $restaurant->cuisine_type,
                     'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
                     'capacity' => $restaurant->capacity,
@@ -59,10 +60,10 @@ class RestaurantController extends Controller
             'success' => true,
             'data' => [
                 'id' => $restaurant->id,
-                'name' => $restaurant->name,
+                'name' => TranslatableApiHelper::translationsFor($restaurant, 'name'),
                 'type' => $restaurant->type,
                 'type_label' => $restaurant->type_label,
-                'description' => $restaurant->description,
+                'description' => TranslatableApiHelper::translationsFor($restaurant, 'description'),
                 'cuisine_type' => $restaurant->cuisine_type,
                 'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
                 'capacity' => $restaurant->capacity,

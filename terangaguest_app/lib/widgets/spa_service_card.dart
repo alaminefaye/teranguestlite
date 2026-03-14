@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../config/theme.dart';
 import '../models/spa.dart';
+import '../providers/locale_provider.dart';
+import '../utils/translatable_text_helper.dart';
+import 'translatable_text.dart';
 
 class SpaServiceCard extends StatelessWidget {
   final SpaService service;
@@ -12,9 +16,10 @@ class SpaServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.read<LocaleProvider>().languageCode;
     return Semantics(
       button: true,
-      label: service.name,
+      label: TranslatableTextHelper.resolveDisplayTextSync(service.name, locale),
       enabled: service.isAvailable,
       child: GestureDetector(
         onTap: service.isAvailable ? onTap : null,
@@ -166,8 +171,9 @@ class SpaServiceCard extends StatelessWidget {
                       children: [
                         // Nom
                         Expanded(
-                          child: Text(
+                          child: TranslatableText(
                             service.name,
+                            locale: locale,
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,

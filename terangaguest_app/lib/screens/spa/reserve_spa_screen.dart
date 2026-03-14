@@ -5,10 +5,13 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/spa.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/spa_provider.dart';
 import '../../providers/tablet_session_provider.dart';
+import '../../widgets/translatable_text.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/translatable_text_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'my_spa_reservations_screen.dart';
 
@@ -141,8 +144,9 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatableText(
                   widget.service.name,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
@@ -429,6 +433,7 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
           _buildSummaryRow(
             AppLocalizations.of(context).service,
             widget.service.name,
+            context.read<LocaleProvider>().languageCode,
           ),
           const SizedBox(height: 12),
           _buildSummaryRow(
@@ -449,7 +454,8 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value) {
+  Widget _buildSummaryRow(String label, dynamic value, [String? locale]) {
+    final localeCode = locale ?? context.read<LocaleProvider>().languageCode;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -457,18 +463,20 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
           label,
           style: const TextStyle(fontSize: 14, color: AppTheme.textGray),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.right,
-        ),
+        value is String
+            ? Text(
+                value,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              )
+            : TranslatableText(
+                value,
+                locale: localeCode,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
       ],
     );
   }
+
 
   Widget _buildCanReserveBanner() {
     return Container(
@@ -612,7 +620,12 @@ class _ReserveSpaScreenState extends State<ReserveSpaScreen> {
                 Text(
                   AppLocalizations.of(
                     context,
-                  ).spaReservationConfirmedMessage(widget.service.name),
+                  ).spaReservationConfirmedMessage(
+                    TranslatableTextHelper.resolveDisplayTextSync(
+                      widget.service.name,
+                      context.read<LocaleProvider>().languageCode,
+                    ),
+                  ),
                   style: const TextStyle(color: AppTheme.textGray),
                 ),
                 const SizedBox(height: 16),

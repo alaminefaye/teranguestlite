@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Models\Scopes\EnterpriseScopeTrait;
+use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class LaundryService extends Model
 {
-    use EnterpriseScopeTrait, HasTranslations;
+    use EnterpriseScopeTrait, HasTranslations, TranslatesAutomatically;
 
     public array $translatable = ['name', 'description'];
 

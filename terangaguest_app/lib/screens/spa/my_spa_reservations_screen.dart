@@ -5,8 +5,10 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/spa.dart';
 import '../../widgets/empty_state.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/spa_provider.dart';
 import '../../providers/tablet_session_provider.dart';
+import '../../widgets/translatable_text.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
 import '../../providers/auth_provider.dart';
@@ -347,8 +349,9 @@ class _MySpaReservationsScreenState extends State<MySpaReservationsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  TranslatableText(
                     reservation.serviceName,
+                    locale: context.read<LocaleProvider>().languageCode,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

@@ -1,7 +1,8 @@
 class SpaService {
   final int id;
-  final String name;
-  final String? description;
+  /// String (ancienne API) ou Map fr/en/es/ar (nouvelle API pour fallback traduction).
+  final dynamic name;
+  final dynamic description;
   final double price;
   final int duration; // en minutes
   final String? image;
@@ -22,8 +23,8 @@ class SpaService {
   factory SpaService.fromJson(Map<String, dynamic> json) {
     return SpaService(
       id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String?,
+      name: json['name'],
+      description: json['description'],
       price: _parseDouble(json['price']),
       duration: _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
@@ -58,8 +59,8 @@ class SpaService {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
+      'name': name is String ? name : null,
+      'description': description is String ? description : null,
       'price': price,
       'duration': duration,
       'image': image,
@@ -72,7 +73,8 @@ class SpaService {
 class SpaReservation {
   final int id;
   final int serviceId;
-  final String serviceName;
+  /// String ou Map fr/en/es/ar (pour TranslatableText).
+  final dynamic serviceName;
   final DateTime date;
   final String time;
   final String status;
@@ -108,7 +110,7 @@ class SpaReservation {
           ? (spaService['id'] as int)
           : (json['service_id'] as int? ?? 0),
       serviceName: spaService != null
-          ? (spaService['name'] as String)
+          ? spaService['name']
           : (json['service_name'] as String? ?? ''),
       date: dateRaw != null
           ? DateTime.parse(dateRaw as String)

@@ -8,6 +8,7 @@ use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Room;
+use App\Http\Helpers\TranslatableApiHelper;
 use App\Services\FirebaseNotificationService;
 use App\Services\GuestReservationHelper;
 
@@ -37,8 +38,8 @@ class RoomServiceController extends Controller
             'data' => $categories->map(function ($category) {
                 return [
                     'id' => $category->id,
-                    'name' => $category->name,
-                    'description' => $category->description,
+                    'name' => TranslatableApiHelper::translationsFor($category, 'name'),
+                    'description' => TranslatableApiHelper::translationsFor($category, 'description'),
                     'image' => $category->image ? asset('storage/' . $category->image) : null,
                     'display_order' => $category->display_order,
                     'is_available' => $category->status === 'active',
@@ -81,8 +82,8 @@ class RoomServiceController extends Controller
             'data' => $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'name' => $item->name,
-                    'description' => $item->description,
+                    'name' => TranslatableApiHelper::translationsFor($item, 'name'),
+                    'description' => TranslatableApiHelper::translationsFor($item, 'description'),
                     'price' => $item->price,
                     'formatted_price' => $item->formatted_price,
                     'image' => $item->image ? asset('storage/' . $item->image) : null,
@@ -90,7 +91,7 @@ class RoomServiceController extends Controller
                     'is_available' => $item->is_available,
                     'category' => [
                         'id' => $item->category->id,
-                        'name' => $item->category->name,
+                        'name' => TranslatableApiHelper::translationsFor($item->category, 'name'),
                     ],
                 ];
             }),
@@ -129,8 +130,8 @@ class RoomServiceController extends Controller
             'success' => true,
             'data' => [
                 'id' => $item->id,
-                'name' => $item->name,
-                'description' => $item->description,
+                'name' => TranslatableApiHelper::translationsFor($item, 'name'),
+                'description' => TranslatableApiHelper::translationsFor($item, 'description'),
                 'price' => $item->price,
                 'formatted_price' => $item->formatted_price,
                 'image' => $item->image ? asset('storage/' . $item->image) : null,
@@ -139,8 +140,8 @@ class RoomServiceController extends Controller
                 'is_available' => $item->is_available,
                 'category' => [
                     'id' => $item->category->id,
-                    'name' => $item->category->name,
-                    'description' => $item->category->description,
+                    'name' => TranslatableApiHelper::translationsFor($item->category, 'name'),
+                    'description' => TranslatableApiHelper::translationsFor($item->category, 'description'),
                 ],
             ],
         ], 200);

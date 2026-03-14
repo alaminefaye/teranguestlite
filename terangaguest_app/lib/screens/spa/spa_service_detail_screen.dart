@@ -4,8 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../models/spa.dart';
 import '../../models/favorite_item.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/spa_provider.dart';
 import '../../providers/favorites_provider.dart';
+import '../../utils/translatable_text_helper.dart';
+import '../../widgets/translatable_text.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -99,9 +102,9 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _service?.name ??
-                      AppLocalizations.of(context).spaServiceFallback,
+                TranslatableText(
+                  _service?.name ?? AppLocalizations.of(context).spaServiceFallback,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
@@ -132,11 +135,12 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
                   ),
                   onPressed: () {
                     HapticHelper.lightImpact();
+                    final locale = context.read<LocaleProvider>().languageCode;
                     fav.toggle(
                       FavoriteItem(
                         type: FavoriteType.spa,
                         id: _service!.id,
-                        name: _service!.name,
+                        name: TranslatableTextHelper.resolveDisplayTextSync(_service!.name, locale),
                         imageUrl: _service!.image,
                       ),
                     );
@@ -268,8 +272,9 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
             const SizedBox(height: 16),
             const Divider(color: AppTheme.textGray, height: 1),
             const SizedBox(height: 16),
-            Text(
-              _service!.description!,
+            TranslatableText(
+              _service!.description,
+              locale: context.read<LocaleProvider>().languageCode,
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,

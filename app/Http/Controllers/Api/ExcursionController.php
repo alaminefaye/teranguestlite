@@ -8,6 +8,7 @@ use App\Models\Excursion;
 use App\Models\ExcursionBooking;
 use App\Models\Guest;
 use App\Models\Room;
+use App\Http\Helpers\TranslatableApiHelper;
 use App\Services\GuestReservationHelper;
 use Illuminate\Support\Facades\Log;
 
@@ -42,10 +43,10 @@ class ExcursionController extends Controller
             'data' => $excursions->map(function ($excursion) {
                 return [
                     'id' => $excursion->id,
-                    'name' => $excursion->name,
+                    'name' => TranslatableApiHelper::translationsFor($excursion, 'name'),
                     'type' => $excursion->type,
                     'type_label' => $excursion->type_label,
-                    'description' => $excursion->description,
+                    'description' => TranslatableApiHelper::translationsFor($excursion, 'description'),
                     'price_adult' => $excursion->price_adult,
                     'price_child' => $excursion->price_child,
                     'formatted_price_adult' => $excursion->formatted_price_adult,
@@ -84,10 +85,10 @@ class ExcursionController extends Controller
             'success' => true,
             'data' => [
                 'id' => $excursion->id,
-                'name' => $excursion->name,
+                'name' => TranslatableApiHelper::translationsFor($excursion, 'name'),
                 'type' => $excursion->type,
                 'type_label' => $excursion->type_label,
-                'description' => $excursion->description,
+                'description' => TranslatableApiHelper::translationsFor($excursion, 'description'),
                 'price_adult' => $excursion->price_adult,
                 'price_child' => $excursion->price_child,
                 'formatted_price_adult' => $excursion->formatted_price_adult,

@@ -76,6 +76,9 @@ dependencies:
   # Lecteur vidéo (annonces & publicités)
   video_player: ^2.9.1
 
+  # Traduction on-device (fallback si backfill non exécuté) — Android/iOS uniquement, pas web
+  google_mlkit_translation: ^0.13.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -9,6 +9,7 @@ use App\Models\PalaceService;
 use App\Models\PalaceRequest;
 use App\Models\Room;
 use App\Models\Vehicle;
+use App\Http\Helpers\TranslatableApiHelper;
 use App\Services\GuestReservationHelper;
 use Illuminate\Support\Facades\Log;
 
@@ -82,10 +83,10 @@ class PalaceServiceController extends Controller
             'success' => true,
             'data' => [
                 'id' => $service->id,
-                'name' => $service->name,
+                'name' => TranslatableApiHelper::translationsFor($service, 'name'),
                 'category' => $service->category,
                 'category_label' => $service->category_label,
-                'description' => $service->description,
+                'description' => TranslatableApiHelper::translationsFor($service, 'description'),
                 'price' => $service->price,
                 'formatted_price' => $service->formatted_price,
                 'price_on_request' => $service->price_on_request,

@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/spa.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/spa_provider.dart';
+import '../../utils/translatable_text_helper.dart';
+import '../../widgets/translatable_text.dart';
 
 /// Écran détail d'une réservation spa : infos complètes + possibilité d'annuler.
 class SpaReservationDetailScreen extends StatelessWidget {
@@ -107,8 +110,9 @@ class SpaReservationDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                TranslatableText(
                   reservation.serviceName,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: TextStyle(
                     fontSize: titleSize,
                     fontWeight: FontWeight.bold,
@@ -400,10 +404,13 @@ class SpaReservationDetailScreen extends StatelessWidget {
         reservation.id,
       );
       if (!context.mounted) return;
+      final locale = context.read<LocaleProvider>().languageCode;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.spaReservationConfirmedMessage(reservation.serviceName),
+            l10n.spaReservationConfirmedMessage(
+              TranslatableTextHelper.resolveDisplayTextSync(reservation.serviceName, locale),
+            ),
           ),
           backgroundColor: Colors.green,
         ),

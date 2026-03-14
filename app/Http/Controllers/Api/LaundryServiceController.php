@@ -8,6 +8,7 @@ use App\Models\Guest;
 use App\Models\LaundryService;
 use App\Models\LaundryRequest;
 use App\Models\Room;
+use App\Http\Helpers\TranslatableApiHelper;
 use App\Services\GuestReservationHelper;
 use Illuminate\Support\Facades\Log;
 
@@ -37,10 +38,10 @@ class LaundryServiceController extends Controller
             'data' => $services->map(function ($service) {
                 return [
                     'id' => $service->id,
-                    'name' => $service->name,
+                    'name' => TranslatableApiHelper::translationsFor($service, 'name'),
                     'category' => $service->category,
                     'category_label' => $service->category_label,
-                    'description' => $service->description,
+                    'description' => TranslatableApiHelper::translationsFor($service, 'description'),
                     'price' => $service->price,
                     'formatted_price' => $service->formatted_price,
                     'turnaround_hours' => $service->turnaround_hours,

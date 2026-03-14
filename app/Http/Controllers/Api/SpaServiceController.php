@@ -8,6 +8,7 @@ use App\Models\Guest;
 use App\Models\SpaService;
 use App\Models\SpaReservation;
 use App\Services\GuestReservationHelper;
+use App\Http\Helpers\TranslatableApiHelper;
 use Illuminate\Support\Facades\Log;
 
 class SpaServiceController extends Controller
@@ -41,10 +42,10 @@ class SpaServiceController extends Controller
             'data' => $services->map(function ($service) {
                 return [
                     'id' => $service->id,
-                    'name' => $service->name,
+                    'name' => TranslatableApiHelper::translationsFor($service, 'name'),
                     'category' => $service->category,
                     'category_label' => $service->category_label,
-                    'description' => $service->description,
+                    'description' => TranslatableApiHelper::translationsFor($service, 'description'),
                     'price' => $service->price,
                     'formatted_price' => $service->formatted_price,
                     'duration' => $service->duration,
@@ -75,10 +76,10 @@ class SpaServiceController extends Controller
             'success' => true,
             'data' => [
                 'id' => $service->id,
-                'name' => $service->name,
+                'name' => TranslatableApiHelper::translationsFor($service, 'name'),
                 'category' => $service->category,
                 'category_label' => $service->category_label,
-                'description' => $service->description,
+                'description' => TranslatableApiHelper::translationsFor($service, 'description'),
                 'price' => $service->price,
                 'formatted_price' => $service->formatted_price,
                 'duration' => $service->duration,
