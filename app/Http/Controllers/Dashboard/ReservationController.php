@@ -104,22 +104,26 @@ class ReservationController extends Controller
             }
         }
 
-        // Heures par défaut définies dans Hotel Infos & Sécurité
-        $enterprise = auth()->user()?->enterprise;
-        $settings = $enterprise && is_array($enterprise->settings) ? $enterprise->settings : [];
-        $hotelInfos = $settings['hotel_infos'] ?? [];
-        $defaultCheckInTime = $hotelInfos['default_checkin_time'] ?? '14:00';
-        $defaultCheckOutTime = $hotelInfos['default_checkout_time'] ?? '12:00';
-        $defaultCheckInTime = is_string($defaultCheckInTime) ? trim($defaultCheckInTime) : '14:00';
-        $defaultCheckOutTime = is_string($defaultCheckOutTime) ? trim($defaultCheckOutTime) : '12:00';
-        if ($defaultCheckInTime === '' || ! preg_match('/^\d{1,2}:\d{2}$/', $defaultCheckInTime)) {
-            $defaultCheckInTime = '14:00';
-        }
-        if ($defaultCheckOutTime === '' || ! preg_match('/^\d{1,2}:\d{2}$/', $defaultCheckOutTime)) {
-            $defaultCheckOutTime = '12:00';
+        // Heures par défaut : 14:00 check-in, 12:00 check-out (évite toute erreur liée à enterprise/settings)
+        $defaultCheckInTime = '14:00';
+        $defaultCheckOutTime = '12:00';
+        try {
+            $enterprise = auth()->user()?->enterprise;
+            if ($enterprise && is_array($enterprise->settings ?? null)) {
+                $hotelInfos = $enterprise->settings['hotel_infos'] ?? [];
+                $in = $hotelInfos['default_checkin_time'] ?? null;
+                $out = $hotelInfos['default_checkout_time'] ?? null;
+                if (is_string($in) && preg_match('/^\d{1,2}:\d{2}$/', trim($in))) {
+                    $defaultCheckInTime = trim($in);
+                }
+                if (is_string($out) && preg_match('/^\d{1,2}:\d{2}$/', trim($out))) {
+                    $defaultCheckOutTime = trim($out);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Garder 14:00 / 12:00 en cas d'erreur (settings invalides, etc.)
         }
 
-        // Valeurs par défaut : aujourd'hui à l'heure de check-in, demain à l'heure de check-out
         $defaultCheckIn = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
         $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
 
