@@ -276,16 +276,27 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        $reservation->load(['room', 'user', 'guest', 'enterprise', 'settlements']);
-        $roomBillOrders = $reservation->roomBillOrdersUnsettled()->with('orderItems')->orderBy('created_at')->get();
-        $totalRoomBill = $roomBillOrders->sum('total');
+        try {
+            $reservation->load(['room', 'user', 'guest', 'enterprise', 'settlements']);
+            $roomBillOrders = $reservation->roomBillOrdersUnsettled()->with('orderItems')->orderBy('created_at')->get();
+            $totalRoomBill = $roomBillOrders->sum('total');
+            $roomTypeLabel = $reservation->room ? $this->typeLabelFromType($reservation->room->type ?? '') : '—';
 
-        return view('pages.dashboard.reservations.show', [
-            'title' => 'Réservation ' . $reservation->reservation_number,
-            'reservation' => $reservation,
-            'roomBillOrders' => $roomBillOrders,
-            'totalRoomBill' => $totalRoomBill,
-        ]);
+            return view('pages.dashboard.reservations.show', [
+                'title' => 'Réservation ' . $reservation->reservation_number,
+                'reservation' => $reservation,
+                'roomBillOrders' => $roomBillOrders,
+                'totalRoomBill' => $totalRoomBill,
+                'roomTypeLabel' => $roomTypeLabel,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::show error: ' . $e->getMessage(), [
+                'reservation_id' => $reservation->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('dashboard.reservations.index')
+                ->with('error', 'Impossible d\'afficher la réservation : ' . $e->getMessage());
+        }
     }
 
     /**
@@ -392,25 +403,58 @@ class ReservationController extends Controller
      */
     public function edit(Reservation $reservation)
     {
-        $rooms = Room::orderBy('room_number')->get();
-        $latest = Guest::orderBy('created_at', 'desc')->limit(5)->get();
-        $currentGuest = $reservation->guest;
-        $guests = $latest->contains('id', $currentGuest->id)
-            ? $latest
-            : $latest->prepend($currentGuest)->take(5);
-        $guestIdForLabel = old('guest_id', $reservation->guest_id);
-        $guestForLabel = Guest::find($guestIdForLabel);
-        $initialGuestLabel = $guestForLabel
-            ? $guestForLabel->name . ($guestForLabel->email ? ' (' . $guestForLabel->email . ')' : '') . ' — Code ' . $guestForLabel->access_code
-            : '';
+        try {
+            $rooms = Room::select(['id', 'room_number', 'type', 'price_per_night'])
+                ->orderBy('room_number')
+                ->limit(500)
+                ->get();
+            $roomsForSelect = [];
+            foreach ($rooms as $r) {
+                $roomsForSelect[] = [
+                    'id' => $r->id,
+                    'room_number' => $r->room_number,
+                    'type_name' => $this->typeLabelFromType($r->type ?? ''),
+                    'price_per_night' => (float) ($r->price_per_night ?? 0),
+                ];
+            }
 
-        return view('pages.dashboard.reservations.edit', [
-            'title' => 'Modifier réservation ' . $reservation->reservation_number,
-            'reservation' => $reservation,
-            'rooms' => $rooms,
-            'guests' => $guests,
-            'initialGuestLabel' => $initialGuestLabel,
-        ]);
+            $latest = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+            $currentGuest = $reservation->guest;
+            $guests = $currentGuest && $latest->contains('id', $currentGuest->id)
+                ? $latest
+                : ($currentGuest ? $latest->prepend($currentGuest)->take(5) : $latest);
+            $guestIdForLabel = old('guest_id', $reservation->guest_id);
+            $guestForLabel = $guestIdForLabel ? Guest::find($guestIdForLabel) : null;
+            $initialGuestLabel = $guestForLabel
+                ? ($guestForLabel->name ?? '') . ($guestForLabel->email ? ' (' . $guestForLabel->email . ')' : '') . ' — Code ' . ($guestForLabel->access_code ?? '')
+                : '';
+
+            $guestSelectInitEdit = [
+                'guestList' => $guests->map(fn ($g) => [
+                    'id' => $g->id,
+                    'label' => ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? ''),
+                ])->values()->all(),
+                'guestSelectedId' => old('guest_id', (string) $reservation->guest_id),
+                'guestSelectedLabel' => $initialGuestLabel,
+                'searchUrl' => route('dashboard.guests.search'),
+            ];
+
+            return view('pages.dashboard.reservations.edit', [
+                'title' => 'Modifier réservation ' . $reservation->reservation_number,
+                'reservation' => $reservation,
+                'roomsForSelect' => $roomsForSelect,
+                'guests' => $guests,
+                'guestSelectInitEdit' => $guestSelectInitEdit,
+                'initialGuestLabel' => $initialGuestLabel,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::edit error: ' . $e->getMessage(), [
+                'reservation_id' => $reservation->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('dashboard.reservations.index')
+                ->with('error', 'Impossible d\'afficher le formulaire de modification : ' . $e->getMessage());
+        }
     }
 
     /**

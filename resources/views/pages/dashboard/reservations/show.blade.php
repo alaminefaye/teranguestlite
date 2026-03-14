@@ -131,7 +131,7 @@
                 id="new_check_out"
                 name="new_check_out"
                 required
-                min="{{ $reservation->check_out->addDay()->format('Y-m-d\TH:i') }}"
+                min="{{ $reservation->check_out?->copy()->addDay()->format('Y-m-d\TH:i') ?? '' }}"
                 class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-warning-400 focus:ring-1 focus:ring-warning-400"
                 onchange="updateExtendPreview(this.value)"
             >
@@ -170,7 +170,7 @@ function updateExtendPreview(newDate) {
     const checkIn  = new Date('{{ $reservation->check_in->toDateString() }}');
     const checkOut = new Date(newDate);
     const nights   = Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-    const pricePerNight = {{ (float) $reservation->room->price_per_night }};
+    const pricePerNight = {{ (float) ($reservation->room->price_per_night ?? 0) }};
     const total = nights * pricePerNight;
     const added = nights - {{ $reservation->nights_count }};
     document.getElementById('extend-preview').textContent = total.toLocaleString('fr-FR') + ' FCFA';
@@ -216,9 +216,13 @@ function updateExtendPreview(newDate) {
 
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Chambre</label>
+                    @if($reservation->room)
                     <a href="{{ route('dashboard.rooms.show', $reservation->room) }}" class="text-brand-600 dark:text-brand-400 hover:underline">
-                        Chambre {{ $reservation->room->room_number }} ({{ $reservation->room->type_name }})
+                        Chambre {{ $reservation->room->room_number }} ({{ $roomTypeLabel }})
                     </a>
+                    @else
+                    <p class="text-gray-800 dark:text-white/90">—</p>
+                    @endif
                 </div>
 
                 <div>
@@ -446,19 +450,19 @@ function updateExtendPreview(newDate) {
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Numéro</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->room->room_number }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->room?->room_number ?? '—' }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->room->type_name }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $roomTypeLabel ?? $reservation->room?->type_name ?? '—' }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Capacité</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->room->capacity }} personnes</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $reservation->room?->capacity ?? 0 }} personnes</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Prix/nuit</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ number_format($reservation->room->price_per_night, 0, ',', ' ') }} FCFA</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ number_format((float) ($reservation->room->price_per_night ?? 0), 0, ',', ' ') }} FCFA</p>
                 </div>
             </div>
         </div>
@@ -472,7 +476,7 @@ function updateExtendPreview(newDate) {
             <div class="space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Prix par nuit</span>
-                    <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format($reservation->room->price_per_night, 0, ',', ' ') }} FCFA</span>
+                    <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ number_format((float) ($reservation->room->price_per_night ?? 0), 0, ',', ' ') }} FCFA</span>
                 </div>
                 <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Nombre de nuits</span>

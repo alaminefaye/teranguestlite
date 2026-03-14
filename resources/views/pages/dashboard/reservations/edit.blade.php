@@ -23,7 +23,7 @@
         checkIn: '{{ old('check_in', $reservation->check_in->format('Y-m-d\TH:i')) }}',
         checkOut: '{{ old('check_out', $reservation->check_out->format('Y-m-d\TH:i')) }}',
         roomId: '{{ old('room_id', $reservation->room_id) }}',
-        pricePerNight: {{ $reservation->room->price_per_night }},
+        pricePerNight: {{ (float) ($reservation->room->price_per_night ?? 0) }},
         calculateTotal() {
             if (this.checkIn && this.checkOut) {
                 const checkInDate = new Date(this.checkIn);
@@ -50,14 +50,6 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Client (invité) : recherche par nom, code ou téléphone ; 5 derniers inscrits par défaut -->
-            @php
-                $guestSelectInitEdit = [
-                    'guestList' => $guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all(),
-                    'guestSelectedId' => old('guest_id', $reservation->guest_id),
-                    'guestSelectedLabel' => $initialGuestLabel ?? '',
-                    'searchUrl' => route('dashboard.guests.search'),
-                ];
-            @endphp
             <script>
             window.guestSelectReservation = function(scriptId) {
                 var el = document.getElementById(scriptId);
@@ -101,7 +93,7 @@
                 };
             };
             </script>
-            <script type="application/json" id="guest-select-data-edit">@json($guestSelectInitEdit)</script>
+            <script type="application/json" id="guest-select-data-edit">@json($guestSelectInitEdit ?? [])</script>
             <div class="md:col-span-2" x-data="guestSelectReservation('guest-select-data-edit')" @click.outside="guestOpen = false">
                 <label for="guest_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Client (invité) <span class="text-error-500">*</span>
@@ -170,9 +162,9 @@
                 <select name="room_id" id="room_id" x-model="roomId" required
                     @change="pricePerNight = parseFloat($event.target.selectedOptions[0].dataset.price)"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                    @foreach($rooms as $room)
-                        <option value="{{ $room->id }}" data-price="{{ $room->price_per_night }}" {{ old('room_id', $reservation->room_id) == $room->id ? 'selected' : '' }}>
-                            {{ $room->room_number }} - {{ $room->type_name }} ({{ number_format($room->price_per_night, 0, ',', ' ') }} FCFA/nuit)
+                    @foreach($roomsForSelect ?? [] as $room)
+                        <option value="{{ $room['id'] }}" data-price="{{ $room['price_per_night'] }}" {{ old('room_id', $reservation->room_id) == $room['id'] ? 'selected' : '' }}>
+                            {{ $room['room_number'] }} - {{ $room['type_name'] }} ({{ number_format($room['price_per_night'], 0, ',', ' ') }} FCFA/nuit)
                         </option>
                     @endforeach
                 </select>
