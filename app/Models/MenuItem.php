@@ -3,14 +3,13 @@
 namespace App\Models;
 
 use App\Models\Scopes\EnterpriseScopeTrait;
-use App\Models\Traits\SafeTranslatableRead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class MenuItem extends Model
 {
-    use HasFactory, EnterpriseScopeTrait, HasTranslations, SafeTranslatableRead;
+    use HasFactory, EnterpriseScopeTrait, HasTranslations;
 
     public array $translatable = ['name', 'description'];
 

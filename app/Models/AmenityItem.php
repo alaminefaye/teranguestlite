@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Traits\SafeTranslatableRead;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class AmenityItem extends Model
 {
-    use HasTranslations, SafeTranslatableRead;
+    use HasTranslations;
 
     public array $translatable = ['name'];
 
