@@ -83,9 +83,15 @@ class RoomController extends Controller
      */
     public function create()
     {
-        return view('pages.dashboard.rooms.create', [
-            'title' => 'Créer une chambre',
-        ]);
+        try {
+            return view('pages.dashboard.rooms.create', [
+                'title' => 'Créer une chambre',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('RoomController::create error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->route('dashboard.rooms.index')
+                ->with('error', 'Impossible d\'afficher le formulaire : ' . $e->getMessage());
+        }
     }
 
     /**
@@ -121,7 +127,14 @@ class RoomController extends Controller
             $validated['image'] = $request->file('image')->store('rooms', 'public');
         }
 
-        Room::create($validated);
+        try {
+            Room::create($validated);
+        } catch (\Throwable $e) {
+            Log::error('RoomController::store error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Impossible de créer la chambre : ' . $e->getMessage());
+        }
 
         return redirect()->route('dashboard.rooms.index')
             ->with('success', 'Chambre créée avec succès !');
@@ -132,27 +145,35 @@ class RoomController extends Controller
      */
     public function show(Room $room)
     {
-        $room->load(['reservations' => function ($query) {
-            $query->orderBy('check_in', 'desc')->take(10);
-        }]);
+        try {
+            $room->load(['reservations' => function ($query) {
+                $query->orderBy('check_in', 'desc')->take(10);
+            }]);
 
-        // Statistiques de la chambre
-        $stats = [
-            'total_reservations' => $room->reservations()->count(),
-            'upcoming_reservations' => $room->reservations()
-                ->where('status', '!=', 'cancelled')
-                ->where('check_in', '>=', now())
-                ->count(),
-            'completed_reservations' => $room->reservations()
-                ->where('status', 'checked_out')
-                ->count(),
-        ];
+            $stats = [
+                'total_reservations' => $room->reservations()->count(),
+                'upcoming_reservations' => $room->reservations()
+                    ->where('status', '!=', 'cancelled')
+                    ->where('check_in', '>=', now())
+                    ->count(),
+                'completed_reservations' => $room->reservations()
+                    ->where('status', 'checked_out')
+                    ->count(),
+            ];
 
-        return view('pages.dashboard.rooms.show', [
-            'title' => 'Chambre ' . $room->room_number,
-            'room' => $room,
-            'stats' => $stats,
-        ]);
+            $typeLabel = (self::roomTypeLabels())[$room->type ?? ''] ?? $room->type ?? '—';
+
+            return view('pages.dashboard.rooms.show', [
+                'title' => 'Chambre ' . $room->room_number,
+                'room' => $room,
+                'stats' => $stats,
+                'roomTypeLabel' => $typeLabel,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('RoomController::show error: ' . $e->getMessage(), ['room_id' => $room->id, 'trace' => $e->getTraceAsString()]);
+            return redirect()->route('dashboard.rooms.index')
+                ->with('error', 'Impossible d\'afficher la chambre : ' . $e->getMessage());
+        }
     }
 
     /**

@@ -126,42 +126,36 @@ class Room extends Model
     }
 
     /**
-     * Retourne le libellé traduit du type de chambre.
-     * En lecture seule depuis le dashboard (locale=fr), c'est le nom français.
-     * Via l'API, Spatie retourne automatiquement la langue demandée.
-     * En cas d'erreur (JSON invalide en base), retourne un fallback sans lever d'exception.
+     * Retourne le libellé du type de chambre.
+     * On ne fait jamais de setTranslation ici (évite 500 / timeout avec Spatie + TranslatesAutomatically).
+     * Si type_name en base est vide ou erreur, on retourne le libellé dérivé de type.
      */
     public function getTypeNameAttribute(): mixed
     {
+        $type = $this->attributes['type'] ?? $this->type ?? '';
+        $typeLabel = match ((string) $type) {
+            'single' => 'Chambre Simple',
+            'double' => 'Chambre Double',
+            'suite' => 'Suite',
+            'deluxe' => 'Deluxe',
+            'presidential' => 'Suite Présidentielle',
+            default => $type !== '' ? ucfirst((string) $type) : '—',
+        };
+
         try {
-            $stored = $this->getTranslation('type_name', 'fr', false);
-            if (empty($stored) && ! empty($this->type)) {
-                $label = match($this->type) {
-                    'single'       => 'Chambre Simple',
-                    'double'       => 'Chambre Double',
-                    'suite'        => 'Suite',
-                    'deluxe'       => 'Deluxe',
-                    'presidential' => 'Suite Présidentielle',
-                    default        => ucfirst($this->type),
-                };
-                $this->setTranslation('type_name', 'fr', $label);
+            $stored = $this->getTranslation('type_name', app()->getLocale(), false);
+            if (is_string($stored) && trim($stored) !== '') {
+                return $stored;
             }
-            return $this->getTranslations('type_name')[app()->getLocale()]
-                ?? $this->getTranslation('type_name', 'fr', true);
+            $storedFr = $this->getTranslation('type_name', 'fr', false);
+            if (is_string($storedFr) && trim($storedFr) !== '') {
+                return $storedFr;
+            }
         } catch (\Throwable $e) {
-            $type = $this->attributes['type'] ?? null;
-            if ($type === null) {
-                $type = $this->type ?? '';
-            }
-            return match((string) $type) {
-                'single'       => 'Chambre Simple',
-                'double'       => 'Chambre Double',
-                'suite'        => 'Suite',
-                'deluxe'       => 'Deluxe',
-                'presidential' => 'Suite Présidentielle',
-                default        => $type !== '' && $type !== null ? ucfirst((string) $type) : '—',
-            };
+            // JSON invalide ou autre : on retourne le libellé depuis type
         }
+
+        return $typeLabel;
     }
 
     /**

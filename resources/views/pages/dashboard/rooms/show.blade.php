@@ -10,7 +10,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Chambre {{ $room->room_number }}</h1>
-            <p class="text-gray-600 dark:text-gray-400">{{ $room->type_name }}</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ $roomTypeLabel ?? $room->type ?? '—' }}</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('dashboard.rooms.edit', $room) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -53,7 +53,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $room->type_name }}</p>
+                    <p class="text-gray-800 dark:text-white/90">{{ $roomTypeLabel ?? $room->type ?? '—' }}</p>
                 </div>
 
                 <div>
