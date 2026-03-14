@@ -113,8 +113,10 @@ class ReservationController extends Controller
                     'price_per_night' => (float) ($r->price_per_night ?? 0),
                 ];
             }
+            file_put_contents($debugLog, date('c') . " [create] roomsForSelect ok\n", FILE_APPEND);
 
             $guests = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+            file_put_contents($debugLog, date('c') . " [create] guests ok\n", FILE_APPEND);
             $initialGuestLabel = '';
             if (old('guest_id')) {
                 $g = Guest::find(old('guest_id'));
@@ -125,6 +127,7 @@ class ReservationController extends Controller
                     }
                 }
             }
+            file_put_contents($debugLog, date('c') . " [create] initialGuestLabel ok\n", FILE_APPEND);
 
             $defaultCheckInTime = '14:00';
             $defaultCheckOutTime = '12:00';
@@ -144,9 +147,9 @@ class ReservationController extends Controller
             } catch (\Throwable $e) {
                 // Garder 14:00 / 12:00
             }
-
             $defaultCheckIn = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
             $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
+            file_put_contents($debugLog, date('c') . " [create] default times ok\n", FILE_APPEND);
 
             // Données invités pour le JSON (évite caractères qui cassent @json dans la vue)
             $guestSelectInit = [
@@ -164,6 +167,7 @@ class ReservationController extends Controller
                 'guestSelectedLabel' => $initialGuestLabel,
                 'searchUrl' => route('dashboard.guests.search'),
             ];
+            file_put_contents($debugLog, date('c') . " [create] guestSelectInit ok\n", FILE_APPEND);
 
             file_put_contents($debugLog, date('c') . " [create] before view\n", FILE_APPEND);
             $response = view('pages.dashboard.reservations.create', [
