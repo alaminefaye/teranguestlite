@@ -12,6 +12,7 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReservationController extends Controller
@@ -91,50 +92,105 @@ class ReservationController extends Controller
      */
     public function create()
     {
-        $rooms = Room::available()->orderBy('room_number')->get();
-        $guests = Guest::orderBy('created_at', 'desc')->limit(5)->get();
-        $initialGuestLabel = '';
-        if (old('guest_id')) {
-            $g = Guest::find(old('guest_id'));
-            if ($g) {
-                $initialGuestLabel = ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? '');
-                if (! $guests->contains('id', $g->id)) {
-                    $guests = $guests->prepend($g)->take(5);
-                }
-            }
-        }
-
-        // Heures par défaut : 14:00 check-in, 12:00 check-out (évite toute erreur liée à enterprise/settings)
-        $defaultCheckInTime = '14:00';
-        $defaultCheckOutTime = '12:00';
         try {
-            $enterprise = auth()->user()?->enterprise;
-            if ($enterprise && is_array($enterprise->settings ?? null)) {
-                $hotelInfos = $enterprise->settings['hotel_infos'] ?? [];
-                $in = $hotelInfos['default_checkin_time'] ?? null;
-                $out = $hotelInfos['default_checkout_time'] ?? null;
-                if (is_string($in) && preg_match('/^\d{1,2}:\d{2}$/', trim($in))) {
-                    $defaultCheckInTime = trim($in);
-                }
-                if (is_string($out) && preg_match('/^\d{1,2}:\d{2}$/', trim($out))) {
-                    $defaultCheckOutTime = trim($out);
+            $rooms = Room::available()->orderBy('room_number')->get();
+            // Préparer les chambres en tableau simple (évite erreurs Spatie/Translatable dans la vue)
+            $roomsForSelect = [];
+            foreach ($rooms as $r) {
+                $roomsForSelect[] = [
+                    'id' => $r->id,
+                    'room_number' => $r->room_number,
+                    'type_name' => $this->safeRoomTypeName($r),
+                    'price_per_night' => (float) ($r->price_per_night ?? 0),
+                ];
+            }
+
+            $guests = Guest::orderBy('created_at', 'desc')->limit(5)->get();
+            $initialGuestLabel = '';
+            if (old('guest_id')) {
+                $g = Guest::find(old('guest_id'));
+                if ($g) {
+                    $initialGuestLabel = ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? '');
+                    if (! $guests->contains('id', $g->id)) {
+                        $guests = $guests->prepend($g)->take(5);
+                    }
                 }
             }
+
+            $defaultCheckInTime = '14:00';
+            $defaultCheckOutTime = '12:00';
+            try {
+                $enterprise = auth()->user()?->enterprise;
+                if ($enterprise && is_array($enterprise->settings ?? null)) {
+                    $hotelInfos = $enterprise->settings['hotel_infos'] ?? [];
+                    $in = $hotelInfos['default_checkin_time'] ?? null;
+                    $out = $hotelInfos['default_checkout_time'] ?? null;
+                    if (is_string($in) && preg_match('/^\d{1,2}:\d{2}$/', trim($in))) {
+                        $defaultCheckInTime = trim($in);
+                    }
+                    if (is_string($out) && preg_match('/^\d{1,2}:\d{2}$/', trim($out))) {
+                        $defaultCheckOutTime = trim($out);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Garder 14:00 / 12:00
+            }
+
+            $defaultCheckIn = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
+            $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
+
+            // Données invités pour le JSON (évite caractères qui cassent @json dans la vue)
+            $guestSelectInit = [
+                'guestList' => $guests->map(function ($g) {
+                    return [
+                        'id' => $g->id,
+                        'label' => mb_convert_encoding(
+                            ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? ''),
+                            'UTF-8',
+                            'UTF-8'
+                        ),
+                    ];
+                })->values()->all(),
+                'guestSelectedId' => old('guest_id', ''),
+                'guestSelectedLabel' => $initialGuestLabel,
+                'searchUrl' => route('dashboard.guests.search'),
+            ];
+
+            return view('pages.dashboard.reservations.create', [
+                'title'             => 'Créer une réservation',
+                'roomsForSelect'    => $roomsForSelect,
+                'guests'            => $guests,
+                'guestSelectInit'   => $guestSelectInit,
+                'initialGuestLabel' => $initialGuestLabel,
+                'defaultCheckIn'    => $defaultCheckIn,
+                'defaultCheckOut'   => $defaultCheckOut,
+            ]);
         } catch (\Throwable $e) {
-            // Garder 14:00 / 12:00 en cas d'erreur (settings invalides, etc.)
+            Log::error('ReservationController::create error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return redirect()
+                ->route('dashboard.reservations.index')
+                ->with('error', 'Impossible de charger le formulaire de création. Erreur : ' . $e->getMessage());
         }
+    }
 
-        $defaultCheckIn = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
-        $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
-
-        return view('pages.dashboard.reservations.create', [
-            'title'             => 'Créer une réservation',
-            'rooms'             => $rooms,
-            'guests'            => $guests,
-            'initialGuestLabel' => $initialGuestLabel,
-            'defaultCheckIn'    => $defaultCheckIn,
-            'defaultCheckOut'   => $defaultCheckOut,
-        ]);
+    /**
+     * Retourne le libellé type de chambre sans lever d'exception (Spatie Translatable peut échouer si JSON invalide).
+     */
+    private function safeRoomTypeName(Room $room): string
+    {
+        try {
+            $name = $room->getTranslation('type_name', app()->getLocale(), false);
+            if (is_string($name) && trim($name) !== '') {
+                return $name;
+            }
+            return (string) ($room->type ?? '—');
+        } catch (\Throwable $e) {
+            return (string) ($room->type ?? '—');
+        }
     }
 
     /**
