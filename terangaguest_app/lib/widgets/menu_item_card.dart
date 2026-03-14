@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../generated/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../config/theme.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../models/menu_item.dart';
+import '../providers/currency_provider.dart';
 
 class MenuItemCard extends StatelessWidget {
   final MenuItem item;
@@ -204,7 +206,7 @@ class MenuItemCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                item.formattedPrice,
+                                context.watch<CurrencyProvider>().formatPrice(item.price),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w900,

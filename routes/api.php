@@ -23,17 +23,17 @@ use App\Http\Controllers\Api\ChatController as ApiChatController;
 */
 
 // ==========================================
-// AUTHENTIFICATION (Public)
+// AUTHENTIFICATION (Public) — limité pour limiter le brute-force
 // ==========================================
-Route::prefix('auth')->group(function () {
+Route::prefix('auth')->middleware('throttle:api-auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/web-login', [AuthController::class, 'webLogin']);
 });
 
 // ==========================================
-// TABLETTE EN CHAMBRE - Validation code client (sans auth)
+// TABLETTE EN CHAMBRE - Validation code client (sans auth) — limité par IP
 // ==========================================
-Route::prefix('tablet')->group(function () {
+Route::prefix('tablet')->middleware('throttle:api-tablet')->group(function () {
     Route::post('/hotel-infos', [\App\Http\Controllers\Api\TabletSessionController::class, 'hotelInfos']);
     Route::post('/session-by-room', [\App\Http\Controllers\Api\TabletSessionController::class, 'sessionByRoom']);
     Route::post('/validate-code', [\App\Http\Controllers\Api\TabletSessionController::class, 'validateCode']);

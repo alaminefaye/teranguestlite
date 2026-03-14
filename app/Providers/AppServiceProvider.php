@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Models\HotelMessage;
 use App\Models\Notification;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +26,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Limitation des tentatives de connexion API (brute-force)
+        RateLimiter::for('api-auth', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip())->response(function () {
+                return response()->json(['success' => false, 'message' => 'Trop de tentatives. Réessayez dans une minute.'], 429);
+            });
+        });
+        // Limitation des appels tablette (sans auth) par IP
+        RateLimiter::for('api-tablet', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip())->response(function () {
+                return response()->json(['success' => false, 'message' => 'Trop de requêtes. Réessayez plus tard.'], 429);
+            });
+        });
+
+
         View::composer('layouts.app', function ($view) {
             $unreadCount = 0;
             $headerNotifications = [];

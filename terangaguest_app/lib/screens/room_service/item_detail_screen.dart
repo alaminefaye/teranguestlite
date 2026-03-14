@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../models/menu_item.dart';
 import '../../models/favorite_item.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/currency_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../widgets/cart_badge.dart';
@@ -104,7 +105,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final priceLabel = '${widget.item.price.toStringAsFixed(0)} FCFA';
+    final priceLabel = context.watch<CurrencyProvider>().formatPrice(widget.item.price);
     return Semantics(
       label:
           '${AppLocalizations.of(context).description} ${widget.item.name}, $priceLabel',

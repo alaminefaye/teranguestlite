@@ -104,11 +104,17 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
+        $allowedSortColumns = ['created_at', 'updated_at', 'total', 'status', 'order_number'];
         $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        if (! in_array($sortBy, $allowedSortColumns, true)) {
+            $sortBy = 'created_at';
+        }
+        $sortOrder = strtolower($request->input('sort_order', 'desc'));
+        $sortOrder = ($sortOrder === 'asc') ? 'asc' : 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
-        $perPage = $request->input('per_page', 15);
+        $perPage = (int) $request->input('per_page', 15);
+        $perPage = max(1, min(100, $perPage));
         $orders = $query
             ->withCount('orderItems')
             ->with(['room', 'guest'])

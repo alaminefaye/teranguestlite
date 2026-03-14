@@ -31,8 +31,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/auth/change-password', [\App\Http\Controllers\Auth\ChangePasswordController::class, 'changePassword'])->name('auth.change-password.update');
 });
 
-// Routes protégées (à ajouter middleware auth plus tard)
-Route::middleware(['auth'])->group(function () {
+// Routes protégées — auth + enterprise pour éviter l'accès sans entreprise (SaaS)
+Route::middleware(['auth', 'enterprise'])->group(function () {
     // Profil (utilisateur + données établissement pour modifier son entreprise directement)
     Route::get('/profile', [\App\Http\Controllers\Dashboard\ProfileController::class, 'index'])->name('profile');
     Route::put('/dashboard/my-enterprise', [\App\Http\Controllers\Dashboard\ProfileController::class, 'updateEnterprise'])->name('dashboard.my-enterprise.update');

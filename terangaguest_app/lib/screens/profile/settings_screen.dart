@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../providers/currency_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../utils/haptic_helper.dart';
 
@@ -76,6 +77,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(height: 12),
                           _buildNotificationTile(context),
+                          const SizedBox(height: 16),
+                          _buildCurrencyTile(context),
                           const SizedBox(height: 24),
                           _buildSectionTitle(
                             AppLocalizations.of(context).application,
@@ -155,6 +158,91 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeThumbColor: AppTheme.accentGold,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCurrencyTile(BuildContext context) {
+    final currencyProvider = context.watch<CurrencyProvider>();
+    final labels = {
+      DisplayCurrency.fcfa: 'FCFA (Franc CFA)',
+      DisplayCurrency.eur: 'EUR (€)',
+      DisplayCurrency.usd: 'USD (\$)',
+    };
+    final currentLabel = labels[currencyProvider.displayCurrency] ?? 'FCFA';
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showCurrencyDialog(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.accentGold.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.attach_money, color: AppTheme.accentGold),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Devise d\'affichage',
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+              Text(
+                currentLabel,
+                style: TextStyle(fontSize: 14, color: AppTheme.textGray),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: AppTheme.textGray,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCurrencyDialog(BuildContext context) {
+    HapticHelper.lightImpact();
+    final currencyProvider = context.read<CurrencyProvider>();
+    final labels = {
+      DisplayCurrency.fcfa: 'FCFA (Franc CFA)',
+      DisplayCurrency.eur: 'EUR (€) — taux du jour',
+      DisplayCurrency.usd: 'USD (\$) — taux du jour',
+    };
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.primaryBlue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Afficher les prix en',
+          style: TextStyle(color: AppTheme.accentGold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: DisplayCurrency.values.map((c) {
+            return RadioListTile<DisplayCurrency>(
+              value: c,
+              groupValue: currencyProvider.displayCurrency,
+              onChanged: (v) async {
+                if (v != null) await currencyProvider.setDisplayCurrency(v);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              title: Text(labels[c] ?? c.code, style: const TextStyle(color: Colors.white)),
+              activeColor: AppTheme.accentGold,
+            );
+          }).toList(),
+        ),
       ),
     );
   }

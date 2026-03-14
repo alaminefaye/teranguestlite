@@ -118,24 +118,25 @@ class GuestReviewsController extends Controller
     {
         $model = $r->reviewable_type;
         $id = $r->reviewable_id;
+        $enterpriseId = $r->enterprise_id; // Ne résoudre que les entités de la même entreprise (SaaS)
         if ($model === Order::class) {
-            $o = Order::withoutGlobalScope('enterprise')->find($id);
+            $o = Order::where('enterprise_id', $enterpriseId)->find($id);
             return $o ? 'Commande ' . $o->order_number : 'Commande #' . $id;
         }
         if ($model === Reservation::class) {
-            $res = Reservation::withoutGlobalScope('enterprise')->find($id);
+            $res = Reservation::where('enterprise_id', $enterpriseId)->find($id);
             return $res ? 'Séjour ' . $res->reservation_number : 'Réservation #' . $id;
         }
         if ($model === ExcursionBooking::class) {
-            $b = ExcursionBooking::withoutGlobalScope('enterprise')->with('excursion')->find($id);
+            $b = ExcursionBooking::where('enterprise_id', $enterpriseId)->with('excursion')->find($id);
             return $b && $b->excursion ? 'Excursion ' . $b->excursion->name : 'Excursion #' . $id;
         }
         if ($model === LaundryRequest::class) {
-            $l = LaundryRequest::withoutGlobalScope('enterprise')->find($id);
+            $l = LaundryRequest::where('enterprise_id', $enterpriseId)->find($id);
             return $l ? 'Blanchisserie ' . $l->request_number : 'Blanchisserie #' . $id;
         }
         if ($model === PalaceRequest::class) {
-            $p = PalaceRequest::withoutGlobalScope('enterprise')->find($id);
+            $p = PalaceRequest::where('enterprise_id', $enterpriseId)->find($id);
             return $p ? 'Service ' . $p->request_number : 'Service #' . $id;
         }
         return class_basename($model) . ' #' . $id;

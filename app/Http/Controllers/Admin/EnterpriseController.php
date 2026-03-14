@@ -68,11 +68,10 @@ class EnterpriseController extends Controller
         // Générer un slug pour l'email
         $slug = Str::slug($enterprise->name);
         
-        // Générer les credentials du compte admin
+        // Générer les credentials du compte admin (mot de passe aléatoire, affiché une seule fois)
         $adminEmail = "admin@{$slug}.com";
-        $adminPassword = 'passer123'; // Mot de passe par défaut
-        
-        // Créer automatiquement un compte administrateur pour cette entreprise
+        $adminPassword = \Illuminate\Support\Str::password(12, true, true, false); // 12 caractères, lettres + chiffres
+
         $admin = User::create([
             'name' => "Administrateur {$enterprise->name}",
             'email' => $adminEmail,
@@ -80,10 +79,9 @@ class EnterpriseController extends Controller
             'role' => 'admin',
             'enterprise_id' => $enterprise->id,
             'department' => 'Direction',
-            'must_change_password' => true, // Forcer le changement à la première connexion
+            'must_change_password' => true,
         ]);
 
-        // Données par défaut : Sport/Loisirs, Blanchisserie, Services Palace, Amenities & Conciergerie
         DefaultDataForEnterpriseService::seedForEnterprise($enterprise);
 
         return redirect()->route('admin.enterprises.index')

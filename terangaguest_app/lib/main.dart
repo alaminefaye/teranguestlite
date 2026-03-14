@@ -34,6 +34,7 @@ import 'providers/locale_provider.dart';
 import 'providers/tablet_session_provider.dart';
 import 'providers/chat_unread_provider.dart';
 import 'providers/announcements_provider.dart';
+import 'providers/currency_provider.dart';
 import 'services/fcm_service.dart';
 import 'services/notifications_api.dart';
 import 'utils/navigation_helper.dart';
@@ -139,6 +140,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
         ChangeNotifierProvider(create: (_) => ChatUnreadProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementsProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final p = CurrencyProvider();
+          p.load(); // Taux de change (cache 24h), devise sauvegardée
+          return p;
+        }),
       ],
       child: const _LocalizedApp(),
     );

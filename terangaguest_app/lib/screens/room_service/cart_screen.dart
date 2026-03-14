@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/currency_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -990,7 +991,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${cart.totalAmount.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfa}',
+                    context.watch<CurrencyProvider>().formatPrice(cart.totalAmount),
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,

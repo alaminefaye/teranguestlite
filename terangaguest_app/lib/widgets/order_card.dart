@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/order.dart';
+import '../providers/currency_provider.dart';
 import '../utils/layout_helper.dart';
-import 'package:intl/intl.dart';
 
 class OrderCard extends StatelessWidget {
   final Order order;
@@ -161,7 +163,7 @@ class OrderCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            order.formattedTotal,
+                            context.watch<CurrencyProvider>().formatPrice(order.total),
                             style: TextStyle(
                               fontSize: totalSize,
                               fontWeight: FontWeight.w900,
