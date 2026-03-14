@@ -122,6 +122,10 @@ class RoomController extends Controller
         // Ajouter enterprise_id automatiquement
         $validated['enterprise_id'] = $enterpriseId;
 
+        // Libellé FR du type (plus de traduction auto Google = plus de 500)
+        $typeLabels = self::roomTypeLabels();
+        $validated['type_name'] = ['fr' => $typeLabels[$validated['type']] ?? ucfirst($validated['type'])];
+
         // Upload image
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('rooms', 'public');
@@ -211,6 +215,10 @@ class RoomController extends Controller
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
         ]);
+
+        // Libellé FR du type (Room n'utilise plus TranslatesAutomatically)
+        $typeLabels = self::roomTypeLabels();
+        $validated['type_name'] = ['fr' => $typeLabels[$validated['type']] ?? ucfirst($validated['type'])];
 
         // Upload nouvelle image
         if ($request->hasFile('image')) {
