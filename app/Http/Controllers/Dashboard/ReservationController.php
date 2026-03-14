@@ -535,8 +535,8 @@ class ReservationController extends Controller
                 Log::warning('ActivityLogger checkIn: ' . $e->getMessage());
             }
 
-            if ($reservation->room) {
-                $reservation->room->update(['status' => 'occupied']);
+            if ($reservation->room_id) {
+                Room::where('id', $reservation->room_id)->update(['status' => 'occupied']);
             }
 
             return back()->with('success', 'Check-in effectué avec succès !');
@@ -683,9 +683,10 @@ class ReservationController extends Controller
                 Log::warning('ActivityLogger cancel: ' . $e->getMessage());
             }
 
-            $room = $reservation->room;
-            if ($room && in_array($room->status, ['reserved', 'occupied'], true)) {
-                $room->update(['status' => 'available']);
+            if ($reservation->room_id) {
+                Room::where('id', $reservation->room_id)
+                    ->whereIn('status', ['reserved', 'occupied'])
+                    ->update(['status' => 'available']);
             }
 
             return back()->with('success', 'Réservation annulée avec succès !');
