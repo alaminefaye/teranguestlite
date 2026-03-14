@@ -371,31 +371,39 @@ class ReservationController extends Controller
      */
     public function settle(Request $request, Reservation $reservation): RedirectResponse
     {
-        $request->validate([
-            'payment_method' => 'required|in:wave,orange_money,cash,card',
-            'notes' => 'nullable|string|max:500',
-        ]);
+        try {
+            $request->validate([
+                'payment_method' => 'required|in:wave,orange_money,cash,card',
+                'notes' => 'nullable|string|max:500',
+            ]);
 
-        $orders = $reservation->roomBillOrdersUnsettled()->get();
-        $amount = $orders->sum('total');
+            $orders = $reservation->roomBillOrdersUnsettled()->get();
+            $amount = $orders->sum('total');
 
-        if ($amount <= 0) {
-            return back()->with('error', 'Aucun montant à régler sur la note de chambre.');
+            if ($amount <= 0) {
+                return back()->with('error', 'Aucun montant à régler sur la note de chambre.');
+            }
+
+            ReservationSettlement::create([
+                'reservation_id' => $reservation->id,
+                'amount' => $amount,
+                'payment_method' => $request->payment_method,
+                'paid_at' => now(),
+                'notes' => $request->notes,
+            ]);
+
+            foreach ($orders as $order) {
+                $order->update(['settled_at' => now()]);
+            }
+
+            $methodLabel = ReservationSettlement::paymentMethodLabels()[$request->payment_method] ?? $request->payment_method;
+            return back()->with('success', 'Note de chambre réglée : ' . number_format($amount, 0, ',', ' ') . ' FCFA (' . $methodLabel . ').');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::settle error: ' . $e->getMessage(), ['reservation_id' => $reservation->id, 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur lors du règlement : ' . $e->getMessage());
         }
-
-        ReservationSettlement::create([
-            'reservation_id' => $reservation->id,
-            'amount' => $amount,
-            'payment_method' => $request->payment_method,
-            'paid_at' => now(),
-            'notes' => $request->notes,
-        ]);
-
-        foreach ($orders as $order) {
-            $order->update(['settled_at' => now()]);
-        }
-
-        return back()->with('success', 'Note de chambre réglée : ' . number_format($amount, 0, ',', ' ') . ' FCFA (' . (ReservationSettlement::paymentMethodLabels()[$request->payment_method] ?? $request->payment_method) . ').');
     }
 
     /**
@@ -511,21 +519,31 @@ class ReservationController extends Controller
      */
     public function checkIn(Reservation $reservation)
     {
-        if ($reservation->status !== 'confirmed') {
-            return back()->with('error', 'Seules les réservations confirmées peuvent être check-in.');
+        try {
+            if ($reservation->status !== 'confirmed') {
+                return back()->with('error', 'Seules les réservations confirmées peuvent être check-in.');
+            }
+
+            $reservation->update([
+                'status' => 'checked_in',
+                'checked_in_at' => now(),
+            ]);
+
+            try {
+                ActivityLogger::log('reservation_check_in', 'Check-in réservation ' . $reservation->reservation_number, $reservation);
+            } catch (\Throwable $e) {
+                Log::warning('ActivityLogger checkIn: ' . $e->getMessage());
+            }
+
+            if ($reservation->room) {
+                $reservation->room->update(['status' => 'occupied']);
+            }
+
+            return back()->with('success', 'Check-in effectué avec succès !');
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::checkIn error: ' . $e->getMessage(), ['reservation_id' => $reservation->id, 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur lors du check-in : ' . $e->getMessage());
         }
-
-        $reservation->update([
-            'status' => 'checked_in',
-            'checked_in_at' => now(),
-        ]);
-
-        ActivityLogger::log('reservation_check_in', 'Check-in réservation ' . $reservation->reservation_number, $reservation);
-
-        // Mettre à jour le statut de la chambre
-        $reservation->room->update(['status' => 'occupied']);
-
-        return back()->with('success', 'Check-in effectué avec succès !');
     }
 
     /**
@@ -533,27 +551,37 @@ class ReservationController extends Controller
      */
     public function checkOut(Reservation $reservation)
     {
-        if ($reservation->status !== 'checked_in') {
-            return back()->with('error', 'Seules les réservations avec check-in peuvent être check-out.');
+        try {
+            if ($reservation->status !== 'checked_in') {
+                return back()->with('error', 'Seules les réservations avec check-in peuvent être check-out.');
+            }
+
+            $orders = $reservation->roomBillOrdersUnsettled()->get();
+            $totalRoomBill = $orders->sum(fn ($o) => (float) $o->total);
+            if ($totalRoomBill > 0) {
+                return back()->with('error', 'La note de chambre doit être réglée avant le check-out. Réglez la facture dans la section « Note de chambre » ci-dessous, puis réessayez.');
+            }
+
+            $reservation->update([
+                'status' => 'checked_out',
+                'checked_out_at' => now(),
+            ]);
+
+            try {
+                ActivityLogger::log('reservation_check_out', 'Check-out réservation ' . $reservation->reservation_number, $reservation);
+            } catch (\Throwable $e) {
+                Log::warning('ActivityLogger checkOut: ' . $e->getMessage());
+            }
+
+            if ($reservation->room) {
+                $reservation->room->update(['status' => 'available']);
+            }
+
+            return back()->with('success', 'Check-out effectué avec succès !');
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::checkOut error: ' . $e->getMessage(), ['reservation_id' => $reservation->id, 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur lors du check-out : ' . $e->getMessage());
         }
-
-        $orders = $reservation->roomBillOrdersUnsettled()->get();
-        $totalRoomBill = $orders->sum(fn ($o) => (float) $o->total);
-        if ($totalRoomBill > 0) {
-            return back()->with('error', 'La note de chambre doit être réglée avant le check-out. Réglez la facture dans la section « Note de chambre » ci-dessous, puis réessayez.');
-        }
-
-        $reservation->update([
-            'status' => 'checked_out',
-            'checked_out_at' => now(),
-        ]);
-
-        ActivityLogger::log('reservation_check_out', 'Check-out réservation ' . $reservation->reservation_number, $reservation);
-
-        // Norme : après check-out, la chambre redevient disponible jusqu'à la prochaine réservation (check-in).
-        $reservation->room->update(['status' => 'available']);
-
-        return back()->with('success', 'Check-out effectué avec succès !');
     }
 
     /**
@@ -561,64 +589,80 @@ class ReservationController extends Controller
      */
     public function extend(Request $request, Reservation $reservation): RedirectResponse
     {
-        if ($reservation->status !== 'checked_in') {
-            return back()->with('error', 'La prolongation est uniquement possible pour les réservations en cours (Check-in effectué).');
-        }
+        try {
+            if ($reservation->status !== 'checked_in') {
+                return back()->with('error', 'La prolongation est uniquement possible pour les réservations en cours (Check-in effectué).');
+            }
 
-        $validated = $request->validate([
-            'new_check_out' => [
-                'required',
-                'date',
-                'after:' . $reservation->check_out->toDateString(),
-            ],
-        ], [
-            'new_check_out.required' => 'La nouvelle date de départ est obligatoire.',
-            'new_check_out.after'    => 'La nouvelle date de départ doit être postérieure à la date actuelle (' . $reservation->check_out->format('d/m/Y') . ').',
-        ]);
+            $checkOut = $reservation->check_out;
+            if (! $checkOut) {
+                return back()->with('error', 'Date de check-out manquante sur cette réservation.');
+            }
 
-        $newCheckOut = \Carbon\Carbon::parse($validated['new_check_out']);
+            $validated = $request->validate([
+                'new_check_out' => [
+                    'required',
+                    'date',
+                    'after:' . $checkOut->toDateString(),
+                ],
+            ], [
+                'new_check_out.required' => 'La nouvelle date de départ est obligatoire.',
+                'new_check_out.after'    => 'La nouvelle date de départ doit être postérieure à la date actuelle (' . $checkOut->format('d/m/Y') . ').',
+            ]);
 
-        // Vérifier qu'aucune autre réservation n'occupe la chambre entre l'ancien check-out et le nouveau
-        $conflict = Reservation::where('room_id', $reservation->room_id)
-            ->where('id', '!=', $reservation->id)
-            ->whereIn('status', ['confirmed', 'checked_in'])
-            ->where('check_in', '<', $newCheckOut)
-            ->where('check_out', '>', $reservation->check_out)
-            ->first();
+            $newCheckOut = \Carbon\Carbon::parse($validated['new_check_out']);
 
-        if ($conflict) {
-            return back()->with('error',
-                'Impossible de prolonger : la chambre est réservée par ' .
-                ($conflict->guest?->name ?? 'un autre client') .
-                ' à partir du ' . $conflict->check_in->format('d/m/Y') . '.'
+            $conflict = Reservation::where('room_id', $reservation->room_id)
+                ->where('id', '!=', $reservation->id)
+                ->whereIn('status', ['confirmed', 'checked_in'])
+                ->where('check_in', '<', $newCheckOut)
+                ->where('check_out', '>', $reservation->check_out)
+                ->first();
+
+            if ($conflict) {
+                return back()->with('error',
+                    'Impossible de prolonger : la chambre est réservée par ' .
+                    ($conflict->guest?->name ?? 'un autre client') .
+                    ' à partir du ' . $conflict->check_in->format('d/m/Y') . '.'
+                );
+            }
+
+            $room = $reservation->room;
+            $pricePerNight = $room ? (float) $room->price_per_night : 0;
+            $totalNights = (int) max(1, ceil($reservation->check_in->floatDiffInDays($newCheckOut)));
+            $newTotalPrice = $pricePerNight * $totalNights;
+
+            $oldCheckOut = $reservation->check_out->format('d/m/Y');
+            $addedNights = $totalNights - $reservation->nights_count;
+
+            $reservation->update([
+                'check_out'    => $newCheckOut,
+                'total_price'  => $newTotalPrice,
+            ]);
+
+            try {
+                ActivityLogger::log(
+                    'reservation_extended',
+                    'Prolongation réservation ' . $reservation->reservation_number .
+                    ' : ' . $oldCheckOut . ' → ' . $newCheckOut->format('d/m/Y') .
+                    ' (+' . $addedNights . ' nuit(s))',
+                    $reservation
+                );
+            } catch (\Throwable $e) {
+                Log::warning('ActivityLogger extend: ' . $e->getMessage());
+            }
+
+            return back()->with('success',
+                'Séjour prolongé de ' . $addedNights . ' nuit(s). ' .
+                'Nouveau check-out : ' . $newCheckOut->format('d/m/Y') . '. ' .
+                'Nouveau total : ' . number_format($newTotalPrice, 0, ',', ' ') . ' FCFA.'
             );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::extend error: ' . $e->getMessage(), ['reservation_id' => $reservation->id, 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur lors de la prolongation : ' . $e->getMessage());
         }
-
-        // Recalcul du prix total : prix/nuit × nombre total de nuits
-        $totalNights = (int) max(1, ceil($reservation->check_in->floatDiffInDays($newCheckOut)));
-        $newTotalPrice = $reservation->room->price_per_night * $totalNights;
-
-        $oldCheckOut = $reservation->check_out->format('d/m/Y');
-        $addedNights = $totalNights - $reservation->nights_count;
-
-        $reservation->update([
-            'check_out'    => $newCheckOut,
-            'total_price'  => $newTotalPrice,
-        ]);
-
-        ActivityLogger::log(
-            'reservation_extended',
-            'Prolongation réservation ' . $reservation->reservation_number .
-            ' : ' . $oldCheckOut . ' → ' . $newCheckOut->format('d/m/Y') .
-            ' (+' . $addedNights . ' nuit(s))',
-            $reservation
-        );
-
-        return back()->with('success',
-            'Séjour prolongé de ' . $addedNights . ' nuit(s). ' .
-            'Nouveau check-out : ' . $newCheckOut->format('d/m/Y') . '. ' .
-            'Nouveau total : ' . number_format($newTotalPrice, 0, ',', ' ') . ' FCFA.'
-        );
     }
 
     /**
@@ -626,19 +670,28 @@ class ReservationController extends Controller
      */
     public function cancel(Reservation $reservation)
     {
-        if ($reservation->status === 'checked_out') {
-            return back()->with('error', 'Impossible d\'annuler une réservation déjà terminée.');
+        try {
+            if ($reservation->status === 'checked_out') {
+                return back()->with('error', 'Impossible d\'annuler une réservation déjà terminée.');
+            }
+
+            $reservation->update(['status' => 'cancelled']);
+
+            try {
+                ActivityLogger::log('reservation_cancelled', 'Réservation ' . $reservation->reservation_number . ' annulée', $reservation);
+            } catch (\Throwable $e) {
+                Log::warning('ActivityLogger cancel: ' . $e->getMessage());
+            }
+
+            $room = $reservation->room;
+            if ($room && in_array($room->status, ['reserved', 'occupied'], true)) {
+                $room->update(['status' => 'available']);
+            }
+
+            return back()->with('success', 'Réservation annulée avec succès !');
+        } catch (\Throwable $e) {
+            Log::error('ReservationController::cancel error: ' . $e->getMessage(), ['reservation_id' => $reservation->id, 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur lors de l\'annulation : ' . $e->getMessage());
         }
-
-        $reservation->update(['status' => 'cancelled']);
-
-        ActivityLogger::log('reservation_cancelled', 'Réservation ' . $reservation->reservation_number . ' annulée', $reservation);
-
-        // Remettre la chambre disponible : si elle était réservée (confirmée) ou occupée (check-in).
-        if (in_array($reservation->room->status, ['reserved', 'occupied'], true)) {
-            $reservation->room->update(['status' => 'available']);
-        }
-
-        return back()->with('success', 'Réservation annulée avec succès !');
     }
 }
