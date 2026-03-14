@@ -90,7 +90,10 @@
                 };
             };
             </script>
-            <script type="application/json" id="guest-select-data-create">@json($guestSelectInit ?? ['guestList' => [], 'guestSelectedId' => '', 'guestSelectedLabel' => '', 'searchUrl' => route('dashboard.guests.search')])</script>
+            @php
+                $guestSelectData = $guestSelectInit ?? ['guestList' => [], 'guestSelectedId' => '', 'guestSelectedLabel' => '', 'searchUrl' => route('dashboard.guests.search')];
+            @endphp
+            <script type="application/json" id="guest-select-data-create">@json($guestSelectData)</script>
             <div class="md:col-span-2" x-data="guestSelectReservation('guest-select-data-create')" @click.outside="guestOpen = false">
                 <label for="guest_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Client (invité) <span class="text-error-500">*</span>
