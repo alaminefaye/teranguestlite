@@ -127,6 +127,8 @@ class TranslateExistingRecords extends Command
                                 }
                                 $needsSave = true;
                             }
+                            // Limiter le débit pour éviter le rate-limit Google (gratuit)
+                            usleep(300000); // 300 ms entre chaque appel
                         } catch (\Exception $e) {
                             $this->warn("\n  Erreur traduction [{$shortName}#{$record->id}][{$field}→{$lang}]: " . $e->getMessage());
                             Log::warning("translate:backfill error: " . $e->getMessage());
