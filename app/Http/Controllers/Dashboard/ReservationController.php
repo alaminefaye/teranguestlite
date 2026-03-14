@@ -97,7 +97,7 @@ class ReservationController extends Controller
         if (old('guest_id')) {
             $g = Guest::find(old('guest_id'));
             if ($g) {
-                $initialGuestLabel = $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code;
+                $initialGuestLabel = ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? '');
                 if (! $guests->contains('id', $g->id)) {
                     $guests = $guests->prepend($g)->take(5);
                 }
@@ -105,13 +105,22 @@ class ReservationController extends Controller
         }
 
         // Heures par défaut définies dans Hotel Infos & Sécurité
-        $enterprise   = auth()->user()->enterprise;
-        $hotelInfos   = is_array($enterprise?->settings) ? ($enterprise->settings['hotel_infos'] ?? []) : [];
-        $defaultCheckInTime  = $hotelInfos['default_checkin_time']  ?? '14:00';
+        $enterprise = auth()->user()?->enterprise;
+        $settings = $enterprise && is_array($enterprise->settings) ? $enterprise->settings : [];
+        $hotelInfos = $settings['hotel_infos'] ?? [];
+        $defaultCheckInTime = $hotelInfos['default_checkin_time'] ?? '14:00';
         $defaultCheckOutTime = $hotelInfos['default_checkout_time'] ?? '12:00';
+        $defaultCheckInTime = is_string($defaultCheckInTime) ? trim($defaultCheckInTime) : '14:00';
+        $defaultCheckOutTime = is_string($defaultCheckOutTime) ? trim($defaultCheckOutTime) : '12:00';
+        if ($defaultCheckInTime === '' || ! preg_match('/^\d{1,2}:\d{2}$/', $defaultCheckInTime)) {
+            $defaultCheckInTime = '14:00';
+        }
+        if ($defaultCheckOutTime === '' || ! preg_match('/^\d{1,2}:\d{2}$/', $defaultCheckOutTime)) {
+            $defaultCheckOutTime = '12:00';
+        }
 
         // Valeurs par défaut : aujourd'hui à l'heure de check-in, demain à l'heure de check-out
-        $defaultCheckIn  = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
+        $defaultCheckIn = now()->format('Y-m-d') . 'T' . $defaultCheckInTime;
         $defaultCheckOut = now()->addDay()->format('Y-m-d') . 'T' . $defaultCheckOutTime;
 
         return view('pages.dashboard.reservations.create', [

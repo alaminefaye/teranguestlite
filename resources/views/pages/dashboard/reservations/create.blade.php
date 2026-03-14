@@ -49,7 +49,7 @@
             <!-- Client (invité) : recherche par nom, code ou téléphone ; 5 derniers inscrits par défaut -->
             @php
                 $guestSelectInit = [
-                    'guestList' => $guests->map(fn($g) => ['id' => $g->id, 'label' => $g->name . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . $g->access_code])->values()->all(),
+                    'guestList' => $guests->map(fn($g) => ['id' => $g->id, 'label' => ($g->name ?? '') . ($g->email ? ' (' . $g->email . ')' : '') . ' — Code ' . ($g->access_code ?? '')])->values()->all(),
                     'guestSelectedId' => old('guest_id', ''),
                     'guestSelectedLabel' => $initialGuestLabel ?? '',
                     'searchUrl' => route('dashboard.guests.search'),
@@ -169,8 +169,8 @@
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                     <option value="">Sélectionner une chambre</option>
                     @foreach($rooms as $room)
-                        <option value="{{ $room->id }}" data-price="{{ $room->price_per_night }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
-                            {{ $room->room_number }} - {{ $room->type_name }} ({{ number_format($room->price_per_night, 0, ',', ' ') }} FCFA/nuit)
+                        <option value="{{ $room->id }}" data-price="{{ (float) ($room->price_per_night ?? 0) }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
+                            {{ $room->room_number }} - {{ $room->type_name ?? $room->type ?? '—' }} ({{ number_format((float) ($room->price_per_night ?? 0), 0, ',', ' ') }} FCFA/nuit)
                         </option>
                     @endforeach
                 </select>
