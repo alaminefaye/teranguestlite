@@ -101,15 +101,19 @@ class ReservationController extends Controller
         });
         try {
             file_put_contents($debugLog, date('c') . " [create] START\n", FILE_APPEND);
-            $rooms = Room::available()->orderBy('room_number')->limit(500)->get();
+            // Ne charger que les colonnes nécessaires, sans type_name (JSON Spatie) pour éviter mémoire/timeout
+            $rooms = Room::available()
+                ->select(['id', 'room_number', 'type', 'price_per_night'])
+                ->orderBy('room_number')
+                ->limit(500)
+                ->get();
             file_put_contents($debugLog, date('c') . " [create] rooms ok\n", FILE_APPEND);
-            // Préparer les chambres en tableau simple (évite erreurs Spatie/Translatable dans la vue)
             $roomsForSelect = [];
             foreach ($rooms as $r) {
                 $roomsForSelect[] = [
                     'id' => $r->id,
                     'room_number' => $r->room_number,
-                    'type_name' => $this->safeRoomTypeName($r),
+                    'type_name' => $this->typeLabelFromType($r->type ?? ''),
                     'price_per_night' => (float) ($r->price_per_night ?? 0),
                 ];
             }
@@ -197,6 +201,19 @@ class ReservationController extends Controller
     /**
      * Retourne le libellé type de chambre sans lever d'exception (Spatie Translatable peut échouer si JSON invalide).
      */
+    /** Libellé du type de chambre sans toucher au JSON type_name (évite mémoire/timeout sur liste longue). */
+    private function typeLabelFromType(string $type): string
+    {
+        return match (trim($type)) {
+            'single' => 'Chambre Simple',
+            'double' => 'Chambre Double',
+            'suite' => 'Suite',
+            'deluxe' => 'Deluxe',
+            'presidential' => 'Suite Présidentielle',
+            default => $type !== '' ? ucfirst($type) : '—',
+        };
+    }
+
     private function safeRoomTypeName(Room $room): string
     {
         try {
@@ -204,9 +221,9 @@ class ReservationController extends Controller
             if (is_string($name) && trim($name) !== '') {
                 return $name;
             }
-            return (string) ($room->type ?? '—');
+            return $this->typeLabelFromType((string) ($room->type ?? ''));
         } catch (\Throwable $e) {
-            return (string) ($room->type ?? '—');
+            return $this->typeLabelFromType((string) ($room->type ?? ''));
         }
     }
 
