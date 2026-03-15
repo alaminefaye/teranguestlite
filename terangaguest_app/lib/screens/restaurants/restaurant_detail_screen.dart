@@ -4,8 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../models/restaurant.dart';
 import '../../models/favorite_item.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/restaurants_provider.dart';
 import '../../providers/favorites_provider.dart';
+import '../../utils/translatable_text_helper.dart';
+import '../../widgets/translatable_text.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -99,8 +102,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                TranslatableText(
                   _restaurant?.name ?? AppLocalizations.of(context).restaurant,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 24,
                     fontWeight: FontWeight.bold,
@@ -134,11 +138,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   ),
                   onPressed: () {
                     HapticHelper.lightImpact();
+                    final locale = context.read<LocaleProvider>().languageCode;
                     fav.toggle(
                       FavoriteItem(
                         type: FavoriteType.restaurant,
                         id: _restaurant!.id,
-                        name: _restaurant!.name,
+                        name: TranslatableTextHelper.resolveDisplayTextSync(_restaurant!.name, locale),
                         imageUrl: _restaurant!.image,
                       ),
                     );
@@ -300,12 +305,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               ],
             ),
 
-          if (_restaurant!.description != null) ...[
+          if (TranslatableTextHelper.resolveDisplayTextSync(_restaurant!.description, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
             const SizedBox(height: 16),
             const Divider(color: AppTheme.textGray, height: 1),
             const SizedBox(height: 16),
-            Text(
-              _restaurant!.description!,
+            TranslatableText(
+              _restaurant!.description,
+              locale: context.read<LocaleProvider>().languageCode,
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,

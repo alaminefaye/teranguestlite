@@ -7,6 +7,9 @@ import '../../models/favorite_item.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/currency_provider.dart';
 import '../../providers/favorites_provider.dart';
+import '../../providers/locale_provider.dart';
+import '../../utils/translatable_text_helper.dart';
+import '../../widgets/translatable_text.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../widgets/cart_badge.dart';
 import '../../widgets/animated_button.dart';
@@ -80,7 +83,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                AppLocalizations.of(context).addedToCart(widget.item.name),
+                AppLocalizations.of(context).addedToCart(
+                  TranslatableTextHelper.resolveDisplayTextSync(
+                    widget.item.name,
+                    context.read<LocaleProvider>().languageCode,
+                  ),
+                ),
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -106,9 +114,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final priceLabel = context.watch<CurrencyProvider>().formatPrice(widget.item.price);
+    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(widget.item.name, context.read<LocaleProvider>().languageCode);
     return Semantics(
       label:
-          '${AppLocalizations.of(context).description} ${widget.item.name}, $priceLabel',
+          '${AppLocalizations.of(context).description} $nameStr, $priceLabel',
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
@@ -184,7 +193,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                 FavoriteItem(
                                   type: FavoriteType.menuItem,
                                   id: widget.item.id,
-                                  name: widget.item.name,
+                                  name: TranslatableTextHelper.resolveDisplayTextSync(widget.item.name, context.read<LocaleProvider>().languageCode),
                                   imageUrl: widget.item.image,
                                 ),
                               );
@@ -280,8 +289,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Nom
-          Text(
+          TranslatableText(
             widget.item.name,
+            locale: context.read<LocaleProvider>().languageCode,
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 28,
               fontWeight: FontWeight.bold,
@@ -294,7 +304,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           Row(
             children: [
               if (widget.item.category != null &&
-                  (widget.item.category?.name ?? '').isNotEmpty) ...[
+                  TranslatableTextHelper.resolveDisplayTextSync(widget.item.category!.name, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -307,8 +317,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       color: AppTheme.accentGold.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: Text(
+                  child: TranslatableText(
                     widget.item.category!.name,
+                    locale: context.read<LocaleProvider>().languageCode,
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppTheme.accentGold,
@@ -337,7 +348,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           const SizedBox(height: 24),
 
           // Description
-          if (widget.item.description != null) ...[
+          if (TranslatableTextHelper.resolveDisplayTextSync(widget.item.description, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
             Text(
               AppLocalizations.of(context).description,
               style: TextStyle(
@@ -347,8 +358,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              widget.item.description!,
+            TranslatableText(
+              widget.item.description,
+              locale: context.read<LocaleProvider>().languageCode,
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.width < 600 ? 13 : 15,
                 color: AppTheme.textGray,

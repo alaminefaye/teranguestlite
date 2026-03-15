@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../config/theme.dart';
 import '../models/restaurant.dart';
+import '../providers/locale_provider.dart';
+import '../utils/translatable_text_helper.dart';
+import 'translatable_text.dart';
 
 class RestaurantCard extends StatelessWidget {
   final Restaurant restaurant;
@@ -16,9 +20,10 @@ class RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.read<LocaleProvider>().languageCode;
     return Semantics(
       button: true,
-      label: restaurant.name,
+      label: TranslatableTextHelper.resolveDisplayTextSync(restaurant.name, locale),
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
@@ -142,8 +147,9 @@ class RestaurantCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          TranslatableText(
                             restaurant.name,
+                            locale: locale,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

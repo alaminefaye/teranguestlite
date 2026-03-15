@@ -5,6 +5,9 @@ import '../config/theme.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/menu_item.dart';
 import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
+import '../utils/translatable_text_helper.dart';
+import 'translatable_text.dart';
 
 class MenuItemCard extends StatelessWidget {
   final MenuItem item;
@@ -14,9 +17,10 @@ class MenuItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.read<LocaleProvider>().languageCode;
     return Semantics(
       button: true,
-      label: item.name,
+      label: TranslatableTextHelper.resolveDisplayTextSync(item.name, locale),
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
@@ -175,8 +179,9 @@ class MenuItemCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          TranslatableText(
                             item.name,
+                            locale: locale,
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -185,12 +190,12 @@ class MenuItemCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          if (item.description != null &&
-                              item.description!.isNotEmpty)
+                          if (TranslatableTextHelper.resolveDisplayTextSync(item.description, locale).trim().isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 2.0),
-                              child: Text(
-                                item.description!,
+                              child: TranslatableText(
+                                item.description,
+                                locale: locale,
                                 style: const TextStyle(
                                   fontSize: 10,
                                   color: AppTheme.textGray,

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../utils/layout_helper.dart';
+import '../../utils/translatable_text_helper.dart';
 import '../../models/menu_category.dart';
 import '../../models/menu_item.dart';
+import '../../providers/locale_provider.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/menu_item_card.dart';
 import '../../widgets/cart_badge.dart';
+import '../../widgets/translatable_text.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -146,18 +150,20 @@ class _ItemsScreenState extends State<ItemsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                TranslatableText(
                   widget.category.name,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 24,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.accentGold,
                   ),
                 ),
-                if (widget.category.description != null) ...[
+                if (TranslatableTextHelper.resolveDisplayTextSync(widget.category.description, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    widget.category.description!,
+                  TranslatableText(
+                    widget.category.description,
+                    locale: context.read<LocaleProvider>().languageCode,
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppTheme.textGray,

@@ -5,8 +5,11 @@ import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/restaurants_provider.dart';
 import '../../providers/tablet_session_provider.dart';
+import '../../utils/translatable_text_helper.dart';
+import '../../widgets/translatable_text.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
@@ -167,8 +170,9 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatableText(
                   widget.restaurant.name,
+                  locale: context.read<LocaleProvider>().languageCode,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
@@ -530,7 +534,10 @@ class _ReserveRestaurantScreenState extends State<ReserveRestaurantScreen> {
           const SizedBox(height: 16),
           _buildSummaryRow(
             AppLocalizations.of(context).restaurant,
-            widget.restaurant.name,
+            TranslatableTextHelper.resolveDisplayTextSync(
+              widget.restaurant.name,
+              context.read<LocaleProvider>().languageCode,
+            ),
           ),
           const SizedBox(height: 12),
           _buildSummaryRow(

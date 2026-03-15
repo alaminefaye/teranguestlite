@@ -1,7 +1,8 @@
 class MenuCategory {
   final int id;
-  final String name;
-  final String? description;
+  /// String ou Map fr/en/es/ar (pour TranslatableText).
+  final dynamic name;
+  final dynamic description;
   final String? image;
   final int displayOrder;
   final int itemsCount;
@@ -19,8 +20,8 @@ class MenuCategory {
   factory MenuCategory.fromJson(Map<String, dynamic> json) {
     return MenuCategory(
       id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String?,
+      name: json['name'],
+      description: json['description'],
       image: json['image'] as String?,
       displayOrder: json['display_order'] as int? ?? 0,
       itemsCount: _parseInt(json['items_count']),
@@ -39,8 +40,8 @@ class MenuCategory {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
+      'name': name is String ? name : null,
+      'description': description is String ? description : null,
       'image': image,
       'display_order': displayOrder,
       'items_count': itemsCount,

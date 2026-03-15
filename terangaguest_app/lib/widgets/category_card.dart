@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../models/menu_category.dart';
 import '../generated/l10n/app_localizations.dart';
+import '../providers/locale_provider.dart';
+import '../utils/translatable_text_helper.dart';
+import 'translatable_text.dart';
 
 class CategoryCard extends StatelessWidget {
   final MenuCategory category;
@@ -11,15 +15,17 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.read<LocaleProvider>().languageCode;
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     final double iconDisplaySize = isMobile ? 46.0 : 70.0;
     final double fontSize = isMobile ? 13.0 : 21.0;
     final double subFontSize = isMobile ? 11.0 : 14.0;
+    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(category.name, locale);
 
     return Semantics(
       button: true,
-      label: category.name,
+      label: nameStr,
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
@@ -64,7 +70,7 @@ class CategoryCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Icon(
-                        _getIconForCategory(category.name),
+                        _getIconForCategory(nameStr),
                         size: iconDisplaySize,
                         color: AppTheme.accentGold,
                       ),
@@ -81,8 +87,9 @@ class CategoryCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
+                          TranslatableText(
                             category.name,
+                            locale: locale,
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

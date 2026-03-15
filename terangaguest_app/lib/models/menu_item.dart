@@ -1,7 +1,8 @@
 class MenuItem {
   final int id;
-  final String name;
-  final String? description;
+  /// String (ancienne API) ou Map fr/en/es/ar (fallback traduction).
+  final dynamic name;
+  final dynamic description;
   final double price;
   final String formattedPrice;
   final String? image;
@@ -25,8 +26,8 @@ class MenuItem {
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
       id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String?,
+      name: json['name'],
+      description: json['description'],
       price: _parsePrice(json['price']),
       formattedPrice:
           json['formatted_price'] as String? ?? '${json['price']} FCFA',
@@ -51,8 +52,8 @@ class MenuItem {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
+      'name': name is String ? name : null,
+      'description': description is String ? description : null,
       'price': price,
       'formatted_price': formattedPrice,
       'image': image,
@@ -66,18 +67,19 @@ class MenuItem {
 // Classe pour la catégorie dans MenuItem
 class MenuItemCategory {
   final int id;
-  final String name;
+  /// String ou Map fr/en/es/ar (pour TranslatableText).
+  final dynamic name;
 
   MenuItemCategory({required this.id, required this.name});
 
   factory MenuItemCategory.fromJson(Map<String, dynamic> json) {
     return MenuItemCategory(
       id: json['id'] as int? ?? 0,
-      name: json['name'] as String? ?? '',
+      name: json['name'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name};
+    return {'id': id, 'name': name is String ? name : null};
   }
 }

@@ -1,7 +1,8 @@
 class Restaurant {
   final int id;
-  final String name;
-  final String? description;
+  /// String ou Map fr/en/es/ar (pour TranslatableText).
+  final dynamic name;
+  final dynamic description;
   final String? type;
   final String? cuisine;
   final int? capacity;
@@ -26,8 +27,8 @@ class Restaurant {
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     return Restaurant(
       id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String?,
+      name: json['name'],
+      description: json['description'],
       type: json['type'] as String?,
       cuisine: (json['cuisine_type'] ?? json['cuisine']) as String?,
       capacity: _parseInt(json['capacity']),
@@ -75,8 +76,8 @@ class Restaurant {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
+      'name': name is String ? name : null,
+      'description': description is String ? description : null,
       'type': type,
       'cuisine': cuisine,
       'capacity': capacity,

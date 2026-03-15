@@ -5,7 +5,9 @@ import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/currency_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/tablet_session_provider.dart';
+import '../../widgets/translatable_text.dart';
 import '../../widgets/quantity_selector.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
@@ -729,7 +731,7 @@ class _CartScreenState extends State<CartScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         // Liste des articles
-        ...cart.items.map((cartItem) => _buildCartItemTile(cartItem, cart)),
+        ...cart.items.map((cartItem) => _buildCartItemTile(context, cartItem, cart)),
 
         const SizedBox(height: 24),
 
@@ -781,7 +783,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildCartItemTile(dynamic cartItem, CartProvider cart) {
+  Widget _buildCartItemTile(BuildContext context, dynamic cartItem, CartProvider cart) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -831,8 +833,9 @@ class _CartScreenState extends State<CartScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
+                          child: TranslatableText(
                             cartItem.menuItem.name,
+                            locale: context.read<LocaleProvider>().languageCode,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
