@@ -257,13 +257,7 @@ class PalaceServiceController extends Controller
                 $request->user()->enterprise_id,
                 \App\Helpers\StaffSection::PALACE_SERVICES,
                 'Nouvelle demande palace',
-                "Nouvelle demande de service : {$staffPushTitle}",
-                [
-                    'type' => 'palace_status',
-                    'request_id' => (string) $palaceRequest->id,
-                    'request_number' => $palaceRequest->request_number,
-                    'screen' => 'AdminPalaceRequests',
-                ]
+                "Nouvelle demande de service : {$staffPushTitle}"
             );
         } catch (\Exception $e) {
             Log::error('Firebase notification error: ' . $e->getMessage());

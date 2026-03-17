@@ -134,7 +134,7 @@ class LaundryServiceController extends Controller
                 \App\Helpers\StaffSection::LAUNDRY_REQUESTS,
                 'Nouvelle demande blanchisserie',
                 "Nouvelle demande #{$laundryRequest->request_number}",
-                ['type' => 'laundry_status', 'request_id' => (string) $laundryRequest->id, 'screen' => 'AdminLaundryRequests']
+                ['type' => 'laundry_status', 'request_id' => (string) $laundryRequest->id, 'screen' => 'LaundryRequests']
             );
             if ($laundryRequest->room_id) {
                 $firebaseService->sendToClientOfRoom(

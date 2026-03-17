@@ -161,7 +161,7 @@ class SpaServiceController extends Controller
                 'Nouvelle réservation spa',
                 "Nouvelle réservation spa {$service->name} le " . $reservation->reservation_date->format('d/m/Y') . " à " . \Carbon\Carbon::parse($reservation->reservation_time)->format('H:i'),
                 [
-                    'type' => 'spa_reservation_status',
+                    'type' => 'spa_reservation',
                     'reservation_id' => (string) $reservation->id,
                     'screen' => 'AdminSpaReservations',
                 ]
@@ -372,10 +372,8 @@ class SpaServiceController extends Controller
                         'Annulation Spa',
                         "$guestName$roomText a annulé sa réservation pour $serviceName.",
                         [
-                            'type' => 'spa_reservation_status',
+                            'type' => 'spa_cancelled',
                             'reservation_id' => (string) $reservation->id,
-                            'status' => 'cancelled',
-                            'screen' => 'AdminSpaReservations',
                         ]
                     );
                 } elseif ($action === 'reschedule') {
@@ -385,10 +383,8 @@ class SpaServiceController extends Controller
                         'Modification Spa',
                         "$guestName$roomText a demandé à replanifier sa réservation pour $serviceName au $dateStr à $timeStr.",
                         [
-                            'type' => 'spa_reservation_status',
+                            'type' => 'spa_new',
                             'reservation_id' => (string) $reservation->id,
-                            'status' => 'pending_reschedule',
-                            'screen' => 'AdminSpaReservations',
                         ]
                     );
                 }

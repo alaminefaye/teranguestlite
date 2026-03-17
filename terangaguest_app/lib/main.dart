@@ -1584,47 +1584,23 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final status = data['status'] as String? ?? '';
     final excursionName = data['excursion_name'] as String? ?? 'Excursion';
     final date = data['date'] as String? ?? '';
-    final screen = data['screen'] as String? ?? '';
-    final rawReason = data['reason'] as String?;
-    final reason = rawReason != null && rawReason.trim().isNotEmpty
-        ? rawReason.trim()
-        : null;
-    final isStaff = screen == 'AdminExcursionBookings';
+    final reason = data['reason'] as String?;
 
     String title = 'Réservation Excursions & Activités';
     String message;
-    if (isStaff) {
-      final roomNumber = data['room_number'] as String?;
-      final guestName = data['guest_name'] as String?;
-
-      final detailsParts = <String>[];
-      if (roomNumber != null && roomNumber.isNotEmpty) {
-        detailsParts.add('Chambre $roomNumber');
+    if (status == 'confirmed') {
+      message =
+          'Votre réservation excursion « $excursionName » est confirmée pour le $date.';
+    } else if (status == 'cancelled') {
+      message = l10n.reservationCancelledMessage;
+      if (reason != null && reason.isNotEmpty) {
+        message += '\nMotif : $reason';
       }
-      if (guestName != null && guestName.isNotEmpty) {
-        detailsParts.add(guestName);
-      }
-      final detailsSuffix = detailsParts.isEmpty
-          ? ''
-          : ' (${detailsParts.join(' – ')})';
-
-      title = 'Nouvelle Réservation Excursion';
-      message = 'Nouvelle réservation pour « $excursionName » le $date$detailsSuffix.';
+    } else if (status == 'completed') {
+      message = 'Votre excursion « $excursionName » du $date a été honorée.';
     } else {
-      if (status == 'confirmed') {
-        message =
-            'Votre réservation excursion « $excursionName » est confirmée pour le $date.';
-      } else if (status == 'cancelled') {
-        message = l10n.reservationCancelledMessage;
-        if (reason != null && reason.isNotEmpty) {
-          message += '\nMotif : $reason';
-        }
-      } else if (status == 'completed') {
-        message = 'Votre excursion « $excursionName » du $date a été honorée.';
-      } else {
-        final label = _restaurantStatusLabel(l10n, status);
-        message = 'Statut de votre réservation excursion : $label';
-      }
+      final label = _restaurantStatusLabel(l10n, status);
+      message = 'Statut de votre réservation excursion : $label';
     }
 
     showDialog(
@@ -1675,7 +1651,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 );
               },
               child: Text(
-                isStaff ? l10n.viewRequests : l10n.myExcursionsShort,
+                l10n.myExcursionsShort,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
