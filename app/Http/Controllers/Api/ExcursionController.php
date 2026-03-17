@@ -203,6 +203,8 @@ class ExcursionController extends Controller
                 [
                     'type' => 'excursion_booking',
                     'booking_id' => (string) $booking->id,
+                    'room_number' => $booking->room->room_number ?? '',
+                    'guest_name' => $booking->guest->name ?? '',
                     'screen' => 'AdminExcursionBookings',
                 ]
             );
