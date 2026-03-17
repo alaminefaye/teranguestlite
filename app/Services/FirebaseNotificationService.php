@@ -515,6 +515,19 @@ class FirebaseNotificationService
 
         if (empty($tokens)) {
             Log::warning("No valid FCM tokens found");
+            // Fallback: stocker en base pour polling pour tous les utilisateurs cibles
+            foreach ($users as $user) {
+                $userModel = null;
+                if (is_array($user) && isset($user['id'])) {
+                    $userModel = User::find($user['id']);
+                } elseif ($user instanceof User) {
+                    $userModel = $user;
+                }
+                
+                if ($userModel) {
+                    $this->storeForInAppPolling($userModel, $title, $body, $data);
+                }
+            }
             return false;
         }
 
@@ -625,7 +638,6 @@ class FirebaseNotificationService
     public function sendToEnterprise($enterpriseId, string $title, string $body, array $data = [])
     {
         $users = User::where('enterprise_id', $enterpriseId)
-            ->has('fcmTokens')
             ->get();
 
         if ($users->isEmpty()) {
@@ -651,14 +663,12 @@ class FirebaseNotificationService
         $user = User::where('enterprise_id', $room->enterprise_id)
             ->where('role', 'guest')
             ->where('room_id', $room->id)
-            ->has('fcmTokens')
             ->first();
 
         if (!$user) {
             $user = User::where('enterprise_id', $room->enterprise_id)
                 ->where('role', 'guest')
                 ->where('room_number', $room->room_number)
-                ->has('fcmTokens')
                 ->first();
         }
 
@@ -840,7 +850,6 @@ class FirebaseNotificationService
                             });
                     });
             })
-            ->has('fcmTokens')
             ->get();
 
         if ($staff->isEmpty()) {
@@ -865,7 +874,6 @@ class FirebaseNotificationService
                             ->where('department', 'Service en chambre');
                     });
             })
-            ->has('fcmTokens')
             ->get();
 
         if ($staff->isEmpty()) {
@@ -891,7 +899,6 @@ class FirebaseNotificationService
     {
         $staff = User::where('enterprise_id', $enterpriseId)
             ->whereIn('role', ['admin', 'staff'])
-            ->has('fcmTokens')
             ->get();
 
         if ($staff->isEmpty()) {
@@ -909,7 +916,6 @@ class FirebaseNotificationService
     {
         $staff = User::where('enterprise_id', $enterpriseId)
             ->whereIn('role', ['admin', 'staff'])
-            ->has('fcmTokens')
             ->where(function ($q) use ($sectionKey) {
                 $q->where('role', 'admin')
                     ->orWhere(function ($q2) use ($sectionKey) {
