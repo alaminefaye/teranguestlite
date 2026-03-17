@@ -114,13 +114,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  _restaurant?.type ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textGray,
+                if (_restaurant?.type != null)
+                  TranslatableText(
+                    _restaurant!.type,
+                    locale: context.read<LocaleProvider>().languageCode,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textGray,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -271,8 +273,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     color: AppTheme.accentGold,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    _restaurant!.type!,
+                  TranslatableText(
+                    _restaurant!.type,
+                    locale: context.read<LocaleProvider>().languageCode,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppTheme.textGray,
@@ -294,8 +297,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     color: AppTheme.accentGold,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    _restaurant!.cuisine!,
+                  TranslatableText(
+                    _restaurant!.cuisine,
+                    locale: context.read<LocaleProvider>().languageCode,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppTheme.textGray,
@@ -329,7 +333,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 const Icon(Icons.people, size: 20, color: AppTheme.accentGold),
                 const SizedBox(width: 12),
                 Text(
-                  'Capacité : ${_restaurant!.capacity} personnes',
+                  AppLocalizations.of(context).capacityPeople(_restaurant!.capacity!),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white,

@@ -94,7 +94,7 @@ class OrderCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          _buildStatusBadge(isMobile),
+                          _buildStatusBadge(context, isMobile),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -150,7 +150,7 @@ class OrderCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '${order.itemsCount} article${order.itemsCount > 1 ? 's' : ''}',
+                            '${order.itemsCount} ${AppLocalizations.of(context).itemCount(order.itemsCount)}',
                             style: TextStyle(
                               fontSize: detailSize,
                               color: AppTheme.textGray,
@@ -188,7 +188,7 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge([bool isMobile = false]) {
+  Widget _buildStatusBadge(BuildContext context, [bool isMobile = false]) {
     final statusColors = _getStatusColor(order.status);
 
     return Container(
@@ -199,7 +199,7 @@ class OrderCard extends StatelessWidget {
         border: Border.all(color: statusColors['border']!, width: 1),
       ),
       child: Text(
-        order.statusLabel,
+        _getStatusLabel(context, order.status),
         style: TextStyle(
           fontSize: isMobile ? 10 : 11,
           fontWeight: FontWeight.bold,
@@ -207,6 +207,28 @@ class OrderCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getStatusLabel(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context);
+    switch (status) {
+      case 'pending':
+        return l10n.statusPending;
+      case 'confirmed':
+        return l10n.statusConfirmed;
+      case 'preparing':
+        return l10n.statusPreparing;
+      case 'ready':
+        return l10n.statusReady;
+      case 'delivering':
+        return l10n.statusDelivering;
+      case 'delivered':
+        return l10n.statusDelivered;
+      case 'cancelled':
+        return l10n.statusCancelled;
+      default:
+        return status;
+    }
   }
 
   Map<String, Color> _getStatusColor(String status) {

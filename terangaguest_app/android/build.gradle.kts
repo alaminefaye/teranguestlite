@@ -18,6 +18,14 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(":app")
 }
+// Suppress "source value 8 is obsolete" from dependency modules (e.g. google_mlkit_commons)
+gradle.projectsEvaluated {
+    subprojects {
+        tasks.withType<JavaCompile>().configureEach {
+            options.compilerArgs.add("-Xlint:-options")
+        }
+    }
+}
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)

@@ -1,7 +1,7 @@
 class LaundryService {
   final int id;
-  final String name;
-  final String? description;
+  final dynamic name;
+  final dynamic description;
   final double pricePerItem;
   final bool isAvailable;
 
@@ -24,8 +24,8 @@ class LaundryService {
   factory LaundryService.fromJson(Map<String, dynamic> json) {
     return LaundryService(
       id: _parseIntSafe(json['id']),
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
+      name: json['name'] ?? '',
+      description: json['description'],
       pricePerItem: _parseDouble(json['price_per_item'] ?? json['price']),
       isAvailable: json['is_available'] as bool? ?? true,
     );
@@ -126,20 +126,20 @@ class LaundryRequest {
 
   String get formattedTotalPrice => '${totalPrice.toStringAsFixed(0)} FCFA';
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'picked_up':
-        return 'Récupérée';
+        return 'statusPickedUp';
       case 'processing':
-        return 'En cours';
+        return 'statusProcessing';
       case 'ready':
-        return 'Prête';
+        return 'statusReady';
       case 'delivered':
-        return 'Livrée';
+        return 'statusDelivered';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
       default:
         return status;
     }
@@ -165,7 +165,7 @@ class LaundryRequest {
 
 class LaundryRequestItem {
   final int serviceId;
-  final String serviceName;
+  final dynamic serviceName;
   final int quantity;
   final double pricePerItem;
 
@@ -182,8 +182,8 @@ class LaundryRequestItem {
         ? LaundryRequest._parseIntSafe(service['id'])
         : LaundryRequest._parseIntSafe(json['service_id']);
     final serviceName = service != null
-        ? (service['name'] as String? ?? '')
-        : (json['service_name'] as String? ?? '');
+        ? (service['name'] ?? '')
+        : (json['service_name'] ?? '');
     final pricePerItem = _parseDouble(
       json['price_per_item'] ?? json['unit_price'] ?? json['price'],
     );

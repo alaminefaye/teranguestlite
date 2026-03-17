@@ -11,6 +11,8 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'create_laundry_request_screen.dart';
+import '../../widgets/translatable_text.dart';
+import '../../utils/translatable_text_helper.dart';
 
 class LaundryListScreen extends StatefulWidget {
   const LaundryListScreen({super.key});
@@ -195,8 +197,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                     color: AppTheme.accentGold,
                                   ),
                                   const SizedBox(height: 6),
-                                  Text(
+                                  TranslatableText(
                                     service.name,
+                                    locale: Localizations.localeOf(context).languageCode,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -391,7 +394,8 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
 
   /// Icône spécifique selon le type de service blanchisserie (vêtements et linge)
   static IconData _iconForLaundryService(LaundryService service) {
-    final n = service.name.toLowerCase();
+    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(service.name, 'fr');
+    final n = nameStr.toLowerCase();
     // Vêtements : icône nettoyage à sec / vêtement
     if (n.contains('chemise') || n.contains('shirt')) {
       return Icons.dry_cleaning;

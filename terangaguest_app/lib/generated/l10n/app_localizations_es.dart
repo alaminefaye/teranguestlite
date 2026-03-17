@@ -1710,7 +1710,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reasonOptional => 'Motivo (opcional)';
 
   @override
-  String get reasonRequired => 'Proporcione un motivo.';
+  String get reasonRequired => 'Por favor, especifique un motivo.';
 
   @override
   String get accept => 'Aceptar';
@@ -2158,7 +2158,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newPalaceRequest => 'Nueva solicitud Palace / Conserjería';
 
   @override
-  String get newRestaurantReservation => 'Nueva reserva restaurante';
+  String get newRestaurantReservation => 'Nueva reserva de restaurante';
 
   @override
   String reservationIdShort(String id) {
@@ -2199,4 +2199,185 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get confirmCancellation => 'Confirmar cancelación';
+
+  @override
+  String get actionConfirm => 'Confirmar';
+
+  @override
+  String get actionHonor => 'Marcar como honrada';
+
+  @override
+  String get statusHonored => 'Honrada';
+
+  @override
+  String itemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'artículos',
+      one: 'artículo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get actionNotifyRoomService =>
+      'Transferir al Servicio de Habitaciones';
+
+  @override
+  String get clientRoom => 'Cliente habitacion';
+
+  @override
+  String roomLabelLong(Object number) {
+    return 'Habitación $number';
+  }
+
+  @override
+  String get laundryRequestCancelledByClient =>
+      'Solicitud de lavandería cancelada por el cliente';
+
+  @override
+  String laundryRequestCancelledByClientMessage(Object number, Object details) {
+    return 'El cliente ha cancelado la solicitud de lavandería #$number$details.';
+  }
+
+  @override
+  String get laundryRequestUpdated => 'Solicitud de lavandería actualizada';
+
+  @override
+  String laundryRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  ) {
+    return 'Estado de la solicitud de lavandería #$number actualizado: $status$details.';
+  }
+
+  @override
+  String get laundryRequest => 'Solicitud de lavandería';
+
+  @override
+  String laundryItemsLabel(Object items) {
+    return 'Ropa: $items';
+  }
+
+  @override
+  String specialInstructionsLong(Object instructions) {
+    return 'Instrucciones: $instructions';
+  }
+
+  @override
+  String get viewRequests => 'Ver solicitudes';
+
+  @override
+  String newRestaurantReservationMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  ) {
+    return 'Nueva reserva en el restaurante $restaurant prevista para el $date a las $time$details.';
+  }
+
+  @override
+  String get restaurantReservationCancelledByClient =>
+      'Reserva de restaurante cancelada por el cliente';
+
+  @override
+  String restaurantReservationCancelledByClientMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  ) {
+    return 'El cliente ha cancelado la reserva en el restaurante $restaurant prevista para el $date a las $time$details.';
+  }
+
+  @override
+  String get restaurantReservationUpdated =>
+      'Reserva de restaurante actualizada';
+
+  @override
+  String get restaurantReservation => 'Reserva de restaurante';
+
+  @override
+  String restaurantReservationConfirmedMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+  ) {
+    return 'Su reserva en el restaurante $restaurant está confirmada para el $date a las $time.';
+  }
+
+  @override
+  String restaurantReservationHonoredMessage(Object restaurant) {
+    return 'Gracias, su reserva en el restaurante $restaurant ha sido honrada.';
+  }
+
+  @override
+  String get palaceRequestCancelledByClient =>
+      'Solicitud Palace cancelada por el cliente';
+
+  @override
+  String palaceRequestCancelledByClientMessage(Object number, Object details) {
+    return 'El cliente ha cancelado la solicitud Palace #$number$details.';
+  }
+
+  @override
+  String get palaceRequestUpdated => 'Solicitud Palace actualizada';
+
+  @override
+  String palaceRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  ) {
+    return 'Estado de la solicitud Palace #$number actualizado: $status$details.';
+  }
+
+  @override
+  String get palaceRequestDetailed => 'Solicitud Palace / Conserjería';
+
+  @override
+  String palaceRequestInProgressMessage(Object item, Object number) {
+    return 'Su solicitud \"$item\" (#$number) está en curso de tratamiento.';
+  }
+
+  @override
+  String palaceRequestCompletedMessage(Object item, Object number) {
+    return 'Su solicitud \"$item\" (#$number) está terminada.';
+  }
+
+  @override
+  String palaceRequestRefusedMessage(Object item, Object number) {
+    return 'Su solicitud \"$item\" (#$number) ha sido rechazada o cancelada.';
+  }
+
+  @override
+  String palaceRequestUpdatedStatusMessage(Object item, Object number) {
+    return 'Estado de su solicitud \"$item\" (#$number) actualizado.';
+  }
+
+  @override
+  String get closeButton => 'Cerrar';
+
+  @override
+  String laundryStatusPickedUpMessage(Object item, Object number) {
+    return '$item para la solicitud #$number ha sido recogido.';
+  }
+
+  @override
+  String laundryStatusReadyMessage(Object item, Object number) {
+    return '$item para la solicitud #$number está listo.';
+  }
+
+  @override
+  String laundryStatusDeliveredMessage(Object item, Object number) {
+    return '$item para la solicitud #$number ha sido entregado.';
+  }
+
+  @override
+  String laundryStatusCancelledMessage(Object number) {
+    return 'La solicitud de lavandería #$number ha sido cancelada.';
+  }
 }

@@ -3,8 +3,8 @@ class Restaurant {
   /// String ou Map fr/en/es/ar (pour TranslatableText).
   final dynamic name;
   final dynamic description;
-  final String? type;
-  final String? cuisine;
+  final dynamic type;
+  final dynamic cuisine;
   final int? capacity;
   final String? image;
   final Map<String, String>? openingHours;
@@ -29,8 +29,8 @@ class Restaurant {
       id: json['id'] as int,
       name: json['name'],
       description: json['description'],
-      type: json['type'] as String?,
-      cuisine: (json['cuisine_type'] ?? json['cuisine']) as String?,
+      type: json['type'],
+      cuisine: json['cuisine_type'] ?? json['cuisine'],
       capacity: _parseInt(json['capacity']),
       image: json['image'] as String?,
       openingHours: _parseOpeningHours(json['opening_hours']),
@@ -76,8 +76,8 @@ class Restaurant {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name is String ? name : null,
-      'description': description is String ? description : null,
+      'name': name is String ? name : name,
+      'description': description is String ? description : description,
       'type': type,
       'cuisine': cuisine,
       'capacity': capacity,
@@ -149,14 +149,16 @@ class RestaurantReservation {
     return null;
   }
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'confirmed':
-        return 'Confirmée';
+        return 'statusConfirmed';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
+      case 'honored':
+        return 'statusHonored';
       default:
         return status;
     }

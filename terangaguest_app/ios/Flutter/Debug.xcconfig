@@ -1,2 +1,6 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+// Ensure Pods_Runner.framework is found (umbrella framework lives in PODS_CONFIGURATION_BUILD_DIR)
+FRAMEWORK_SEARCH_PATHS = $(FRAMEWORK_SEARCH_PATHS) "${PODS_CONFIGURATION_BUILD_DIR}" "$(BUILT_PRODUCTS_DIR)"
+// Link Flutter.framework (copied to BUILT_PRODUCTS_DIR by xcode_backend before link; not in Pods OTHER_LDFLAGS)
+OTHER_LDFLAGS = $(inherited) -framework Flutter

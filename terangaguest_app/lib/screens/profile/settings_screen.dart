@@ -228,20 +228,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'Afficher les prix en',
           style: TextStyle(color: AppTheme.accentGold),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: DisplayCurrency.values.map((c) {
-            return RadioListTile<DisplayCurrency>(
-              value: c,
-              groupValue: currencyProvider.displayCurrency,
-              onChanged: (v) async {
-                if (v != null) await currencyProvider.setDisplayCurrency(v);
-                if (ctx.mounted) Navigator.pop(ctx);
-              },
-              title: Text(labels[c] ?? c.code, style: const TextStyle(color: Colors.white)),
-              activeColor: AppTheme.accentGold,
-            );
-          }).toList(),
+        content: RadioGroup<DisplayCurrency>(
+          groupValue: currencyProvider.displayCurrency,
+          onChanged: (v) async {
+            if (v != null) await currencyProvider.setDisplayCurrency(v);
+            if (ctx.mounted) Navigator.pop(ctx);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: DisplayCurrency.values.map((c) {
+              return RadioListTile<DisplayCurrency>(
+                value: c,
+                title: Text(labels[c] ?? c.code, style: const TextStyle(color: Colors.white)),
+                activeColor: AppTheme.accentGold,
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

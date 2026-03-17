@@ -635,7 +635,6 @@
   "acceptEmergencyAlertMessage": "هل تقبل تنبيه المساعدة والطوارئ هذا؟",
   "cancelEmergencyAlertMessage": "هل تريد إلغاء هذا التنبيه؟",
   "reasonOptional": "السبب (اختياري)",
-  "reasonRequired": "يرجى تقديم سبب.",
   "accept": "قبول",
   "unidentifiedRoom": "غرفة غير محددة",
   "requestFromRoom": "طلب من {roomInfo}",
@@ -876,5 +875,164 @@
     }
   },
   "clientWillBeNotifiedWithReason": "سيتم إخطار العميل بالسبب المقدم.",
-  "confirmCancellation": "تأكيد الإلغاء"
+  "confirmCancellation": "تأكيد الإلغاء",
+  "actionConfirm": "تأكيد",
+  "actionHonor": "تحديد كمشرفة",
+  "statusHonored": "مشرفة",
+  "actionNotifyRoomService": "نقل إلى خدمة الغرف",
+  "clientRoom": "غرفة العميل",
+  "roomLabelLong": "غرفة {number}",
+  "@roomLabelLong": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "laundryRequestCancelledByClient": "تم إلغاء طلب الغسيل من قبل العميل",
+  "laundryRequestCancelledByClientMessage": "قام العميل بإلغاء طلب الغسيل رقم {number}{details}.",
+  "@laundryRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "laundryRequestUpdated": "تم تحديث طلب الغسيل",
+  "laundryRequestUpdatedMessage": "تم تحديث حالة طلب الغسيل رقم {number}: {status}{details}.",
+  "@laundryRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "laundryRequest": "طلب غسيل",
+  "laundryItemsLabel": "الغسيل: {items}",
+  "@laundryItemsLabel": {
+    "placeholders": {
+      "items": {}
+    }
+  },
+  "specialInstructionsLong": "التعليمات: {instructions}",
+  "@specialInstructionsLong": {
+    "placeholders": {
+      "instructions": {}
+    }
+  },
+  "viewRequests": "عرض الطلبات",
+  "viewMyRequests": "عرض طلباتي",
+  "newRestaurantReservationMessage": "حجز جديد في مطعم {restaurant} مجدول في {date} في {time}{details}.",
+  "@newRestaurantReservationMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationCancelledByClient": "تم إلغاء حجز المطعم من قبل العميل",
+  "restaurantReservationCancelledByClientMessage": "قام العميل بإلغاء الحجز في مطعم {restaurant} المجدول في {date} في {time}{details}.",
+  "@restaurantReservationCancelledByClientMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationUpdated": "تم تحديث حجز المطعم",
+  "restaurantReservation": "حجز مطعم",
+  "restaurantReservationConfirmedMessage": "تم تأكيد حجزك في مطعم {restaurant} لليوم {date} الساعة {time}.",
+  "@restaurantReservationConfirmedMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {}
+    }
+  },
+  "restaurantReservationHonoredMessage": "شكراً لك، تم استخدام حجزك في مطعم {restaurant}.",
+  "@restaurantReservationHonoredMessage": {
+    "placeholders": {
+      "restaurant": {}
+    }
+  },
+  "palaceRequestCancelledByClient": "تم إلغاء طلب Palace من قبل العميل",
+  "palaceRequestCancelledByClientMessage": "قام العميل بإلغاء طلب Palace رقم {number}{details}.",
+  "@palaceRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "palaceRequestUpdated": "تم تحديث طلب Palace",
+  "palaceRequestUpdatedMessage": "تم تحديث حالة طلب Palace رقم {number}: {status}{details}.",
+  "@palaceRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "palaceRequestDetailed": "طلب Palace / كونسيرج",
+  "palaceRequestInProgressMessage": "طلبك \"{item}\" (رقم {number}) قيد المعالجة.",
+  "@palaceRequestInProgressMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestCompletedMessage": "تم اكتمال طلبك \"{item}\" (رقم {number}).",
+  "@palaceRequestCompletedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestRefusedMessage": "تم رفض أو إلغاء طلبك \"{item}\" (رقم {number}).",
+  "@palaceRequestRefusedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestUpdatedStatusMessage": "تم تحديث حالة طلبك \"{item}\" (رقم {number}).",
+  "@palaceRequestUpdatedStatusMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "closeButton": "إغلاق",
+  "laundryStatusPickedUpMessage": "تم استلام {item} للطلب رقم {number}.",
+  "@laundryStatusPickedUpMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusReadyMessage": "{item} للطلب رقم {number} جاهز.",
+  "@laundryStatusReadyMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusDeliveredMessage": "تم تسليم {item} للطلب رقم {number}.",
+  "@laundryStatusDeliveredMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusCancelledMessage": "تم إلغاء طلب الغسيل رقم {number}.",
+  "@laundryStatusCancelledMessage": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "reasonRequired": "يرجى تحديد السبب.",
+  "itemCount": "{count, plural, =1{عنصر} other{عناصر}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

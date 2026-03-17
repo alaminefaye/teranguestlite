@@ -883,5 +883,163 @@
     }
   },
   "clientWillBeNotifiedWithReason": "Le client sera notifié avec le motif saisi.",
-  "confirmCancellation": "Confirmer l'annulation"
+  "confirmCancellation": "Confirmer l'annulation",
+  "actionConfirm": "Confirmer",
+  "actionHonor": "Honorer",
+  "statusHonored": "Honorée",
+  "itemCount": "{count, plural, =1{article} other{articles}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "actionNotifyRoomService": "Transférer au Service en Chambre",
+  "clientRoom": "Client chambre",
+  "roomLabelLong": "Chambre {number}",
+  "@roomLabelLong": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "laundryRequestCancelledByClient": "Demande de blanchisserie annulée par le client",
+  "laundryRequestCancelledByClientMessage": "Le client a annulé la demande de blanchisserie #{number}{details}.",
+  "@laundryRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "laundryRequestUpdated": "Demande de blanchisserie mise à jour",
+  "laundryRequestUpdatedMessage": "Statut de la demande #{number} mis à jour : {status}{details}.",
+  "@laundryRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "laundryRequest": "Demande de blanchisserie",
+  "laundryItemsLabel": "Linge : {items}",
+  "@laundryItemsLabel": {
+    "placeholders": {
+      "items": {}
+    }
+  },
+  "specialInstructionsLong": "Instructions : {instructions}",
+  "@specialInstructionsLong": {
+    "placeholders": {
+      "instructions": {}
+    }
+  },
+  "viewRequests": "Voir les demandes",
+  "newRestaurantReservation": "Nouvelle réservation restaurant",
+  "newRestaurantReservationMessage": "Nouvelle réservation au restaurant {restaurant} prévue le {date} à {time}{details}.",
+  "@newRestaurantReservationMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationCancelledByClient": "Réservation restaurant annulée par le client",
+  "restaurantReservationCancelledByClientMessage": "Le client a annulé la réservation au restaurant {restaurant} prévue le {date} à {time}{details}.",
+  "@restaurantReservationCancelledByClientMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationUpdated": "Réservation restaurant mise à jour",
+  "restaurantReservation": "Réservation restaurant",
+  "restaurantReservationConfirmedMessage": "Votre réservation au restaurant {restaurant} est confirmée pour le {date} à {time}.",
+  "@restaurantReservationConfirmedMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {}
+    }
+  },
+  "restaurantReservationHonoredMessage": "Merci, votre réservation au restaurant {restaurant} a été honorée.",
+  "@restaurantReservationHonoredMessage": {
+    "placeholders": {
+      "restaurant": {}
+    }
+  },
+  "palaceRequestCancelledByClient": "Demande Palace annulée par le client",
+  "palaceRequestCancelledByClientMessage": "Le client a annulé la demande Palace #{number}{details}.",
+  "@palaceRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "palaceRequestUpdated": "Demande Palace mise à jour",
+  "palaceRequestUpdatedMessage": "Statut de la demande Palace #{number} mis à jour : {status}{details}.",
+  "@palaceRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "palaceRequestDetailed": "Demande Palace / Conciergerie",
+  "palaceRequestInProgressMessage": "Votre demande \"{item}\" (#{number}) est en cours de traitement.",
+  "@palaceRequestInProgressMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestCompletedMessage": "Votre demande \"{item}\" (#{number}) est terminée.",
+  "@palaceRequestCompletedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestRefusedMessage": "Votre demande \"{item}\" (#{number}) a été refusée ou annulée.",
+  "@palaceRequestRefusedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestUpdatedStatusMessage": "Statut de votre demande \"{item}\" (#{number}) mis à jour.",
+  "@palaceRequestUpdatedStatusMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "closeButton": "Fermer",
+  "laundryStatusPickedUpMessage": "{item} pour la demande #{number} a été récupéré.",
+  "@laundryStatusPickedUpMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusReadyMessage": "{item} pour la demande #{number} est prêt.",
+  "@laundryStatusReadyMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusDeliveredMessage": "{item} pour la demande #{number} a été livré.",
+  "@laundryStatusDeliveredMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusCancelledMessage": "La demande de blanchisserie #{number} a été annulée.",
+  "@laundryStatusCancelledMessage": {
+    "placeholders": {
+      "number": {}
+    }
+  }
 }

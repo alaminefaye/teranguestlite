@@ -25,8 +25,6 @@ class VehicleDirectFormScreen extends StatefulWidget {
       _VehicleDirectFormScreenState();
 }
 
-typedef _DurationChoice = ({String label, String value, int? days, int? hours});
-
 class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
   final TextEditingController _detailsController = TextEditingController();
   final TextEditingController _clientCodeController = TextEditingController();
@@ -454,7 +452,7 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
       runSpacing: 8,
       children: [
         // Chip "Tous"
-        _typeChip(null, l10n.allOption ?? 'Tous'),
+        _typeChip(null, l10n.allOption),
         for (final t in items) _typeChip(t.value, t.label),
       ],
     );
@@ -498,9 +496,9 @@ class _VehicleDirectFormScreenState extends State<VehicleDirectFormScreen> {
 
   Widget _durationSelector(AppLocalizations l10n) {
     final options = [
-      (value: 'half', label: l10n.halfDayOption ?? 'Demi-journée'),
-      (value: 'day', label: l10n.fullDayOption ?? '1 Journée'),
-      (value: 'multi', label: l10n.multipleDaysOption ?? 'Plusieurs jours'),
+      (value: 'half', label: l10n.halfDayOption),
+      (value: 'day', label: l10n.fullDayOption),
+      (value: 'multi', label: l10n.multipleDaysOption),
     ];
     return Row(
       children: options

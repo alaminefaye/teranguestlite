@@ -9,6 +9,7 @@ import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../models/laundry.dart';
+import '../../widgets/translatable_text.dart';
 
 class MyLaundryRequestsScreen extends StatefulWidget {
   const MyLaundryRequestsScreen({super.key});
@@ -864,13 +865,27 @@ class LaundryRequestDetailScreen extends StatelessWidget {
                               final item = items[index];
                               return Row(
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      '${item.quantity} x ${item.serviceName}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                      ),
+                                   Expanded(
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          '${item.quantity} x ',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: TranslatableText(
+                                            item.serviceName,
+                                            locale: Localizations.localeOf(context).languageCode,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   const SizedBox(width: 8),

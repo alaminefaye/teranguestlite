@@ -12,7 +12,16 @@ class TranslatableTextHelper {
   /// - Map (fr, en, es, ar) : utilise content[locale] si présent, sinon traduit content['fr'] vers locale.
   static Future<String> resolveDisplayText(dynamic content, String locale) async {
     if (content == null) return '';
-    if (content is String) return content;
+    if (content is String) {
+      // Pour les chaînes "en dur" (anciennes ou labels server simples)
+      final lower = content.toLowerCase().trim();
+      // On normalise les termes connus pour faciliter la traduction par le widget TranslatableText
+      if (lower == 'restaurant' || lower == 'restaurants') return 'restaurant';
+      if (lower == 'bar' || lower == 'bars') return 'bar';
+      if (lower == 'cafe' || lower == 'café' || lower == 'cafes' || lower == 'cafés' || lower == 'caffe' || lower == 'caffes') return 'cafe';
+      if (lower == 'lounge' || lower == 'lounges') return 'lounge';
+      return content;
+    }
     if (content is! Map) return content.toString();
 
     final map = content;
@@ -36,7 +45,14 @@ class TranslatableTextHelper {
   /// Synchrone : retourne le texte pour [locale] si disponible, sinon le français (sans traduire).
   static String resolveDisplayTextSync(dynamic content, String locale) {
     if (content == null) return '';
-    if (content is String) return content;
+    if (content is String) {
+      final lower = content.toLowerCase().trim();
+      if (lower == 'restaurant' || lower == 'restaurants') return 'restaurant';
+      if (lower == 'bar' || lower == 'bars') return 'bar';
+      if (lower == 'cafe' || lower == 'café' || lower == 'cafes' || lower == 'cafés' || lower == 'caffe' || lower == 'caffes') return 'cafe';
+      if (lower == 'lounge' || lower == 'lounges') return 'lounge';
+      return content;
+    }
     if (content is! Map) return content.toString();
 
     final map = content;

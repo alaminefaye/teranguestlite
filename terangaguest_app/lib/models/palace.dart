@@ -203,16 +203,16 @@ class PalaceRequest {
     );
   }
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'in_progress':
-        return 'Acceptée';
+        return 'statusInProgress';
       case 'completed':
-        return 'Terminée';
+        return 'statusCompleted';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
       default:
         return status;
     }

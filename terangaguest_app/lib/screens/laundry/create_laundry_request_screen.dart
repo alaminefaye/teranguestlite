@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/laundry_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../widgets/animated_button.dart';
+import '../../widgets/translatable_text.dart';
 
 class CreateLaundryRequestScreen extends StatefulWidget {
   const CreateLaundryRequestScreen({super.key});
@@ -169,13 +170,25 @@ class _CreateLaundryRequestScreenState
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          '${service.name} × $quantity',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
+                       Expanded(
+                        child: Row(
+                          children: [
+                            TranslatableText(
+                              service.name,
+                              locale: Localizations.localeOf(context).languageCode,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              ' × $quantity',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Text(

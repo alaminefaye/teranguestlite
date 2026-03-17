@@ -4145,6 +4145,244 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Confirmer l\'annulation'**
   String get confirmCancellation;
+
+  /// No description provided for @actionConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get actionConfirm;
+
+  /// No description provided for @actionHonor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honorer'**
+  String get actionHonor;
+
+  /// No description provided for @statusHonored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Honorée'**
+  String get statusHonored;
+
+  /// No description provided for @itemCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{article} other{articles}}'**
+  String itemCount(num count);
+
+  /// No description provided for @actionNotifyRoomService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer au Service en Chambre'**
+  String get actionNotifyRoomService;
+
+  /// No description provided for @clientRoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Client chambre'**
+  String get clientRoom;
+
+  /// No description provided for @roomLabelLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chambre {number}'**
+  String roomLabelLong(Object number);
+
+  /// No description provided for @laundryRequestCancelledByClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande de blanchisserie annulée par le client'**
+  String get laundryRequestCancelledByClient;
+
+  /// No description provided for @laundryRequestCancelledByClientMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client a annulé la demande de blanchisserie #{number}{details}.'**
+  String laundryRequestCancelledByClientMessage(Object number, Object details);
+
+  /// No description provided for @laundryRequestUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande de blanchisserie mise à jour'**
+  String get laundryRequestUpdated;
+
+  /// No description provided for @laundryRequestUpdatedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut de la demande #{number} mis à jour : {status}{details}.'**
+  String laundryRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  );
+
+  /// No description provided for @laundryRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande de blanchisserie'**
+  String get laundryRequest;
+
+  /// No description provided for @laundryItemsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Linge : {items}'**
+  String laundryItemsLabel(Object items);
+
+  /// No description provided for @specialInstructionsLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Instructions : {instructions}'**
+  String specialInstructionsLong(Object instructions);
+
+  /// No description provided for @viewRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les demandes'**
+  String get viewRequests;
+
+  /// No description provided for @newRestaurantReservationMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle réservation au restaurant {restaurant} prévue le {date} à {time}{details}.'**
+  String newRestaurantReservationMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  );
+
+  /// No description provided for @restaurantReservationCancelledByClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation restaurant annulée par le client'**
+  String get restaurantReservationCancelledByClient;
+
+  /// No description provided for @restaurantReservationCancelledByClientMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client a annulé la réservation au restaurant {restaurant} prévue le {date} à {time}{details}.'**
+  String restaurantReservationCancelledByClientMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  );
+
+  /// No description provided for @restaurantReservationUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation restaurant mise à jour'**
+  String get restaurantReservationUpdated;
+
+  /// No description provided for @restaurantReservation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservation restaurant'**
+  String get restaurantReservation;
+
+  /// No description provided for @restaurantReservationConfirmedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre réservation au restaurant {restaurant} est confirmée pour le {date} à {time}.'**
+  String restaurantReservationConfirmedMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+  );
+
+  /// No description provided for @restaurantReservationHonoredMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci, votre réservation au restaurant {restaurant} a été honorée.'**
+  String restaurantReservationHonoredMessage(Object restaurant);
+
+  /// No description provided for @palaceRequestCancelledByClient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande Palace annulée par le client'**
+  String get palaceRequestCancelledByClient;
+
+  /// No description provided for @palaceRequestCancelledByClientMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le client a annulé la demande Palace #{number}{details}.'**
+  String palaceRequestCancelledByClientMessage(Object number, Object details);
+
+  /// No description provided for @palaceRequestUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande Palace mise à jour'**
+  String get palaceRequestUpdated;
+
+  /// No description provided for @palaceRequestUpdatedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut de la demande Palace #{number} mis à jour : {status}{details}.'**
+  String palaceRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  );
+
+  /// No description provided for @palaceRequestDetailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande Palace / Conciergerie'**
+  String get palaceRequestDetailed;
+
+  /// No description provided for @palaceRequestInProgressMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre demande \"{item}\" (#{number}) est en cours de traitement.'**
+  String palaceRequestInProgressMessage(Object item, Object number);
+
+  /// No description provided for @palaceRequestCompletedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre demande \"{item}\" (#{number}) est terminée.'**
+  String palaceRequestCompletedMessage(Object item, Object number);
+
+  /// No description provided for @palaceRequestRefusedMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre demande \"{item}\" (#{number}) a été refusée ou annulée.'**
+  String palaceRequestRefusedMessage(Object item, Object number);
+
+  /// No description provided for @palaceRequestUpdatedStatusMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut de votre demande \"{item}\" (#{number}) mis à jour.'**
+  String palaceRequestUpdatedStatusMessage(Object item, Object number);
+
+  /// No description provided for @closeButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get closeButton;
+
+  /// No description provided for @laundryStatusPickedUpMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{item} pour la demande #{number} a été récupéré.'**
+  String laundryStatusPickedUpMessage(Object item, Object number);
+
+  /// No description provided for @laundryStatusReadyMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{item} pour la demande #{number} est prêt.'**
+  String laundryStatusReadyMessage(Object item, Object number);
+
+  /// No description provided for @laundryStatusDeliveredMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'{item} pour la demande #{number} a été livré.'**
+  String laundryStatusDeliveredMessage(Object item, Object number);
+
+  /// No description provided for @laundryStatusCancelledMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande de blanchisserie #{number} a été annulée.'**
+  String laundryStatusCancelledMessage(Object number);
 }
 
 class _AppLocalizationsDelegate

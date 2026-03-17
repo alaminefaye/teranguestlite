@@ -1,5 +1,5 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# Déploiement minimum iOS 15.5 requis par google_mlkit_translation
+platform :ios, '15.5'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -37,7 +37,49 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # Force Pods to build where Runner looks for frameworks
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings['BUILD_DIR'] = '${SRCROOT}/../build/ios'
+  end
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['CONFIGURATION_BUILD_DIR'] = '${BUILD_DIR}/${CONFIGURATION}${EFFECTIVE_PLATFORM_NAME}'
+      # Only exclude i386 so arm64 simulator is supported and Xcode 26 lists simulator destinations (fixes "Unable to find a destination")
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+    end
+  end
+end
+
+post_integrate do |installer|
+  # Xcode 26+ does not build the Pods-Runner umbrella target; Runner links pod frameworks via OTHER_LDFLAGS from Pods-Runner.xcconfig instead.
+  require 'xcodeproj'
+  project = installer.aggregate_targets.find { |t| t.name == 'Pods-Runner' }&.user_project
+  if project
+    project.native_targets.each do |target|
+      if target.name == 'Runner'
+        to_remove = target.frameworks_build_phase.files.select { |f| f.file_ref && f.file_ref.path.to_s.include?('Pods_Runner.framework') }
+        to_remove.each { |f| target.frameworks_build_phase.remove_build_file(f) }
+      end
+    end
+    project.save
+  end
+
+  # Generated xcconfig has EXCLUDED_ARCHS = arm64 for simulator, so Xcode only shows 4 destinations. Override to i386 so simulator destinations are listed.
+  pods_runner_dir = File.join(__dir__, 'Pods', 'Target Support Files', 'Pods-Runner')
+  %w[debug release profile].each do |config|
+    path = File.join(pods_runner_dir, "Pods-Runner.#{config}.xcconfig")
+    next unless File.exist?(path)
+    content = File.read(path)
+    new_content = content.gsub(/EXCLUDED_ARCHS\[sdk=iphonesimulator\*\]\s*=\s*arm64/, 'EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386')
+    File.write(path, new_content) if new_content != content
+  end
+
+  # Runner.xcodeproj can have EXCLUDED_ARCHS = arm64 hardcoded; set to i386 so Xcode 26 lists simulator destinations.
+  runner_pbxproj = File.join(__dir__, 'Runner.xcodeproj', 'project.pbxproj')
+  if File.exist?(runner_pbxproj)
+    pbx = File.read(runner_pbxproj)
+    new_pbx = pbx.gsub('"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;', '"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;')
+    File.write(runner_pbxproj, new_pbx) if new_pbx != pbx
   end
 end

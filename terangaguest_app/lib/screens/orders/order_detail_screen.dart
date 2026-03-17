@@ -427,7 +427,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 SizedBox(height: isMobile ? 8 : 10),
                 if (roomNumber != null && roomNumber.isNotEmpty)
                   Text(
-                    'Chambre $roomNumber',
+                    '${AppLocalizations.of(context).profileRoom} $roomNumber',
                     style: TextStyle(
                       fontSize: isMobile ? 13 : 14,
                       color: Colors.white,
@@ -883,14 +883,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             border: Border.all(color: Colors.red.withValues(alpha: 0.8)),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
-              SizedBox(width: 6),
+              const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+              const SizedBox(width: 6),
               Text(
-                'Annuler',
-                style: TextStyle(
+                AppLocalizations.of(context).cancel,
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: Colors.red,
@@ -929,7 +929,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         border: Border.all(color: statusColors['border']!, width: 1),
       ),
       child: Text(
-        _order!.statusLabel,
+        _getStatusLabel(context, _order!.status),
         style: TextStyle(
           fontSize: isMobile ? 11 : 12,
           fontWeight: FontWeight.bold,
@@ -948,6 +948,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final status = _order!.status;
     final isRoomService = _isRoomServiceOnly();
 
@@ -958,17 +959,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       if (status == 'pending') {
         kitchenActions.add({
           'action': 'confirm',
-          'label': 'Confirmer la commande',
+          'label': l10n.actionConfirm,
         });
       } else if (status == 'confirmed') {
         kitchenActions.add({
           'action': 'prepare',
-          'label': 'Lancer la préparation',
+          'label': l10n.statusPreparing,
         });
       } else if (status == 'preparing') {
         kitchenActions.add({
           'action': 'mark_ready',
-          'label': 'Marquer comme prête',
+          'label': l10n.statusReady,
         });
       }
     }
@@ -980,12 +981,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       if (status == 'ready') {
         deliveryActions.add({
           'action': 'deliver',
-          'label': 'Mettre en livraison',
+          'label': l10n.statusDelivering,
         });
       } else if (status == 'delivering') {
         deliveryActions.add({
           'action': 'complete',
-          'label': 'Marquer comme livrée',
+          'label': l10n.statusDelivered,
         });
       }
     }
@@ -1098,9 +1099,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             children: [
               const Icon(Icons.campaign_rounded, color: Colors.white, size: 22),
               const SizedBox(width: 10),
-              const Text(
-                'Transférer au Service en Chambre',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context).actionNotifyRoomService,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -1370,6 +1371,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  String _getStatusLabel(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context);
+    switch (status) {
+      case 'pending':
+        return l10n.statusPending;
+      case 'confirmed':
+        return l10n.statusConfirmed;
+      case 'preparing':
+        return l10n.statusPreparing;
+      case 'ready':
+        return l10n.statusReady;
+      case 'delivering':
+        return l10n.statusDelivering;
+      case 'delivered':
+        return l10n.statusDelivered;
+      case 'cancelled':
+        return l10n.statusCancelled;
+      default:
+        return status;
     }
   }
 

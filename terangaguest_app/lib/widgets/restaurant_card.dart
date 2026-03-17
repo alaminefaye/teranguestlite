@@ -162,19 +162,33 @@ class RestaurantCard extends StatelessWidget {
                               restaurant.cuisine != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(
-                                [
-                                  if (restaurant.type != null) restaurant.type!,
+                              child: Row(
+                                children: [
+                                  if (restaurant.type != null)
+                                    TranslatableText(
+                                      restaurant.type,
+                                      locale: locale,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textGray,
+                                      ),
+                                    ),
+                                  if (restaurant.type != null &&
+                                      restaurant.cuisine != null)
+                                    const Text(' • ',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppTheme.textGray)),
                                   if (restaurant.cuisine != null)
-                                    restaurant.cuisine!,
-                                ].join(' • '),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppTheme.textGray,
-                                  height: 1.2,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                    TranslatableText(
+                                      restaurant.cuisine,
+                                      locale: locale,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textGray,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           const SizedBox(height: 8),
@@ -193,7 +207,7 @@ class RestaurantCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${restaurant.capacity} pers.',
+                                      '${restaurant.capacity} ${AppLocalizations.of(context).personsShort}',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.textGray,

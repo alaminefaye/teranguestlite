@@ -635,7 +635,6 @@
   "acceptEmergencyAlertMessage": "¿Aceptar esta alerta de Asistencia y Emergencia?",
   "cancelEmergencyAlertMessage": "¿Cancelar esta alerta?",
   "reasonOptional": "Motivo (opcional)",
-  "reasonRequired": "Proporcione un motivo.",
   "accept": "Aceptar",
   "unidentifiedRoom": "Habitación no identificada",
   "requestFromRoom": "Solicitud desde {roomInfo}",
@@ -876,5 +875,165 @@
     }
   },
   "clientWillBeNotifiedWithReason": "El cliente será notificado con el motivo indicado.",
-  "confirmCancellation": "Confirmar cancelación"
+  "confirmCancellation": "Confirmar cancelación",
+  "actionConfirm": "Confirmar",
+  "actionHonor": "Marcar como honrada",
+  "statusHonored": "Honrada",
+  "itemCount": "{count, plural, =1{artículo} other{artículos}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "actionNotifyRoomService": "Transferir al Servicio de Habitaciones",
+  "clientRoom": "Cliente habitacion",
+  "roomLabelLong": "Habitación {number}",
+  "@roomLabelLong": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "laundryRequestCancelledByClient": "Solicitud de lavandería cancelada por el cliente",
+  "laundryRequestCancelledByClientMessage": "El cliente ha cancelado la solicitud de lavandería #{number}{details}.",
+  "@laundryRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "laundryRequestUpdated": "Solicitud de lavandería actualizada",
+  "laundryRequestUpdatedMessage": "Estado de la solicitud de lavandería #{number} actualizado: {status}{details}.",
+  "@laundryRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "laundryRequest": "Solicitud de lavandería",
+  "laundryItemsLabel": "Ropa: {items}",
+  "@laundryItemsLabel": {
+    "placeholders": {
+      "items": {}
+    }
+  },
+  "specialInstructionsLong": "Instrucciones: {instructions}",
+  "@specialInstructionsLong": {
+    "placeholders": {
+      "instructions": {}
+    }
+  },
+  "viewRequests": "Ver solicitudes",
+  "viewMyRequests": "Ver mis solicitudes",
+  "newRestaurantReservation": "Nueva reserva de restaurante",
+  "newRestaurantReservationMessage": "Nueva reserva en el restaurante {restaurant} prevista para el {date} a las {time}{details}.",
+  "@newRestaurantReservationMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationCancelledByClient": "Reserva de restaurante cancelada por el cliente",
+  "restaurantReservationCancelledByClientMessage": "El cliente ha cancelado la reserva en el restaurante {restaurant} prevista para el {date} a las {time}{details}.",
+  "@restaurantReservationCancelledByClientMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {},
+      "details": {}
+    }
+  },
+  "restaurantReservationUpdated": "Reserva de restaurante actualizada",
+  "restaurantReservation": "Reserva de restaurante",
+  "restaurantReservationConfirmedMessage": "Su reserva en el restaurante {restaurant} está confirmada para el {date} a las {time}.",
+  "@restaurantReservationConfirmedMessage": {
+    "placeholders": {
+      "restaurant": {},
+      "date": {},
+      "time": {}
+    }
+  },
+  "restaurantReservationHonoredMessage": "Gracias, su reserva en el restaurante {restaurant} ha sido honrada.",
+  "@restaurantReservationHonoredMessage": {
+    "placeholders": {
+      "restaurant": {}
+    }
+  },
+  "palaceRequestCancelledByClient": "Solicitud Palace cancelada por el cliente",
+  "palaceRequestCancelledByClientMessage": "El cliente ha cancelado la solicitud Palace #{number}{details}.",
+  "@palaceRequestCancelledByClientMessage": {
+    "placeholders": {
+      "number": {},
+      "details": {}
+    }
+  },
+  "palaceRequestUpdated": "Solicitud Palace actualizada",
+  "palaceRequestUpdatedMessage": "Estado de la solicitud Palace #{number} actualizado: {status}{details}.",
+  "@palaceRequestUpdatedMessage": {
+    "placeholders": {
+      "number": {},
+      "status": {},
+      "details": {}
+    }
+  },
+  "palaceRequestDetailed": "Solicitud Palace / Conserjería",
+  "palaceRequestInProgressMessage": "Su solicitud \"{item}\" (#{number}) está en curso de tratamiento.",
+  "@palaceRequestInProgressMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestCompletedMessage": "Su solicitud \"{item}\" (#{number}) está terminada.",
+  "@palaceRequestCompletedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestRefusedMessage": "Su solicitud \"{item}\" (#{number}) ha sido rechazada o cancelada.",
+  "@palaceRequestRefusedMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "palaceRequestUpdatedStatusMessage": "Estado de su solicitud \"{item}\" (#{number}) actualizado.",
+  "@palaceRequestUpdatedStatusMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "closeButton": "Cerrar",
+  "laundryStatusPickedUpMessage": "{item} para la solicitud #{number} ha sido recogido.",
+  "@laundryStatusPickedUpMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusReadyMessage": "{item} para la solicitud #{number} está listo.",
+  "@laundryStatusReadyMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusDeliveredMessage": "{item} para la solicitud #{number} ha sido entregado.",
+  "@laundryStatusDeliveredMessage": {
+    "placeholders": {
+      "item": {},
+      "number": {}
+    }
+  },
+  "laundryStatusCancelledMessage": "La solicitud de lavandería #{number} ha sido cancelada.",
+  "@laundryStatusCancelledMessage": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "reasonRequired": "Por favor, especifique un motivo."
 }

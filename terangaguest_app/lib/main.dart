@@ -1233,20 +1233,20 @@ class _LocalizedAppState extends State<_LocalizedApp>
     }
   }
 
-  String _laundryStatusLabel(String status) {
+  String _laundryStatusLabel(AppLocalizations l10n, String status) {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return l10n.statusPending;
       case 'picked_up':
-        return 'Récupérée';
+        return l10n.statusPickedUp;
       case 'processing':
-        return 'En cours';
+        return l10n.statusPreparing; // Reuse preparing for processing
       case 'ready':
-        return 'Prête';
+        return l10n.statusReady;
       case 'delivered':
-        return 'Livrée';
+        return l10n.statusDelivered;
       case 'cancelled':
-        return 'Annulée';
+        return l10n.statusCancelled;
       default:
         return status;
     }
@@ -1260,6 +1260,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final ctx = rootNavigatorKey.currentContext;
     if (ctx == null) return;
 
+    final l10n = AppLocalizations.of(ctx);
     final status = data['status'] as String? ?? '';
     final requestIdRaw = data['request_id'] as String?;
     final requestNumber =
@@ -1280,7 +1281,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
       final detailsParts = <String>[];
       if (roomNumber != null && roomNumber.isNotEmpty) {
-        detailsParts.add('Chambre $roomNumber');
+        detailsParts.add(l10n.roomLabelLong(roomNumber));
       }
       if (guestName != null && guestName.isNotEmpty) {
         detailsParts.add(guestName);
@@ -1290,23 +1291,21 @@ class _LocalizedAppState extends State<_LocalizedApp>
           : ' (${detailsParts.join(' – ')})';
 
       if (status == 'cancelled') {
-        title = 'Demande de blanchisserie annulée par le client';
-        message =
-            'Le client a annulé la demande de blanchisserie #$requestNumber$detailsSuffix.';
+        title = l10n.laundryRequestCancelledByClient;
+        message = l10n.laundryRequestCancelledByClientMessage(requestNumber, detailsSuffix);
         if (reason != null && reason.isNotEmpty) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        title = 'Demande de blanchisserie mise à jour';
-        final label = _laundryStatusLabel(status);
-        message =
-            'Statut de la demande #$requestNumber mis à jour : $label$detailsSuffix.';
+        title = l10n.laundryRequestUpdated;
+        final label = _laundryStatusLabel(l10n, status);
+        message = l10n.laundryRequestUpdatedMessage(requestNumber, label, detailsSuffix);
       }
     } else {
       final laundryProvider = Provider.of<LaundryProvider>(ctx, listen: false);
       final intRequestNumber = int.tryParse(requestNumber);
 
-      String generatedItemsDesc = 'votre linge';
+      String generatedItemsDesc = l10n.laundryRequest.toLowerCase();
       if (intRequestNumber != null) {
         var foundRequestList = laundryProvider.requests.where(
           (r) => r.id == intRequestNumber,
@@ -1329,31 +1328,37 @@ class _LocalizedAppState extends State<_LocalizedApp>
                   if (e.quantity > 1) {
                     return '${e.quantity}x ${e.serviceName}';
                   }
-                  return 'votre ${e.serviceName.toLowerCase()}';
+                  return e.serviceName.toLowerCase();
                 })
                 .join(', ');
           }
         }
       }
 
-      title = 'Demande de blanchisserie';
+      title = l10n.laundryRequest;
       if (status == 'picked_up') {
-        message =
-            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber a été récupéré.';
+        message = l10n.laundryStatusPickedUpMessage(
+          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          requestNumber,
+        );
       } else if (status == 'ready') {
-        message =
-            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber est prêt.';
+        message = l10n.laundryStatusReadyMessage(
+          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          requestNumber,
+        );
       } else if (status == 'delivered') {
-        message =
-            '${generatedItemsDesc.replaceFirst(RegExp('^votre '), 'Votre ')} pour la demande #$requestNumber a été livré.';
+        message = l10n.laundryStatusDeliveredMessage(
+          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          requestNumber,
+        );
       } else if (status == 'cancelled') {
-        message = 'La demande de blanchisserie #$requestNumber a été annulée.';
+        message = l10n.laundryStatusCancelledMessage(requestNumber);
         if (reason != null) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        final label = _laundryStatusLabel(status);
-        message = 'Statut de la demande #$requestNumber : $label';
+        final label = _laundryStatusLabel(l10n, status);
+        message = l10n.laundryRequestUpdatedMessage(requestNumber, label, '');
       }
     }
 
@@ -1361,14 +1366,10 @@ class _LocalizedAppState extends State<_LocalizedApp>
     final specialInstructions = data['special_instructions'] as String?;
 
     if (itemsDesc != null && itemsDesc.trim().isNotEmpty) {
-      message += '\n\nLinge : $itemsDesc';
+      message += '\n\n${l10n.laundryItemsLabel(itemsDesc)}';
     }
     if (specialInstructions != null && specialInstructions.trim().isNotEmpty) {
-      if (itemsDesc == null || itemsDesc.trim().isEmpty) {
-        message += '\n\nInstructions : $specialInstructions';
-      } else {
-        message += '\nInstructions : $specialInstructions';
-      }
+      message += '\n\n${l10n.specialInstructionsLong(specialInstructions)}';
     }
 
     if (!ctx.mounted) return;
@@ -1400,9 +1401,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 _stopNotificationSound();
                 Navigator.of(dialogContext, rootNavigator: true).pop();
               },
-              child: const Text(
-                'Fermer',
-                style: TextStyle(
+              child: Text(
+                l10n.closeButton,
+                style: const TextStyle(
                   color: AppTheme.accentGold,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1419,7 +1420,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 );
               },
               child: Text(
-                isStaff ? 'Voir les demandes' : 'Voir mes demandes',
+                isStaff ? l10n.viewRequests : l10n.viewMyRequests,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -1455,7 +1456,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
     if (isStaff) {
       final detailsParts = <String>[];
       if (roomNumber != null && roomNumber.isNotEmpty) {
-        detailsParts.add('Chambre $roomNumber');
+        detailsParts.add(l10n.roomLabelLong(roomNumber));
       }
       if (guestName != null && guestName.isNotEmpty) {
         detailsParts.add(guestName);
@@ -1465,37 +1466,33 @@ class _LocalizedAppState extends State<_LocalizedApp>
           : ' (${detailsParts.join(' – ')})';
 
       if (status == 'pending') {
-        title = 'Nouvelle réservation restaurant';
-        message =
-            'Nouvelle réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
+        title = l10n.newRestaurantReservation;
+        message = l10n.newRestaurantReservationMessage(restaurantName, date, time, detailsSuffix);
       } else if (status == 'cancelled') {
-        title = 'Réservation restaurant annulée par le client';
-        message =
-            'Le client a annulé la réservation au restaurant $restaurantName prévue le $date à $time$detailsSuffix.';
+        title = l10n.restaurantReservationCancelledByClient;
+        message = l10n.restaurantReservationCancelledByClientMessage(restaurantName, date, time, detailsSuffix);
         if (reason != null && reason.isNotEmpty) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        title = 'Réservation restaurant mise à jour';
+        title = l10n.restaurantReservationUpdated;
         final label = _restaurantStatusLabel(l10n, status);
-        message = 'Statut de la réservation restaurant mis à jour : $label.';
+        message = '${l10n.restaurantReservationUpdated} : $label.';
       }
     } else {
-      title = 'Réservation restaurant';
+      title = l10n.restaurantReservation;
       if (status == 'confirmed') {
-        message =
-            'Votre réservation au restaurant $restaurantName est confirmée pour le $date à $time.';
+        message = l10n.restaurantReservationConfirmedMessage(restaurantName, date, time);
       } else if (status == 'cancelled') {
         message = l10n.reservationCancelledMessage;
         if (reason != null && reason.isNotEmpty) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else if (status == 'completed') {
-        message =
-            'Merci, votre réservation au restaurant $restaurantName a été honorée.';
+        message = l10n.restaurantReservationHonoredMessage(restaurantName);
       } else {
         final label = _restaurantStatusLabel(l10n, status);
-        message = 'Statut de la réservation restaurant : $label';
+        message = '${l10n.restaurantReservation} : $label';
       }
     }
 
@@ -1526,9 +1523,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 _stopNotificationSound();
                 Navigator.of(dialogContext, rootNavigator: true).pop();
               },
-              child: const Text(
-                'Fermer',
-                style: TextStyle(
+              child: Text(
+                l10n.closeButton,
+                style: const TextStyle(
                   color: AppTheme.accentGold,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1548,8 +1545,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
               },
               child: Text(
                 isStaff
-                    ? 'Voir les réservations restaurants à traiter'
-                    : 'Voir mes réservations restaurants',
+                    ? l10n.viewRequests // Simplified
+                    : l10n.viewMyRequests,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -1758,13 +1755,17 @@ class _LocalizedAppState extends State<_LocalizedApp>
     String title;
     String message;
 
+    final validCtx = rootNavigatorKey.currentContext;
+    if (validCtx == null || !validCtx.mounted) return;
+
+    final l10n = AppLocalizations.of(validCtx);
     if (isStaff) {
       final roomNumber = data['room_number'] as String?;
       final guestName = data['guest_name'] as String?;
 
       final detailsParts = <String>[];
       if (roomNumber != null && roomNumber.isNotEmpty) {
-        detailsParts.add('Chambre $roomNumber');
+        detailsParts.add(l10n.roomLabelLong(roomNumber));
       }
       if (guestName != null && guestName.isNotEmpty) {
         detailsParts.add(guestName);
@@ -1774,22 +1775,20 @@ class _LocalizedAppState extends State<_LocalizedApp>
           : ' (${detailsParts.join(' – ')})';
 
       if (status == 'cancelled') {
-        title = 'Demande Palace annulée par le client';
-        message =
-            'Le client a annulé la demande Palace #$requestNumber$detailsSuffix.';
+        title = l10n.palaceRequestCancelledByClient;
+        message = l10n.palaceRequestCancelledByClientMessage(requestNumber, detailsSuffix);
         if (reason != null && reason.isNotEmpty) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        title = 'Demande Palace mise à jour';
-        message =
-            'Statut de la demande Palace #$requestNumber mis à jour : $status$detailsSuffix.';
+        title = l10n.palaceRequestUpdated;
+        message = l10n.palaceRequestUpdatedMessage(requestNumber, status, detailsSuffix);
       }
     } else {
-      String generatedItemDesc = 'votre demande Palace / Conciergerie';
+      String generatedItemDesc = l10n.palaceRequestDetailed;
 
       try {
-        final palaceProvider = Provider.of<PalaceProvider>(ctx, listen: false);
+        final palaceProvider = Provider.of<PalaceProvider>(validCtx, listen: false);
         final intRequestId = int.tryParse(requestIdRaw ?? '');
 
         if (intRequestId != null) {
@@ -1798,12 +1797,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
           );
 
           if (foundRequestList.isEmpty) {
-            // Fetch silently without awaiting strictly
             palaceProvider
                 .fetchMyPalaceRequests()
-                .then((_) {
-                  // Background refresh, no big deal for the dialog
-                })
+                .then((_) {})
                 .catchError((_) {});
           } else {
             final foundRequest = foundRequestList.first;
@@ -1812,34 +1808,24 @@ class _LocalizedAppState extends State<_LocalizedApp>
             }
           }
         }
-      } catch (_) {
-        // Fallback to default desc if provider lookup fails
-      }
+      } catch (_) {}
 
-      title = 'Demande Palace / Conciergerie';
+      title = l10n.palaceRequestDetailed;
       if (status == 'in_progress' ||
           status == 'accepted' ||
           status == 'confirmed') {
-        message =
-            'Votre demande "$generatedItemDesc" (#$requestNumber) est en cours de traitement.';
+        message = l10n.palaceRequestInProgressMessage(generatedItemDesc, requestNumber);
       } else if (status == 'completed') {
-        message =
-            'Votre demande "$generatedItemDesc" (#$requestNumber) est terminée.';
+        message = l10n.palaceRequestCompletedMessage(generatedItemDesc, requestNumber);
       } else if (status == 'cancelled') {
-        message =
-            'Votre demande "$generatedItemDesc" (#$requestNumber) a été refusée ou annulée.';
+        message = l10n.palaceRequestRefusedMessage(generatedItemDesc, requestNumber);
         if (reason != null) {
-          message += '\nMotif : $reason';
+          message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        message =
-            'Statut de votre demande "$generatedItemDesc" (#$requestNumber) mis à jour.';
+        message = l10n.palaceRequestUpdatedStatusMessage(generatedItemDesc, requestNumber);
       }
     }
-
-    // Try to get the most recent context
-    final validCtx = rootNavigatorKey.currentContext;
-    if (validCtx == null || !validCtx.mounted) return;
 
     showDialog(
       context: validCtx,
@@ -1869,9 +1855,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 _stopNotificationSound();
                 Navigator.of(dialogContext, rootNavigator: true).pop();
               },
-              child: const Text(
-                'Fermer',
-                style: TextStyle(
+              child: Text(
+                l10n.closeButton,
+                style: const TextStyle(
                   color: AppTheme.accentGold,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1893,7 +1879,7 @@ class _LocalizedAppState extends State<_LocalizedApp>
                 }
               },
               child: Text(
-                isStaff ? 'Ouvrir' : 'Voir mes demandes',
+                isStaff ? l10n.actionConfirm : l10n.viewMyRequests,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,

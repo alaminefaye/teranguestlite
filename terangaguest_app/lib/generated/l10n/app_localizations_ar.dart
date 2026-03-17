@@ -1664,7 +1664,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reasonOptional => 'السبب (اختياري)';
 
   @override
-  String get reasonRequired => 'يرجى تقديم سبب.';
+  String get reasonRequired => 'يرجى تحديد السبب.';
 
   @override
   String get accept => 'قبول';
@@ -2131,4 +2131,183 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirmCancellation => 'تأكيد الإلغاء';
+
+  @override
+  String get actionConfirm => 'تأكيد';
+
+  @override
+  String get actionHonor => 'تحديد كمشرفة';
+
+  @override
+  String get statusHonored => 'مشرفة';
+
+  @override
+  String itemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عناصر',
+      one: 'عنصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get actionNotifyRoomService => 'نقل إلى خدمة الغرف';
+
+  @override
+  String get clientRoom => 'غرفة العميل';
+
+  @override
+  String roomLabelLong(Object number) {
+    return 'غرفة $number';
+  }
+
+  @override
+  String get laundryRequestCancelledByClient =>
+      'تم إلغاء طلب الغسيل من قبل العميل';
+
+  @override
+  String laundryRequestCancelledByClientMessage(Object number, Object details) {
+    return 'قام العميل بإلغاء طلب الغسيل رقم $number$details.';
+  }
+
+  @override
+  String get laundryRequestUpdated => 'تم تحديث طلب الغسيل';
+
+  @override
+  String laundryRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  ) {
+    return 'تم تحديث حالة طلب الغسيل رقم $number: $status$details.';
+  }
+
+  @override
+  String get laundryRequest => 'طلب غسيل';
+
+  @override
+  String laundryItemsLabel(Object items) {
+    return 'الغسيل: $items';
+  }
+
+  @override
+  String specialInstructionsLong(Object instructions) {
+    return 'التعليمات: $instructions';
+  }
+
+  @override
+  String get viewRequests => 'عرض الطلبات';
+
+  @override
+  String newRestaurantReservationMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  ) {
+    return 'حجز جديد في مطعم $restaurant مجدول في $date في $time$details.';
+  }
+
+  @override
+  String get restaurantReservationCancelledByClient =>
+      'تم إلغاء حجز المطعم من قبل العميل';
+
+  @override
+  String restaurantReservationCancelledByClientMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+    Object details,
+  ) {
+    return 'قام العميل بإلغاء الحجز في مطعم $restaurant المجدول في $date في $time$details.';
+  }
+
+  @override
+  String get restaurantReservationUpdated => 'تم تحديث حجز المطعم';
+
+  @override
+  String get restaurantReservation => 'حجز مطعم';
+
+  @override
+  String restaurantReservationConfirmedMessage(
+    Object restaurant,
+    Object date,
+    Object time,
+  ) {
+    return 'تم تأكيد حجزك في مطعم $restaurant لليوم $date الساعة $time.';
+  }
+
+  @override
+  String restaurantReservationHonoredMessage(Object restaurant) {
+    return 'شكراً لك، تم استخدام حجزك في مطعم $restaurant.';
+  }
+
+  @override
+  String get palaceRequestCancelledByClient =>
+      'تم إلغاء طلب Palace من قبل العميل';
+
+  @override
+  String palaceRequestCancelledByClientMessage(Object number, Object details) {
+    return 'قام العميل بإلغاء طلب Palace رقم $number$details.';
+  }
+
+  @override
+  String get palaceRequestUpdated => 'تم تحديث طلب Palace';
+
+  @override
+  String palaceRequestUpdatedMessage(
+    Object number,
+    Object status,
+    Object details,
+  ) {
+    return 'تم تحديث حالة طلب Palace رقم $number: $status$details.';
+  }
+
+  @override
+  String get palaceRequestDetailed => 'طلب Palace / كونسيرج';
+
+  @override
+  String palaceRequestInProgressMessage(Object item, Object number) {
+    return 'طلبك \"$item\" (رقم $number) قيد المعالجة.';
+  }
+
+  @override
+  String palaceRequestCompletedMessage(Object item, Object number) {
+    return 'تم اكتمال طلبك \"$item\" (رقم $number).';
+  }
+
+  @override
+  String palaceRequestRefusedMessage(Object item, Object number) {
+    return 'تم رفض أو إلغاء طلبك \"$item\" (رقم $number).';
+  }
+
+  @override
+  String palaceRequestUpdatedStatusMessage(Object item, Object number) {
+    return 'تم تحديث حالة طلبك \"$item\" (رقم $number).';
+  }
+
+  @override
+  String get closeButton => 'إغلاق';
+
+  @override
+  String laundryStatusPickedUpMessage(Object item, Object number) {
+    return 'تم استلام $item للطلب رقم $number.';
+  }
+
+  @override
+  String laundryStatusReadyMessage(Object item, Object number) {
+    return '$item للطلب رقم $number جاهز.';
+  }
+
+  @override
+  String laundryStatusDeliveredMessage(Object item, Object number) {
+    return 'تم تسليم $item للطلب رقم $number.';
+  }
+
+  @override
+  String laundryStatusCancelledMessage(Object number) {
+    return 'تم إلغاء طلب الغسيل رقم $number.';
+  }
 }

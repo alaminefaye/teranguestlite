@@ -334,6 +334,9 @@ class FirebaseNotificationService
         $responseData = json_decode($response, true);
         Log::error("FCM cURL error (HTTP {$httpCode}): " . ($responseData ? json_encode($responseData) : $response));
 
+        // Handle errors (cleanup stale tokens)
+        $this->handleFcmError($httpCode, $responseData, $payload['message']['token'] ?? null);
+
         if ($httpCode === 401) {
             Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
             Log::warning(
@@ -398,6 +401,9 @@ class FirebaseNotificationService
                 $errorBody = ['raw' => $body];
             }
             Log::error("FCM HTTP API error (fallback): " . json_encode($errorBody));
+
+            // Handle errors (cleanup stale tokens)
+            $this->handleFcmError($statusCode, $errorBody, $fcmToken);
 
             if ($statusCode === 401) {
                 Cache::forget('firebase_oauth_token_' . md5($this->credentialsPath));
@@ -525,9 +531,67 @@ class FirebaseNotificationService
             }
         }
 
+        // Si des échecs ont eu lieu, on s'assure de stocker pour polling pour TOUS les utilisateurs cibles
+        // car on ne sait pas forcément quel token appartient à quel user ici sans recherche supplémentaire.
+        // Plus simple: le sendToUser gère déjà le fallback. Ici c'est pour sendToMultipleUsers (Staff/Enterprise).
+        if ($successCount < count($tokens)) {
+            foreach ($users as $user) {
+                $userModel = null;
+                if (is_array($user) && isset($user['id'])) {
+                    $userModel = User::find($user['id']);
+                } elseif ($user instanceof User) {
+                    $userModel = $user;
+                }
+                
+                if ($userModel) {
+                    $this->storeForInAppPolling($userModel, $title, $body, $data);
+                }
+            }
+        }
+
         Log::info("Multicast notification: {$successCount} succeeded, {$failCount} failed out of " . count($tokens) . " total");
 
         return $successCount > 0;
+    }
+
+    /**
+     * Gère les erreurs FCM (suppression des tokens invalides)
+     */
+    protected function handleFcmError(int $httpCode, $response, ?string $token): void
+    {
+        if (!$token) return;
+
+        $isUnregistered = false;
+
+        // Erreur 404 peut signifier UNREGISTERED dans l'API v1
+        if ($httpCode === 404) {
+            $isUnregistered = true;
+        }
+
+        // Vérifier le corps de la réponse pour plus de certitude
+        if ($response && is_array($response)) {
+            $error = $response['error'] ?? null;
+            if ($error && isset($error['status']) && $error['status'] === 'NOT_FOUND') {
+                $isUnregistered = true;
+            }
+            
+            $details = $error['details'] ?? [];
+            foreach ($details as $detail) {
+                if (isset($detail['errorCode']) && $detail['errorCode'] === 'UNREGISTERED') {
+                    $isUnregistered = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isUnregistered) {
+            try {
+                \App\Models\UserFcmToken::where('token', $token)->delete();
+                Log::info("Deleted unregistered FCM token: " . substr($token, 0, 20) . "...");
+            } catch (\Exception $e) {
+                Log::error("Failed to delete unregistered token: " . $e->getMessage());
+            }
+        }
     }
 
     /**

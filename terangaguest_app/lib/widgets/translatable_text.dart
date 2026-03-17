@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/l10n/app_localizations.dart';
 import '../utils/translatable_text_helper.dart';
 
 /// Affiche un contenu traduisible (String ou Map fr/en/es/ar).
@@ -54,10 +55,31 @@ class _TranslatableTextState extends State<TranslatableText> {
     }
   }
 
+  String _localizeIfKeyword(BuildContext context, String text) {
+    if (text.isEmpty) return text;
+    final lower = text.toLowerCase().trim();
+    // On essaye de voir si c'est un type de restaurant connu
+    try {
+      final l10n = AppLocalizations.of(context);
+      if (lower == 'restaurant' || lower == 'restaurants') return l10n.typeRestaurant;
+      if (lower == 'bar' || lower == 'bars') return l10n.typeBar;
+      if (lower == 'cafe' || lower == 'café' || lower == 'cafes' || lower == 'cafés' || lower == 'caffe' || lower == 'caffes') {
+        return l10n.typeCafe;
+      }
+      if (lower == 'lounge' || lower == 'lounges') return l10n.typeLounge;
+    } catch (_) {
+      // Si AppLocalizations n'est pas dispo dans ce context
+    }
+    return text;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final displayText = _resolved ?? '';
+    final finalVisibleText = _localizeIfKeyword(context, displayText);
+
     return Text(
-      _resolved ?? '',
+      finalVisibleText,
       style: widget.style,
       textAlign: widget.textAlign,
       maxLines: widget.maxLines,

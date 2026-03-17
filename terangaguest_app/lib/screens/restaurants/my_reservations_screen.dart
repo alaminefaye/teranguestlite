@@ -24,11 +24,12 @@ class _MyRestaurantReservationsScreenState
   String _selectedPeriod = 'all';
 
   List<Map<String, String>> _periodFilters() {
+    final l10n = AppLocalizations.of(context);
     return [
-      {'value': 'all', 'label': 'Toutes les dates'},
-      {'value': 'today', 'label': 'Aujourd\'hui'},
-      {'value': 'week', 'label': 'Cette semaine'},
-      {'value': 'month', 'label': 'Ce mois'},
+      {'value': 'all', 'label': l10n.periodAllDates},
+      {'value': 'today', 'label': l10n.periodToday},
+      {'value': 'week', 'label': l10n.periodThisWeek},
+      {'value': 'month', 'label': l10n.periodThisMonth},
     ];
   }
 
@@ -98,7 +99,7 @@ class _MyRestaurantReservationsScreenState
               children: [
                 Text(
                   isStaffOrAdmin
-                      ? 'Réservations Restaurants'
+                      ? l10n.myRestaurantReservations
                       : l10n.myReservations,
                   style: TextStyle(
                     fontSize: titleSize,
@@ -109,7 +110,7 @@ class _MyRestaurantReservationsScreenState
                 const SizedBox(height: 4),
                 Text(
                   isStaffOrAdmin
-                      ? 'Suivi des réservations restaurants'
+                      ? l10n.reservationsConfirmed
                       : l10n.restaurantsBars,
                   style: const TextStyle(
                     fontSize: 13,
@@ -495,12 +496,13 @@ class _MyRestaurantReservationsScreenState
 
     final actions = <Map<String, String>>[];
 
+    final l10n = AppLocalizations.of(context);
     if (reservation.status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'confirm', 'label': l10n.actionConfirm});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (reservation.status == 'confirmed') {
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
-      actions.add({'action': 'honor', 'label': 'Marquer honorée'});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
+      actions.add({'action': 'honor', 'label': l10n.actionHonor});
     }
 
     if (actions.isEmpty) {
@@ -627,7 +629,7 @@ class _MyRestaurantReservationsScreenState
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
                     setState(() {
-                      validationError = 'Veuillez préciser un motif.';
+                      validationError = l10n.reasonRequired;
                     });
                     return;
                   }
@@ -745,7 +747,7 @@ class _MyRestaurantReservationsScreenState
                 final text = reasonController.text.trim();
                 if (text.isEmpty) {
                   setState(() {
-                    validationError = 'Veuillez préciser un motif.';
+                    validationError = l10n.reasonRequired;
                   });
                   return;
                 }
@@ -951,10 +953,9 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Détail de la réservation',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textGray),
+                Text(
+                  AppLocalizations.of(context).reservationDetailTitle,
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textGray),
                 ),
               ],
             ),
@@ -968,10 +969,11 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
     final hasRoomOrGuest =
         reservation.roomNumber != null || reservation.guestName != null;
     final roomGuestText = () {
+      final l10n = AppLocalizations.of(context);
       final parts = <String>[];
       if (reservation.roomNumber != null &&
           reservation.roomNumber!.isNotEmpty) {
-        parts.add('Chambre ${reservation.roomNumber}');
+        parts.add('${l10n.profileRoom} ${reservation.roomNumber}');
       }
       if (reservation.guestName != null && reservation.guestName!.isNotEmpty) {
         if (parts.isNotEmpty) {
@@ -1016,7 +1018,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
             _buildInfoRow(
               Icons.cancel_outlined,
-              'Motif : ${reservation.cancellationReason}',
+              '${AppLocalizations.of(context).cancellationReason} : ${reservation.cancellationReason}',
             ),
           ],
         ],
@@ -1139,12 +1141,13 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
   Widget _buildStaffActions(BuildContext context) {
     final actions = <Map<String, String>>[];
 
+    final l10n = AppLocalizations.of(context);
     if (reservation.status == 'pending') {
-      actions.add({'action': 'confirm', 'label': 'Confirmer'});
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
+      actions.add({'action': 'confirm', 'label': l10n.actionConfirm});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
     } else if (reservation.status == 'confirmed') {
-      actions.add({'action': 'cancel', 'label': 'Annuler'});
-      actions.add({'action': 'honor', 'label': 'Marquer honorée'});
+      actions.add({'action': 'cancel', 'label': l10n.cancel});
+      actions.add({'action': 'honor', 'label': l10n.actionHonor});
     }
 
     if (actions.isEmpty) {
@@ -1206,14 +1209,14 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
     String? validationError;
 
     if (action == 'confirm') {
-      title = 'Confirmer la réservation';
-      message = 'Confirmer cette réservation restaurant ?';
+      title = l10n.actionConfirm;
+      message = '${l10n.actionConfirm} ${l10n.reservationIdShort(reservation.id.toString()).toLowerCase()}?';
     } else if (action == 'cancel') {
       title = l10n.cancel;
       message = l10n.cancelReservationConfirm;
     } else if (action == 'honor') {
-      title = 'Marquer comme honorée';
-      message = 'Marquer cette réservation comme honorée ?';
+      title = l10n.actionHonor;
+      message = '${l10n.actionHonor}?';
     } else {
       return;
     }
@@ -1267,7 +1270,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
                   final text = reasonController.text.trim();
                   if (text.isEmpty) {
                     setState(() {
-                      validationError = 'Veuillez préciser un motif.';
+                      validationError = l10n.reasonRequired;
                     });
                     return;
                   }
@@ -1401,7 +1404,7 @@ class RestaurantReservationDetailScreen extends StatelessWidget {
                 final text = reasonController.text.trim();
                 if (text.isEmpty) {
                   setState(() {
-                    validationError = 'Veuillez préciser un motif.';
+                    validationError = l10n.reasonRequired;
                   });
                   return;
                 }

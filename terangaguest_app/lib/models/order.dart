@@ -129,22 +129,22 @@ class Order {
         status == 'preparing';
   }
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'confirmed':
-        return 'Confirmée';
+        return 'statusConfirmed';
       case 'preparing':
-        return 'En préparation';
+        return 'statusPreparing';
       case 'ready':
-        return 'Prête';
+        return 'statusReady';
       case 'delivering':
-        return 'En livraison';
+        return 'statusDelivering';
       case 'delivered':
-        return 'Livrée';
+        return 'statusDelivered';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
       default:
         return status;
     }

@@ -136,16 +136,16 @@ class SpaReservation {
 
   String get formattedPrice => '${price.toStringAsFixed(0)} FCFA';
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'confirmed':
-        return 'Confirmée';
+        return 'statusConfirmed';
       case 'completed':
-        return 'Terminée';
+        return 'statusCompleted';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
       default:
         return status;
     }

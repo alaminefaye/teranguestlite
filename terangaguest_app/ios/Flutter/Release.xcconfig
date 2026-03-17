@@ -1,2 +1,4 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+FRAMEWORK_SEARCH_PATHS = $(FRAMEWORK_SEARCH_PATHS) "${PODS_CONFIGURATION_BUILD_DIR}" "$(BUILT_PRODUCTS_DIR)"
+OTHER_LDFLAGS = $(inherited) -framework Flutter

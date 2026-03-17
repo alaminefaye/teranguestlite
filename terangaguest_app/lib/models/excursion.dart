@@ -173,16 +173,16 @@ class ExcursionBooking {
   String get formattedTotalPrice => '${totalPrice.toStringAsFixed(0)} FCFA';
   int get totalParticipants => adultsCount + childrenCount;
 
-  String get statusLabel {
+  String get statusLabelKey {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'statusPending';
       case 'confirmed':
-        return 'Confirmée';
+        return 'statusConfirmed';
       case 'completed':
-        return 'Terminée';
+        return 'statusCompleted';
       case 'cancelled':
-        return 'Annulée';
+        return 'statusCancelled';
       default:
         return status;
     }
