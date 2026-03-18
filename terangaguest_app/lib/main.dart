@@ -21,6 +21,7 @@ import 'screens/restaurants/my_reservations_screen.dart';
 import 'screens/excursions/my_excursion_bookings_screen.dart';
 import 'screens/laundry/my_laundry_requests_screen.dart';
 import 'screens/palace/my_palace_requests_screen.dart';
+import 'screens/reviews/reviews_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/orders_provider.dart';
@@ -37,6 +38,7 @@ import 'providers/announcements_provider.dart';
 import 'providers/currency_provider.dart';
 import 'services/fcm_service.dart';
 import 'services/notifications_api.dart';
+import 'services/reviews_api.dart';
 import 'utils/navigation_helper.dart';
 import 'screens/admin/admin_chat_conversations_screen.dart';
 import 'screens/hotel_infos/chatbot_screen.dart';
@@ -140,11 +142,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
         ChangeNotifierProvider(create: (_) => ChatUnreadProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementsProvider()),
-        ChangeNotifierProvider(create: (_) {
-          final p = CurrencyProvider();
-          p.load(); // Taux de change (cache 24h), devise sauvegardée
-          return p;
-        }),
+        ChangeNotifierProvider(
+          create: (_) {
+            final p = CurrencyProvider();
+            p.load(); // Taux de change (cache 24h), devise sauvegardée
+            return p;
+          },
+        ),
       ],
       child: const _LocalizedApp(),
     );
@@ -164,6 +168,11 @@ class _LocalizedAppState extends State<_LocalizedApp>
   Timer? _notificationSoundTimer;
   Timer? _staffPollingTimer;
   final FcmService _fcmService = FcmService();
+  final ReviewsApi _reviewsApi = ReviewsApi();
+  bool _isCheckingPendingReviews = false;
+  bool _isShowingPendingReviewsPrompt = false;
+  DateTime? _lastPendingReviewsPromptAt;
+  final Set<String> _promptedPendingReviewKeys = <String>{};
 
   @override
   void initState() {
@@ -294,6 +303,127 @@ class _LocalizedAppState extends State<_LocalizedApp>
     _notificationSoundTimer = null;
     _notificationPlayer.stop();
     _notificationPlayer.setReleaseMode(ReleaseMode.stop);
+  }
+
+  Future<void> _maybePromptForPendingReviews() async {
+    if (_isCheckingPendingReviews || _isShowingPendingReviewsPrompt) return;
+
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+
+    final auth = Provider.of<AuthProvider>(ctx, listen: false);
+    if (!auth.isAuthenticated || auth.isAdmin || auth.isStaff) return;
+
+    final now = DateTime.now();
+    final last = _lastPendingReviewsPromptAt;
+    if (last != null && now.difference(last) < const Duration(seconds: 30)) {
+      return;
+    }
+
+    _isCheckingPendingReviews = true;
+    List<PendingReviewItem> pending;
+    try {
+      pending = await _reviewsApi.getPending();
+    } catch (_) {
+      _isCheckingPendingReviews = false;
+      return;
+    }
+    _isCheckingPendingReviews = false;
+
+    if (!mounted) return;
+    if (pending.isEmpty) return;
+
+    final currentCtx = rootNavigatorKey.currentContext;
+    if (currentCtx == null || !currentCtx.mounted) return;
+
+    final first = pending.first;
+    final key = '${first.reviewableType}:${first.reviewableId}';
+    if (_promptedPendingReviewKeys.contains(key) && pending.length == 1) {
+      return;
+    }
+
+    _promptedPendingReviewKeys.add(key);
+    _lastPendingReviewsPromptAt = now;
+    _isShowingPendingReviewsPrompt = true;
+
+    final l10n = AppLocalizations.of(currentCtx);
+    showDialog(
+      context: currentCtx,
+      barrierDismissible: true,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.primaryBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppTheme.accentGold, width: 1.5),
+          ),
+          title: Text(
+            l10n.reviewsTitle,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.rateYourExperience,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '${l10n.reviewsPending} : ${pending.length}',
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                first.label,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+              },
+              child: Text(
+                l10n.close,
+                style: const TextStyle(
+                  color: AppTheme.accentGold,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext, rootNavigator: true).pop();
+                final navigator = rootNavigatorKey.currentState;
+                if (navigator == null) return;
+                navigator.push(
+                  NavigationHelper.slideRoute(const ReviewsScreen()),
+                );
+              },
+              child: Text(
+                l10n.open,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(() {
+      _isShowingPendingReviewsPrompt = false;
+    });
   }
 
   void _setupFcmListeners() {
@@ -716,7 +846,10 @@ class _LocalizedAppState extends State<_LocalizedApp>
               orderNumber: orderNumber,
             );
           },
-        ).then((_) => _stopNotificationSound());
+        ).then((_) async {
+          _stopNotificationSound();
+          await _maybePromptForPendingReviews();
+        });
       }
       return;
     }
@@ -1091,7 +1224,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    ).then((_) => _stopNotificationSound());
+    ).then((_) async {
+      _stopNotificationSound();
+      if (status == 'completed') {
+        await _maybePromptForPendingReviews();
+      }
+    });
   }
 
   void _handleOpenedFromNotification(Map<String, dynamic> data) {
@@ -1292,14 +1430,21 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
       if (status == 'cancelled') {
         title = l10n.laundryRequestCancelledByClient;
-        message = l10n.laundryRequestCancelledByClientMessage(requestNumber, detailsSuffix);
+        message = l10n.laundryRequestCancelledByClientMessage(
+          requestNumber,
+          detailsSuffix,
+        );
         if (reason != null && reason.isNotEmpty) {
           message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
         title = l10n.laundryRequestUpdated;
         final label = _laundryStatusLabel(l10n, status);
-        message = l10n.laundryRequestUpdatedMessage(requestNumber, label, detailsSuffix);
+        message = l10n.laundryRequestUpdatedMessage(
+          requestNumber,
+          label,
+          detailsSuffix,
+        );
       }
     } else {
       final laundryProvider = Provider.of<LaundryProvider>(ctx, listen: false);
@@ -1338,17 +1483,26 @@ class _LocalizedAppState extends State<_LocalizedApp>
       title = l10n.laundryRequest;
       if (status == 'picked_up') {
         message = l10n.laundryStatusPickedUpMessage(
-          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          generatedItemsDesc.replaceFirst(
+            generatedItemsDesc[0],
+            generatedItemsDesc[0].toUpperCase(),
+          ),
           requestNumber,
         );
       } else if (status == 'ready') {
         message = l10n.laundryStatusReadyMessage(
-          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          generatedItemsDesc.replaceFirst(
+            generatedItemsDesc[0],
+            generatedItemsDesc[0].toUpperCase(),
+          ),
           requestNumber,
         );
       } else if (status == 'delivered') {
         message = l10n.laundryStatusDeliveredMessage(
-          generatedItemsDesc.replaceFirst(generatedItemsDesc[0], generatedItemsDesc[0].toUpperCase()),
+          generatedItemsDesc.replaceFirst(
+            generatedItemsDesc[0],
+            generatedItemsDesc[0].toUpperCase(),
+          ),
           requestNumber,
         );
       } else if (status == 'cancelled') {
@@ -1430,7 +1584,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    ).then((_) => _stopNotificationSound());
+    ).then((_) async {
+      _stopNotificationSound();
+      if (!isStaff && status == 'delivered') {
+        await _maybePromptForPendingReviews();
+      }
+    });
   }
 
   void _handleRestaurantStatusNotification(Map<String, dynamic> data) {
@@ -1467,10 +1626,20 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
       if (status == 'pending') {
         title = l10n.newRestaurantReservation;
-        message = l10n.newRestaurantReservationMessage(restaurantName, date, time, detailsSuffix);
+        message = l10n.newRestaurantReservationMessage(
+          restaurantName,
+          date,
+          time,
+          detailsSuffix,
+        );
       } else if (status == 'cancelled') {
         title = l10n.restaurantReservationCancelledByClient;
-        message = l10n.restaurantReservationCancelledByClientMessage(restaurantName, date, time, detailsSuffix);
+        message = l10n.restaurantReservationCancelledByClientMessage(
+          restaurantName,
+          date,
+          time,
+          detailsSuffix,
+        );
         if (reason != null && reason.isNotEmpty) {
           message += '\n${l10n.reasonOptional} : $reason';
         }
@@ -1482,7 +1651,11 @@ class _LocalizedAppState extends State<_LocalizedApp>
     } else {
       title = l10n.restaurantReservation;
       if (status == 'confirmed') {
-        message = l10n.restaurantReservationConfirmedMessage(restaurantName, date, time);
+        message = l10n.restaurantReservationConfirmedMessage(
+          restaurantName,
+          date,
+          time,
+        );
       } else if (status == 'cancelled') {
         message = l10n.reservationCancelledMessage;
         if (reason != null && reason.isNotEmpty) {
@@ -1545,7 +1718,8 @@ class _LocalizedAppState extends State<_LocalizedApp>
               },
               child: Text(
                 isStaff
-                    ? l10n.viewRequests // Simplified
+                    ? l10n
+                          .viewRequests // Simplified
                     : l10n.viewMyRequests,
                 style: const TextStyle(
                   color: Colors.white,
@@ -1556,7 +1730,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    ).then((_) => _stopNotificationSound());
+    ).then((_) async {
+      _stopNotificationSound();
+      if (!isStaff && status == 'completed') {
+        await _maybePromptForPendingReviews();
+      }
+    });
   }
 
   String _restaurantStatusLabel(AppLocalizations l10n, String status) {
@@ -1661,7 +1840,12 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    ).then((_) => _stopNotificationSound());
+    ).then((_) async {
+      _stopNotificationSound();
+      if (status == 'completed') {
+        await _maybePromptForPendingReviews();
+      }
+    });
   }
 
   String _statusMessage(AppLocalizations l10n, String statusLabel) {
@@ -1776,19 +1960,29 @@ class _LocalizedAppState extends State<_LocalizedApp>
 
       if (status == 'cancelled') {
         title = l10n.palaceRequestCancelledByClient;
-        message = l10n.palaceRequestCancelledByClientMessage(requestNumber, detailsSuffix);
+        message = l10n.palaceRequestCancelledByClientMessage(
+          requestNumber,
+          detailsSuffix,
+        );
         if (reason != null && reason.isNotEmpty) {
           message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
         title = l10n.palaceRequestUpdated;
-        message = l10n.palaceRequestUpdatedMessage(requestNumber, status, detailsSuffix);
+        message = l10n.palaceRequestUpdatedMessage(
+          requestNumber,
+          status,
+          detailsSuffix,
+        );
       }
     } else {
       String generatedItemDesc = l10n.palaceRequestDetailed;
 
       try {
-        final palaceProvider = Provider.of<PalaceProvider>(validCtx, listen: false);
+        final palaceProvider = Provider.of<PalaceProvider>(
+          validCtx,
+          listen: false,
+        );
         final intRequestId = int.tryParse(requestIdRaw ?? '');
 
         if (intRequestId != null) {
@@ -1814,16 +2008,28 @@ class _LocalizedAppState extends State<_LocalizedApp>
       if (status == 'in_progress' ||
           status == 'accepted' ||
           status == 'confirmed') {
-        message = l10n.palaceRequestInProgressMessage(generatedItemDesc, requestNumber);
+        message = l10n.palaceRequestInProgressMessage(
+          generatedItemDesc,
+          requestNumber,
+        );
       } else if (status == 'completed') {
-        message = l10n.palaceRequestCompletedMessage(generatedItemDesc, requestNumber);
+        message = l10n.palaceRequestCompletedMessage(
+          generatedItemDesc,
+          requestNumber,
+        );
       } else if (status == 'cancelled') {
-        message = l10n.palaceRequestRefusedMessage(generatedItemDesc, requestNumber);
+        message = l10n.palaceRequestRefusedMessage(
+          generatedItemDesc,
+          requestNumber,
+        );
         if (reason != null) {
           message += '\n${l10n.reasonOptional} : $reason';
         }
       } else {
-        message = l10n.palaceRequestUpdatedStatusMessage(generatedItemDesc, requestNumber);
+        message = l10n.palaceRequestUpdatedStatusMessage(
+          generatedItemDesc,
+          requestNumber,
+        );
       }
     }
 
@@ -1889,6 +2095,11 @@ class _LocalizedAppState extends State<_LocalizedApp>
           ],
         );
       },
-    ).then((_) => _stopNotificationSound());
+    ).then((_) async {
+      _stopNotificationSound();
+      if (!isStaff && status == 'completed') {
+        await _maybePromptForPendingReviews();
+      }
+    });
   }
 }

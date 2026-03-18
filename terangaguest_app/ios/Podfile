@@ -49,6 +49,15 @@ post_install do |installer|
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
     end
   end
+
+  pods_resources_script = File.join(__dir__, 'Pods', 'Target Support Files', 'Pods-Runner', 'Pods-Runner-resources.sh')
+  if File.exist?(pods_resources_script)
+    content = File.read(pods_resources_script)
+    new_content = content
+      .gsub(%r{\$\{PODS_CONFIGURATION_BUILD_DIR\}/MLKitTranslate/MLKitTranslate_resource\.bundle}, '${PODS_CONFIGURATION_BUILD_DIR}/MLKitTranslate_resource.bundle')
+      .gsub(%r{\$\{PODS_CONFIGURATION_BUILD_DIR\}/firebase_messaging/firebase_messaging_Privacy\.bundle}, '${PODS_CONFIGURATION_BUILD_DIR}/firebase_messaging_Privacy.bundle')
+    File.write(pods_resources_script, new_content) if new_content != content
+  end
 end
 
 post_integrate do |installer|

@@ -39,25 +39,61 @@ class Excursion {
     return 0;
   }
 
+  static String _parseTranslatableString(dynamic v) {
+    if (v == null) return '';
+    if (v is String) return v;
+    if (v is Map) {
+      String? s(dynamic x) => x is String ? x : (x?.toString());
+      final fr = s(v['fr']);
+      if (fr != null && fr.trim().isNotEmpty) return fr;
+      final en = s(v['en']);
+      if (en != null && en.trim().isNotEmpty) return en;
+      final es = s(v['es']);
+      if (es != null && es.trim().isNotEmpty) return es;
+      final ar = s(v['ar']);
+      if (ar != null && ar.trim().isNotEmpty) return ar;
+      // Dernier recours : première valeur non vide
+      for (final value in v.values) {
+        final sv = s(value);
+        if (sv != null && sv.trim().isNotEmpty) return sv;
+      }
+      return '';
+    }
+    return v.toString();
+  }
+
   factory Excursion.fromJson(Map<String, dynamic> json) {
     return Excursion(
       id: _parseIntSafe(json['id']),
-      name: json['name'] as String? ?? '',
-      description: json['description'] as String?,
+      name: _parseTranslatableString(json['name']),
+      description: _parseTranslatableString(json['description']).trim().isEmpty
+          ? null
+          : _parseTranslatableString(json['description']),
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
       duration: _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
-      destination: json['destination'] as String?,
+      destination: _parseTranslatableString(json['destination']).trim().isEmpty
+          ? null
+          : _parseTranslatableString(json['destination']),
       inclusions: json['inclusions'] != null
           ? List<String>.from(json['inclusions'] as List)
           : (json['included'] != null
               ? List<String>.from(json['included'] as List)
               : null),
-      scheduleDescription: json['schedule_description'] as String?,
-      childrenAgeRange: json['children_age_range'] as String?,
-      departureTime: json['departure_time'] as String?,
+      scheduleDescription:
+          _parseTranslatableString(json['schedule_description']).trim().isEmpty
+              ? null
+              : _parseTranslatableString(json['schedule_description']),
+      childrenAgeRange:
+          _parseTranslatableString(json['children_age_range']).trim().isEmpty
+              ? null
+              : _parseTranslatableString(json['children_age_range']),
+      departureTime:
+          _parseTranslatableString(json['departure_time']).trim().isEmpty
+              ? null
+              : _parseTranslatableString(json['departure_time']),
     );
   }
 
