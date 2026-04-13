@@ -43,6 +43,22 @@ class VitrineController extends Controller
         abort(500, 'Aucune entreprise disponible pour la vitrine.');
     }
 
+    private function decodeJsonList(mixed $value): array
+    {
+        if (is_array($value)) return $value;
+        if ($value === null) return [];
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') return [];
+            $decoded = json_decode($trimmed, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+            return [$trimmed];
+        }
+        return [];
+    }
+
     public function enterprise(): JsonResponse
     {
         $enterpriseId = $this->resolveEnterpriseId();
@@ -390,8 +406,8 @@ class VitrineController extends Controller
                     'image' => $excursion->image ? asset('storage/' . $excursion->image) : null,
                     'min_participants' => $excursion->min_participants,
                     'max_participants' => $excursion->max_participants,
-                    'included' => $excursion->included,
-                    'not_included' => $excursion->not_included,
+                    'included' => $this->decodeJsonList($excursion->included),
+                    'not_included' => $this->decodeJsonList($excursion->not_included),
                     'is_available' => $excursion->is_available,
                     'is_featured' => $excursion->is_featured,
                 ];
@@ -434,8 +450,8 @@ class VitrineController extends Controller
                 'image' => $excursion->image ? asset('storage/' . $excursion->image) : null,
                 'min_participants' => $excursion->min_participants,
                 'max_participants' => $excursion->max_participants,
-                'included' => $excursion->included,
-                'not_included' => $excursion->not_included,
+                'included' => $this->decodeJsonList($excursion->included),
+                'not_included' => $this->decodeJsonList($excursion->not_included),
                 'is_available' => $excursion->is_available,
             ],
         ], 200);

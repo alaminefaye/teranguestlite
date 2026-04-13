@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Excursion {
   final int id;
   final String name;
@@ -9,8 +11,10 @@ class Excursion {
   final bool isAvailable;
   final String? destination;
   final List<String>? inclusions;
+
   /// Horaires et planning détaillé (ex: Départ 09h00, retour 18h)
   final String? scheduleDescription;
+
   /// Tranche d'âge applicable aux enfants (ex: 3-12 ans)
   final String? childrenAgeRange;
   final String? departureTime;
@@ -62,6 +66,31 @@ class Excursion {
     return v.toString();
   }
 
+  static List<String>? _parseStringList(dynamic v) {
+    if (v == null) return null;
+    if (v is List) {
+      return v
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+    if (v is String) {
+      final s = v.trim();
+      if (s.isEmpty) return null;
+      try {
+        final decoded = jsonDecode(s);
+        if (decoded is List) {
+          return decoded
+              .map((e) => e?.toString() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList();
+        }
+      } catch (_) {}
+      return [s];
+    }
+    return null;
+  }
+
   factory Excursion.fromJson(Map<String, dynamic> json) {
     return Excursion(
       id: _parseIntSafe(json['id']),
@@ -71,29 +100,28 @@ class Excursion {
           : _parseTranslatableString(json['description']),
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
-      duration: _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
+      duration:
+          _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
       destination: _parseTranslatableString(json['destination']).trim().isEmpty
           ? null
           : _parseTranslatableString(json['destination']),
-      inclusions: json['inclusions'] != null
-          ? List<String>.from(json['inclusions'] as List)
-          : (json['included'] != null
-              ? List<String>.from(json['included'] as List)
-              : null),
+      inclusions:
+          _parseStringList(json['inclusions']) ??
+          _parseStringList(json['included']),
       scheduleDescription:
           _parseTranslatableString(json['schedule_description']).trim().isEmpty
-              ? null
-              : _parseTranslatableString(json['schedule_description']),
+          ? null
+          : _parseTranslatableString(json['schedule_description']),
       childrenAgeRange:
           _parseTranslatableString(json['children_age_range']).trim().isEmpty
-              ? null
-              : _parseTranslatableString(json['children_age_range']),
+          ? null
+          : _parseTranslatableString(json['children_age_range']),
       departureTime:
           _parseTranslatableString(json['departure_time']).trim().isEmpty
-              ? null
-              : _parseTranslatableString(json['departure_time']),
+          ? null
+          : _parseTranslatableString(json['departure_time']),
     );
   }
 
