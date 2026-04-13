@@ -9,13 +9,10 @@ import '../../providers/spa_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../utils/translatable_text_helper.dart';
 import '../../widgets/translatable_text.dart';
-import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
-import '../../widgets/animated_button.dart';
-import 'reserve_spa_screen.dart';
 
 class SpaServiceDetailScreen extends StatefulWidget {
   final int serviceId;
@@ -190,8 +187,6 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
           _buildImage(),
           const SizedBox(height: 30),
           _buildMainInfo(),
-          const SizedBox(height: 30),
-          _buildReserveButton(),
         ],
       ),
     );
@@ -287,22 +282,4 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
     );
   }
 
-  Widget _buildReserveButton() {
-    return AnimatedButton(
-      text: _service!.isAvailable
-          ? AppLocalizations.of(context).book
-          : AppLocalizations.of(context).unavailable,
-      onPressed: _service!.isAvailable
-          ? () {
-              HapticHelper.confirm();
-              context.navigateTo(ReserveSpaScreen(service: _service!));
-            }
-          : null,
-      width: double.infinity,
-      height: 56,
-      backgroundColor: AppTheme.accentGold,
-      textColor: AppTheme.primaryDark,
-      enableHaptic: false,
-    );
-  }
 }

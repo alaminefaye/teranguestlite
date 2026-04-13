@@ -35,6 +35,26 @@ Route::prefix('vitrine')->group(function () {
     Route::get('/room-service/categories', [VitrineController::class, 'roomServiceCategories']);
     Route::get('/room-service/items', [VitrineController::class, 'roomServiceItems']);
     Route::get('/room-service/items/{id}', [VitrineController::class, 'roomServiceItemShow'])->whereNumber('id');
+
+    Route::get('/spa-services', [VitrineController::class, 'spaServices']);
+    Route::get('/spa-services/{id}', [VitrineController::class, 'spaServiceShow'])->whereNumber('id');
+
+    Route::get('/excursions', [VitrineController::class, 'excursions']);
+    Route::get('/excursions/{id}', [VitrineController::class, 'excursionShow'])->whereNumber('id');
+
+    Route::get('/laundry/services', [VitrineController::class, 'laundryServices']);
+    Route::get('/palace-services', [VitrineController::class, 'palaceServices']);
+    Route::get('/vehicles', [VitrineController::class, 'vehicles']);
+
+    Route::get('/leisure-categories', [VitrineController::class, 'leisureCategories']);
+    Route::get('/amenity-categories', [VitrineController::class, 'amenityCategories']);
+
+    Route::get('/establishments', [VitrineController::class, 'establishments']);
+    Route::get('/establishments/{id}', [VitrineController::class, 'establishmentShow'])->whereNumber('id');
+
+    Route::get('/announcements', [VitrineController::class, 'announcements']);
+
+    Route::get('/guides', [VitrineController::class, 'guides']);
 });
 
 // ==========================================

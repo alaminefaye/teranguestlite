@@ -10,8 +10,10 @@ class ExcursionsApi {
   /// Récupère la liste des excursions
   Future<List<Excursion>> getExcursions({int page = 1}) async {
     try {
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineExcursions : ApiConfig.excursions;
       final response = await _apiService.get(
-        ApiConfig.excursions,
+        endpoint,
         queryParameters: {'page': page},
       );
 
@@ -27,8 +29,10 @@ class ExcursionsApi {
   /// Récupère le détail d'une excursion
   Future<Excursion> getExcursionDetail(int excursionId) async {
     try {
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineExcursions : ApiConfig.excursions;
       final response = await _apiService.get(
-        '${ApiConfig.excursions}/$excursionId',
+        '$endpoint/$excursionId',
       );
 
       return Excursion.fromJson(response.data['data'] as Map<String, dynamic>);
@@ -47,6 +51,9 @@ class ExcursionsApi {
     String? specialRequests,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{
         'date': date.toIso8601String().split('T')[0],
@@ -96,6 +103,9 @@ class ExcursionsApi {
     int perPage = 15,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
@@ -131,6 +141,9 @@ class ExcursionsApi {
 
   /// Annuler un booking
   Future<void> cancelExcursionBooking(int bookingId, {String? reason}) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final payload = <String, dynamic>{};
       if (reason != null && reason.trim().isNotEmpty) {
@@ -151,6 +164,9 @@ class ExcursionsApi {
     required String action,
     String? reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{'action': action};
       if (reason != null && reason.trim().isNotEmpty) {

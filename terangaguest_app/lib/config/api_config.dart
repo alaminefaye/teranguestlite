@@ -41,6 +41,15 @@ class ApiConfig {
   static const String vitrineRoomServiceCategories =
       '/vitrine/room-service/categories';
   static const String vitrineRoomServiceItems = '/vitrine/room-service/items';
+  static const String vitrineSpaServices = '/vitrine/spa-services';
+  static const String vitrineExcursions = '/vitrine/excursions';
+  static const String vitrineLaundryServices = '/vitrine/laundry/services';
+  static const String vitrinePalaceServices = '/vitrine/palace-services';
+  static const String vitrineVehicles = '/vitrine/vehicles';
+  static const String vitrineLeisureCategories = '/vitrine/leisure-categories';
+  static const String vitrineAmenityCategories = '/vitrine/amenity-categories';
+  static const String vitrineEstablishments = '/vitrine/establishments';
+  static const String vitrineAnnouncements = '/vitrine/announcements';
 
   // Room Service
   static const String roomServiceCategories = '/room-service/categories';

@@ -10,7 +10,10 @@ class LaundryApi {
   /// Récupère la liste des services de blanchisserie
   Future<List<LaundryService>> getLaundryServices() async {
     try {
-      final response = await _apiService.get(ApiConfig.laundryServices);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineLaundryServices
+          : ApiConfig.laundryServices;
+      final response = await _apiService.get(endpoint);
 
       return (response.data['data'] as List)
           .map((json) => LaundryService.fromJson(json as Map<String, dynamic>))
@@ -28,6 +31,9 @@ class LaundryApi {
     String? specialInstructions,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final payloadItems = items
           .map(
@@ -84,6 +90,9 @@ class LaundryApi {
     int perPage = 15,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
@@ -120,6 +129,9 @@ class LaundryApi {
     required String action,
     String? reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final payload = <String, dynamic>{'action': action};
       if (reason != null && reason.trim().isNotEmpty) {
@@ -142,6 +154,9 @@ class LaundryApi {
 
   /// Annuler une demande
   Future<void> cancelLaundryRequest(int requestId) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       await _apiService.post(
         '${ApiConfig.laundryRequests}/$requestId/status',

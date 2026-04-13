@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../models/palace.dart';
 import '../../utils/layout_helper.dart';
@@ -152,6 +153,15 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                     onTap: service.isAvailable
                         ? () {
                             HapticHelper.lightImpact();
+                            if (ApiConfig.vitrineMode) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Fonction désactivée en vitrine.'),
+                                ),
+                              );
+                              return;
+                            }
                             context.navigateTo(
                               CreatePalaceRequestScreen(service: service),
                             );

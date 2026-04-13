@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -27,7 +28,9 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().loadUser();
+      if (!ApiConfig.vitrineMode) {
+        context.read<AuthProvider>().loadUser();
+      }
     });
   }
 

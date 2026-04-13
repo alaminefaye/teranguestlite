@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
@@ -18,8 +19,13 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../room_service/categories_screen.dart';
+import '../services_chambre/room_and_logistics_screen.dart';
 import '../restaurants/restaurants_list_screen.dart';
-import '../hotel_infos/hotel_infos_screen.dart';
+import '../leisure/wellness_sport_leisure_screen.dart';
+import '../palace/palace_list_screen.dart';
+import '../exploration/exploration_mobility_screen.dart';
+import '../hotel_infos/hotel_infos_security_screen.dart';
+import '../hotel_infos/assistance_emergency_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -67,14 +73,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
     HapticHelper.lightImpact();
 
     switch (route) {
+      case '/services-chambre-logistique':
+        context.navigateTo(const RoomAndLogisticsScreen());
+        break;
       case '/room-service':
         context.navigateTo(const CategoriesScreen());
         break;
       case '/restaurants':
         context.navigateTo(const RestaurantsListScreen());
         break;
+      case '/wellness-sport-leisure':
+        context.navigateTo(const WellnessSportLeisureScreen());
+        break;
+      case '/palace':
+        context.navigateTo(const PalaceListScreen());
+        break;
+      case '/exploration-mobility':
+        context.navigateTo(const ExplorationMobilityScreen());
+        break;
       case '/hotel-infos-security':
-        context.navigateTo(const HotelInfosScreen());
+        context.navigateTo(const HotelInfosSecurityScreen());
+        break;
+      case '/assistance-emergency':
+        context.navigateTo(const AssistanceEmergencyScreen());
+        break;
+      case '/chatbot':
+        final url = _enterprise?.chatbotUrl?.trim() ?? '';
+        if (url.isNotEmpty) {
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          break;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Fonction indisponible.'),
+            backgroundColor: AppTheme.accentGold,
+            duration: const Duration(seconds: 1),
+          ),
+        );
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -444,22 +479,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final l10n = AppLocalizations.of(context);
     final services = [
       {
+        'title': l10n.servicesChambreLogistique,
+        'icon': Icons.room_service_outlined,
+        'route': '/services-chambre-logistique',
+        'image': 'assets/images/box_room_service.png',
+      },
+      {
         'title': l10n.restaurantsBars,
         'icon': Icons.restaurant_menu_outlined,
         'route': '/restaurants',
         'image': 'assets/images/box_restaurant.png',
       },
       {
-        'title': l10n.roomService,
-        'icon': Icons.menu_book_outlined,
-        'route': '/room-service',
-        'image': 'assets/images/box_room_service.png',
+        'title': l10n.wellnessSportLeisure,
+        'icon': Icons.spa_outlined,
+        'route': '/wellness-sport-leisure',
+        'image': 'assets/images/box_wellness.png',
       },
       {
-        'title': l10n.hotelInfos,
+        'title': l10n.palaceServices,
+        'icon': Icons.auto_awesome_outlined,
+        'route': '/palace',
+        'image': 'assets/images/box_autres_services.png',
+      },
+      {
+        'title': l10n.explorationMobility,
+        'icon': Icons.explore_outlined,
+        'route': '/exploration-mobility',
+        'image': 'assets/images/box_exploration.png',
+      },
+      {
+        'title': l10n.hotelInfosSecurity,
         'icon': Icons.info_outline_rounded,
         'route': '/hotel-infos-security',
         'image': 'assets/images/box_hotel_infos.png',
+      },
+      {
+        'title': l10n.assistanceEmergency,
+        'icon': Icons.emergency_outlined,
+        'route': '/assistance-emergency',
+        'image': 'assets/images/box_assistance.png',
+      },
+      {
+        'title': l10n.chatbotMultilingual,
+        'icon': Icons.smart_toy_outlined,
+        'route': '/chatbot',
+        'image': 'assets/images/box_chatbot.png',
       },
     ];
 

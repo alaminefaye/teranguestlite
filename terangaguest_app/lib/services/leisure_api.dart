@@ -10,7 +10,10 @@ class LeisureApi {
   /// Arbre Sport / Loisirs : catégories principales avec leurs activités (config admin).
   Future<List<LeisureMainCategoryDto>> getCategories() async {
     try {
-      final response = await _apiService.get(ApiConfig.leisureCategories);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineLeisureCategories
+          : ApiConfig.leisureCategories;
+      final response = await _apiService.get(endpoint);
       final list = response.data['data'] as List? ?? [];
       return list
           .map(

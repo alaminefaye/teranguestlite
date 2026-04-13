@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -248,6 +249,13 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 isLoading: _sendingDoctor,
                                 onTap: () {
                                   HapticHelper.lightImpact();
+                                  if (ApiConfig.vitrineMode) {
+                                    _showSnack(
+                                      'Fonction désactivée en vitrine.',
+                                      isError: true,
+                                    );
+                                    return;
+                                  }
                                   _confirmAndSendRequest(
                                     'doctor',
                                     l10n.requestDoctor,
@@ -263,6 +271,13 @@ class _AssistanceEmergencyScreenState extends State<AssistanceEmergencyScreen> {
                                 isLoading: _sendingSecurity,
                                 onTap: () {
                                   HapticHelper.lightImpact();
+                                  if (ApiConfig.vitrineMode) {
+                                    _showSnack(
+                                      'Fonction désactivée en vitrine.',
+                                      isError: true,
+                                    );
+                                    return;
+                                  }
                                   _confirmAndSendRequest(
                                     'security',
                                     l10n.reportSecurityEmergency,

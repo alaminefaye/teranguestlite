@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import '../config/api_config.dart';
 import '../models/vehicle.dart';
 import 'api_service.dart';
 
@@ -20,8 +21,10 @@ class VehicleApi {
       if (minSeats != null && minSeats > 0) {
         queryParams['seats'] = minSeats;
       }
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineVehicles : '/vehicles';
       final response = await _apiService.get(
-        '/vehicles',
+        endpoint,
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
       final rentalMode =

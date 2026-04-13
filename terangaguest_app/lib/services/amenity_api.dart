@@ -10,7 +10,10 @@ class AmenityApi {
   /// Récupère les catégories Amenities & Conciergerie avec leurs articles (config admin).
   Future<List<AmenityCategoryDto>> getCategories() async {
     try {
-      final response = await _apiService.get(ApiConfig.amenityCategories);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineAmenityCategories
+          : ApiConfig.amenityCategories;
+      final response = await _apiService.get(endpoint);
       final list = response.data['data'] as List? ?? [];
       return list
           .map((e) => AmenityCategoryDto.fromJson(e as Map<String, dynamic>))

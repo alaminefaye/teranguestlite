@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/guest_session.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/tablet_session_provider.dart';
+import '../../services/api_service.dart';
 import '../../services/tablet_session_api.dart';
+import '../../src/platform_check_stub.dart'
+    if (dart.library.io) '../../src/platform_check_io.dart'
+    as platform_check;
 import '../../utils/haptic_helper.dart';
 
 /// Livret d'accueil : Wi‑Fi (chambre si renseigné), plans, règlement, infos pratiques.
@@ -21,9 +26,39 @@ class HotelInfosScreen extends StatefulWidget {
 class _HotelInfosScreenState extends State<HotelInfosScreen> {
   final TabletSessionApi _tabletApi = TabletSessionApi();
   HotelInfos? _tabletInfos;
+  Enterprise? _vitrineEnterprise;
   int? _lastFetchedRoomId;
   bool _loadingTablet = false;
   String? _tabletError;
+  bool _loadingVitrine = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (ApiConfig.vitrineMode && !platform_check.isFlutterTest) {
+      _loadVitrineEnterprise();
+    }
+  }
+
+  Future<void> _loadVitrineEnterprise() async {
+    if (_loadingVitrine) return;
+    setState(() => _loadingVitrine = true);
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final payload = Map<String, dynamic>.from(data['data'] as Map);
+        if (!mounted) return;
+        setState(() {
+          _vitrineEnterprise = Enterprise.fromJson(payload);
+        });
+      }
+    } catch (_) {
+      // ignore
+    } finally {
+      if (mounted) setState(() => _loadingVitrine = false);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -83,7 +118,9 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
     }
     // Sinon : utilisateur connecté (staff / guest avec compte) → infos entreprise (déjà avec Wi‑Fi chambre si user.room_id)
     if (infos == null && !hasSession) {
-      infos = context.watch<AuthProvider>().user?.enterprise?.hotelInfos;
+      infos =
+          _vitrineEnterprise?.hotelInfos ??
+          context.watch<AuthProvider>().user?.enterprise?.hotelInfos;
     }
 
     return Scaffold(

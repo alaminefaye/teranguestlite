@@ -201,7 +201,9 @@ class GuideItemsScreen extends StatelessWidget {
                             onPressed: () =>
                                 _openMap(item.latitude!, item.longitude!),
                             icon: const Icon(Icons.map, size: 20),
-                            label: Text(AppLocalizations.of(context).getDirections),
+                            label: Text(
+                              AppLocalizations.of(context).getDirections,
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.accentGold.withValues(
                                 alpha: 0.1,

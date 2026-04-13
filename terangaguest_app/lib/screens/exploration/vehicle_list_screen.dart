@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/vehicle.dart';
@@ -49,7 +50,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
       );
 
       // ── Mode formulaire direct activé par l'admin ─────────────────────
-      if (result.rentalMode == 'form' && mounted) {
+      if (!ApiConfig.vitrineMode && result.rentalMode == 'form' && mounted) {
         // Remplace cet écran par le formulaire direct (popAndPushNamed).
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -190,6 +191,16 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                 vehicle: v,
                                 onTap: () {
                                   HapticHelper.lightImpact();
+                                  if (ApiConfig.vitrineMode) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Fonction désactivée en vitrine.',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   context.navigateTo(
                                     VehicleRentalRequestScreen(vehicle: v),
                                   );

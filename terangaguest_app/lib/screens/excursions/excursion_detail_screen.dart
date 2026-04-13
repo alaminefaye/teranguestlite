@@ -6,13 +6,10 @@ import '../../models/excursion.dart';
 import '../../models/favorite_item.dart';
 import '../../providers/excursions_provider.dart';
 import '../../providers/favorites_provider.dart';
-import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
-import '../../widgets/animated_button.dart';
-import 'book_excursion_screen.dart';
 
 class ExcursionDetailScreen extends StatefulWidget {
   final int excursionId;
@@ -391,25 +388,6 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
                 ],
               ],
             ),
-          ),
-          const SizedBox(height: 30),
-          AnimatedButton(
-            text: _excursion!.isAvailable
-                ? AppLocalizations.of(context).book
-                : AppLocalizations.of(context).unavailable,
-            onPressed: _excursion!.isAvailable
-                ? () {
-                    HapticHelper.confirm();
-                    context.navigateTo(
-                      BookExcursionScreen(excursion: _excursion!),
-                    );
-                  }
-                : null,
-            width: double.infinity,
-            height: 56,
-            backgroundColor: AppTheme.accentGold,
-            textColor: AppTheme.primaryDark,
-            enableHaptic: false,
           ),
         ],
       ),

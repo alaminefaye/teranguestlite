@@ -10,7 +10,10 @@ class EstablishmentsApi {
   /// Liste des établissements (autres sites du groupe).
   Future<List<Establishment>> getEstablishments() async {
     try {
-      final response = await _apiService.get(ApiConfig.establishments);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineEstablishments
+          : ApiConfig.establishments;
+      final response = await _apiService.get(endpoint);
       final data = response.data['data'];
       if (data == null || data is! List) return [];
       return data
@@ -25,7 +28,10 @@ class EstablishmentsApi {
   /// Détail d'un établissement avec galerie.
   Future<EstablishmentDetail> getEstablishmentDetail(int id) async {
     try {
-      final response = await _apiService.get('${ApiConfig.establishments}/$id');
+      final base = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineEstablishments
+          : ApiConfig.establishments;
+      final response = await _apiService.get('$base/$id');
       final data = response.data['data'];
       if (data == null || data is! Map<String, dynamic>) {
         throw Exception('Invalid establishment detail response');

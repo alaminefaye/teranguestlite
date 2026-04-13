@@ -10,7 +10,10 @@ class PalaceApi {
   /// Récupère la liste des services palace
   Future<List<PalaceService>> getPalaceServices() async {
     try {
-      final response = await _apiService.get(ApiConfig.palaceServices);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrinePalaceServices
+          : ApiConfig.palaceServices;
+      final response = await _apiService.get(endpoint);
 
       return (response.data['data'] as List)
           .map((json) => PalaceService.fromJson(json as Map<String, dynamic>))
@@ -30,6 +33,9 @@ class PalaceApi {
     Map<String, dynamic>? metadata,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final description = (details?.trim() ?? '').isEmpty
           ? null
@@ -85,6 +91,9 @@ class PalaceApi {
     int perPage = 15,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
@@ -121,6 +130,9 @@ class PalaceApi {
     int page = 1,
     int perPage = 15,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{
         'emergency': 1,
@@ -154,6 +166,9 @@ class PalaceApi {
 
   /// Annuler une demande
   Future<void> cancelPalaceRequest(int requestId) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       await _apiService.post('/palace-requests/$requestId/cancel');
     } on DioException catch (e) {
@@ -168,6 +183,9 @@ class PalaceApi {
     required String action,
     String? reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{'action': action};
       if (reason != null && reason.trim().isNotEmpty) {

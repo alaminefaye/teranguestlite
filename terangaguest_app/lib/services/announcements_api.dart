@@ -12,7 +12,10 @@ class AnnouncementsApi {
   /// mélangées et triées par display_order.
   Future<List<Announcement>> fetchAnnouncements() async {
     try {
-      final response = await _apiService.get(ApiConfig.announcements);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineAnnouncements
+          : ApiConfig.announcements;
+      final response = await _apiService.get(endpoint);
       final data = response.data['data'] as List? ?? [];
       return data
           .map((json) => Announcement.fromJson(json as Map<String, dynamic>))
@@ -26,6 +29,7 @@ class AnnouncementsApi {
   /// Enregistre une vue pour l'annonce donnée.
   /// Appelé en fire-and-forget : les erreurs sont silencieuses (ne bloquent pas l'UI).
   Future<void> recordView(int announcementId) async {
+    if (ApiConfig.vitrineMode) return;
     try {
       await _apiService.post('${ApiConfig.announcements}/$announcementId/view');
     } catch (e) {

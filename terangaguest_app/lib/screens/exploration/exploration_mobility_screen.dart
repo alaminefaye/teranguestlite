@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/navigation_helper.dart';
@@ -44,6 +45,12 @@ class ExplorationMobilityScreen extends StatelessWidget {
         'assets/images/explor_visites_guidees.png',
         () {
           HapticHelper.lightImpact();
+          if (ApiConfig.vitrineMode) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fonction désactivée en vitrine.')),
+            );
+            return;
+          }
           context.navigateTo(const GuidedToursRequestScreen());
         },
       ),
@@ -53,6 +60,12 @@ class ExplorationMobilityScreen extends StatelessWidget {
         'assets/images/explor_transfert.png',
         () {
           HapticHelper.lightImpact();
+          if (ApiConfig.vitrineMode) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fonction désactivée en vitrine.')),
+            );
+            return;
+          }
           context.navigateTo(const TransfersRequestScreen());
         },
       ),

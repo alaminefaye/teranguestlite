@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../models/laundry.dart';
 import '../../utils/layout_helper.dart';
@@ -357,9 +358,16 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                           text: AppLocalizations.of(context).validate,
                           onPressed: () {
                             HapticHelper.confirm();
-                            context.navigateTo(
-                              const CreateLaundryRequestScreen(),
-                            );
+                            if (ApiConfig.vitrineMode) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Fonction désactivée en vitrine.'),
+                                ),
+                              );
+                              return;
+                            }
+                            context.navigateTo(const CreateLaundryRequestScreen());
                           },
                           backgroundColor: AppTheme.accentGold,
                           textColor: AppTheme.primaryDark,

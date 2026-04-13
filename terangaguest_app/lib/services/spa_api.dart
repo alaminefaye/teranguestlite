@@ -19,10 +19,10 @@ class SpaApi {
         queryParams['category'] = category;
       }
 
-      final response = await _apiService.get(
-        ApiConfig.spaServices,
-        queryParameters: queryParams,
-      );
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineSpaServices : ApiConfig.spaServices;
+      final response =
+          await _apiService.get(endpoint, queryParameters: queryParams);
 
       return (response.data['data'] as List)
           .map((json) => SpaService.fromJson(json as Map<String, dynamic>))
@@ -36,8 +36,10 @@ class SpaApi {
   /// Récupère le détail d'un service spa
   Future<SpaService> getSpaServiceDetail(int serviceId) async {
     try {
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineSpaServices : ApiConfig.spaServices;
       final response = await _apiService.get(
-        '${ApiConfig.spaServices}/$serviceId',
+        '$endpoint/$serviceId',
       );
 
       return SpaService.fromJson(response.data['data'] as Map<String, dynamic>);
@@ -55,6 +57,9 @@ class SpaApi {
     String? specialRequests,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{
         'date': date.toIso8601String().split('T')[0],
@@ -116,6 +121,9 @@ class SpaApi {
     int perPage = 15,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
@@ -149,6 +157,9 @@ class SpaApi {
 
   /// Annuler une réservation spa (si > 24h avant)
   Future<void> cancelSpaReservation(int reservationId, {String? reason}) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final payload = <String, dynamic>{};
       if (reason != null && reason.trim().isNotEmpty) {
@@ -167,6 +178,9 @@ class SpaApi {
   Future<SpaReservation> acceptRescheduledSpaReservation(
     int reservationId,
   ) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final response = await _apiService.post(
         '${ApiConfig.mySpaReservations}/$reservationId/accept-reschedule',
@@ -188,6 +202,9 @@ class SpaApi {
     String? time,
     String? reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{'action': action};
 
