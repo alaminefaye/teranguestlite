@@ -359,9 +359,10 @@ Route::get('/', function () {
         }
         return redirect()->route('guest.dashboard');
     }
-    return view('pages.landing', [
-        'title' => 'Teranga Guest',
-    ]);
+    return redirect()
+        ->route('login')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        ->header('Pragma', 'no-cache');
 });
 
 Route::get('/landing-assets/{file}', function (string $file) {
