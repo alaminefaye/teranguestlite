@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/guide.dart';
@@ -119,7 +120,7 @@ class _GuidesScreenState extends State<GuidesScreen> {
       itemBuilder: (context, index) {
         final category = _categories![index];
         final imagePath = category.image != null
-            ? 'https://teranguest.com/storage/${category.image}'
+            ? ApiConfig.storageUrl(category.image!)
             : null;
 
         return ServiceCard(

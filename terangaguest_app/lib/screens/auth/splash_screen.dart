@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../src/platform_check_stub.dart'
+    if (dart.library.io) '../../src/platform_check_io.dart'
+    as platform_check;
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -140,6 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAuth() async {
+    if (platform_check.isFlutterTest) return;
     await Future.delayed(const Duration(milliseconds: 5000));
     if (!mounted) return;
 

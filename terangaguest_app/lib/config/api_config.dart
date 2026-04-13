@@ -1,7 +1,7 @@
 class ApiConfig {
   // Base URL de l'API
   // Production
-  static const String baseUrl = 'https://teranguest.com/api';
+  static const String baseUrl = 'https://palmbeach.teranguest.com/api';
 
   /// Base URL du site (sans /api) pour les assets stockés : storage, logos, etc.
   static String get storageBaseUrl {

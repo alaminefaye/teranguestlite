@@ -68,7 +68,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       // Pour le web, on ignore FCM car on veut juste afficher le site via QR Code.
-      if (!kIsWeb) {
+      if (!kIsWeb && !platform_check.isFlutterTest) {
         // Firebase (notifications push) — utilise google-services.json / GoogleService-Info.plist
         await Firebase.initializeApp();
 
@@ -145,7 +145,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) {
             final p = CurrencyProvider();
-            p.load(); // Taux de change (cache 24h), devise sauvegardée
+            if (!platform_check.isFlutterTest) {
+              p.load();
+            }
             return p;
           },
         ),
@@ -184,14 +186,16 @@ class _LocalizedAppState extends State<_LocalizedApp>
       context
           .read<TabletSessionProvider>()
           .load(); // ← charge la session invité depuis SharedPreferences
-      if (!kIsWeb) {
+      if (!kIsWeb && !platform_check.isFlutterTest) {
         _setupFcmListeners();
         // Enregistrer le token FCM dès le premier lancement (Android : crée le canal et permet les notifs app fermée)
         _fcmService.registerTokenIfNeeded();
         _handleInitialFcmMessage();
       }
       // Polling des notifications en base (fallback garanti pour le staff)
-      _startStaffNotificationPolling();
+      if (!platform_check.isFlutterTest) {
+        _startStaffNotificationPolling();
+      }
     });
   }
 
@@ -207,7 +211,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (!kIsWeb && state == AppLifecycleState.resumed) {
+    if (!kIsWeb &&
+        !platform_check.isFlutterTest &&
+        state == AppLifecycleState.resumed) {
       _fcmService.registerTokenIfNeeded();
     }
   }
