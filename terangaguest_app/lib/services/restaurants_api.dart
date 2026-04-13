@@ -16,10 +16,9 @@ class RestaurantsApi {
         queryParams['type'] = type;
       }
 
-      final response = await _apiService.get(
-        ApiConfig.restaurants,
-        queryParameters: queryParams,
-      );
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineRestaurants : ApiConfig.restaurants;
+      final response = await _apiService.get(endpoint, queryParameters: queryParams);
 
       return (response.data['data'] as List)
           .map((json) => Restaurant.fromJson(json as Map<String, dynamic>))
@@ -33,8 +32,10 @@ class RestaurantsApi {
   /// Récupère le détail d'un restaurant
   Future<Restaurant> getRestaurantDetail(int restaurantId) async {
     try {
+      final endpoint =
+          ApiConfig.vitrineMode ? ApiConfig.vitrineRestaurants : ApiConfig.restaurants;
       final response = await _apiService.get(
-        '${ApiConfig.restaurants}/$restaurantId',
+        '$endpoint/$restaurantId',
       );
 
       return Restaurant.fromJson(response.data['data'] as Map<String, dynamic>);
@@ -53,6 +54,9 @@ class RestaurantsApi {
     String? specialRequests,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{
         'date': date.toIso8601String().split('T')[0],
@@ -94,6 +98,9 @@ class RestaurantsApi {
     int perPage = 15,
     String? clientCode,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
@@ -133,6 +140,9 @@ class RestaurantsApi {
     required String action,
     String? reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final data = <String, dynamic>{'action': action};
       if (reason != null && reason.trim().isNotEmpty) {
@@ -158,6 +168,9 @@ class RestaurantsApi {
     required int reservationId,
     required String reason,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       await _apiService.post(
         '${ApiConfig.myRestaurantReservations}/$reservationId/cancel',

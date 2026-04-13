@@ -8,7 +8,6 @@ import '../../models/menu_item.dart';
 import '../../providers/locale_provider.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/menu_item_card.dart';
-import '../../widgets/cart_badge.dart';
 import '../../widgets/translatable_text.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
@@ -175,9 +174,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
               ],
             ),
           ),
-
-          // Badge panier
-          const CartBadge(),
         ],
       ),
     );

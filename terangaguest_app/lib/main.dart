@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'config/api_config.dart';
 import 'config/theme.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'screens/auth/splash_screen.dart';
@@ -1900,7 +1901,9 @@ class _LocalizedAppState extends State<_LocalizedApp>
                     ),
                   );
                 },
-                home: const SplashScreen(),
+                home: ApiConfig.vitrineMode
+                    ? const DashboardScreen()
+                    : const SplashScreen(),
               );
             },
           ),

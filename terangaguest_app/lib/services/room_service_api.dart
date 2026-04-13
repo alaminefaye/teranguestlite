@@ -17,10 +17,11 @@ class RoomServiceApi {
       if (available != null) queryParams['available'] = available ? 1 : 0;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final response = await _apiService.get(
-        ApiConfig.roomServiceCategories,
-        queryParameters: queryParams,
-      );
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineRoomServiceCategories
+          : ApiConfig.roomServiceCategories;
+      final response =
+          await _apiService.get(endpoint, queryParameters: queryParams);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -61,10 +62,11 @@ class RoomServiceApi {
       if (available != null) queryParams['available'] = available ? 1 : 0;
       if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final response = await _apiService.get(
-        ApiConfig.roomServiceItems,
-        queryParameters: queryParams,
-      );
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineRoomServiceItems
+          : ApiConfig.roomServiceItems;
+      final response =
+          await _apiService.get(endpoint, queryParameters: queryParams);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -95,8 +97,11 @@ class RoomServiceApi {
   // Récupérer le détail d'un article
   Future<MenuItem> getItemDetails(int itemId) async {
     try {
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineRoomServiceItems
+          : ApiConfig.roomServiceItems;
       final response = await _apiService.get(
-        '${ApiConfig.roomServiceItems}/$itemId',
+        '$endpoint/$itemId',
       );
 
       if (response.statusCode == 200) {
@@ -126,6 +131,9 @@ class RoomServiceApi {
     String? specialInstructions,
     String? deliveryTime,
   }) async {
+    if (ApiConfig.vitrineMode) {
+      throw Exception('Fonction désactivée en mode vitrine.');
+    }
     try {
       final requestData = {
         'items': items,

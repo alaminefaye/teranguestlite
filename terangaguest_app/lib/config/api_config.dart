@@ -1,4 +1,6 @@
 class ApiConfig {
+  static const bool vitrineMode = true;
+
   // Base URL de l'API
   // Production
   static const String baseUrl = 'https://palmbeach.teranguest.com/api';
@@ -32,6 +34,13 @@ class ApiConfig {
   static const String logout = '/auth/logout';
   static const String user = '/user';
   static const String changePassword = '/auth/change-password';
+
+  // Vitrine (public, lecture seule)
+  static const String vitrineEnterprise = '/vitrine/enterprise';
+  static const String vitrineRestaurants = '/vitrine/restaurants';
+  static const String vitrineRoomServiceCategories =
+      '/vitrine/room-service/categories';
+  static const String vitrineRoomServiceItems = '/vitrine/room-service/items';
 
   // Room Service
   static const String roomServiceCategories = '/room-service/categories';

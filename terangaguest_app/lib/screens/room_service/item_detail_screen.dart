@@ -4,19 +4,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../models/menu_item.dart';
 import '../../models/favorite_item.dart';
-import '../../providers/cart_provider.dart';
-import '../../providers/currency_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../utils/translatable_text_helper.dart';
 import '../../widgets/translatable_text.dart';
-import '../../widgets/quantity_selector.dart';
-import '../../widgets/cart_badge.dart';
-import '../../widgets/animated_button.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
-import '../../utils/navigation_helper.dart';
-import 'cart_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final MenuItem item;
@@ -28,9 +21,6 @@ class ItemDetailScreen extends StatefulWidget {
 }
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
-  int _quantity = 1;
-  final TextEditingController _instructionsController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -41,83 +31,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   @override
   void dispose() {
-    _instructionsController.dispose();
     super.dispose();
-  }
-
-  void _incrementQuantity() {
-    setState(() {
-      _quantity++;
-    });
-  }
-
-  void _decrementQuantity() {
-    if (_quantity > 1) {
-      setState(() {
-        _quantity--;
-      });
-    }
-  }
-
-  void _addToCart(BuildContext context) {
-    HapticHelper.addToCart();
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-
-    cartProvider.addItem(
-      widget.item,
-      quantity: _quantity,
-      specialInstructions: _instructionsController.text.isEmpty
-          ? null
-          : _instructionsController.text,
-    );
-
-    // Récupérer le Navigator avant le pop pour que "VOIR PANIER" fonctionne
-    final navigator = Navigator.maybeOf(context);
-
-    // Afficher un message de confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(context).addedToCart(
-                  TranslatableTextHelper.resolveDisplayTextSync(
-                    widget.item.name,
-                    context.read<LocaleProvider>().languageCode,
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-        action: SnackBarAction(
-          label: AppLocalizations.of(context).viewCartCaps,
-          textColor: Colors.white,
-          onPressed: () {
-            navigator?.push(
-              NavigationHelper.slideFadeRoute(const CartScreen()),
-            );
-          },
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final priceLabel = context.watch<CurrencyProvider>().formatPrice(widget.item.price);
-    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(widget.item.name, context.read<LocaleProvider>().languageCode);
+    final priceLabel = widget.item.formattedPrice;
+    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(
+      widget.item.name,
+      context.read<LocaleProvider>().languageCode,
+    );
     return Semantics(
-      label:
-          '${AppLocalizations.of(context).description} $nameStr, $priceLabel',
+      label: '${AppLocalizations.of(context).description} $nameStr, $priceLabel',
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
@@ -164,46 +89,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
                 right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Consumer<FavoritesProvider>(
-                      builder: (context, fav, _) {
-                        final isFav = fav.isFavorite(
-                          FavoriteType.menuItem,
-                          widget.item.id,
-                        );
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryDark.withValues(alpha: 0.8),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppTheme.accentGold,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav ? Colors.red : AppTheme.accentGold,
-                            ),
-                            onPressed: () {
-                              HapticHelper.lightImpact();
-                              fav.toggle(
-                                FavoriteItem(
-                                  type: FavoriteType.menuItem,
-                                  id: widget.item.id,
-                                  name: TranslatableTextHelper.resolveDisplayTextSync(widget.item.name, context.read<LocaleProvider>().languageCode),
-                                  imageUrl: widget.item.image,
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
+                child: Consumer<FavoritesProvider>(
+                  builder: (context, fav, _) {
+                    final isFav = fav.isFavorite(
+                      FavoriteType.menuItem,
+                      widget.item.id,
+                    );
+                    return Container(
                       decoration: BoxDecoration(
                         color: AppTheme.primaryDark.withValues(alpha: 0.8),
                         shape: BoxShape.circle,
@@ -212,15 +104,33 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           width: 1.5,
                         ),
                       ),
-                      child: const CartBadge(),
-                    ),
-                  ],
+                      child: IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : AppTheme.accentGold,
+                        ),
+                        onPressed: () {
+                          HapticHelper.lightImpact();
+                          fav.toggle(
+                            FavoriteItem(
+                              type: FavoriteType.menuItem,
+                              id: widget.item.id,
+                              name: TranslatableTextHelper.resolveDisplayTextSync(
+                                widget.item.name,
+                                context.read<LocaleProvider>().languageCode,
+                              ),
+                              imageUrl: widget.item.image,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
         ),
-        bottomNavigationBar: _buildBottomBar(context),
       ),
     );
   }
@@ -369,110 +279,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             ),
             const SizedBox(height: 24),
           ],
-
-          // Quantité
-          Text(
-            AppLocalizations.of(context).quantity,
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          QuantitySelector(
-            quantity: _quantity,
-            onIncrement: _incrementQuantity,
-            onDecrement: _decrementQuantity,
-          ),
-          const SizedBox(height: 24),
-
-          // Instructions spéciales
-          Text(
-            AppLocalizations.of(context).specialInstructions,
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width < 600 ? 14 : 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _instructionsController,
-            maxLines: 3,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context).specialInstructionsExample,
-              hintStyle: TextStyle(
-                color: AppTheme.textGray.withValues(alpha: 0.6),
-              ),
-              filled: true,
-              fillColor: AppTheme.primaryBlue.withValues(alpha: 0.5),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppTheme.accentGold.withValues(alpha: 0.3),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppTheme.accentGold.withValues(alpha: 0.3),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: AppTheme.accentGold,
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).padding.bottom + 100,
-          ), // Espace pour scroll + bouton fixe
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 32),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.primaryDark.withValues(alpha: 0.95),
-            AppTheme.primaryDark,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: AnimatedButton(
-        text: widget.item.isAvailable
-            ? AppLocalizations.of(context).addToCart
-            : AppLocalizations.of(context).unavailable,
-        icon: Icons.add_shopping_cart,
-        onPressed: widget.item.isAvailable ? () => _addToCart(context) : null,
-        width: double.infinity,
-        height: 56,
-        backgroundColor: AppTheme.accentGold,
-        textColor: AppTheme.primaryDark,
-        enableHaptic: false, // _addToCart already calls HapticHelper.addToCart
       ),
     );
   }

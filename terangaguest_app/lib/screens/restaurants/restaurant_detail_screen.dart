@@ -9,13 +9,10 @@ import '../../providers/restaurants_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../utils/translatable_text_helper.dart';
 import '../../widgets/translatable_text.dart';
-import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
-import '../../widgets/animated_button.dart';
-import 'reserve_restaurant_screen.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final int restaurantId;
@@ -145,7 +142,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       FavoriteItem(
                         type: FavoriteType.restaurant,
                         id: _restaurant!.id,
-                        name: TranslatableTextHelper.resolveDisplayTextSync(_restaurant!.name, locale),
+                        name: TranslatableTextHelper.resolveDisplayTextSync(
+                          _restaurant!.name,
+                          locale,
+                        ),
                         imageUrl: _restaurant!.image,
                       ),
                     );
@@ -214,9 +214,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             _buildAmenities(),
             const SizedBox(height: 30),
           ],
-
-          // Bouton Réserver
-          _buildReserveButton(),
         ],
       ),
     );
@@ -309,7 +306,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               ],
             ),
 
-          if (TranslatableTextHelper.resolveDisplayTextSync(_restaurant!.description, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
+          if (TranslatableTextHelper.resolveDisplayTextSync(
+            _restaurant!.description,
+            context.read<LocaleProvider>().languageCode,
+          ).trim().isNotEmpty) ...[
             const SizedBox(height: 16),
             const Divider(color: AppTheme.textGray, height: 1),
             const SizedBox(height: 16),
@@ -333,7 +333,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 const Icon(Icons.people, size: 20, color: AppTheme.accentGold),
                 const SizedBox(width: 12),
                 Text(
-                  AppLocalizations.of(context).capacityPeople(_restaurant!.capacity!),
+                  AppLocalizations.of(
+                    context,
+                  ).capacityPeople(_restaurant!.capacity!),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white,
@@ -458,26 +460,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildReserveButton() {
-    final l10n = AppLocalizations.of(context);
-    return AnimatedButton(
-      text: _restaurant!.isOpen ? l10n.bookTable : l10n.closed,
-      onPressed: _restaurant!.isOpen
-          ? () {
-              HapticHelper.confirm();
-              context.navigateTo(
-                ReserveRestaurantScreen(restaurant: _restaurant!),
-              );
-            }
-          : null,
-      width: double.infinity,
-      height: 56,
-      backgroundColor: AppTheme.accentGold,
-      textColor: AppTheme.primaryDark,
-      enableHaptic: false,
     );
   }
 

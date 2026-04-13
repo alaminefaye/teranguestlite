@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:terangaguest_app/main.dart';
-import 'package:terangaguest_app/screens/auth/splash_screen.dart';
+import 'package:terangaguest_app/screens/dashboard/dashboard_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +18,11 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('Démarrage: affiche SplashScreen', (WidgetTester tester) async {
+  testWidgets('Démarrage: affiche DashboardScreen (mode vitrine)', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
-    expect(find.byType(SplashScreen), findsOneWidget);
+    expect(find.byType(DashboardScreen), findsOneWidget);
   });
 }

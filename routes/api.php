@@ -15,12 +15,27 @@ use App\Http\Controllers\Api\PalaceServiceController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\AdminSummaryController;
 use App\Http\Controllers\Api\ChatController as ApiChatController;
+use App\Http\Controllers\Api\VitrineController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes - Teranga Guest
 |--------------------------------------------------------------------------
 */
+
+// ==========================================
+// VITRINE (Public) — lecture seule, une seule entreprise
+// ==========================================
+Route::prefix('vitrine')->group(function () {
+    Route::get('/enterprise', [VitrineController::class, 'enterprise']);
+
+    Route::get('/restaurants', [VitrineController::class, 'restaurants']);
+    Route::get('/restaurants/{id}', [VitrineController::class, 'restaurantShow'])->whereNumber('id');
+
+    Route::get('/room-service/categories', [VitrineController::class, 'roomServiceCategories']);
+    Route::get('/room-service/items', [VitrineController::class, 'roomServiceItems']);
+    Route::get('/room-service/items/{id}', [VitrineController::class, 'roomServiceItemShow'])->whereNumber('id');
+});
 
 // ==========================================
 // AUTHENTIFICATION (Public) — limité pour limiter le brute-force

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/menu_category.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/tablet_session_provider.dart';
 import '../../services/room_service_api.dart';
 import '../../widgets/category_card.dart';
-import '../../widgets/cart_badge.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -32,16 +28,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void initState() {
     super.initState();
     _loadCategories();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      final tabletSession = context.read<TabletSessionProvider>();
-      final auth = context.read<AuthProvider>();
-      await tabletSession.load();
-      if (!mounted) return;
-      final authRoom = auth.user?.roomNumber?.trim() ?? '';
-      if (authRoom.isNotEmpty) await tabletSession.setRoomNumber(authRoom);
-      await tabletSession.tryRestoreSessionFromRoom();
-    });
   }
 
   Future<void> _loadCategories() async {
@@ -123,9 +109,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ],
             ),
           ),
-
-          // Badge panier
-          const CartBadge(),
         ],
       ),
     );
