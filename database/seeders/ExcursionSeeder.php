@@ -23,8 +23,8 @@ class ExcursionSeeder extends Seeder
                 'departure_time' => '09:00',
                 'min_participants' => 4,
                 'max_participants' => 20,
-                'included' => json_encode(['Transport en ferry', 'Guide francophone', 'Entrée musée']),
-                'not_included' => json_encode(['Repas', 'Boissons', 'Pourboires']),
+                'included' => ['Transport en ferry', 'Guide francophone', 'Entrée musée'],
+                'not_included' => ['Repas', 'Boissons', 'Pourboires'],
             ],
             [
                 'name' => 'Safari au Parc de Bandia',
@@ -36,8 +36,8 @@ class ExcursionSeeder extends Seeder
                 'departure_time' => '08:00',
                 'min_participants' => 2,
                 'max_participants' => 15,
-                'included' => json_encode(['Transport 4x4', 'Guide', 'Entrée parc', 'Eau minérale']),
-                'not_included' => json_encode(['Déjeuner', 'Photos avec animaux']),
+                'included' => ['Transport 4x4', 'Guide', 'Entrée parc', 'Eau minérale'],
+                'not_included' => ['Déjeuner', 'Photos avec animaux'],
             ],
             [
                 'name' => 'Lac Rose et Dunes',
@@ -49,8 +49,8 @@ class ExcursionSeeder extends Seeder
                 'departure_time' => '10:00',
                 'min_participants' => 3,
                 'max_participants' => 25,
-                'included' => json_encode(['Transport', 'Guide', 'Balade en quad (option)']),
-                'not_included' => json_encode(['Repas', 'Quad (supplément)']),
+                'included' => ['Transport', 'Guide', 'Balade en quad (option)'],
+                'not_included' => ['Repas', 'Quad (supplément)'],
             ],
             [
                 'name' => 'City Tour de Dakar',
@@ -62,8 +62,8 @@ class ExcursionSeeder extends Seeder
                 'departure_time' => '09:00',
                 'min_participants' => 2,
                 'max_participants' => 30,
-                'included' => json_encode(['Transport', 'Guide', 'Entrées monuments']),
-                'not_included' => json_encode(['Repas', 'Souvenirs']),
+                'included' => ['Transport', 'Guide', 'Entrées monuments'],
+                'not_included' => ['Repas', 'Souvenirs'],
             ],
         ];
 

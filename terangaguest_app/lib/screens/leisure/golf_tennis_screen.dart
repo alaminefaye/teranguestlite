@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
@@ -27,7 +28,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PalaceProvider>().fetchPalaceServices();
+      if (!ApiConfig.vitrineMode) {
+        context.read<PalaceProvider>().fetchPalaceServices();
+      }
     });
   }
 
@@ -380,7 +383,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
                       return ServiceCard(
                         title: title,
                         icon: icon,
-                        onTap: () => _onOptionTap(context, key, title),
+                        onTap: ApiConfig.vitrineMode
+                            ? () {}
+                            : () => _onOptionTap(context, key, title),
                       );
                     },
                   ),
@@ -396,7 +401,9 @@ class _GolfTennisScreenState extends State<GolfTennisScreen> {
   Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
     final isGolf = widget.sportType == 'golf';
     final title = isGolf ? l10n.golfTitle : l10n.tennisTitle;
-    final subtitle = isGolf ? l10n.golfSubtitle : l10n.tennisSubtitle;
+    final subtitle = ApiConfig.vitrineMode
+        ? 'Informations'
+        : (isGolf ? l10n.golfSubtitle : l10n.tennisSubtitle);
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(

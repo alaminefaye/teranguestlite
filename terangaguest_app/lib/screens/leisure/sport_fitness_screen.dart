@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
@@ -24,7 +25,9 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PalaceProvider>().fetchPalaceServices();
+      if (!ApiConfig.vitrineMode) {
+        context.read<PalaceProvider>().fetchPalaceServices();
+      }
     });
   }
 
@@ -419,7 +422,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _onBookCoachTap(context),
+        onTap: ApiConfig.vitrineMode ? null : () => _onBookCoachTap(context),
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
@@ -448,23 +451,25 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 18),
-              FilledButton.icon(
-                onPressed: () => _onBookCoachTap(context),
-                icon: const Icon(Icons.calendar_today_outlined, size: 18),
-                label: Text(l10n.book),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.accentGold,
-                  foregroundColor: AppTheme.primaryDark,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              if (!ApiConfig.vitrineMode) ...[
+                const SizedBox(height: 18),
+                FilledButton.icon(
+                  onPressed: () => _onBookCoachTap(context),
+                  icon: const Icon(Icons.calendar_today_outlined, size: 18),
+                  label: Text(l10n.book),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.accentGold,
+                    foregroundColor: AppTheme.primaryDark,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -473,6 +478,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
   }
 
   Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
+    final subtitle = ApiConfig.vitrineMode ? 'Informations' : l10n.sportFitnessSubtitle;
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Row(
@@ -500,7 +506,7 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.sportFitnessSubtitle,
+                  subtitle,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,
