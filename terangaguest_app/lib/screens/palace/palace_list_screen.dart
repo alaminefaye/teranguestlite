@@ -11,6 +11,7 @@ import '../../widgets/error_state.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import 'create_palace_request_screen.dart';
+import 'palace_service_detail_screen.dart';
 
 class PalaceListScreen extends StatefulWidget {
   const PalaceListScreen({super.key});
@@ -154,17 +155,14 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
                         ? () {
                             HapticHelper.lightImpact();
                             if (ApiConfig.vitrineMode) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text('Fonction désactivée en vitrine.'),
-                                ),
+                              context.navigateTo(
+                                PalaceServiceDetailScreen(service: service),
                               );
-                              return;
+                            } else {
+                              context.navigateTo(
+                                CreatePalaceRequestScreen(service: service),
+                              );
                             }
-                            context.navigateTo(
-                              CreatePalaceRequestScreen(service: service),
-                            );
                           }
                         : null,
                     child: Transform(

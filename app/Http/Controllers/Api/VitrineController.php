@@ -511,9 +511,12 @@ class VitrineController extends Controller
                 'description' => TranslatableApiHelper::translationsFor($s, 'description'),
                 'price' => $s->price,
                 'formatted_price' => $s->formatted_price,
+                'price_on_request' => $s->price_on_request,
+                'is_premium' => $s->is_premium,
                 'image' => $s->image ? asset('storage/' . $s->image) : null,
                 'is_available' => $s->is_available,
                 'is_emergency' => $s->is_emergency,
+                'is_guided_tours' => $s->isGuidedToursService(),
             ]),
         ], 200);
     }

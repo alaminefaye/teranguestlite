@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
@@ -27,7 +28,9 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PalaceProvider>().fetchPalaceServices();
+      if (!ApiConfig.vitrineMode) {
+        context.read<PalaceProvider>().fetchPalaceServices();
+      }
     });
   }
 
@@ -360,10 +363,12 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
   }
 
   Widget _buildReservationCard(BuildContext context, AppLocalizations l10n) {
+    final isVitrine = ApiConfig.vitrineMode;
+    final desc = widget.activity.description?.trim() ?? '';
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _openRequestDialog(context),
+        onTap: isVitrine ? null : () => _openRequestDialog(context),
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,
@@ -380,22 +385,23 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.calendar_month_outlined,
+                isVitrine ? Icons.info_outline : Icons.calendar_month_outlined,
                 size: 48,
                 color: AppTheme.accentGold,
               ),
               const SizedBox(height: 16),
               Text(
-                l10n.book,
+                widget.activity.name,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.requestReservationHint,
+                desc.isNotEmpty ? desc : l10n.requestReservationHint,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -403,23 +409,25 @@ class _LeisureRequestScreenState extends State<LeisureRequestScreen> {
                   height: 1.3,
                 ),
               ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: () => _openRequestDialog(context),
-                icon: const Icon(Icons.edit_calendar_outlined, size: 20),
-                label: Text(l10n.sendRequest),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.accentGold,
-                  foregroundColor: AppTheme.primaryDark,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              if (!isVitrine) ...[
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => _openRequestDialog(context),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 20),
+                  label: Text(l10n.sendRequest),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.accentGold,
+                    foregroundColor: AppTheme.primaryDark,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/navigation_helper.dart';
@@ -8,7 +7,6 @@ import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import '../exploration/vehicle_list_screen.dart';
 import '../excursions/excursions_list_screen.dart';
-import '../exploration/guided_tours_request_screen.dart';
 import '../exploration/transfers_request_screen.dart';
 
 /// Hub « EXPLORATION & MOBILITÉ » : Location véhicule, Découverte & Sites touristiques,
@@ -40,32 +38,11 @@ class ExplorationMobilityScreen extends StatelessWidget {
         },
       ),
       (
-        l10n.guidedTours,
-        Icons.tour_outlined,
-        'assets/images/explor_visites_guidees.png',
-        () {
-          HapticHelper.lightImpact();
-          if (ApiConfig.vitrineMode) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Fonction désactivée en vitrine.')),
-            );
-            return;
-          }
-          context.navigateTo(const GuidedToursRequestScreen());
-        },
-      ),
-      (
         l10n.transfersVtc,
         Icons.local_taxi_outlined,
         'assets/images/explor_transfert.png',
         () {
           HapticHelper.lightImpact();
-          if (ApiConfig.vitrineMode) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Fonction désactivée en vitrine.')),
-            );
-            return;
-          }
           context.navigateTo(const TransfersRequestScreen());
         },
       ),

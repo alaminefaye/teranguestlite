@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../utils/haptic_helper.dart';
@@ -10,6 +11,8 @@ import '../../providers/palace_provider.dart';
 import '../../models/palace.dart';
 import '../../models/amenity_category.dart';
 import '../../services/amenity_api.dart';
+import '../../utils/navigation_helper.dart';
+import 'amenity_category_detail_screen.dart';
 
 /// Écran dédié « Amenities & Conciergerie » : demande simplifiée d'articles de toilette,
 /// oreillers supplémentaires, kit de rasage ou tout autre service sans passer par le téléphone.
@@ -30,7 +33,9 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PalaceProvider>().fetchPalaceServices();
+      if (!ApiConfig.vitrineMode) {
+        context.read<PalaceProvider>().fetchPalaceServices();
+      }
       _loadAmenityCategories();
     });
   }
@@ -108,6 +113,14 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
     List<String>? itemLabelsOverride,
   }) {
     HapticHelper.lightImpact();
+    if (ApiConfig.vitrineMode) {
+      final l10n = AppLocalizations.of(context);
+      final items = itemLabelsOverride ?? _getItemsForCategory(l10n, label);
+      context.navigateTo(
+        AmenityCategoryDetailScreen(title: label, icon: icon, items: items),
+      );
+      return;
+    }
     final l10n = AppLocalizations.of(context);
     final provider = context.read<PalaceProvider>();
     final service = _getConciergeService(provider.services);
@@ -449,6 +462,10 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
         ),
       ];
     }
+    final filteredOptions = options.where((o) {
+      final title = o.$1.toLowerCase();
+      return !title.contains('autre') && !title.contains('other');
+    }).toList();
 
     return Scaffold(
       body: Container(
@@ -477,10 +494,10 @@ class _AmenitiesConciergeScreenState extends State<AmenitiesConciergeScreen> {
                                 mainAxisSpacing: spacing,
                                 childAspectRatio: aspectRatio,
                               ),
-                          itemCount: options.length,
+                          itemCount: filteredOptions.length,
                           itemBuilder: (context, index) {
                             final (title, icon, image, itemLabels) =
-                                options[index];
+                                filteredOptions[index];
                             return ServiceCard(
                               title: title,
                               icon: icon,

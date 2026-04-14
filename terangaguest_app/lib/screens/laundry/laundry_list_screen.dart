@@ -12,6 +12,7 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import 'create_laundry_request_screen.dart';
+import 'laundry_service_detail_screen.dart';
 import '../../widgets/translatable_text.dart';
 import '../../utils/translatable_text_helper.dart';
 
@@ -150,143 +151,159 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                         ..rotateX(-0.05)
                         ..rotateY(0.02),
                       alignment: Alignment.center,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppTheme.primaryBlue,
-                              AppTheme.primaryDark,
+                      child: GestureDetector(
+                        onTap: ApiConfig.vitrineMode
+                            ? () {
+                                HapticHelper.lightImpact();
+                                context.navigateTo(
+                                  LaundryServiceDetailScreen(service: service),
+                                );
+                              }
+                            : null,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppTheme.primaryBlue,
+                                AppTheme.primaryDark,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppTheme.accentGold,
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 10),
+                              ),
+                              BoxShadow(
+                                color:
+                                    AppTheme.accentGold.withValues(alpha: 0.1),
+                                blurRadius: 15,
+                                spreadRadius: -2,
+                                offset: const Offset(0, -4),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppTheme.accentGold,
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              blurRadius: 20,
-                              spreadRadius: 2,
-                              offset: const Offset(0, 10),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
                             ),
-                            BoxShadow(
-                              color: AppTheme.accentGold.withValues(alpha: 0.1),
-                              blurRadius: 15,
-                              spreadRadius: -2,
-                              offset: const Offset(0, -4),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 12,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    _iconForLaundryService(service),
-                                    size: 40,
-                                    color: AppTheme.accentGold,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  TranslatableText(
-                                    service.name,
-                                    locale: Localizations.localeOf(context).languageCode,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _iconForLaundryService(service),
+                                      size: 40,
                                       color: AppTheme.accentGold,
                                     ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${service.pricePerItem.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfaPerPiece}',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppTheme.textGray,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: quantity > 0
-                                        ? () => provider.updateQuantity(
-                                            service.id,
-                                            quantity - 1,
-                                          )
-                                        : null,
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                    ),
-                                    color: AppTheme.accentGold,
-                                    iconSize: 24,
-                                    style: IconButton.styleFrom(
-                                      minimumSize: const Size(36, 36),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 44,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.accentGold.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: AppTheme.accentGold,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '$quantity',
-                                      textAlign: TextAlign.center,
+                                    const SizedBox(height: 6),
+                                    TranslatableText(
+                                      service.name,
+                                      locale:
+                                          Localizations.localeOf(context).languageCode,
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.accentGold,
                                       ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: quantity < 99
-                                        ? () => provider.updateQuantity(
-                                            service.id,
-                                            quantity + 1,
-                                          )
-                                        : null,
-                                    icon: const Icon(Icons.add_circle_outline),
-                                    color: AppTheme.accentGold,
-                                    iconSize: 24,
-                                    style: IconButton.styleFrom(
-                                      minimumSize: const Size(36, 36),
-                                      padding: EdgeInsets.zero,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${service.pricePerItem.toStringAsFixed(0)} ${AppLocalizations.of(context).currencyFcfaPerPiece}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textGray,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                  ],
+                                ),
+                                if (!ApiConfig.vitrineMode) ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: quantity > 0
+                                            ? () => provider.updateQuantity(
+                                                  service.id,
+                                                  quantity - 1,
+                                                )
+                                            : null,
+                                        icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                        ),
+                                        color: AppTheme.accentGold,
+                                        iconSize: 24,
+                                        style: IconButton.styleFrom(
+                                          minimumSize: const Size(36, 36),
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 44,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.accentGold.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: AppTheme.accentGold,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '$quantity',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.accentGold,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: quantity < 99
+                                            ? () => provider.updateQuantity(
+                                                  service.id,
+                                                  quantity + 1,
+                                                )
+                                            : null,
+                                        icon: const Icon(
+                                          Icons.add_circle_outline,
+                                        ),
+                                        color: AppTheme.accentGold,
+                                        iconSize: 24,
+                                        style: IconButton.styleFrom(
+                                          minimumSize: const Size(36, 36),
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -295,7 +312,7 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                 ),
               ),
             ),
-            if (provider.getTotalItems() > 0)
+            if (!ApiConfig.vitrineMode && provider.getTotalItems() > 0)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
@@ -358,15 +375,6 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                           text: AppLocalizations.of(context).validate,
                           onPressed: () {
                             HapticHelper.confirm();
-                            if (ApiConfig.vitrineMode) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text('Fonction désactivée en vitrine.'),
-                                ),
-                              );
-                              return;
-                            }
                             context.navigateTo(const CreateLaundryRequestScreen());
                           },
                           backgroundColor: AppTheme.accentGold,

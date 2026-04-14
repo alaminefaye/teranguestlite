@@ -16,9 +16,13 @@ class RestaurantsApi {
         queryParams['type'] = type;
       }
 
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineRestaurants : ApiConfig.restaurants;
-      final response = await _apiService.get(endpoint, queryParameters: queryParams);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineRestaurants
+          : ApiConfig.restaurants;
+      final response = await _apiService.get(
+        endpoint,
+        queryParameters: queryParams,
+      );
 
       return (response.data['data'] as List)
           .map((json) => Restaurant.fromJson(json as Map<String, dynamic>))
@@ -32,11 +36,10 @@ class RestaurantsApi {
   /// Récupère le détail d'un restaurant
   Future<Restaurant> getRestaurantDetail(int restaurantId) async {
     try {
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineRestaurants : ApiConfig.restaurants;
-      final response = await _apiService.get(
-        '$endpoint/$restaurantId',
-      );
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineRestaurants
+          : ApiConfig.restaurants;
+      final response = await _apiService.get('$endpoint/$restaurantId');
 
       return Restaurant.fromJson(response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {

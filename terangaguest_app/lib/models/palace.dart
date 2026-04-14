@@ -3,6 +3,9 @@ class PalaceService {
   final String name;
   final String? description;
   final String? category;
+  final String? categoryLabel;
+  final double? price;
+  final String? formattedPrice;
   final bool isAvailable;
 
   /// URL complète de l'image (fournie par le serveur)
@@ -16,22 +19,64 @@ class PalaceService {
     required this.name,
     this.description,
     this.category,
+    this.categoryLabel,
+    this.price,
+    this.formattedPrice,
     required this.isAvailable,
     this.image,
     bool? isGuidedTours,
   }) : isGuidedTours = isGuidedTours ?? false;
 
+  static int _parseIntSafe(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
+  static String _parseTranslatableString(dynamic v) {
+    if (v == null) return '';
+    if (v is String) return v;
+    if (v is Map) {
+      String? s(dynamic x) => x is String ? x : (x?.toString());
+      final fr = s(v['fr']);
+      if (fr != null && fr.trim().isNotEmpty) return fr;
+      final en = s(v['en']);
+      if (en != null && en.trim().isNotEmpty) return en;
+      final es = s(v['es']);
+      if (es != null && es.trim().isNotEmpty) return es;
+      final ar = s(v['ar']);
+      if (ar != null && ar.trim().isNotEmpty) return ar;
+      for (final value in v.values) {
+        final sv = s(value);
+        if (sv != null && sv.trim().isNotEmpty) return sv;
+      }
+      return '';
+    }
+    return v.toString();
+  }
+
   factory PalaceService.fromJson(Map<String, dynamic> json) {
-    final name = json['name'] as String? ?? '';
+    final name = _parseTranslatableString(json['name']);
     final fromApi = json['is_guided_tours'] as bool?;
     final fromName =
         name.toLowerCase().contains('visites guidées') ||
         name.toLowerCase().contains('visite guidée');
     return PalaceService(
-      id: json['id'] as int,
+      id: _parseIntSafe(json['id']),
       name: name,
-      description: json['description'] as String?,
+      description: _parseTranslatableString(json['description']).trim().isEmpty
+          ? null
+          : _parseTranslatableString(json['description']),
       category: json['category'] as String?,
+      categoryLabel: json['category_label'] as String?,
+      price: json['price'] is num
+          ? (json['price'] as num).toDouble()
+          : (json['price'] is String
+                ? double.tryParse(json['price'] as String)
+                : null),
+      formattedPrice: json['formatted_price'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
       image: json['image'] as String?,
       isGuidedTours: fromApi ?? fromName,
@@ -73,6 +118,9 @@ class PalaceService {
       'name': name,
       'description': description,
       'category': category,
+      'category_label': categoryLabel,
+      'price': price,
+      'formatted_price': formattedPrice,
       'is_available': isAvailable,
       'image': image,
     };
@@ -114,6 +162,28 @@ class PalaceRequest {
     return 0;
   }
 
+  static String _parseTranslatableString(dynamic v) {
+    if (v == null) return '';
+    if (v is String) return v;
+    if (v is Map) {
+      String? s(dynamic x) => x is String ? x : (x?.toString());
+      final fr = s(v['fr']);
+      if (fr != null && fr.trim().isNotEmpty) return fr;
+      final en = s(v['en']);
+      if (en != null && en.trim().isNotEmpty) return en;
+      final es = s(v['es']);
+      if (es != null && es.trim().isNotEmpty) return es;
+      final ar = s(v['ar']);
+      if (ar != null && ar.trim().isNotEmpty) return ar;
+      for (final value in v.values) {
+        final sv = s(value);
+        if (sv != null && sv.trim().isNotEmpty) return sv;
+      }
+      return '';
+    }
+    return v.toString();
+  }
+
   factory PalaceRequest.fromJson(Map<String, dynamic> json) {
     final palaceService = json['palace_service'] as Map<String, dynamic>?;
     final requestNumber = json['request_number'] as String?;
@@ -121,7 +191,7 @@ class PalaceRequest {
         ? _parseInt(palaceService['id'])
         : _parseInt(json['service_id']);
     var parsedServiceName = palaceService != null
-        ? (palaceService['name'] as String? ?? '')
+        ? _parseTranslatableString(palaceService['name'])
         : (json['service_name'] as String? ?? '');
     var parsedDetails =
         json['description'] as String? ?? json['details'] as String?;

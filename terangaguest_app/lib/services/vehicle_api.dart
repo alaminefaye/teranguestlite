@@ -21,16 +21,17 @@ class VehicleApi {
       if (minSeats != null && minSeats > 0) {
         queryParams['seats'] = minSeats;
       }
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineVehicles : '/vehicles';
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineVehicles
+          : '/vehicles';
       final response = await _apiService.get(
         endpoint,
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
       final rentalMode =
           (response.data['rental_mode'] as String?)?.trim() == 'form'
-              ? 'form'
-              : 'catalogue';
+          ? 'form'
+          : 'catalogue';
       final list = response.data['data'] as List? ?? [];
       final vehicles = list
           .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))

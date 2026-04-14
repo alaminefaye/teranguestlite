@@ -20,8 +20,10 @@ class RoomServiceApi {
       final endpoint = ApiConfig.vitrineMode
           ? ApiConfig.vitrineRoomServiceCategories
           : ApiConfig.roomServiceCategories;
-      final response =
-          await _apiService.get(endpoint, queryParameters: queryParams);
+      final response = await _apiService.get(
+        endpoint,
+        queryParameters: queryParams,
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -65,8 +67,10 @@ class RoomServiceApi {
       final endpoint = ApiConfig.vitrineMode
           ? ApiConfig.vitrineRoomServiceItems
           : ApiConfig.roomServiceItems;
-      final response =
-          await _apiService.get(endpoint, queryParameters: queryParams);
+      final response = await _apiService.get(
+        endpoint,
+        queryParameters: queryParams,
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -100,9 +104,7 @@ class RoomServiceApi {
       final endpoint = ApiConfig.vitrineMode
           ? ApiConfig.vitrineRoomServiceItems
           : ApiConfig.roomServiceItems;
-      final response = await _apiService.get(
-        '$endpoint/$itemId',
-      );
+      final response = await _apiService.get('$endpoint/$itemId');
 
       if (response.statusCode == 200) {
         final data = response.data;

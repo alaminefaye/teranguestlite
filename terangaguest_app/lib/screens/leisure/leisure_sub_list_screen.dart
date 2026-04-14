@@ -6,6 +6,7 @@ import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import '../../models/leisure_category.dart';
+import '../excursions/excursions_list_screen.dart';
 import '../spa/spa_services_list_screen.dart';
 import 'golf_tennis_screen.dart';
 import 'sport_fitness_screen.dart';
@@ -150,6 +151,17 @@ class LeisureSubListScreen extends StatelessWidget {
 
   void _onActivityTap(BuildContext context, LeisureCategoryDto child) {
     HapticHelper.lightImpact();
+    final n = child.name.toLowerCase();
+    if (n.contains('excursion') || n.contains('découverte')) {
+      context.navigateTo(const ExcursionsListScreen());
+      return;
+    }
+    if (n.contains('hammam') || n.contains('sauna')) {
+      context.navigateTo(
+        const SpaServicesListScreen(initialCategory: 'hammam'),
+      );
+      return;
+    }
     if (child.type == 'spa') {
       context.navigateTo(const SpaServicesListScreen());
     } else if (child.type == 'golf' || child.type == 'golf_tennis') {
@@ -169,7 +181,9 @@ class LeisureSubListScreen extends StatelessWidget {
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
-    final children = mainCategory.children;
+    final children = mainCategory.type == 'loisirs'
+        ? mainCategory.children.where((c) => c.type == 'spa').toList()
+        : mainCategory.children;
 
     return Scaffold(
       body: Container(
@@ -232,9 +246,10 @@ class LeisureSubListScreen extends StatelessWidget {
     final title = mainCategory.name.trim().isNotEmpty
         ? mainCategory.name
         : (mainCategory.type == 'sport'
-            ? l10n.sportCategory
-            : l10n.leisureCategory);
-    final subtitle = (mainCategory.description != null &&
+              ? l10n.sportCategory
+              : l10n.leisureCategory);
+    final subtitle =
+        (mainCategory.description != null &&
             mainCategory.description!.trim().isNotEmpty)
         ? mainCategory.description!
         : l10n.wellnessSportLeisureSubtitle;

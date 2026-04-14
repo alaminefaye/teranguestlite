@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
@@ -24,6 +25,8 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
   String _tourType = 'cultural';
   bool _sending = false;
   int? _serviceId;
+  PalaceService? _service;
+  bool _serviceResolved = false;
 
   @override
   void initState() {
@@ -47,14 +50,27 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
         for (final s in services) {
           if (!s.isAvailable) continue;
           final n = s.name.toLowerCase();
-          if (n.contains('visites guidées') || n.contains('visite guidée')) {
+          if (n.contains('visites guidées') ||
+              n.contains('visite guidée') ||
+              n.contains('visite') ||
+              n.contains('guid') ||
+              n.contains('tour')) {
             found = s;
             break;
           }
         }
       }
-      if (found != null && mounted) setState(() => _serviceId = found!.id);
-    } catch (_) {}
+      if (found != null && mounted) {
+        setState(() {
+          _serviceId = found!.id;
+          _service = found;
+        });
+      }
+    } catch (_) {
+      // ignore
+    } finally {
+      if (mounted) setState(() => _serviceResolved = true);
+    }
   }
 
   @override
@@ -108,6 +124,132 @@ class _GuidedToursRequestScreenState extends State<GuidedToursRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
+    if (ApiConfig.vitrineMode) {
+      final w = MediaQuery.sizeOf(context).width;
+      final isMobile = w < 600;
+      final pad = isMobile ? 16.0 : 60.0;
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppTheme.accentGold,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.guidedToursTitle,
+                              style: TextStyle(
+                                fontSize: isMobile ? 18 : 28,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.accentGold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.guidedToursSubtitle,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.textGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: pad,
+                      vertical: 20,
+                    ),
+                    child: !_serviceResolved
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppTheme.accentGold,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Chargement...',
+                                  style: TextStyle(color: AppTheme.textGray),
+                                ),
+                              ],
+                            ),
+                          )
+                        : _service == null
+                        ? Text(
+                            l10n.guidedToursNotConfigured,
+                            style: const TextStyle(
+                              color: AppTheme.textGray,
+                              height: 1.4,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSection(
+                                'Prix',
+                                Text(
+                                  _service!.formattedPrice ?? 'Sur demande',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if ((_service!.description ?? '')
+                                  .trim()
+                                  .isNotEmpty)
+                                _buildSection(
+                                  l10n.description,
+                                  Text(
+                                    _service!.description!,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(

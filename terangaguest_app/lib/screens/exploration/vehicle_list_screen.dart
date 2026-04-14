@@ -9,6 +9,7 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
+import 'vehicle_detail_screen.dart';
 import 'vehicle_direct_form_screen.dart';
 import 'vehicle_rental_request_screen.dart';
 
@@ -54,8 +55,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
         // Remplace cet écran par le formulaire direct (popAndPushNamed).
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) =>
-                VehicleDirectFormScreen(vehicles: result.vehicles),
+            builder: (_) => VehicleDirectFormScreen(vehicles: result.vehicles),
           ),
         );
         return;
@@ -192,18 +192,14 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                 onTap: () {
                                   HapticHelper.lightImpact();
                                   if (ApiConfig.vitrineMode) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Fonction désactivée en vitrine.',
-                                        ),
-                                      ),
+                                    context.navigateTo(
+                                      VehicleDetailScreen(vehicle: v),
                                     );
-                                    return;
+                                  } else {
+                                    context.navigateTo(
+                                      VehicleRentalRequestScreen(vehicle: v),
+                                    );
                                   }
-                                  context.navigateTo(
-                                    VehicleRentalRequestScreen(vehicle: v),
-                                  );
                                 },
                               );
                             },

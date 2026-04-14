@@ -12,7 +12,9 @@ import '../../utils/haptic_helper.dart';
 import 'spa_service_detail_screen.dart';
 
 class SpaServicesListScreen extends StatefulWidget {
-  const SpaServicesListScreen({super.key});
+  final String? initialCategory;
+
+  const SpaServicesListScreen({super.key, this.initialCategory});
 
   @override
   State<SpaServicesListScreen> createState() => _SpaServicesListScreenState();
@@ -36,7 +38,8 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SpaProvider>().fetchSpaServices();
+      setState(() => _selectedCategory = widget.initialCategory);
+      context.read<SpaProvider>().fetchSpaServices(category: _selectedCategory);
     });
   }
 

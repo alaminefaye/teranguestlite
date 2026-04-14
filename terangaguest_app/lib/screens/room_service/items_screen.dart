@@ -158,7 +158,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
                     color: AppTheme.accentGold,
                   ),
                 ),
-                if (TranslatableTextHelper.resolveDisplayTextSync(widget.category.description, context.read<LocaleProvider>().languageCode).trim().isNotEmpty) ...[
+                if (TranslatableTextHelper.resolveDisplayTextSync(
+                  widget.category.description,
+                  context.read<LocaleProvider>().languageCode,
+                ).trim().isNotEmpty) ...[
                   const SizedBox(height: 4),
                   TranslatableText(
                     widget.category.description,

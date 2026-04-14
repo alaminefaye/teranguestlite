@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
@@ -23,6 +24,7 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
   DateTime? _requestedFor;
   bool _sending = false;
   int? _serviceId;
+  PalaceService? _service;
 
   @override
   void initState() {
@@ -49,7 +51,10 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
         }
       }
       if (found != null && mounted) {
-        setState(() => _serviceId = found!.id);
+        setState(() {
+          _serviceId = found!.id;
+          _service = found;
+        });
       }
     } catch (_) {}
   }
@@ -115,6 +120,121 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
+    if (ApiConfig.vitrineMode) {
+      final w = MediaQuery.sizeOf(context).width;
+      final isMobile = w < 600;
+      final pad = isMobile ? 16.0 : 60.0;
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppTheme.accentGold,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.transfersVtcTitle,
+                              style: TextStyle(
+                                fontSize: isMobile ? 18 : 28,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.accentGold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.transfersVtcSubtitle,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.textGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: pad, vertical: 20),
+                    child: _service == null
+                        ? const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppTheme.accentGold,
+                                  ),
+                                ),
+                                SizedBox(height: 12),
+                                Text(
+                                  'Chargement...',
+                                  style: TextStyle(color: AppTheme.textGray),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildField(
+                                label: 'Prix',
+                                child: Text(
+                                  _service!.formattedPrice ?? 'Sur demande',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              if ((_service!.description ?? '')
+                                  .trim()
+                                  .isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                _buildField(
+                                  label: l10n.description,
+                                  child: Text(
+                                    _service!.description!,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(

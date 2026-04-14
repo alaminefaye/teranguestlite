@@ -177,8 +177,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final w = MediaQuery.sizeOf(context).width;
     final isMobileWidth = w < 600;
     final logoSize = isVeryCompact
-        ? 88.0
-        : (isCompact ? 100.0 : (isMobileWidth ? 90.0 : 160.0));
+        ? 76.0
+        : (isCompact ? 88.0 : (isMobileWidth ? 78.0 : 140.0));
     final subtitleSize = isVeryCompact
         ? 10.0
         : (isCompact ? 12.0 : (isMobileWidth ? 11.0 : 14.0));
@@ -247,40 +247,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           // 3) Logo + slogan sur le cover (remontés pour que "Votre assistant digital" soit plus haut)
           Align(
-            alignment: const Alignment(0, -0.95),
+            alignment: const Alignment(0, -0.72),
             child: Padding(
               padding: EdgeInsets.only(
                 left: pad,
                 right: pad,
-                top: 12,
-                bottom: 12,
+                top: 8,
+                bottom: 6,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (logoUrl != null && logoUrl.isNotEmpty)
-                    CachedNetworkImage(
-                      imageUrl: logoUrl,
+                    SizedBox(
+                      width: logoSize,
                       height: logoSize,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => SizedBox(
-                        height: logoSize,
-                        child: Center(
-                          child: SizedBox(
-                            width: logoSize * 0.4,
-                            height: logoSize * 0.4,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppTheme.accentGold,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.accentGold.withValues(alpha: 0.6),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: logoUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: SizedBox(
+                                width: logoSize * 0.28,
+                                height: logoSize * 0.28,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppTheme.accentGold,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(
+                                Icons.business_outlined,
+                                color: AppTheme.textGray,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      errorWidget: (context, url, error) =>
-                          const SizedBox.shrink(),
                     ),
                   if (logoUrl != null && logoUrl.isNotEmpty)
-                    SizedBox(height: isVeryCompact ? 12 : 18),
+                    SizedBox(height: isVeryCompact ? 6 : 8),
                   Text(
                     l10n.welcomeSubtitle,
                     textAlign: TextAlign.center,
@@ -307,8 +329,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Padding(
               padding: EdgeInsets.only(
                 left: pad + 8,
-                top: 20,
-                bottom: 16,
+                top: 0,
+                bottom: 8,
                 right: pad + 8,
               ),
               child: Text(
@@ -366,7 +388,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               child: Image.asset(
                 'assets/logo.png',
-                height: isVeryCompact ? 28 : (isCompact ? 32 : 36),
+                height: isVeryCompact ? 18 : (isCompact ? 22 : 24),
                 fit: BoxFit.contain,
               ),
             ),
@@ -408,7 +430,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     constraints: isMobileWidth ? const BoxConstraints() : null,
                     iconSize: iconSize,
                     icon: Icon(
-                      Icons.language,
+                      Icons.translate,
                       color: AppTheme.accentGold,
                       shadows: [
                         Shadow(
@@ -528,6 +550,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     ];
 
+    final filteredServices = services.where((s) {
+      final route = (s['route'] as String?) ?? '';
+      return route != '/assistance-emergency' && route != '/chatbot';
+    }).toList();
+
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
@@ -543,9 +570,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           mainAxisSpacing: spacing,
           childAspectRatio: aspectRatio,
         ),
-        itemCount: services.length,
+        itemCount: filteredServices.length,
         itemBuilder: (context, index) {
-          final service = services[index];
+          final service = filteredServices[index];
           return ServiceCard(
             title: service['title'] as String,
             icon: service['icon'] as IconData,
