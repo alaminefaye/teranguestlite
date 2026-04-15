@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/announcement.dart';
+import '../../models/user.dart';
 import '../../providers/announcements_provider.dart';
+import '../../services/api_service.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/announcement_popup.dart';
 import '../../widgets/empty_state.dart';
@@ -17,19 +21,44 @@ class AnimationsModuleScreen extends StatefulWidget {
 }
 
 class _AnimationsModuleScreenState extends State<AnimationsModuleScreen> {
+  Enterprise? _enterprise;
+  bool _loadingEnterprise = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _loadVitrineEnterprise();
       final provider = context.read<AnnouncementsProvider>();
       provider.loadAnnouncements();
     });
   }
 
+  Future<void> _loadVitrineEnterprise() async {
+    if (_loadingEnterprise) return;
+    setState(() => _loadingEnterprise = true);
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final payload = Map<String, dynamic>.from(data['data'] as Map);
+        if (!mounted) return;
+        setState(() => _enterprise = Enterprise.fromJson(payload));
+      }
+    } catch (_) {
+      // ignore
+    } finally {
+      if (mounted) setState(() => _loadingEnterprise = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final programUrl = _enterprise?.animationsProgramUrl?.trim() ?? '';
+    final journalUrl = _enterprise?.animationsJournalUrl?.trim() ?? '';
+    final hasDocs = programUrl.isNotEmpty || journalUrl.isNotEmpty;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
@@ -81,7 +110,9 @@ class _AnimationsModuleScreenState extends State<AnimationsModuleScreen> {
               Expanded(
                 child: Consumer<AnnouncementsProvider>(
                   builder: (context, provider, _) {
-                    if (provider.isLoading && !provider.hasAnnouncements) {
+                    if (provider.isLoading &&
+                        !provider.hasAnnouncements &&
+                        !hasDocs) {
                       return const Center(
                         child: CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -92,40 +123,57 @@ class _AnimationsModuleScreenState extends State<AnimationsModuleScreen> {
                     }
 
                     if (provider.error != null && !provider.hasAnnouncements) {
-                      return ErrorStateWidget(
-                        message: provider.error!,
-                        hint: l10n.errorHint,
-                        onRetry: provider.loadAnnouncements,
-                      );
+                      if (!hasDocs) {
+                        return ErrorStateWidget(
+                          message: provider.error!,
+                          hint: l10n.errorHint,
+                          onRetry: provider.loadAnnouncements,
+                        );
+                      }
                     }
 
                     final items = provider.announcements;
-                    if (items.isEmpty) {
-                      return EmptyStateWidget(
-                        icon: Icons.campaign_outlined,
-                        title: 'Aucune animation',
-                        subtitle:
-                            'Les annonces et événements seront affichés ici.',
-                      );
-                    }
-
-                    return ListView.separated(
+                    return ListView(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final ann = items[index];
-                        return _AnnouncementTile(
-                          announcement: ann,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            AnnouncementPopup.show(context, ann);
-                          },
-                        );
-                      },
+                      children: [
+                        if (_loadingEnterprise && !hasDocs)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: LinearProgressIndicator(
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        if (hasDocs) ...[
+                          _DocsSection(
+                            programUrl: programUrl,
+                            journalUrl: journalUrl,
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+                        if (items.isEmpty)
+                          const EmptyStateWidget(
+                            icon: Icons.campaign_outlined,
+                            title: 'Aucune animation',
+                            subtitle:
+                                'Les annonces et événements seront affichés ici.',
+                          )
+                        else
+                          ...items.map(
+                            (ann) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _AnnouncementTile(
+                                announcement: ann,
+                                onTap: () {
+                                  HapticHelper.lightImpact();
+                                  AnnouncementPopup.show(context, ann);
+                                },
+                              ),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),
@@ -206,4 +254,102 @@ class _AnnouncementTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DocsSection extends StatelessWidget {
+  final String programUrl;
+  final String journalUrl;
+
+  const _DocsSection({required this.programUrl, required this.journalUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <_DocItem>[];
+    if (programUrl.trim().isNotEmpty) {
+      items.add(
+        _DocItem(
+          label: 'Programme',
+          icon: Icons.event_note_outlined,
+          url: programUrl,
+        ),
+      );
+    }
+    if (journalUrl.trim().isNotEmpty) {
+      items.add(
+        _DocItem(
+          label: 'Journal',
+          icon: Icons.article_outlined,
+          url: journalUrl,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Documents',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 10),
+        ...items.map(
+          (d) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: AppTheme.primaryDark.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () async {
+                  HapticHelper.lightImpact();
+                  await launchUrl(
+                    Uri.parse(d.url),
+                    mode: LaunchMode.externalApplication,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.accentGold.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Icon(d.icon, color: AppTheme.accentGold),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          d.label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppTheme.textGray),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DocItem {
+  final String label;
+  final IconData icon;
+  final String url;
+
+  _DocItem({required this.label, required this.icon, required this.url});
 }

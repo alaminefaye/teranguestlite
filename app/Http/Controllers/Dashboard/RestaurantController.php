@@ -68,6 +68,7 @@ class RestaurantController extends Controller
             'type' => 'required|in:restaurant,bar,cafe,pool_bar',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'menu_file' => 'nullable|file|max:30720|mimes:pdf,jpg,jpeg,png',
             'location' => 'nullable|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'status' => 'required|in:open,closed,coming_soon',
@@ -86,6 +87,10 @@ class RestaurantController extends Controller
         // Upload image
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('restaurants', 'public');
+        }
+
+        if ($request->hasFile('menu_file')) {
+            $validated['menu_file'] = $request->file('menu_file')->store('restaurant-menus', 'public');
         }
 
         // Traiter les horaires d'ouverture
@@ -140,6 +145,7 @@ class RestaurantController extends Controller
             'type' => 'required|in:restaurant,bar,cafe,pool_bar',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'menu_file' => 'nullable|file|max:30720|mimes:pdf,jpg,jpeg,png',
             'location' => 'nullable|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'status' => 'required|in:open,closed,coming_soon',
@@ -160,6 +166,13 @@ class RestaurantController extends Controller
                 Storage::disk('public')->delete($restaurant->image);
             }
             $validated['image'] = $request->file('image')->store('restaurants', 'public');
+        }
+
+        if ($request->hasFile('menu_file')) {
+            if ($restaurant->menu_file) {
+                Storage::disk('public')->delete($restaurant->menu_file);
+            }
+            $validated['menu_file'] = $request->file('menu_file')->store('restaurant-menus', 'public');
         }
 
         // Traiter les horaires d'ouverture
@@ -196,6 +209,9 @@ class RestaurantController extends Controller
         // Supprimer l'image
         if ($restaurant->image) {
             Storage::disk('public')->delete($restaurant->image);
+        }
+        if ($restaurant->menu_file) {
+            Storage::disk('public')->delete($restaurant->menu_file);
         }
 
         $restaurant->delete();

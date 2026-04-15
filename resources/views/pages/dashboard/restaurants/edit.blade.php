@@ -124,6 +124,26 @@
                     @enderror
                 </div>
 
+                <!-- Carte / Menu (PDF ou image) -->
+                <div class="md:col-span-2">
+                    <label for="menu_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Carte / Menu (PDF ou image)
+                    </label>
+                    @if($restaurant->menu_file)
+                        <div class="mb-3">
+                            <a href="{{ Storage::url($restaurant->menu_file) }}" target="_blank" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">
+                                Voir la carte actuelle
+                            </a>
+                        </div>
+                    @endif
+                    <input type="file" name="menu_file" id="menu_file" accept="application/pdf,image/*"
+                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Laissez vide pour conserver le fichier actuel.</p>
+                    @error('menu_file')
+                        <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Contact -->
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

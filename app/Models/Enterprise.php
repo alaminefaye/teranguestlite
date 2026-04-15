@@ -218,6 +218,27 @@ class Enterprise extends Model
     }
 
     /**
+     * Animations : documents (programme, journal).
+     * Stocké dans settings['animations'].
+     */
+    public function getAnimationsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['animations'] ?? []) : [];
+        $programUrl = $s['program_url'] ?? null;
+        if (!$programUrl && !empty($s['program_path'])) {
+            $programUrl = asset('storage/' . $s['program_path']);
+        }
+        $journalUrl = $s['journal_url'] ?? null;
+        if (!$journalUrl && !empty($s['journal_path'])) {
+            $journalUrl = asset('storage/' . $s['journal_path']);
+        }
+        return [
+            'program_url' => $programUrl,
+            'journal_url' => $journalUrl,
+        ];
+    }
+
+    /**
      * Chatbot IA : URL du chatbot (null si non configuré).
      * Stocké dans settings['chatbot_url'].
      */

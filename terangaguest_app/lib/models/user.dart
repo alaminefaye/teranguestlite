@@ -283,6 +283,9 @@ class Enterprise {
   final EmergencySettings emergency;
   final String? chatbotUrl;
 
+  final String? animationsProgramUrl;
+  final String? animationsJournalUrl;
+
   /// Adresse, téléphone et email de l'entreprise (reçu, facture, contact).
   final String? address;
   final String? phone;
@@ -298,6 +301,8 @@ class Enterprise {
     HotelInfos? hotelInfos,
     EmergencySettings? emergency,
     this.chatbotUrl,
+    this.animationsProgramUrl,
+    this.animationsJournalUrl,
     this.address,
     this.phone,
     this.email,
@@ -305,6 +310,9 @@ class Enterprise {
        emergency = emergency ?? EmergencySettings();
 
   factory Enterprise.fromJson(Map<String, dynamic> json) {
+    final animations = json['animations'] is Map
+        ? Map<String, dynamic>.from(json['animations'] as Map)
+        : null;
     return Enterprise(
       id: _parseIdSafe(json['id']),
       name: json['name'] as String,
@@ -319,6 +327,8 @@ class Enterprise {
         json['emergency'] as Map<String, dynamic>?,
       ),
       chatbotUrl: json['chatbot_url'] as String?,
+      animationsProgramUrl: animations?['program_url'] as String?,
+      animationsJournalUrl: animations?['journal_url'] as String?,
       address: json['address'] as String?,
       phone: json['phone'] as String?,
       email: json['email'] as String?,
@@ -356,6 +366,10 @@ class Enterprise {
         'security_enabled': emergency.securityEnabled,
       },
       'chatbot_url': chatbotUrl,
+      'animations': {
+        'program_url': animationsProgramUrl,
+        'journal_url': animationsJournalUrl,
+      },
     };
   }
 }

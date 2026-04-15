@@ -43,6 +43,7 @@ class ApiConfig {
   static const String vitrineRoomServiceItems = '/vitrine/room-service/items';
   static const String vitrineSpaServices = '/vitrine/spa-services';
   static const String vitrineExcursions = '/vitrine/excursions';
+  static const String vitrineSeminars = '/vitrine/seminars';
   static const String vitrineLaundryServices = '/vitrine/laundry/services';
   static const String vitrinePalaceServices = '/vitrine/palace-services';
   static const String vitrineVehicles = '/vitrine/vehicles';

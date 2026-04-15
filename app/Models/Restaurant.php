@@ -20,6 +20,7 @@ class Restaurant extends Model
         'type',
         'description',
         'image',
+        'menu_file',
         'location',
         'capacity',
         'status',

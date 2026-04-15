@@ -42,6 +42,8 @@ Route::prefix('vitrine')->group(function () {
     Route::get('/excursions', [VitrineController::class, 'excursions']);
     Route::get('/excursions/{id}', [VitrineController::class, 'excursionShow'])->whereNumber('id');
 
+    Route::get('/seminars', [VitrineController::class, 'seminars']);
+
     Route::get('/laundry/services', [VitrineController::class, 'laundryServices']);
     Route::get('/palace-services', [VitrineController::class, 'palaceServices']);
     Route::get('/vehicles', [VitrineController::class, 'vehicles']);

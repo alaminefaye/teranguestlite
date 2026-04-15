@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/restaurant.dart';
 import '../../models/favorite_item.dart';
@@ -202,6 +203,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
           const SizedBox(height: 30),
 
+          if ((_restaurant!.menuFile ?? '').trim().isNotEmpty) ...[
+            _buildMenuFile(),
+            const SizedBox(height: 30),
+          ],
+
           // Horaires
           if (_restaurant!.openingHours != null) ...[
             _buildOpeningHours(),
@@ -214,6 +220,52 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             _buildAmenities(),
             const SizedBox(height: 30),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuFile() {
+    final url = _restaurant!.menuFile!.trim();
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.menu_book_outlined,
+            color: AppTheme.accentGold,
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Carte / Menu',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () async {
+              HapticHelper.lightImpact();
+              await launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.accentGold,
+              foregroundColor: AppTheme.primaryDark,
+            ),
+            child: const Text('Ouvrir'),
+          ),
         ],
       ),
     );

@@ -114,6 +114,10 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         Route::get('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'index'])->name('hotel-infos-security.index');
         Route::put('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'update'])->name('hotel-infos-security.update');
 
+        // Animations : documents (programme & journal)
+        Route::get('animations', [\App\Http\Controllers\Dashboard\AnimationsContentController::class, 'index'])->name('animations.index');
+        Route::put('animations', [\App\Http\Controllers\Dashboard\AnimationsContentController::class, 'update'])->name('animations.update');
+
         // Galerie (image d'établissement + albums)
         Route::get('gallery', [\App\Http\Controllers\Dashboard\GalleryController::class, 'index'])->name('gallery.index');
         Route::put('gallery/cover-photo', [\App\Http\Controllers\Dashboard\GalleryController::class, 'updateCoverPhoto'])->name('gallery.cover-photo.update');
@@ -130,6 +134,10 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         Route::post('establishments/{establishment}/photos', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'store'])->name('establishments.photos.store');
         Route::put('establishments/{establishment}/photos/{photo}', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'update'])->name('establishments.photos.update');
         Route::delete('establishments/{establishment}/photos/{photo}', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'destroy'])->name('establishments.photos.destroy');
+
+        // Séminaires (salles)
+        Route::resource('seminar-rooms', \App\Http\Controllers\Dashboard\SeminarRoomController::class);
+        Route::post('seminar-rooms/{seminar_room}/toggle', [\App\Http\Controllers\Dashboard\SeminarRoomController::class, 'toggleActive'])->name('seminar-rooms.toggle');
 
         // Chat invité (messages depuis les tablettes)
         Route::get('hotel-chat', [\App\Http\Controllers\Dashboard\ChatController::class, 'index'])->name('hotel-chat.index');

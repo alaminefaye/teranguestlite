@@ -7,6 +7,7 @@ class Restaurant {
   final dynamic cuisine;
   final int? capacity;
   final String? image;
+  final String? menuFile;
   final Map<String, String>? openingHours;
   final bool isOpen;
   final List<String>? amenities;
@@ -19,6 +20,7 @@ class Restaurant {
     this.cuisine,
     this.capacity,
     this.image,
+    this.menuFile,
     this.openingHours,
     required this.isOpen,
     this.amenities,
@@ -33,6 +35,7 @@ class Restaurant {
       cuisine: json['cuisine_type'] ?? json['cuisine'],
       capacity: _parseInt(json['capacity']),
       image: json['image'] as String?,
+      menuFile: json['menu_file'] as String?,
       openingHours: _parseOpeningHours(json['opening_hours']),
       isOpen: json['is_open_now'] as bool? ?? json['is_open'] as bool? ?? false,
       amenities: _parseAmenities(json['amenities']),
@@ -82,6 +85,7 @@ class Restaurant {
       'cuisine': cuisine,
       'capacity': capacity,
       'image': image,
+      'menu_file': menuFile,
       'opening_hours': openingHours,
       'is_open': isOpen,
       'amenities': amenities,

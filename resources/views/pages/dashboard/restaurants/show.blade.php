@@ -49,6 +49,15 @@
                     </div>
                 @endif
 
+                @if($restaurant->menu_file)
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Carte / Menu</label>
+                        <a href="{{ Storage::url($restaurant->menu_file) }}" target="_blank" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">
+                            Ouvrir le fichier
+                        </a>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>

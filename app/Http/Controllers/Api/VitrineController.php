@@ -16,6 +16,7 @@ use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\PalaceService;
 use App\Models\Restaurant;
+use App\Models\SeminarRoom;
 use App\Models\SpaService;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
@@ -86,6 +87,7 @@ class VitrineController extends Controller
                 'address' => $enterprise->address,
                 'phone' => $enterprise->phone,
                 'email' => $enterprise->email,
+                'animations' => $enterprise->animations,
             ],
         ], 200);
     }
@@ -117,6 +119,7 @@ class VitrineController extends Controller
                     'description' => TranslatableApiHelper::translationsFor($restaurant, 'description'),
                     'cuisine_type' => $restaurant->cuisine_type,
                     'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
+                    'menu_file' => $restaurant->menu_file ? asset('storage/' . $restaurant->menu_file) : null,
                     'capacity' => $restaurant->capacity,
                     'opening_hours' => $restaurant->opening_hours,
                     'is_open_now' => $restaurant->is_open_now,
@@ -151,6 +154,7 @@ class VitrineController extends Controller
                 'description' => TranslatableApiHelper::translationsFor($restaurant, 'description'),
                 'cuisine_type' => $restaurant->cuisine_type,
                 'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
+                'menu_file' => $restaurant->menu_file ? asset('storage/' . $restaurant->menu_file) : null,
                 'capacity' => $restaurant->capacity,
                 'opening_hours' => $restaurant->opening_hours,
                 'is_open_now' => $restaurant->is_open_now,
@@ -517,6 +521,30 @@ class VitrineController extends Controller
                 'is_available' => $s->is_available,
                 'is_emergency' => $s->is_emergency,
                 'is_guided_tours' => $s->isGuidedToursService(),
+            ]),
+        ], 200);
+    }
+
+    public function seminars(): JsonResponse
+    {
+        $enterpriseId = $this->resolveEnterpriseId();
+        $rooms = SeminarRoom::query()
+            ->where('enterprise_id', $enterpriseId)
+            ->active()
+            ->ordered()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $rooms->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => TranslatableApiHelper::translationsFor($r, 'name'),
+                'description' => TranslatableApiHelper::translationsFor($r, 'description'),
+                'capacity' => $r->capacity,
+                'equipments' => $r->equipments ?? [],
+                'image' => $r->image ? asset('storage/' . $r->image) : null,
+                'contact_phone' => $r->contact_phone,
+                'contact_email' => $r->contact_email,
             ]),
         ], 200);
     }
