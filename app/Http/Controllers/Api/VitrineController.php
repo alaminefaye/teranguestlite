@@ -729,19 +729,27 @@ class VitrineController extends Controller
 
     public function guides(): JsonResponse
     {
-        $categories = GuideCategory::with([
+        $enterpriseId = $this->resolveEnterpriseId();
+        $baseQuery = GuideCategory::with([
             'items' => function ($query) {
                 $query->where('is_active', true)->orderBy('order', 'asc');
             },
         ])
-            ->where('is_active', true)
-            ->orderBy('order', 'asc')
-            ->get();
+            ->where('is_active', true);
+
+        $hasEnterpriseGuides = (clone $baseQuery)
+            ->where('enterprise_id', $enterpriseId)
+            ->exists();
+
+        $categories = $hasEnterpriseGuides
+            ? $baseQuery->where('enterprise_id', $enterpriseId)->orderBy('order', 'asc')->get()
+            : $baseQuery->whereNull('enterprise_id')->orderBy('order', 'asc')->get();
 
         $data = $categories->map(function ($category) {
             return [
                 'id' => $category->id,
                 'name' => $category->name,
+                'category_type' => $category->category_type,
                 'image' => $category->image,
                 'order' => $category->order,
                 'is_active' => $category->is_active,

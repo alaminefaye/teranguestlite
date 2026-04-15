@@ -4,6 +4,7 @@ class GuideCategory {
   final String? image;
   final int order;
   final bool isActive;
+  final String? categoryType;
   final List<GuideItem>? items;
 
   GuideCategory({
@@ -12,6 +13,7 @@ class GuideCategory {
     this.image,
     required this.order,
     required this.isActive,
+    this.categoryType,
     this.items,
   });
 
@@ -22,6 +24,7 @@ class GuideCategory {
       image: json['image'],
       order: json['order'] ?? 0,
       isActive: json['is_active'] ?? true,
+      categoryType: json['category_type']?.toString(),
       items: json['items'] != null
           ? (json['items'] as List).map((i) => GuideItem.fromJson(i)).toList()
           : null,

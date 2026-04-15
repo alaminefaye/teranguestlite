@@ -1,17 +1,84 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/guide.dart';
+import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
 import '../../widgets/service_card.dart';
-import '../amenities/amenities_concierge_screen.dart';
-import '../hotel_infos/gallery_screen.dart';
+import '../hotel_infos/guide_items_screen.dart';
 import '../hotel_infos/guides_screen.dart';
-import '../laundry/laundry_list_screen.dart';
+import '../hotel_infos/hotel_infos_screen.dart';
 
-class RoomModuleScreen extends StatelessWidget {
+class RoomModuleScreen extends StatefulWidget {
   const RoomModuleScreen({super.key});
+
+  @override
+  State<RoomModuleScreen> createState() => _RoomModuleScreenState();
+}
+
+class _RoomModuleScreenState extends State<RoomModuleScreen> {
+  List<GuideCategory>? _categories;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadGuides();
+    });
+  }
+
+  Future<void> _loadGuides() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    try {
+      final cats = await GuidesApi().getGuides();
+      if (!mounted) return;
+      setState(() => _categories = cats);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _categories = const []);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  GuideCategory? _findCategory({
+    required List<GuideCategory> categories,
+    required List<String> types,
+    required List<String> keywords,
+  }) {
+    for (final t in types) {
+      final found = categories.firstWhere(
+        (c) => (c.categoryType ?? '').toLowerCase() == t.toLowerCase(),
+        orElse: () => GuideCategory(
+          id: -1,
+          name: '',
+          order: 0,
+          isActive: false,
+          items: const [],
+        ),
+      );
+      if (found.id != -1) return found;
+    }
+    for (final k in keywords) {
+      final key = k.toLowerCase();
+      final found = categories.firstWhere(
+        (c) => c.name.toLowerCase().contains(key),
+        orElse: () => GuideCategory(
+          id: -1,
+          name: '',
+          order: 0,
+          isActive: false,
+          items: const [],
+        ),
+      );
+      if (found.id != -1) return found;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,30 +87,40 @@ class RoomModuleScreen extends StatelessWidget {
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
 
+    final categories = _categories ?? <GuideCategory>[];
+    final equipmentCategory = _findCategory(
+      categories: categories,
+      types: const ['equipment_guide', 'equipment', 'guide_equipment'],
+      keywords: const ['équip', 'equip', 'utilisation', 'guide'],
+    );
+    final numbersCategory = _findCategory(
+      categories: categories,
+      types: const ['useful_numbers', 'numbers', 'contacts'],
+      keywords: const ['num', 'urgence', 'contact', 'appel'],
+    );
+
     final items = [
       (
-        l10n.guidesInfos,
-        Icons.library_books_outlined,
+        'Guide utilisation équipements',
+        Icons.menu_book_outlined,
         'assets/images/info_guides.png',
-        () => context.navigateTo(const GuidesScreen()),
+        () => equipmentCategory != null
+            ? context.navigateTo(GuideItemsScreen(category: equipmentCategory))
+            : context.navigateTo(const GuidesScreen()),
       ),
       (
-        l10n.gallery,
-        Icons.photo_library_outlined,
-        'assets/images/info_galerie.png',
-        () => context.navigateTo(const GalleryScreen()),
+        'Numéros utiles',
+        Icons.phone_in_talk_outlined,
+        'assets/images/info_urgence.png',
+        () => numbersCategory != null
+            ? context.navigateTo(GuideItemsScreen(category: numbersCategory))
+            : context.navigateTo(const GuidesScreen()),
       ),
       (
-        l10n.amenitiesConcierge,
-        Icons.room_service_outlined,
-        'assets/images/amenity_toiletries.png',
-        () => context.navigateTo(const AmenitiesConciergeScreen()),
-      ),
-      (
-        l10n.laundry,
-        Icons.local_laundry_service_outlined,
-        'assets/images/sub_laundry.png',
-        () => context.navigateTo(const LaundryListScreen()),
+        l10n.practicalInfo,
+        Icons.info_outline_rounded,
+        'assets/images/info_pratique.png',
+        () => context.navigateTo(const HotelInfosScreen()),
       ),
     ];
 
@@ -83,7 +160,7 @@ class RoomModuleScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Informations & services',
+                            'Guide, numéros & infos pratiques',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppTheme.textGray,

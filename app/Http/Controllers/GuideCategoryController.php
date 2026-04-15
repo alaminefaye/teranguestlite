@@ -26,6 +26,7 @@ class GuideCategoryController extends Controller
             return [
                 'id' => $category->id,
                 'name' => $category->name,
+                'category_type' => $category->category_type,
                 'image' => $category->image,
                 'order' => $category->order,
                 'is_active' => $category->is_active,

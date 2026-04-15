@@ -531,19 +531,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'title': 'Séminaires',
         'icon': Icons.meeting_room_outlined,
         'route': '/module-seminars',
-        'image': 'assets/images/info_transport.png',
+        'image': 'assets/images/info_etablissements.png',
       },
       {
         'title': 'Chambre',
         'icon': Icons.bed_outlined,
         'route': '/module-room',
-        'image': 'assets/images/box_room_service.png',
+        'image': 'assets/images/info_hotel.png',
       },
       {
         'title': 'Contact',
         'icon': Icons.call_outlined,
         'route': '/module-contact',
-        'image': 'assets/images/info_sante.png',
+        'image': 'assets/images/info_pratique.png',
       },
     ];
 

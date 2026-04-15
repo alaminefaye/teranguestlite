@@ -118,6 +118,12 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         Route::get('animations', [\App\Http\Controllers\Dashboard\AnimationsContentController::class, 'index'])->name('animations.index');
         Route::put('animations', [\App\Http\Controllers\Dashboard\AnimationsContentController::class, 'update'])->name('animations.update');
 
+        // Chambre : guides (catégories + items)
+        Route::resource('guide-categories', \App\Http\Controllers\Dashboard\GuideCategoryController::class);
+        Route::post('guide-categories/{guide_category}/toggle', [\App\Http\Controllers\Dashboard\GuideCategoryController::class, 'toggleActive'])->name('guide-categories.toggle');
+        Route::resource('guide-items', \App\Http\Controllers\Dashboard\GuideItemController::class);
+        Route::post('guide-items/{guide_item}/toggle', [\App\Http\Controllers\Dashboard\GuideItemController::class, 'toggleActive'])->name('guide-items.toggle');
+
         // Galerie (image d'établissement + albums)
         Route::get('gallery', [\App\Http\Controllers\Dashboard\GalleryController::class, 'index'])->name('gallery.index');
         Route::put('gallery/cover-photo', [\App\Http\Controllers\Dashboard\GalleryController::class, 'updateCoverPhoto'])->name('gallery.cover-photo.update');

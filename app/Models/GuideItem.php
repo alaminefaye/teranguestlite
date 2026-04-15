@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\EnterpriseScopeTrait;
 use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class GuideItem extends Model
 {
-    use HasTranslations, TranslatesAutomatically;
+    use HasTranslations, TranslatesAutomatically, EnterpriseScopeTrait;
 
     public array $translatable = ['title', 'description'];
 
     protected $fillable = [
+        'enterprise_id',
         'guide_category_id',
         'title',
         'description',
