@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -7,6 +8,7 @@ import '../../providers/laundry_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../widgets/animated_button.dart';
 import '../../widgets/translatable_text.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class CreateLaundryRequestScreen extends StatefulWidget {
   const CreateLaundryRequestScreen({super.key});
@@ -54,6 +56,13 @@ class _CreateLaundryRequestScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Demande',
+        subtitle: 'Les demandes sont désactivées en mode vitrine.',
+        icon: Icons.send_outlined,
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

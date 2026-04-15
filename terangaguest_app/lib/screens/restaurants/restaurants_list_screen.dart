@@ -12,7 +12,18 @@ import '../../utils/layout_helper.dart';
 import 'restaurant_detail_screen.dart';
 
 class RestaurantsListScreen extends StatefulWidget {
-  const RestaurantsListScreen({super.key});
+  final String? initialType;
+  final List<String>? allowedTypes;
+  final String? titleOverride;
+  final String? subtitleOverride;
+
+  const RestaurantsListScreen({
+    super.key,
+    this.initialType,
+    this.allowedTypes,
+    this.titleOverride,
+    this.subtitleOverride,
+  });
 
   @override
   State<RestaurantsListScreen> createState() => _RestaurantsListScreenState();
@@ -23,20 +34,25 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
 
   List<Map<String, String>> _typeFilters(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return [
+    final all = [
       {'value': '', 'label': l10n.filterAllTypes},
       {'value': 'restaurant', 'label': l10n.filterRestaurants},
       {'value': 'bar', 'label': l10n.filterBars},
       {'value': 'cafe', 'label': l10n.filterCafes},
       {'value': 'lounge', 'label': l10n.filterLounges},
+      {'value': 'pool_bar', 'label': l10n.filterBars},
     ];
+    final allowed = widget.allowedTypes;
+    if (allowed == null || allowed.isEmpty) return all;
+    return all.where((e) => e['value'] == '' || allowed.contains(e['value'])).toList();
   }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RestaurantsProvider>().fetchRestaurants();
+      setState(() => _selectedType = widget.initialType);
+      context.read<RestaurantsProvider>().fetchRestaurants(type: _selectedType);
     });
   }
 
@@ -83,7 +99,8 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  AppLocalizations.of(context).restaurantsBars,
+                  widget.titleOverride ??
+                      AppLocalizations.of(context).restaurantsBars,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
@@ -92,7 +109,8 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context).discoverRestaurants,
+                  widget.subtitleOverride ??
+                      AppLocalizations.of(context).discoverRestaurants,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,

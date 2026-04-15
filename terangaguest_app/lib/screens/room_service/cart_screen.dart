@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
@@ -17,6 +18,7 @@ import '../../models/guest_session.dart';
 import '../../utils/navigation_helper.dart';
 import 'categories_screen.dart';
 import 'order_confirmation_screen.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -599,6 +601,13 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Commande',
+        subtitle: 'Les commandes sont désactivées en mode vitrine.',
+        icon: Icons.shopping_cart_outlined,
+      );
+    }
     final l10n = _l10n(context);
     return Scaffold(
       body: Container(

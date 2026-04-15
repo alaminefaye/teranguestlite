@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -13,6 +14,7 @@ import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../dashboard/dashboard_screen.dart';
 import 'order_detail_screen.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class OrdersListScreen extends StatefulWidget {
   /// Si true, la liste est vidée puis rechargée à l'ouverture (après un court
@@ -96,6 +98,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Commandes',
+        subtitle: 'Les commandes sont désactivées en mode vitrine.',
+        icon: Icons.shopping_cart_outlined,
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

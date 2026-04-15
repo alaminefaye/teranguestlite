@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/palace_provider.dart';
@@ -9,6 +10,7 @@ import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/empty_state.dart';
 import '../../models/palace.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class MyPalaceRequestsScreen extends StatefulWidget {
   const MyPalaceRequestsScreen({super.key});
@@ -46,6 +48,13 @@ class _MyPalaceRequestsScreenState extends State<MyPalaceRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Demandes',
+        subtitle: 'Les demandes sont désactivées en mode vitrine.',
+        icon: Icons.send_outlined,
+      );
+    }
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;

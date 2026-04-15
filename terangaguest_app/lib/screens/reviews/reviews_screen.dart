@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../services/reviews_api.dart';
@@ -6,6 +7,7 @@ import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key});
@@ -200,6 +202,13 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Avis',
+        subtitle: 'Les avis sont désactivés en mode vitrine.',
+        icon: Icons.rate_review_outlined,
+      );
+    }
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Container(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../models/order.dart';
 import '../../providers/orders_provider.dart';
@@ -8,6 +9,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import 'invoice_receipt_dialog.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class InvoicesListScreen extends StatefulWidget {
   const InvoicesListScreen({super.key});
@@ -49,6 +51,13 @@ class _InvoicesListScreenState extends State<InvoicesListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Factures',
+        subtitle: 'Les factures sont désactivées en mode vitrine.',
+        icon: Icons.receipt_long_outlined,
+      );
+    }
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
       body: SafeArea(

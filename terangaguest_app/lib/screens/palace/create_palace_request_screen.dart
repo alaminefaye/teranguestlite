@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
@@ -11,6 +12,7 @@ import '../../providers/palace_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../services/vehicle_api.dart';
 import '../../widgets/animated_button.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 /// Type de demande véhicule : taxi ou location.
 enum VehicleRequestType { taxi, rental }
@@ -753,6 +755,13 @@ class _CreatePalaceRequestScreenState extends State<CreatePalaceRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Demande',
+        subtitle: 'Les demandes sont désactivées en mode vitrine.',
+        icon: Icons.send_outlined,
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

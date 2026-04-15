@@ -88,6 +88,9 @@ class MenuHelper
      */
     private static function getAdminMenuGroups()
     {
+        if (filter_var(env('TERANGUEST_LITE', false), FILTER_VALIDATE_BOOL)) {
+            return self::getAdminMenuGroupsLite();
+        }
         return [
             [
                 'title' => 'Gestion Hôtel',
@@ -197,6 +200,51 @@ class MenuHelper
                             ['name' => 'Catégories de stock', 'path' => '/dashboard/stock-categories'],
                             ['name' => 'Produits / Stock', 'path' => '/dashboard/stock-products'],
                             ['name' => 'Mouvements', 'path' => '/dashboard/stock-movements'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Autres',
+                'items' => [
+                    [
+                        'icon' => 'user-profile',
+                        'name' => 'Profil',
+                        'path' => '/profile',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private static function getAdminMenuGroupsLite()
+    {
+        return [
+            [
+                'title' => 'TerangaGuest Lite',
+                'items' => [
+                    [
+                        'icon' => 'dashboard',
+                        'name' => 'Dashboard',
+                        'path' => '/dashboard',
+                    ],
+                    [
+                        'icon' => 'services',
+                        'name' => 'Contenu (Lite)',
+                        'path' => '#',
+                        'subItems' => [
+                            ['name' => 'Hotel Infos & Sécurité', 'path' => '/dashboard/hotel-infos-security'],
+                            ['name' => 'Galerie', 'path' => '/dashboard/gallery'],
+                            ['name' => 'Nos établissements', 'path' => '/dashboard/establishments'],
+                            ['name' => 'Restaurants & Bars', 'path' => '/dashboard/restaurants'],
+                            ['name' => 'Spa & Bien-être', 'path' => '/dashboard/spa-services'],
+                            ['name' => 'Bien-être, Sport & Loisirs', 'path' => '/dashboard/leisure-categories'],
+                            ['name' => 'Horaires salle de sport', 'path' => '/dashboard/gym-hours'],
+                            ['name' => 'Excursions', 'path' => '/dashboard/excursions'],
+                            ['name' => 'Annonces & Vidéos', 'path' => '/dashboard/enterprise-announcements'],
+                            ['name' => 'Blanchisserie (tarifs)', 'path' => '/dashboard/laundry-services'],
+                            ['name' => 'Amenities & Conciergerie', 'path' => '/dashboard/amenity-categories'],
+                            ['name' => 'Services Palace', 'path' => '/dashboard/palace-services'],
                         ],
                     ],
                 ],

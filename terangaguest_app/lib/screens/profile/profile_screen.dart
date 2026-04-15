@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
@@ -26,6 +27,63 @@ const String _supportPhone = '+221338699000';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  Widget _buildVitrineProfile(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 30),
+              Text(
+                AppLocalizations.of(context).settings,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.accentGold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildActionTile(
+                context: context,
+                icon: Icons.info_outline,
+                title: AppLocalizations.of(context).about,
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  _showAboutDialog(context);
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionTile(
+                context: context,
+                icon: Icons.support_agent_outlined,
+                title: AppLocalizations.of(context).contactSupport,
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  _showContactSupportDialog(context);
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionTile(
+                context: context,
+                icon: Icons.settings_outlined,
+                title: AppLocalizations.of(context).settings,
+                onTap: () {
+                  HapticHelper.lightImpact();
+                  context.navigateTo(const SettingsScreen());
+                },
+              ),
+              const SizedBox(height: 24),
+              _buildVersionFooter(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _handleLogout(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -73,6 +131,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return _buildVitrineProfile(context);
+    }
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),

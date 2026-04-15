@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/restaurant.dart';
@@ -10,6 +11,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/tablet_session_provider.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 class MyRestaurantReservationsScreen extends StatefulWidget {
   const MyRestaurantReservationsScreen({super.key});
@@ -49,6 +51,13 @@ class _MyRestaurantReservationsScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Réservations',
+        subtitle: 'Les réservations sont désactivées en mode vitrine.',
+        icon: Icons.event_busy_outlined,
+      );
+    }
     final auth = context.watch<AuthProvider>();
     final isStaffOrAdmin = auth.isAdmin || auth.isStaff;
 

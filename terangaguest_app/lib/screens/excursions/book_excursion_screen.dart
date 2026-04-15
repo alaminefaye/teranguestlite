@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/excursion.dart';
@@ -10,6 +11,7 @@ import '../../providers/tablet_session_provider.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/animated_button.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 import 'my_excursion_bookings_screen.dart';
 
 class BookExcursionScreen extends StatefulWidget {
@@ -67,6 +69,13 @@ class _BookExcursionScreenState extends State<BookExcursionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Réservation',
+        subtitle: 'La réservation est désactivée en mode vitrine.',
+        icon: Icons.event_busy_outlined,
+      );
+    }
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

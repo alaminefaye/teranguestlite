@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/palace.dart';
@@ -11,6 +12,7 @@ import '../../providers/tablet_session_provider.dart';
 import '../../services/palace_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
+import '../../widgets/vitrine_disabled_screen.dart';
 
 /// Formulaire de demande de location pour un véhicule choisi.
 class VehicleRentalRequestScreen extends StatefulWidget {
@@ -160,6 +162,13 @@ class _VehicleRentalRequestScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (ApiConfig.vitrineMode) {
+      return const VitrineDisabledScreen(
+        title: 'Demande',
+        subtitle: 'Les demandes sont désactivées en mode vitrine.',
+        icon: Icons.send_outlined,
+      );
+    }
     final l10n = AppLocalizations.of(context);
     final w = MediaQuery.sizeOf(context).width;
     final isMobile = w < 600;
