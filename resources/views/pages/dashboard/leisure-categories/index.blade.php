@@ -1,9 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex items-center justify-between flex-wrap gap-3">
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Bien-être, Sport & Loisirs</h1>
-    <a href="{{ route('dashboard.leisure-categories.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Ajouter une catégorie</a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('dashboard.sport-settings') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-medium border border-gray-200 dark:border-gray-700">
+            ⚙️ Paramètres Sport
+        </a>
+        <a href="{{ route('dashboard.leisure-categories.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Ajouter une catégorie</a>
+    </div>
 </div>
 
 <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Deux catégories principales (Sport, Loisirs) s'affichent dans l'app. Cliquez sur « Gérer les activités » pour ajouter les sports ou loisirs proposés (Golf & Tennis, Fitness, Spa, etc.). Tout est dynamique comme Amenities & Conciergerie.</p>

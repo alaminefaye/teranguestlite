@@ -239,6 +239,42 @@ class Enterprise extends Model
     }
 
     /**
+     * Sport & Fitness : mode d'affichage dans l'app (catalogue ou document).
+     * Stocké dans settings['sport'].
+     */
+    public function getSportSettingsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['sport'] ?? []) : [];
+        $documentUrl = $s['document_url'] ?? null;
+        if (!$documentUrl && !empty($s['document_path'])) {
+            $documentUrl = asset('storage/' . $s['document_path']);
+        }
+        return [
+            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'document_url'  => $documentUrl,
+            'document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
+    /**
+     * Excursions : mode d'affichage dans l'app (catalogue ou document).
+     * Stocké dans settings['excursions'].
+     */
+    public function getExcursionsSettingsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['excursions'] ?? []) : [];
+        $documentUrl = $s['document_url'] ?? null;
+        if (!$documentUrl && !empty($s['document_path'])) {
+            $documentUrl = asset('storage/' . $s['document_path']);
+        }
+        return [
+            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'document_url'  => $documentUrl,
+            'document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
+    /**
      * Spa & Bien-être : mode d'affichage dans l'app (catalogue ou document).
      * Stocké dans settings['spa'].
      */

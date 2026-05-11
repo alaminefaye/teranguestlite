@@ -89,6 +89,8 @@ class VitrineController extends Controller
                 'email' => $enterprise->email,
                 'animations' => $enterprise->animations,
                 'spa_settings' => $enterprise->spa_settings,
+                'sport_settings' => $enterprise->sport_settings,
+                'excursions_settings' => $enterprise->excursions_settings,
             ],
         ], 200);
     }

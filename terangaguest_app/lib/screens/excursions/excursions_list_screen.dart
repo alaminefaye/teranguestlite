@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
+import '../../models/user.dart';
+import '../../services/api_service.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/excursions_provider.dart';
+import '../../screens/common/in_app_document_screen.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/excursion_card.dart';
@@ -19,12 +23,44 @@ class ExcursionsListScreen extends StatefulWidget {
 }
 
 class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
+  bool _checkingMode = true;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ExcursionsProvider>().fetchExcursions();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkExcursionsDisplayMode();
+      if (mounted && !_checkingMode) {
+        context.read<ExcursionsProvider>().fetchExcursions();
+      }
     });
+  }
+
+  Future<void> _checkExcursionsDisplayMode() async {
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final enterprise = Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+        if (enterprise.excursionsDisplayMode == 'document' &&
+            enterprise.excursionsDocumentUrl != null &&
+            enterprise.excursionsDocumentUrl!.isNotEmpty) {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => InAppDocumentScreen(
+                title: 'Excursions',
+                url: enterprise.excursionsDocumentUrl!,
+              ),
+            ),
+          );
+          return;
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _checkingMode = false);
   }
 
   @override
@@ -39,12 +75,18 @@ class _ExcursionsListScreenState extends State<ExcursionsListScreen> {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(child: _buildContent()),
-            ],
-          ),
+          child: _checkingMode
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                  ),
+                )
+              : Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(child: _buildContent()),
+                  ],
+                ),
         ),
       ),
     );

@@ -290,6 +290,14 @@ class Enterprise {
   final String spaDisplayMode;
   final String? spaDocumentUrl;
 
+  /// Sport & Fitness : mode d'affichage ('catalog' | 'document') et document associé.
+  final String sportDisplayMode;
+  final String? sportDocumentUrl;
+
+  /// Excursions : mode d'affichage ('catalog' | 'document') et document associé.
+  final String excursionsDisplayMode;
+  final String? excursionsDocumentUrl;
+
   /// Adresse, téléphone et email de l'entreprise (reçu, facture, contact).
   final String? address;
   final String? phone;
@@ -309,6 +317,10 @@ class Enterprise {
     this.animationsJournalUrl,
     this.spaDisplayMode = 'catalog',
     this.spaDocumentUrl,
+    this.sportDisplayMode = 'catalog',
+    this.sportDocumentUrl,
+    this.excursionsDisplayMode = 'catalog',
+    this.excursionsDocumentUrl,
     this.address,
     this.phone,
     this.email,
@@ -340,6 +352,18 @@ class Enterprise {
           : 'catalog'),
       spaDocumentUrl: (json['spa_settings'] is Map
           ? json['spa_settings']['document_url'] as String?
+          : null),
+      sportDisplayMode: (json['sport_settings'] is Map
+          ? (json['sport_settings']['display_mode'] as String? ?? 'catalog')
+          : 'catalog'),
+      sportDocumentUrl: (json['sport_settings'] is Map
+          ? json['sport_settings']['document_url'] as String?
+          : null),
+      excursionsDisplayMode: (json['excursions_settings'] is Map
+          ? (json['excursions_settings']['display_mode'] as String? ?? 'catalog')
+          : 'catalog'),
+      excursionsDocumentUrl: (json['excursions_settings'] is Map
+          ? json['excursions_settings']['document_url'] as String?
           : null),
       address: json['address'] as String?,
       phone: json['phone'] as String?,

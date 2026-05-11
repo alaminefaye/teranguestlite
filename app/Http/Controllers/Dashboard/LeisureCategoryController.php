@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
 use App\Models\LeisureCategory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 
 class LeisureCategoryController extends Controller
 {
@@ -107,5 +109,45 @@ class LeisureCategoryController extends Controller
         $label = $leisureCategory->is_active ? 'affichée' : 'masquée';
         return redirect()->route('dashboard.leisure-categories.index')
             ->with('success', "Catégorie {$label}.");
+    }
+
+    public function sportSettings(): View
+    {
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        return view('pages.dashboard.leisure-categories.sport-settings', [
+            'title'        => 'Paramètres Sport & Fitness',
+            'sportSettings' => $enterprise ? $enterprise->sport_settings : ['display_mode' => 'catalog', 'document_url' => null],
+        ]);
+    }
+
+    public function updateSportSettings(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'display_mode' => 'required|in:catalog,document',
+            'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+        ]);
+
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        if (!$enterprise) {
+            return back()->with('error', 'Entreprise introuvable.');
+        }
+
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $sport = $settings['sport'] ?? [];
+        $sport['display_mode'] = $request->display_mode;
+
+        if ($request->hasFile('document')) {
+            if (!empty($sport['document_path'])) {
+                Storage::disk('public')->delete($sport['document_path']);
+            }
+            $sport['document_path'] = $request->file('document')->store('sport-documents', 'public');
+            unset($sport['document_url']);
+        }
+
+        $settings['sport'] = $sport;
+        $enterprise->update(['settings' => $settings]);
+
+        return redirect()->route('dashboard.sport-settings')
+            ->with('success', 'Paramètres Sport & Fitness mis à jour avec succès !');
     }
 }

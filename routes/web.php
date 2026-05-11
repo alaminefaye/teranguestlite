@@ -155,6 +155,8 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         // Bien-être, Sport & Loisirs (catégories principales Sport/Loisirs + sous-catégories dynamiques)
         Route::resource('leisure-categories', \App\Http\Controllers\Dashboard\LeisureCategoryController::class);
         Route::post('leisure-categories/{leisure_category}/toggle', [\App\Http\Controllers\Dashboard\LeisureCategoryController::class, 'toggleActive'])->name('leisure-categories.toggle');
+        Route::get('sport-settings', [\App\Http\Controllers\Dashboard\LeisureCategoryController::class, 'sportSettings'])->name('sport-settings');
+        Route::post('sport-settings', [\App\Http\Controllers\Dashboard\LeisureCategoryController::class, 'updateSportSettings'])->name('sport-settings.update');
         Route::get('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'index'])->name('leisure-categories.subcategories.index');
         Route::get('leisure-categories/{leisure_category}/subcategories/create', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'create'])->name('leisure-categories.subcategories.create');
         Route::post('leisure-categories/{leisure_category}/subcategories', [\App\Http\Controllers\Dashboard\LeisureSubcategoryController::class, 'store'])->name('leisure-categories.subcategories.store');
@@ -185,6 +187,8 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         // Excursions
         Route::resource('excursions', \App\Http\Controllers\Dashboard\ExcursionController::class);
         Route::post('excursions/{excursion}/toggle', [\App\Http\Controllers\Dashboard\ExcursionController::class, 'toggleActive'])->name('excursions.toggle');
+        Route::get('excursions-settings', [\App\Http\Controllers\Dashboard\ExcursionController::class, 'excursionsSettings'])->name('excursions.settings');
+        Route::post('excursions-settings', [\App\Http\Controllers\Dashboard\ExcursionController::class, 'updateExcursionsSettings'])->name('excursions.settings.update');
 
         // Réservations & demandes (spa, excursions, restaurants, blanchisserie, palace)
         Route::get('spa-reservations', [\App\Http\Controllers\Dashboard\SpaReservationsController::class, 'index'])->name('spa-reservations.index');

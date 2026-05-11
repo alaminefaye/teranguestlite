@@ -4,12 +4,15 @@ import 'package:intl/intl.dart';
 import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/user.dart';
+import '../../services/api_service.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/palace_provider.dart';
 import '../../models/palace.dart';
 import '../../main.dart'; // import for rootNavigatorKey
+import '../common/in_app_document_screen.dart';
 import '../palace/my_palace_requests_screen.dart';
 
 /// Sport & Fitness : affichage des horaires de la salle + réservation d'un coach personnel.
@@ -21,14 +24,44 @@ class SportFitnessScreen extends StatefulWidget {
 }
 
 class _SportFitnessScreenState extends State<SportFitnessScreen> {
+  bool _checkingMode = true;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!ApiConfig.vitrineMode) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkSportDisplayMode();
+      if (mounted && _checkingMode == false && !ApiConfig.vitrineMode) {
         context.read<PalaceProvider>().fetchPalaceServices();
       }
     });
+  }
+
+  Future<void> _checkSportDisplayMode() async {
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final enterprise = Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+        if (enterprise.sportDisplayMode == 'document' &&
+            enterprise.sportDocumentUrl != null &&
+            enterprise.sportDocumentUrl!.isNotEmpty) {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => InAppDocumentScreen(
+                title: 'Sport & Fitness',
+                url: enterprise.sportDocumentUrl!,
+              ),
+            ),
+          );
+          return;
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _checkingMode = false);
   }
 
   PalaceService? _getConciergeService(List<PalaceService> services) {
@@ -339,6 +372,19 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
     final gymHoursDisplay = (gymHours != null && gymHours.isNotEmpty)
         ? gymHours
         : l10n.gymHoursDefault;
+
+    if (_checkingMode) {
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(

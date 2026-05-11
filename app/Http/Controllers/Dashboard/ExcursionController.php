@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
 use App\Models\Excursion;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -155,6 +156,46 @@ class ExcursionController extends Controller
         $label = $excursion->is_active ? 'affichée' : 'masquée';
         return redirect()->route('dashboard.excursions.index')
             ->with('success', "Excursion {$label}.");
+    }
+
+    public function excursionsSettings(): View
+    {
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        return view('pages.dashboard.excursions.settings', [
+            'title'               => 'Paramètres Excursions',
+            'excursionsSettings'  => $enterprise ? $enterprise->excursions_settings : ['display_mode' => 'catalog', 'document_url' => null],
+        ]);
+    }
+
+    public function updateExcursionsSettings(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'display_mode' => 'required|in:catalog,document',
+            'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+        ]);
+
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        if (!$enterprise) {
+            return back()->with('error', 'Entreprise introuvable.');
+        }
+
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $exc = $settings['excursions'] ?? [];
+        $exc['display_mode'] = $request->display_mode;
+
+        if ($request->hasFile('document')) {
+            if (!empty($exc['document_path'])) {
+                Storage::disk('public')->delete($exc['document_path']);
+            }
+            $exc['document_path'] = $request->file('document')->store('excursions-documents', 'public');
+            unset($exc['document_url']);
+        }
+
+        $settings['excursions'] = $exc;
+        $enterprise->update(['settings' => $settings]);
+
+        return redirect()->route('dashboard.excursions.settings')
+            ->with('success', 'Paramètres Excursions mis à jour avec succès !');
     }
 
     private function parseLines(?string $value): array
