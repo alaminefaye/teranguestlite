@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
 use App\Models\SpaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -139,5 +140,48 @@ class SpaServiceController extends Controller
         $label = $spaService->is_active ? 'affiché' : 'masqué';
         return redirect()->route('dashboard.spa-services.index')
             ->with('success', "Service spa {$label}.");
+    }
+
+    /** Affichage du formulaire des paramètres d'affichage Spa. */
+    public function spaSettings(): View
+    {
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        return view('pages.dashboard.spa-services.settings', [
+            'title'       => 'Paramètres Spa & Bien-être',
+            'spaSettings' => $enterprise ? $enterprise->spa_settings : ['display_mode' => 'catalog', 'document_url' => null],
+        ]);
+    }
+
+    /** Enregistre les paramètres d'affichage Spa. */
+    public function updateSpaSettings(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'display_mode' => 'required|in:catalog,document',
+            'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+        ]);
+
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        if (!$enterprise) {
+            return back()->with('error', 'Entreprise introuvable.');
+        }
+
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $spa = $settings['spa'] ?? [];
+
+        $spa['display_mode'] = $request->display_mode;
+
+        if ($request->hasFile('document')) {
+            if (!empty($spa['document_path'])) {
+                Storage::disk('public')->delete($spa['document_path']);
+            }
+            $spa['document_path'] = $request->file('document')->store('spa-documents', 'public');
+            unset($spa['document_url']);
+        }
+
+        $settings['spa'] = $spa;
+        $enterprise->update(['settings' => $settings]);
+
+        return redirect()->route('dashboard.spa-services.settings')
+            ->with('success', 'Paramètres Spa mis à jour avec succès !');
     }
 }

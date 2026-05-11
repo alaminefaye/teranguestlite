@@ -10,8 +10,9 @@ class ExcursionsApi {
   /// Récupère la liste des excursions
   Future<List<Excursion>> getExcursions({int page = 1}) async {
     try {
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineExcursions : ApiConfig.excursions;
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineExcursions
+          : ApiConfig.excursions;
       final response = await _apiService.get(
         endpoint,
         queryParameters: {'page': page},
@@ -29,11 +30,10 @@ class ExcursionsApi {
   /// Récupère le détail d'une excursion
   Future<Excursion> getExcursionDetail(int excursionId) async {
     try {
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineExcursions : ApiConfig.excursions;
-      final response = await _apiService.get(
-        '$endpoint/$excursionId',
-      );
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineExcursions
+          : ApiConfig.excursions;
+      final response = await _apiService.get('$endpoint/$excursionId');
 
       return Excursion.fromJson(response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {

@@ -100,7 +100,8 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TranslatableText(
-                  _service?.name ?? AppLocalizations.of(context).spaServiceFallback,
+                  _service?.name ??
+                      AppLocalizations.of(context).spaServiceFallback,
                   locale: context.read<LocaleProvider>().languageCode,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
@@ -137,7 +138,10 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
                       FavoriteItem(
                         type: FavoriteType.spa,
                         id: _service!.id,
-                        name: TranslatableTextHelper.resolveDisplayTextSync(_service!.name, locale),
+                        name: TranslatableTextHelper.resolveDisplayTextSync(
+                          _service!.name,
+                          locale,
+                        ),
                         imageUrl: _service!.image,
                       ),
                     );
@@ -183,11 +187,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildImage(),
-          const SizedBox(height: 30),
-          _buildMainInfo(),
-        ],
+        children: [_buildImage(), const SizedBox(height: 30), _buildMainInfo()],
       ),
     );
   }
@@ -281,5 +281,4 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
       ),
     );
   }
-
 }

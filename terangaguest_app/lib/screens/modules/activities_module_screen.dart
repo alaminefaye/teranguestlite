@@ -27,15 +27,21 @@ class ActivitiesModuleScreen extends StatelessWidget {
         () => context.navigateTo(const SpaServicesListScreen()),
       ),
       (
-        l10n.wellnessSportLeisure,
-        Icons.fitness_center_outlined,
-        'assets/images/box_wellness.png',
-        () => context.navigateTo(const WellnessSportLeisureScreen()),
+        'Sports',
+        Icons.sports_soccer_outlined,
+        'assets/images/sub_sport.png',
+        () => context.navigateTo(
+          const WellnessSportLeisureScreen(
+            onlyMainType: 'sport',
+            titleOverride: 'Sports',
+            subtitleOverride: 'Golf, Tennis, Fitness',
+          ),
+        ),
       ),
       (
         l10n.excursions,
         Icons.map_outlined,
-        'assets/images/box_excursion.png',
+        'assets/images/box_exploration.png',
         () => context.navigateTo(const ExcursionsListScreen()),
       ),
     ];
@@ -78,7 +84,7 @@ class ActivitiesModuleScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            l10n.wellnessSportLeisureSubtitle,
+                            'Spa, Sports, Excursions',
                             style: const TextStyle(
                               fontSize: 14,
                               color: AppTheme.textGray,

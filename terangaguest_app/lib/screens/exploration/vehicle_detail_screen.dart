@@ -79,7 +79,8 @@ class VehicleDetailScreen extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: vehicle.image != null &&
+                        child:
+                            vehicle.image != null &&
                                 vehicle.image!.trim().isNotEmpty
                             ? CachedNetworkImage(
                                 imageUrl: vehicle.image!,
@@ -181,4 +182,3 @@ class VehicleDetailScreen extends StatelessWidget {
     );
   }
 }
-

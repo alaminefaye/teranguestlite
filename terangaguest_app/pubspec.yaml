@@ -57,6 +57,9 @@ dependencies:
   # Open external links (mail, phone)
   url_launcher: ^6.3.2
 
+  # In-app WebView (documents, PDF)
+  webview_flutter: ^4.10.0
+
   # Cache images (performance, offline)
   cached_network_image: ^3.4.1
 

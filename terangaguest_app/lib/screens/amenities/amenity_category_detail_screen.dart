@@ -133,4 +133,3 @@ class AmenityCategoryDetailScreen extends StatelessWidget {
     );
   }
 }
-

@@ -183,8 +183,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                 offset: const Offset(0, 10),
                               ),
                               BoxShadow(
-                                color:
-                                    AppTheme.accentGold.withValues(alpha: 0.1),
+                                color: AppTheme.accentGold.withValues(
+                                  alpha: 0.1,
+                                ),
                                 blurRadius: 15,
                                 spreadRadius: -2,
                                 offset: const Offset(0, -4),
@@ -211,8 +212,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                     const SizedBox(height: 6),
                                     TranslatableText(
                                       service.name,
-                                      locale:
-                                          Localizations.localeOf(context).languageCode,
+                                      locale: Localizations.localeOf(
+                                        context,
+                                      ).languageCode,
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
@@ -244,9 +246,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                       IconButton(
                                         onPressed: quantity > 0
                                             ? () => provider.updateQuantity(
-                                                  service.id,
-                                                  quantity - 1,
-                                                )
+                                                service.id,
+                                                quantity - 1,
+                                              )
                                             : null,
                                         icon: const Icon(
                                           Icons.remove_circle_outline,
@@ -267,7 +269,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                           color: AppTheme.accentGold.withValues(
                                             alpha: 0.2,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                           border: Border.all(
                                             color: AppTheme.accentGold,
                                           ),
@@ -285,9 +289,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                                       IconButton(
                                         onPressed: quantity < 99
                                             ? () => provider.updateQuantity(
-                                                  service.id,
-                                                  quantity + 1,
-                                                )
+                                                service.id,
+                                                quantity + 1,
+                                              )
                                             : null,
                                         icon: const Icon(
                                           Icons.add_circle_outline,
@@ -375,7 +379,9 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
                           text: AppLocalizations.of(context).validate,
                           onPressed: () {
                             HapticHelper.confirm();
-                            context.navigateTo(const CreateLaundryRequestScreen());
+                            context.navigateTo(
+                              const CreateLaundryRequestScreen(),
+                            );
                           },
                           backgroundColor: AppTheme.accentGold,
                           textColor: AppTheme.primaryDark,
@@ -410,7 +416,10 @@ class _LaundryListScreenState extends State<LaundryListScreen> {
 
   /// Icône spécifique selon le type de service blanchisserie (vêtements et linge)
   static IconData _iconForLaundryService(LaundryService service) {
-    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(service.name, 'fr');
+    final nameStr = TranslatableTextHelper.resolveDisplayTextSync(
+      service.name,
+      'fr',
+    );
     final n = nameStr.toLowerCase();
     // Vêtements : icône nettoyage à sec / vêtement
     if (n.contains('chemise') || n.contains('shirt')) {

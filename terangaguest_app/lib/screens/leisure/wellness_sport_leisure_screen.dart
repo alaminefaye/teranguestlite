@@ -12,7 +12,16 @@ import 'leisure_sub_list_screen.dart';
 /// Écran « BIEN-ÊTRE, SPORT & LOISIRS » : 2 boxes (Sport, Loisirs). Données dynamiques depuis l'API.
 /// Données dynamiques depuis l’API (leisure-categories).
 class WellnessSportLeisureScreen extends StatefulWidget {
-  const WellnessSportLeisureScreen({super.key});
+  final String? onlyMainType;
+  final String? titleOverride;
+  final String? subtitleOverride;
+
+  const WellnessSportLeisureScreen({
+    super.key,
+    this.onlyMainType,
+    this.titleOverride,
+    this.subtitleOverride,
+  });
 
   @override
   State<WellnessSportLeisureScreen> createState() =>
@@ -23,6 +32,7 @@ class _WellnessSportLeisureScreenState
     extends State<WellnessSportLeisureScreen> {
   List<LeisureMainCategoryDto>? _mainCategories;
   bool _loading = true;
+  bool _autoNavigated = false;
 
   static IconData _iconForMainType(String type) {
     return type == 'sport' ? Icons.sports_soccer_outlined : Icons.spa_outlined;
@@ -119,9 +129,38 @@ class _WellnessSportLeisureScreenState
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
 
-    final list = (_mainCategories != null && _mainCategories!.isNotEmpty)
+    var list = (_mainCategories != null && _mainCategories!.isNotEmpty)
         ? _mainCategories!
         : _fallbackMainCategories(l10n);
+
+    final only = widget.onlyMainType?.trim();
+    if (only != null && only.isNotEmpty) {
+      list = list.where((c) => c.type == only).toList();
+    }
+
+    if (!_loading &&
+        !_autoNavigated &&
+        only != null &&
+        only.isNotEmpty &&
+        list.length == 1) {
+      final mainCat = list.first;
+      final mainCatForNav = LeisureMainCategoryDto(
+        id: mainCat.id,
+        name: widget.titleOverride ?? mainCat.name,
+        description: widget.subtitleOverride ?? mainCat.description,
+        type: mainCat.type,
+        displayOrder: mainCat.displayOrder,
+        children: mainCat.children,
+      );
+      _autoNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        NavigationHelper.replaceWith(
+          context,
+          LeisureSubListScreen(mainCategory: mainCatForNav),
+        );
+      });
+    }
 
     return Scaffold(
       body: Container(
@@ -199,7 +238,7 @@ class _WellnessSportLeisureScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  l10n.wellnessSportLeisure,
+                  widget.titleOverride ?? l10n.wellnessSportLeisure,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 28,
                     fontWeight: FontWeight.bold,
@@ -208,7 +247,7 @@ class _WellnessSportLeisureScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.wellnessSportLeisureSubtitle,
+                  widget.subtitleOverride ?? l10n.wellnessSportLeisureSubtitle,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textGray,

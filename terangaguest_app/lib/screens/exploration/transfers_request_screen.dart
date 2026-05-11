@@ -178,7 +178,10 @@ class _TransfersRequestScreenState extends State<TransfersRequestScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: pad, vertical: 20),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: pad,
+                      vertical: 20,
+                    ),
                     child: _service == null
                         ? const Center(
                             child: Column(

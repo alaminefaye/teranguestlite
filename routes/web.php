@@ -105,6 +105,8 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         // Services Spa
         Route::resource('spa-services', \App\Http\Controllers\Dashboard\SpaServiceController::class);
         Route::post('spa-services/{spa_service}/toggle', [\App\Http\Controllers\Dashboard\SpaServiceController::class, 'toggleActive'])->name('spa-services.toggle');
+        Route::get('spa-settings', [\App\Http\Controllers\Dashboard\SpaServiceController::class, 'spaSettings'])->name('spa-services.settings');
+        Route::post('spa-settings', [\App\Http\Controllers\Dashboard\SpaServiceController::class, 'updateSpaSettings'])->name('spa-services.settings.update');
 
         // Horaires salle de sport (établissement courant)
         Route::get('gym-hours', [\App\Http\Controllers\Dashboard\GymHoursController::class, 'index'])->name('gym-hours.index');

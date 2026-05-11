@@ -88,6 +88,7 @@ class VitrineController extends Controller
                 'phone' => $enterprise->phone,
                 'email' => $enterprise->email,
                 'animations' => $enterprise->animations,
+                'spa_settings' => $enterprise->spa_settings,
             ],
         ], 200);
     }

@@ -103,7 +103,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
       (
         'Guide utilisation équipements',
         Icons.menu_book_outlined,
-        'assets/images/info_guides.png',
+        'assets/images/info_hotel.png',
         () => equipmentCategory != null
             ? context.navigateTo(GuideItemsScreen(category: equipmentCategory))
             : context.navigateTo(const GuidesScreen()),

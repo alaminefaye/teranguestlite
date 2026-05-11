@@ -182,7 +182,7 @@ class LeisureSubListScreen extends StatelessWidget {
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
     final children = mainCategory.type == 'loisirs'
-        ? mainCategory.children.where((c) => c.type == 'spa').toList()
+        ? mainCategory.children.where((c) => c.type != 'spa').toList()
         : mainCategory.children;
 
     return Scaffold(

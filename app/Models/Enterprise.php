@@ -239,6 +239,24 @@ class Enterprise extends Model
     }
 
     /**
+     * Spa & Bien-être : mode d'affichage dans l'app (catalogue ou document).
+     * Stocké dans settings['spa'].
+     */
+    public function getSpaSettingsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['spa'] ?? []) : [];
+        $documentUrl = $s['document_url'] ?? null;
+        if (!$documentUrl && !empty($s['document_path'])) {
+            $documentUrl = asset('storage/' . $s['document_path']);
+        }
+        return [
+            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'document_url'  => $documentUrl,
+            'document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
+    /**
      * Chatbot IA : URL du chatbot (null si non configuré).
      * Stocké dans settings['chatbot_url'].
      */

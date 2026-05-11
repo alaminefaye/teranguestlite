@@ -69,7 +69,7 @@ class _HotelInfosSecurityScreenState extends State<HotelInfosSecurityScreen> {
       (
         l10n.guidesInfos,
         Icons.library_books_outlined,
-        'assets/images/info_guides.png',
+        'assets/images/info_pratique.png',
         () {
           HapticHelper.lightImpact();
           context.navigateTo(const GuidesScreen());

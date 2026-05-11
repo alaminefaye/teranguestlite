@@ -238,10 +238,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.menu_book_outlined,
-            color: AppTheme.accentGold,
-          ),
+          const Icon(Icons.menu_book_outlined, color: AppTheme.accentGold),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(

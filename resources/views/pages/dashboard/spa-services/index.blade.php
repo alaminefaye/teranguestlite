@@ -1,9 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex items-center justify-between flex-wrap gap-3">
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Services Spa & Bien-être</h1>
-    <a href="{{ route('dashboard.spa-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Créer un service</a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('dashboard.spa-services.settings') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-medium border border-gray-200 dark:border-gray-700">
+            ⚙️ Paramètres d'affichage
+        </a>
+        <a href="{{ route('dashboard.spa-services.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700 text-sm font-medium">+ Créer un service</a>
+    </div>
 </div>
 
 @if(session('success'))

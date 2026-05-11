@@ -286,6 +286,10 @@ class Enterprise {
   final String? animationsProgramUrl;
   final String? animationsJournalUrl;
 
+  /// Spa & Bien-être : mode d'affichage ('catalog' | 'document') et document associé.
+  final String spaDisplayMode;
+  final String? spaDocumentUrl;
+
   /// Adresse, téléphone et email de l'entreprise (reçu, facture, contact).
   final String? address;
   final String? phone;
@@ -303,6 +307,8 @@ class Enterprise {
     this.chatbotUrl,
     this.animationsProgramUrl,
     this.animationsJournalUrl,
+    this.spaDisplayMode = 'catalog',
+    this.spaDocumentUrl,
     this.address,
     this.phone,
     this.email,
@@ -329,6 +335,12 @@ class Enterprise {
       chatbotUrl: json['chatbot_url'] as String?,
       animationsProgramUrl: animations?['program_url'] as String?,
       animationsJournalUrl: animations?['journal_url'] as String?,
+      spaDisplayMode: (json['spa_settings'] is Map
+          ? (json['spa_settings']['display_mode'] as String? ?? 'catalog')
+          : 'catalog'),
+      spaDocumentUrl: (json['spa_settings'] is Map
+          ? json['spa_settings']['document_url'] as String?
+          : null),
       address: json['address'] as String?,
       phone: json['phone'] as String?,
       email: json['email'] as String?,

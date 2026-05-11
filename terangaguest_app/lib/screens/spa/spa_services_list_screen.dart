@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
+import '../../models/user.dart';
+import '../../services/api_service.dart';
 import '../../utils/layout_helper.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../providers/spa_provider.dart';
+import '../../screens/common/in_app_document_screen.dart';
 import '../../widgets/spa_service_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
@@ -22,6 +26,8 @@ class SpaServicesListScreen extends StatefulWidget {
 
 class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
   String? _selectedCategory;
+  bool _checkingMode = true;
+  bool _documentMode = false;
 
   List<Map<String, String>> _getCategoryFilters(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -37,10 +43,41 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       setState(() => _selectedCategory = widget.initialCategory);
-      context.read<SpaProvider>().fetchSpaServices(category: _selectedCategory);
+      await _checkSpaDisplayMode();
+      if (mounted && !_documentMode) {
+        context.read<SpaProvider>().fetchSpaServices(category: _selectedCategory);
+      }
     });
+  }
+
+  Future<void> _checkSpaDisplayMode() async {
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final payload = Map<String, dynamic>.from(data['data'] as Map);
+        final enterprise = Enterprise.fromJson(payload);
+        if (enterprise.spaDisplayMode == 'document' &&
+            enterprise.spaDocumentUrl != null &&
+            enterprise.spaDocumentUrl!.isNotEmpty) {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => InAppDocumentScreen(
+                title: 'Spa & Bien-être',
+                url: enterprise.spaDocumentUrl!,
+              ),
+            ),
+          );
+          return;
+        }
+      }
+    } catch (_) {
+      // En cas d'erreur, on affiche le catalogue normalement
+    }
+    if (mounted) setState(() => _checkingMode = false);
   }
 
   @override
@@ -55,13 +92,19 @@ class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildFilters(),
-              Expanded(child: _buildContent()),
-            ],
-          ),
+          child: _checkingMode
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                  ),
+                )
+              : Column(
+                  children: [
+                    _buildHeader(),
+                    _buildFilters(),
+                    Expanded(child: _buildContent()),
+                  ],
+                ),
         ),
       ),
     );

@@ -81,7 +81,8 @@ class PalaceServiceDetailScreen extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: service.image != null &&
+                        child:
+                            service.image != null &&
                                 service.image!.trim().isNotEmpty
                             ? CachedNetworkImage(
                                 imageUrl: service.image!,
@@ -202,4 +203,3 @@ class PalaceServiceDetailScreen extends StatelessWidget {
     );
   }
 }
-

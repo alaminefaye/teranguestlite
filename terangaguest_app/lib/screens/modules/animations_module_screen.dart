@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/announcement.dart';
 import '../../models/user.dart';
 import '../../providers/announcements_provider.dart';
+import '../../screens/common/in_app_document_screen.dart';
 import '../../services/api_service.dart';
 import '../../utils/haptic_helper.dart';
 import '../../widgets/announcement_popup.dart';
@@ -300,11 +300,15 @@ class _DocsSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () async {
+                onTap: () {
                   HapticHelper.lightImpact();
-                  await launchUrl(
-                    Uri.parse(d.url),
-                    mode: LaunchMode.externalApplication,
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => InAppDocumentScreen(
+                        title: d.label,
+                        url: d.url,
+                      ),
+                    ),
                   );
                 },
                 child: Padding(

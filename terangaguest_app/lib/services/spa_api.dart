@@ -19,10 +19,13 @@ class SpaApi {
         queryParams['category'] = category;
       }
 
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineSpaServices : ApiConfig.spaServices;
-      final response =
-          await _apiService.get(endpoint, queryParameters: queryParams);
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineSpaServices
+          : ApiConfig.spaServices;
+      final response = await _apiService.get(
+        endpoint,
+        queryParameters: queryParams,
+      );
 
       return (response.data['data'] as List)
           .map((json) => SpaService.fromJson(json as Map<String, dynamic>))
@@ -36,11 +39,10 @@ class SpaApi {
   /// Récupère le détail d'un service spa
   Future<SpaService> getSpaServiceDetail(int serviceId) async {
     try {
-      final endpoint =
-          ApiConfig.vitrineMode ? ApiConfig.vitrineSpaServices : ApiConfig.spaServices;
-      final response = await _apiService.get(
-        '$endpoint/$serviceId',
-      );
+      final endpoint = ApiConfig.vitrineMode
+          ? ApiConfig.vitrineSpaServices
+          : ApiConfig.spaServices;
+      final response = await _apiService.get('$endpoint/$serviceId');
 
       return SpaService.fromJson(response.data['data'] as Map<String, dynamic>);
     } on DioException catch (e) {

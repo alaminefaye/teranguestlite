@@ -49,8 +49,9 @@ class LaundryServiceDetailScreen extends StatelessWidget {
                         children: [
                           TranslatableText(
                             service.name,
-                            locale:
-                                Localizations.localeOf(context).languageCode,
+                            locale: Localizations.localeOf(
+                              context,
+                            ).languageCode,
                             style: TextStyle(
                               fontSize: isMobile ? 18 : 28,
                               fontWeight: FontWeight.bold,
@@ -120,8 +121,7 @@ class LaundryServiceDetailScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         TranslatableText(
                           service.description,
-                          locale:
-                              Localizations.localeOf(context).languageCode,
+                          locale: Localizations.localeOf(context).languageCode,
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.white,
@@ -141,4 +141,3 @@ class LaundryServiceDetailScreen extends StatelessWidget {
     );
   }
 }
-
