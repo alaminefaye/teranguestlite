@@ -122,28 +122,19 @@ class LeisureCategoryController extends Controller
 
     public function updateSportSettings(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $request->validate([
             'display_mode' => 'required|in:catalog,document',
             'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
         ]);
 
-        $enterprise = Enterprise::query()->find(auth()->user()->enterprise_id);
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
         if (!$enterprise) {
             return back()->with('error', 'Entreprise introuvable.');
         }
 
-        $enterprise->refresh();
-
-        $settings = $enterprise->settings;
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-
-        $sport = isset($settings['sport']) && is_array($settings['sport'])
-            ? $settings['sport']
-            : [];
-
-        $sport['display_mode'] = $validated['display_mode'];
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $sport = $settings['sport'] ?? [];
+        $sport['display_mode'] = $request->display_mode;
 
         if ($request->hasFile('document')) {
             if (!empty($sport['document_path'])) {
@@ -154,8 +145,7 @@ class LeisureCategoryController extends Controller
         }
 
         $settings['sport'] = $sport;
-
-        $enterprise->forceFill(['settings' => $settings])->save();
+        $enterprise->update(['settings' => $settings]);
 
         return redirect()->route('dashboard.sport-settings')
             ->with('success', 'Paramètres Sport & Fitness mis à jour avec succès !');

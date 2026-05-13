@@ -181,9 +181,28 @@ class LeisureSubListScreen extends StatelessWidget {
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
-    final children = mainCategory.type == 'loisirs'
-        ? mainCategory.children.where((c) => c.type != 'spa').toList()
-        : mainCategory.children;
+    // Tous les enfants s'affichent (spa inclus dans loisirs)
+    final children = mainCategory.children;
+
+    // Si Sport sans sous-activités : naviguer directement vers SportFitnessScreen
+    if (mainCategory.type == 'sport' && children.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SportFitnessScreen()),
+        );
+      });
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(

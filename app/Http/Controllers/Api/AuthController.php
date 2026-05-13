@@ -31,12 +31,23 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $user->loadMissing('enterprise');
 
         // Créer un token d'accès
         $token = $user->createToken('mobile-app')->plainTextToken;
 
-        $enterpriseData = $this->enterprisePayloadForMobile($user);
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'address' => $user->enterprise->address,
+            'phone' => $user->enterprise->phone,
+            'email' => $user->enterprise->email,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
 
         return response()->json([
             'success' => true,
@@ -115,9 +126,19 @@ class AuthController extends Controller
         // Créer un token d'accès spécifique au Web
         $token = $user->createToken('web-app')->plainTextToken;
 
-        $user->loadMissing('enterprise');
-
-        $enterpriseData = $this->enterprisePayloadForMobile($user);
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'address' => $user->enterprise->address,
+            'phone' => $user->enterprise->phone,
+            'email' => $user->enterprise->email,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
 
         return response()->json([
             'success' => true,
@@ -164,7 +185,19 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load('enterprise');
 
-        $enterpriseData = $this->enterprisePayloadForMobile($user);
+        $enterpriseData = $user->enterprise ? [
+            'id' => $user->enterprise->id,
+            'name' => $user->enterprise->name,
+            'logo' => $user->enterprise->logo,
+            'cover_photo' => $user->enterprise->cover_photo,
+            'gym_hours' => $user->enterprise->gym_hours,
+            'address' => $user->enterprise->address,
+            'phone' => $user->enterprise->phone,
+            'email' => $user->enterprise->email,
+            'hotel_infos' => $this->hotelInfosForUser($user),
+            'emergency' => $user->enterprise->emergency,
+            'chatbot_url' => $user->enterprise->chatbot_url,
+        ] : null;
 
         return response()->json([
             'success' => true,
@@ -183,39 +216,6 @@ class AuthController extends Controller
                 'created_at' => $user->created_at->toISOString(),
             ],
         ], 200);
-    }
-
-    /**
-     * Entreprise pour l’app mobile : mêmes blocs que la vitrine (modes catalogue / document).
-     */
-    private function enterprisePayloadForMobile(?User $user): ?array
-    {
-        if (!$user || !$user->enterprise) {
-            return null;
-        }
-
-        $e = $user->enterprise;
-
-        return [
-            'id' => $e->id,
-            'name' => $e->name,
-            'logo' => $e->logo,
-            'cover_photo' => $e->cover_photo,
-            'gym_hours' => $e->gym_hours,
-            'address' => $e->address,
-            'phone' => $e->phone,
-            'email' => $e->email,
-            'hotel_infos' => $this->hotelInfosForUser($user),
-            'emergency' => $e->emergency,
-            'chatbot_url' => $e->chatbot_url,
-            'animations' => $e->animations,
-            'spa_settings' => $e->spa_settings,
-            'sport_settings' => $e->sport_settings,
-            'excursions_settings' => $e->excursions_settings,
-            'hotel_box_settings' => $e->hotel_box_settings,
-            'room_box_settings' => $e->room_box_settings,
-            'timezone' => config('app.timezone', 'UTC'),
-        ];
     }
 
     /**

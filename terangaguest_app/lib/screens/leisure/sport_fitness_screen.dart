@@ -39,60 +39,34 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
 
   Future<void> _checkSportDisplayMode() async {
     try {
-      final enterprise = await _loadEnterpriseConfigForSport();
-      if (!mounted) return;
-
-      final docUrl = enterprise?.sportDocumentUrl?.trim();
-      final isDocument = enterprise != null &&
-          Enterprise.catalogDocumentMode(enterprise.sportDisplayMode) ==
-              'document' &&
-          docUrl != null &&
-          docUrl.isNotEmpty;
-
-      if (isDocument) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => InAppDocumentScreen(
-              title: 'Sport & Fitness',
-              url: docUrl,
-            ),
-          ),
-        );
-        return;
-      }
-    } catch (_) {}
-    if (mounted) setState(() => _checkingMode = false);
-  }
-
-  /// Tablette connectée : `/user` (entreprise du JWT). Sinon vitrine (QR).
-  Future<Enterprise?> _loadEnterpriseConfigForSport() async {
-    if (!ApiConfig.vitrineMode) {
-      try {
-        final response = await ApiService().get(ApiConfig.user);
-        final data = response.data;
-        if (data is Map &&
-            data['success'] == true &&
-            data['data'] is Map<String, dynamic>) {
-          final entRaw =
-              (data['data'] as Map<String, dynamic>)['enterprise'];
-          if (entRaw is Map) {
-            return Enterprise.fromJson(Map<String, dynamic>.from(entRaw));
-          }
-        }
-      } catch (_) {}
-    }
-
-    try {
       final response = await ApiService().get(ApiConfig.vitrineEnterprise);
       final data = response.data;
       if (data is Map && data['success'] == true && data['data'] is Map) {
-        return Enterprise.fromJson(
+        final enterprise = Enterprise.fromJson(
           Map<String, dynamic>.from(data['data'] as Map),
         );
+        if (enterprise.sportDisplayMode == 'document' &&
+            enterprise.sportDocumentUrl != null &&
+            enterprise.sportDocumentUrl!.isNotEmpty) {
+          if (!mounted) return;
+          // On marque _checkingMode = false avant pushReplacement pour éviter
+          // tout setState sur un widget remplacé
+          _checkingMode = false;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => InAppDocumentScreen(
+                title: 'Sport & Fitness',
+                url: enterprise.sportDocumentUrl!,
+              ),
+            ),
+          );
+          return;
+        }
       }
-    } catch (_) {}
-
-    return null;
+    } catch (_) {
+      // En cas d'erreur réseau, on affiche quand même le catalogue par défaut
+    }
+    if (mounted) setState(() => _checkingMode = false);
   }
 
   PalaceService? _getConciergeService(List<PalaceService> services) {
