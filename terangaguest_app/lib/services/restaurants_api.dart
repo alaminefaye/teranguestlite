@@ -7,13 +7,30 @@ import 'api_service.dart';
 class RestaurantsApi {
   final ApiService _apiService = ApiService();
 
-  /// Récupère la liste des restaurants
-  Future<List<Restaurant>> getRestaurants({String? type, int page = 1}) async {
+  /// Récupère la liste des restaurants.
+  ///
+  /// Si [allowedTypes] est renseigné (boîte Restaurants ou Bars seule), les
+  /// résultats sont toujours limités à ces types — y compris quand [type] est
+  /// vide (« Tous » dans cette boîte).
+  Future<List<Restaurant>> getRestaurants({
+    String? type,
+    List<String>? allowedTypes,
+    int page = 1,
+  }) async {
     try {
       final queryParams = <String, dynamic>{'page': page};
 
-      if (type != null && type.isNotEmpty) {
-        queryParams['type'] = type;
+      final allowed = allowedTypes == null || allowedTypes.isEmpty
+          ? null
+          : allowedTypes.toSet();
+
+      String? apiType = (type != null && type.isNotEmpty) ? type : null;
+      if (apiType == null && allowed != null && allowed.length == 1) {
+        apiType = allowed.first;
+      }
+
+      if (apiType != null && apiType.isNotEmpty) {
+        queryParams['type'] = apiType;
       }
 
       final endpoint = ApiConfig.vitrineMode
@@ -24,9 +41,19 @@ class RestaurantsApi {
         queryParameters: queryParams,
       );
 
-      return (response.data['data'] as List)
+      var list = (response.data['data'] as List)
           .map((json) => Restaurant.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      if (allowed != null) {
+        list = list.where((r) {
+          final raw = r.type;
+          final t = raw is String ? raw : raw?.toString();
+          return t != null && allowed.contains(t);
+        }).toList();
+      }
+
+      return list;
     } on DioException catch (e) {
       debugPrint('❌ API Error: $e');
       rethrow;

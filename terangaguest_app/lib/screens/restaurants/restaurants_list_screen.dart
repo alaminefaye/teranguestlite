@@ -52,7 +52,10 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _selectedType = widget.initialType);
-      context.read<RestaurantsProvider>().fetchRestaurants(type: _selectedType);
+      context.read<RestaurantsProvider>().fetchRestaurants(
+            type: _selectedType,
+            allowedTypes: widget.allowedTypes,
+          );
     });
   }
 
@@ -147,8 +150,9 @@ class _RestaurantsListScreenState extends State<RestaurantsListScreen> {
                       : filter['value'];
                 });
                 context.read<RestaurantsProvider>().fetchRestaurants(
-                  type: _selectedType,
-                );
+                      type: _selectedType,
+                      allowedTypes: widget.allowedTypes,
+                    );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(

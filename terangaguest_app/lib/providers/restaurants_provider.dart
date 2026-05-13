@@ -11,6 +11,7 @@ class RestaurantsProvider with ChangeNotifier {
   bool _hasMoreReservationPages = true;
   String? _errorMessage;
   String? _selectedType;
+  List<String>? _allowedTypes;
   String? _selectedReservationsPeriod;
   int _currentReservationsPage = 1;
   String? _clientCode;
@@ -30,14 +31,21 @@ class RestaurantsProvider with ChangeNotifier {
   }
 
   /// Récupère les restaurants
-  Future<void> fetchRestaurants({String? type}) async {
+  Future<void> fetchRestaurants({
+    String? type,
+    List<String>? allowedTypes,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     _selectedType = type;
+    _allowedTypes = allowedTypes;
     notifyListeners();
 
     try {
-      _restaurants = await _restaurantsApi.getRestaurants(type: type);
+      _restaurants = await _restaurantsApi.getRestaurants(
+        type: type,
+        allowedTypes: allowedTypes,
+      );
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();
@@ -198,6 +206,6 @@ class RestaurantsProvider with ChangeNotifier {
 
   /// Rafraîchir la liste
   Future<void> refreshRestaurants() async {
-    await fetchRestaurants(type: _selectedType);
+    await fetchRestaurants(type: _selectedType, allowedTypes: _allowedTypes);
   }
 }

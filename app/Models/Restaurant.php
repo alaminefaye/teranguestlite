@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Models\Scopes\EnterpriseScopeTrait;
 use App\Models\Traits\TranslatesAutomatically;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -108,39 +109,144 @@ class Restaurant extends Model
 
     public function getIsOpenNowAttribute()
     {
-        if ($this->status !== 'open' || !$this->opening_hours) {
+        if ($this->status !== 'open' || !$this->opening_hours || !is_array($this->opening_hours)) {
             return false;
         }
 
-        $now = now();
-        $dayOfWeek = strtolower($now->format('l')); // monday, tuesday, etc.
-        
-        if (!isset($this->opening_hours[$dayOfWeek])) {
+        $tz = config('app.timezone', 'UTC');
+        $now = Carbon::now($tz);
+
+        $todayKey = self::weekdayKeyForCarbon($now);
+
+        if (isset($this->opening_hours[$todayKey]) && $this->openingHoursSlotCoversNow($now, $this->opening_hours[$todayKey])) {
+            return true;
+        }
+
+        $yesterdayKey = self::weekdayKeyForCarbon($now->copy()->subDay());
+        if (isset($this->opening_hours[$yesterdayKey]) && $this->openingHoursOvernightFromYesterdayCoversNow($now, $this->opening_hours[$yesterdayKey])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Clés JSON du dashboard : monday … sunday (toujours en anglais).
+     * Ne pas utiliser format('l') : dépend de la locale de l’application.
+     */
+    private static function weekdayKeyForCarbon(Carbon $dt): string
+    {
+        $keys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+        return $keys[(int) $dt->format('w')];
+    }
+
+    /**
+     * Plage du jour : même jour calendaire, ou overnight (ex. 22:00–02:00 sur une même ligne),
+     * ou fermeture à minuit affichée en 00:00 / 24:00.
+     */
+    private function openingHoursSlotCoversNow(Carbon $now, array $hours): bool
+    {
+        if (!isset($hours['open'], $hours['close'])) {
             return false;
         }
 
-        $hours = $this->opening_hours[$dayOfWeek];
-        if (!isset($hours['open']) || !isset($hours['close'])) {
+        $openStr = $this->normalizeTimeString($hours['open']);
+        $closeStr = $this->normalizeTimeString($hours['close']);
+        if ($openStr === null || $closeStr === null) {
             return false;
         }
 
-        $currentTime = $now->format('H:i');
-        return $currentTime >= $hours['open'] && $currentTime <= $hours['close'];
+        try {
+            $open = $now->copy()->setTimeFromTimeString($openStr);
+            $close = $now->copy()->setTimeFromTimeString($closeStr);
+        } catch (\Throwable) {
+            return false;
+        }
+
+        // Fermeture à minuit : 09:00 – 00:00 signifie jusqu’à la fin de la journée locale.
+        if ($closeStr === '00:00' || $closeStr === '24:00') {
+            return $now->greaterThanOrEqualTo($open)
+                && $now->lessThanOrEqualTo($now->copy()->endOfDay());
+        }
+
+        if ($close->greaterThan($open)) {
+            return $now->greaterThanOrEqualTo($open) && $now->lessThanOrEqualTo($close);
+        }
+
+        // Même ligne : ouverture le soir, fermeture le lendemain matin (ex. 22h–02h).
+        return $now->greaterThanOrEqualTo($open) || $now->lessThanOrEqualTo($close);
+    }
+
+    /**
+     * Hier : horaires type 22:00–02:00 ; le mercredi 01:00 est encore dans la plage du mardi soir.
+     */
+    private function openingHoursOvernightFromYesterdayCoversNow(Carbon $now, array $hours): bool
+    {
+        if (!isset($hours['open'], $hours['close'])) {
+            return false;
+        }
+
+        $openStr = $this->normalizeTimeString($hours['open']);
+        $closeStr = $this->normalizeTimeString($hours['close']);
+        if ($openStr === null || $closeStr === null) {
+            return false;
+        }
+
+        if ($closeStr === '00:00' || $closeStr === '24:00') {
+            return false;
+        }
+
+        try {
+            $openYesterday = $now->copy()->subDay()->setTimeFromTimeString($openStr);
+            $closeToday = $now->copy()->setTimeFromTimeString($closeStr);
+        } catch (\Throwable) {
+            return false;
+        }
+
+        if (!$this->clockTimesIndicateOvernightSpan($openStr, $closeStr)) {
+            return false;
+        }
+
+        return $now->greaterThanOrEqualTo($openYesterday)
+            && $now->lessThanOrEqualTo($closeToday);
+    }
+
+    /** Ex. 22:00 → 02:00 : la fermeture est le lendemain matin. */
+    private function clockTimesIndicateOvernightSpan(string $openStr, string $closeStr): bool
+    {
+        if ($closeStr === '00:00' || $closeStr === '24:00') {
+            return false;
+        }
+
+        return strcmp($openStr, $closeStr) > 0;
+    }
+
+    private function normalizeTimeString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $s = substr(trim((string) $value), 0, 8);
+
+        return $s !== '' ? substr($s, 0, 5) : null;
     }
 
     public function getTodayHoursAttribute()
     {
-        if (!$this->opening_hours) {
+        if (!$this->opening_hours || !is_array($this->opening_hours)) {
             return null;
         }
 
-        $dayOfWeek = strtolower(now()->format('l'));
-        
-        if (!isset($this->opening_hours[$dayOfWeek])) {
+        $tz = config('app.timezone', 'UTC');
+        $dayKey = self::weekdayKeyForCarbon(Carbon::now($tz));
+
+        if (!isset($this->opening_hours[$dayKey])) {
             return 'Fermé';
         }
 
-        $hours = $this->opening_hours[$dayOfWeek];
+        $hours = $this->opening_hours[$dayKey];
         if (!isset($hours['open']) || !isset($hours['close'])) {
             return 'Fermé';
         }
