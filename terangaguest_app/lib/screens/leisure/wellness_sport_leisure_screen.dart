@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
+import '../../models/user.dart';
+import '../../services/api_service.dart';
 import '../../utils/navigation_helper.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../widgets/service_card.dart';
 import '../../models/leisure_category.dart';
 import '../../services/leisure_api.dart';
+import '../common/in_app_document_screen.dart';
 import 'leisure_sub_list_screen.dart';
 
 /// Écran « BIEN-ÊTRE, SPORT & LOISIRS » : 2 boxes (Sport, Loisirs). Données dynamiques depuis l'API.
@@ -31,6 +35,7 @@ class WellnessSportLeisureScreen extends StatefulWidget {
 class _WellnessSportLeisureScreenState
     extends State<WellnessSportLeisureScreen> {
   List<LeisureMainCategoryDto>? _mainCategories;
+  Enterprise? _enterprise;
   bool _loading = true;
   bool _autoNavigated = false;
 
@@ -47,7 +52,12 @@ class _WellnessSportLeisureScreenState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCategories());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAll());
+  }
+
+  Future<void> _loadAll() async {
+    // Charger en parallèle : catégories + settings enterprise (pour mode document)
+    await Future.wait([_loadCategories(), _loadEnterprise()]);
   }
 
   Future<void> _loadCategories() async {
@@ -56,16 +66,56 @@ class _WellnessSportLeisureScreenState
       if (mounted) {
         setState(() {
           _mainCategories = list;
-          _loading = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
           _mainCategories = null;
-          _loading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadEnterprise() async {
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final ent = Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+        if (mounted) setState(() => _enterprise = ent);
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _loading = false);
+  }
+
+  /// Retourne true si le type donné doit ouvrir un document (PDF/image)
+  bool _isDocumentMode(String type) {
+    if (_enterprise == null) return false;
+    if (type == 'sport') {
+      return _enterprise!.sportDisplayMode == 'document' &&
+          _enterprise!.sportDocumentUrl != null &&
+          _enterprise!.sportDocumentUrl!.isNotEmpty;
+    }
+    return false;
+  }
+
+  /// Ouvre le document associé à un type de catégorie
+  void _openDocument(BuildContext context, String type, String title) {
+    String? url;
+    if (type == 'sport') url = _enterprise?.sportDocumentUrl;
+    if (url == null || url.isEmpty) return;
+    context.navigateTo(InAppDocumentScreen(title: title, url: url));
+  }
+
+  void _onMainCategoryTap(BuildContext context, LeisureMainCategoryDto mainCat, String cardTitle) {
+    HapticHelper.lightImpact();
+    if (_isDocumentMode(mainCat.type)) {
+      _openDocument(context, mainCat.type, cardTitle);
+    } else {
+      context.navigateTo(LeisureSubListScreen(mainCategory: mainCat));
     }
   }
 
@@ -144,21 +194,33 @@ class _WellnessSportLeisureScreenState
         only.isNotEmpty &&
         list.length == 1) {
       final mainCat = list.first;
-      final mainCatForNav = LeisureMainCategoryDto(
-        id: mainCat.id,
-        name: widget.titleOverride ?? mainCat.name,
-        description: widget.subtitleOverride ?? mainCat.description,
-        type: mainCat.type,
-        displayOrder: mainCat.displayOrder,
-        children: mainCat.children,
-      );
       _autoNavigated = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        NavigationHelper.replaceWith(
-          context,
-          LeisureSubListScreen(mainCategory: mainCatForNav),
-        );
+        // Si mode document activé → ouvrir le PDF directement
+        if (_isDocumentMode(mainCat.type)) {
+          final title = widget.titleOverride ?? mainCat.name;
+          NavigationHelper.replaceWith(
+            context,
+            InAppDocumentScreen(
+              title: title,
+              url: _enterprise!.sportDocumentUrl!,
+            ),
+          );
+        } else {
+          final mainCatForNav = LeisureMainCategoryDto(
+            id: mainCat.id,
+            name: widget.titleOverride ?? mainCat.name,
+            description: widget.subtitleOverride ?? mainCat.description,
+            type: mainCat.type,
+            displayOrder: mainCat.displayOrder,
+            children: mainCat.children,
+          );
+          NavigationHelper.replaceWith(
+            context,
+            LeisureSubListScreen(mainCategory: mainCatForNav),
+          );
+        }
       });
     }
 
@@ -201,12 +263,7 @@ class _WellnessSportLeisureScreenState
                               title: cardTitle,
                               icon: _iconForMainType(mainCat.type),
                               imagePath: _imageForMainType(mainCat.type),
-                              onTap: () {
-                                HapticHelper.lightImpact();
-                                context.navigateTo(
-                                  LeisureSubListScreen(mainCategory: mainCat),
-                                );
-                              },
+                              onTap: () => _onMainCategoryTap(context, mainCat, cardTitle),
                             );
                           },
                         ),

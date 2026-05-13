@@ -513,7 +513,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'title': 'Bars',
         'icon': Icons.local_bar_outlined,
         'route': '/module-bars',
-        'image': 'assets/images/box_restaurant.png',
+        'image': 'assets/images/box_bar.png',
       },
       {
         'title': 'Animations',
