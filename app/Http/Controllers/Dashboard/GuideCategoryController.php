@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
 use App\Models\GuideCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -104,6 +105,46 @@ class GuideCategoryController extends Controller
 
         return redirect()->route('dashboard.guide-categories.index')
             ->with('success', $guide_category->is_active ? 'Catégorie activée.' : 'Catégorie désactivée.');
+    }
+
+    public function roomBoxSettings(): View
+    {
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        abort_if(!$enterprise, 404);
+
+        return view('pages.dashboard.guides.room-box-settings', [
+            'title' => 'Boîte Chambre (app)',
+            'roomBoxSettings' => $enterprise->room_box_settings,
+        ]);
+    }
+
+    public function updateRoomBoxSettings(Request $request): RedirectResponse
+    {
+        $enterprise = Enterprise::find(auth()->user()->enterprise_id);
+        abort_if(!$enterprise, 404);
+
+        $request->validate([
+            'display_mode' => 'required|in:catalog,document',
+            'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+        ]);
+
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $box = $settings['room_box'] ?? [];
+        $box['display_mode'] = $request->display_mode;
+
+        if ($request->hasFile('document')) {
+            if (!empty($box['document_path'])) {
+                Storage::disk('public')->delete($box['document_path']);
+            }
+            $box['document_path'] = $request->file('document')->store('room-box-documents', 'public');
+            unset($box['document_url']);
+        }
+
+        $settings['room_box'] = $box;
+        $enterprise->update(['settings' => $settings]);
+
+        return redirect()->route('dashboard.room-box-settings')
+            ->with('success', 'Paramètres boîte Chambre enregistrés.');
     }
 }
 

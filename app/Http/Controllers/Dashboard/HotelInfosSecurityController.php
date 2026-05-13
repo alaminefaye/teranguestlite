@@ -72,4 +72,44 @@ class HotelInfosSecurityController extends Controller
         return redirect()->route('dashboard.hotel-infos-security.index')
             ->with('success', 'Hotel Infos & Sécurité enregistrés.');
     }
+
+    public function hotelBoxSettings(): View
+    {
+        $enterprise = auth()->user()->enterprise;
+        abort_if(!$enterprise, 404, 'Établissement non trouvé.');
+
+        return view('pages.dashboard.hotel-infos-security.hotel-box-settings', [
+            'title' => 'Boîte Hôtel (app)',
+            'hotelBoxSettings' => $enterprise->hotel_box_settings,
+        ]);
+    }
+
+    public function updateHotelBoxSettings(Request $request): RedirectResponse
+    {
+        $enterprise = auth()->user()->enterprise;
+        abort_if(!$enterprise, 404, 'Établissement non trouvé.');
+
+        $request->validate([
+            'display_mode' => 'required|in:catalog,document',
+            'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+        ]);
+
+        $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
+        $box = $settings['hotel_box'] ?? [];
+        $box['display_mode'] = $request->display_mode;
+
+        if ($request->hasFile('document')) {
+            if (!empty($box['document_path'])) {
+                Storage::disk('public')->delete($box['document_path']);
+            }
+            $box['document_path'] = $request->file('document')->store('hotel-box-documents', 'public');
+            unset($box['document_url']);
+        }
+
+        $settings['hotel_box'] = $box;
+        $enterprise->update(['settings' => $settings]);
+
+        return redirect()->route('dashboard.hotel-box-settings')
+            ->with('success', 'Paramètres boîte Hôtel enregistrés.');
+    }
 }

@@ -13,6 +13,11 @@
     </div>
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Hotel Infos & Sécurité</h1>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Livret d'accueil, assistance & urgence, et chatbot. Ces réglages sont affichés dans l'application mobile.</p>
+    <p class="mt-3">
+        <a href="{{ route('dashboard.hotel-box-settings') }}" class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+            ⚙️ Boîte « Hôtel » dans l'app (livret ou document)
+        </a>
+    </p>
 </div>
 
 @if (session('success'))

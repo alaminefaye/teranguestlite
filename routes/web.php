@@ -115,6 +115,8 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         // Hotel Infos & Sécurité (livret d'accueil, assistance urgence, chatbot)
         Route::get('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'index'])->name('hotel-infos-security.index');
         Route::put('hotel-infos-security', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'update'])->name('hotel-infos-security.update');
+        Route::get('hotel-box-settings', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'hotelBoxSettings'])->name('hotel-box-settings');
+        Route::post('hotel-box-settings', [\App\Http\Controllers\Dashboard\HotelInfosSecurityController::class, 'updateHotelBoxSettings'])->name('hotel-box-settings.update');
 
         // Animations : documents (programme & journal)
         Route::get('animations', [\App\Http\Controllers\Dashboard\AnimationsContentController::class, 'index'])->name('animations.index');
@@ -125,6 +127,8 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         Route::post('guide-categories/{guide_category}/toggle', [\App\Http\Controllers\Dashboard\GuideCategoryController::class, 'toggleActive'])->name('guide-categories.toggle');
         Route::resource('guide-items', \App\Http\Controllers\Dashboard\GuideItemController::class);
         Route::post('guide-items/{guide_item}/toggle', [\App\Http\Controllers\Dashboard\GuideItemController::class, 'toggleActive'])->name('guide-items.toggle');
+        Route::get('room-box-settings', [\App\Http\Controllers\Dashboard\GuideCategoryController::class, 'roomBoxSettings'])->name('room-box-settings');
+        Route::post('room-box-settings', [\App\Http\Controllers\Dashboard\GuideCategoryController::class, 'updateRoomBoxSettings'])->name('room-box-settings.update');
 
         // Galerie (image d'établissement + albums)
         Route::get('gallery', [\App\Http\Controllers\Dashboard\GalleryController::class, 'index'])->name('gallery.index');

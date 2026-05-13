@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/guide.dart';
+import '../../models/user.dart';
+import '../../services/api_service.dart';
 import '../../services/guides_api.dart';
 import '../../utils/haptic_helper.dart';
 import '../../utils/layout_helper.dart';
 import '../../utils/navigation_helper.dart';
 import '../../widgets/service_card.dart';
+import '../common/in_app_document_screen.dart';
 import '../hotel_infos/guide_items_screen.dart';
 import '../hotel_infos/guides_screen.dart';
 import '../hotel_infos/hotel_infos_screen.dart';
@@ -21,13 +25,40 @@ class RoomModuleScreen extends StatefulWidget {
 class _RoomModuleScreenState extends State<RoomModuleScreen> {
   List<GuideCategory>? _categories;
   bool _loading = false;
+  bool _checkingRoomBox = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadGuides();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapRoomModule());
+  }
+
+  Future<void> _bootstrapRoomModule() async {
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final enterprise = Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+        final docUrl = enterprise.roomBoxDocumentUrl?.trim() ?? '';
+        if (enterprise.roomBoxDisplayMode == 'document' && docUrl.isNotEmpty) {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) =>
+                  InAppDocumentScreen(title: 'Chambre', url: docUrl),
+            ),
+          );
+          return;
+        }
+      }
+    } catch (_) {
+      // catalogue par défaut
+    }
+    if (!mounted) return;
+    setState(() => _checkingRoomBox = false);
+    _loadGuides();
   }
 
   Future<void> _loadGuides() async {
@@ -82,6 +113,21 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingRoomBox) {
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+          child: const SafeArea(
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final l10n = AppLocalizations.of(context);
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);

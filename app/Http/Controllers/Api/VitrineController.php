@@ -91,6 +91,8 @@ class VitrineController extends Controller
                 'spa_settings' => $enterprise->spa_settings,
                 'sport_settings' => $enterprise->sport_settings,
                 'excursions_settings' => $enterprise->excursions_settings,
+                'hotel_box_settings' => $enterprise->hotel_box_settings,
+                'room_box_settings' => $enterprise->room_box_settings,
             ],
         ], 200);
     }

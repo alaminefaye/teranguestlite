@@ -13,6 +13,7 @@ import '../../src/platform_check_stub.dart'
     if (dart.library.io) '../../src/platform_check_io.dart'
     as platform_check;
 import '../../utils/haptic_helper.dart';
+import '../common/in_app_document_screen.dart';
 
 /// Livret d'accueil : Wi‑Fi (chambre si renseigné), plans, règlement, infos pratiques.
 /// En session tablette (code validé), affiche les infos de la chambre concernée.
@@ -30,34 +31,42 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
   int? _lastFetchedRoomId;
   bool _loadingTablet = false;
   String? _tabletError;
-  bool _loadingVitrine = false;
+  bool _checkingHotelBox = true;
 
   @override
   void initState() {
     super.initState();
-    if (ApiConfig.vitrineMode && !platform_check.isFlutterTest) {
-      _loadVitrineEnterprise();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapHotelScreen());
   }
 
-  Future<void> _loadVitrineEnterprise() async {
-    if (_loadingVitrine) return;
-    setState(() => _loadingVitrine = true);
+  Future<void> _bootstrapHotelScreen() async {
     try {
       final response = await ApiService().get(ApiConfig.vitrineEnterprise);
       final data = response.data;
       if (data is Map && data['success'] == true && data['data'] is Map) {
-        final payload = Map<String, dynamic>.from(data['data'] as Map);
-        if (!mounted) return;
-        setState(() {
-          _vitrineEnterprise = Enterprise.fromJson(payload);
-        });
+        final enterprise = Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+        final docUrl = enterprise.hotelBoxDocumentUrl?.trim() ?? '';
+        if (enterprise.hotelBoxDisplayMode == 'document' && docUrl.isNotEmpty) {
+          if (!mounted) return;
+          final title = AppLocalizations.of(context).hotelInfos;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) =>
+                  InAppDocumentScreen(title: title, url: docUrl),
+            ),
+          );
+          return;
+        }
+        if (ApiConfig.vitrineMode && !platform_check.isFlutterTest && mounted) {
+          setState(() => _vitrineEnterprise = enterprise);
+        }
       }
     } catch (_) {
       // ignore
-    } finally {
-      if (mounted) setState(() => _loadingVitrine = false);
     }
+    if (mounted) setState(() => _checkingHotelBox = false);
   }
 
   @override
@@ -101,6 +110,25 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    if (_checkingHotelBox) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.primaryDark, AppTheme.primaryBlue],
+            ),
+          ),
+          child: const SafeArea(
+            child: Center(
+              child: CircularProgressIndicator(color: AppTheme.accentGold),
+            ),
+          ),
+        ),
+      );
+    }
+
     final tabletSession = context.watch<TabletSessionProvider>();
     final hasSession =
         tabletSession.hasSession && tabletSession.session != null;

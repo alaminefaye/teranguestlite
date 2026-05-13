@@ -1,18 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Guides & Infos</h1>
             <p class="text-gray-600 dark:text-gray-400">Gérer les catégories affichées dans le module Chambre.</p>
         </div>
-        <a href="{{ route('dashboard.guide-categories.create') }}"
-            class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Nouvelle Catégorie
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('dashboard.room-box-settings') }}"
+                class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-medium border border-gray-200 dark:border-gray-700">
+                ⚙️ Boîte Chambre (app)
+            </a>
+            <a href="{{ route('dashboard.guide-categories.create') }}"
+                class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Nouvelle Catégorie
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

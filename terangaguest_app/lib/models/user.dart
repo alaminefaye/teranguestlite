@@ -298,6 +298,14 @@ class Enterprise {
   final String excursionsDisplayMode;
   final String? excursionsDocumentUrl;
 
+  /// Boîte Hôtel (dashboard) : livret ou document unique.
+  final String hotelBoxDisplayMode;
+  final String? hotelBoxDocumentUrl;
+
+  /// Boîte Chambre (dashboard) : grille ou document unique.
+  final String roomBoxDisplayMode;
+  final String? roomBoxDocumentUrl;
+
   /// Adresse, téléphone et email de l'entreprise (reçu, facture, contact).
   final String? address;
   final String? phone;
@@ -321,6 +329,10 @@ class Enterprise {
     this.sportDocumentUrl,
     this.excursionsDisplayMode = 'catalog',
     this.excursionsDocumentUrl,
+    this.hotelBoxDisplayMode = 'catalog',
+    this.hotelBoxDocumentUrl,
+    this.roomBoxDisplayMode = 'catalog',
+    this.roomBoxDocumentUrl,
     this.address,
     this.phone,
     this.email,
@@ -364,6 +376,18 @@ class Enterprise {
           : 'catalog'),
       excursionsDocumentUrl: (json['excursions_settings'] is Map
           ? json['excursions_settings']['document_url'] as String?
+          : null),
+      hotelBoxDisplayMode: (json['hotel_box_settings'] is Map
+          ? (json['hotel_box_settings']['display_mode'] as String? ?? 'catalog')
+          : 'catalog'),
+      hotelBoxDocumentUrl: (json['hotel_box_settings'] is Map
+          ? json['hotel_box_settings']['document_url'] as String?
+          : null),
+      roomBoxDisplayMode: (json['room_box_settings'] is Map
+          ? (json['room_box_settings']['display_mode'] as String? ?? 'catalog')
+          : 'catalog'),
+      roomBoxDocumentUrl: (json['room_box_settings'] is Map
+          ? json['room_box_settings']['document_url'] as String?
           : null),
       address: json['address'] as String?,
       phone: json['phone'] as String?,

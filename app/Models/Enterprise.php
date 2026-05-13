@@ -293,6 +293,42 @@ class Enterprise extends Model
     }
 
     /**
+     * Boîte « Hôtel » (livret / dashboard app) : catalogue ou document unique.
+     * Stocké dans settings['hotel_box'].
+     */
+    public function getHotelBoxSettingsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['hotel_box'] ?? []) : [];
+        $documentUrl = $s['document_url'] ?? null;
+        if (!$documentUrl && !empty($s['document_path'])) {
+            $documentUrl = asset('storage/' . $s['document_path']);
+        }
+        return [
+            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'document_url'  => $documentUrl,
+            'document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
+    /**
+     * Boîte « Chambre » (guides / dashboard app) : grille ou document unique.
+     * Stocké dans settings['room_box'].
+     */
+    public function getRoomBoxSettingsAttribute(): array
+    {
+        $s = is_array($this->settings) ? ($this->settings['room_box'] ?? []) : [];
+        $documentUrl = $s['document_url'] ?? null;
+        if (!$documentUrl && !empty($s['document_path'])) {
+            $documentUrl = asset('storage/' . $s['document_path']);
+        }
+        return [
+            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'document_url'  => $documentUrl,
+            'document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
+    /**
      * Chatbot IA : URL du chatbot (null si non configuré).
      * Stocké dans settings['chatbot_url'].
      */
