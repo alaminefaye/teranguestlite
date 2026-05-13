@@ -38,6 +38,19 @@ class Announcement extends Model
         'view_count' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Announcement $announcement) {
+            // La colonne est NOT NULL ; le formulaire / la validation nullable peuvent envoyer null.
+            $minutes = $announcement->display_duration_minutes;
+            if ($minutes === null || $minutes < 1) {
+                $announcement->display_duration_minutes = 1;
+            } elseif ($minutes > 60) {
+                $announcement->display_duration_minutes = 60;
+            }
+        });
+    }
+
     // ──────────────────────────────────────────
     // Relations
     // ──────────────────────────────────────────
