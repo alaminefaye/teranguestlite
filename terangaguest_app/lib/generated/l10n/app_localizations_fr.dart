@@ -610,16 +610,19 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les restaurants et bars seront listés ici.';
 
   @override
-  String get typeRestaurant => 'restaurant';
+  String get typeRestaurant => 'Restaurant';
 
   @override
-  String get typeBar => 'bar';
+  String get typeBar => 'Bar';
 
   @override
-  String get typeCafe => 'café';
+  String get typeCafe => 'Café';
 
   @override
-  String get typeLounge => 'lounge';
+  String get typeLounge => 'Lounge';
+
+  @override
+  String get typePoolBar => 'Bar piscine';
 
   @override
   String get noItemAvailable => 'Aucun article disponible';

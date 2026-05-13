@@ -1,5 +1,6 @@
 class Restaurant {
   final int id;
+
   /// String ou Map fr/en/es/ar (pour TranslatableText).
   final dynamic name;
   final dynamic description;

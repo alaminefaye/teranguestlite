@@ -616,6 +616,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeLounge => 'lounge';
 
   @override
+  String get typePoolBar => 'Bar piscine';
+
+  @override
   String get noItemAvailable => 'No item available';
 
   @override

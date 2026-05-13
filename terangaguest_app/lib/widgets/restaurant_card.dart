@@ -23,7 +23,10 @@ class RestaurantCard extends StatelessWidget {
     final locale = context.read<LocaleProvider>().languageCode;
     return Semantics(
       button: true,
-      label: TranslatableTextHelper.resolveDisplayTextSync(restaurant.name, locale),
+      label: TranslatableTextHelper.resolveDisplayTextSync(
+        restaurant.name,
+        locale,
+      ),
       child: GestureDetector(
         onTap: onTap,
         child: Transform(
@@ -175,10 +178,13 @@ class RestaurantCard extends StatelessWidget {
                                     ),
                                   if (restaurant.type != null &&
                                       restaurant.cuisine != null)
-                                    const Text(' • ',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            color: AppTheme.textGray)),
+                                    const Text(
+                                      ' • ',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textGray,
+                                      ),
+                                    ),
                                   if (restaurant.cuisine != null)
                                     TranslatableText(
                                       restaurant.cuisine,

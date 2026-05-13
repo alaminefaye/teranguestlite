@@ -607,6 +607,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get typeLounge => 'صالة';
 
   @override
+  String get typePoolBar => 'Bar piscine';
+
+  @override
   String get noItemAvailable => 'لا عنصر متاح';
 
   @override

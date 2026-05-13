@@ -1227,26 +1227,32 @@ abstract class AppLocalizations {
   /// No description provided for @typeRestaurant.
   ///
   /// In fr, this message translates to:
-  /// **'restaurant'**
+  /// **'Restaurant'**
   String get typeRestaurant;
 
   /// No description provided for @typeBar.
   ///
   /// In fr, this message translates to:
-  /// **'bar'**
+  /// **'Bar'**
   String get typeBar;
 
   /// No description provided for @typeCafe.
   ///
   /// In fr, this message translates to:
-  /// **'café'**
+  /// **'Café'**
   String get typeCafe;
 
   /// No description provided for @typeLounge.
   ///
   /// In fr, this message translates to:
-  /// **'lounge'**
+  /// **'Lounge'**
   String get typeLounge;
+
+  /// No description provided for @typePoolBar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bar piscine'**
+  String get typePoolBar;
 
   /// No description provided for @noItemAvailable.
   ///

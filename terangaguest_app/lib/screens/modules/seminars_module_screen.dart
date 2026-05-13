@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../utils/haptic_helper.dart';
+import '../../utils/layout_helper.dart';
 import '../../services/seminars_api.dart';
 import '../../models/seminar_room.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
+import '../../widgets/seminar_room_card.dart';
 import '../../utils/navigation_helper.dart';
 import 'seminar_room_detail_screen.dart';
 
@@ -18,17 +20,35 @@ class SeminarsModuleScreen extends StatefulWidget {
 class _SeminarsModuleScreenState extends State<SeminarsModuleScreen> {
   late Future<List<SeminarRoom>> _future;
 
+  Future<List<SeminarRoom>> _loadRooms() => SeminarsApi().getSeminarRooms();
+
   @override
   void initState() {
     super.initState();
-    _future = SeminarsApi().getSeminarRooms();
+    _future = _loadRooms();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _future = _loadRooms();
+    });
+    await _future;
   }
 
   @override
   Widget build(BuildContext context) {
+    final titleSize =
+        MediaQuery.of(context).size.width < 600 ? 18.0 : 28.0;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: const [AppTheme.primaryDark, AppTheme.primaryBlue],
+          ),
+        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -47,7 +67,7 @@ class _SeminarsModuleScreenState extends State<SeminarsModuleScreen> {
                       },
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -55,13 +75,13 @@ class _SeminarsModuleScreenState extends State<SeminarsModuleScreen> {
                           Text(
                             'Séminaires',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: titleSize,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accentGold,
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
+                          const SizedBox(height: 4),
+                          const Text(
                             'Salles, capacités & équipements',
                             style: TextStyle(
                               fontSize: 14,
@@ -94,112 +114,77 @@ class _SeminarsModuleScreenState extends State<SeminarsModuleScreen> {
                         hint: 'Vérifiez votre connexion et réessayez.',
                         onRetry: () {
                           HapticHelper.lightImpact();
-                          setState(() {
-                            _future = SeminarsApi().getSeminarRooms();
-                          });
+                          _refresh();
                         },
                       );
                     }
 
                     final rooms = snapshot.data ?? const [];
                     if (rooms.isEmpty) {
-                      return EmptyStateWidget(
-                        icon: Icons.meeting_room_outlined,
-                        title: 'Aucune salle',
-                        subtitle: 'Aucune salle de séminaire n’est disponible.',
+                      return RefreshIndicator(
+                        color: AppTheme.accentGold,
+                        onRefresh: _refresh,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.sizeOf(context).height * 0.65,
+                            child: const EmptyStateWidget(
+                              icon: Icons.meeting_room_outlined,
+                              title: 'Aucune salle',
+                              subtitle:
+                                  'Aucune salle de séminaire n’est disponible.',
+                            ),
+                          ),
+                        ),
                       );
                     }
 
-                    return ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                    return RefreshIndicator(
+                      color: AppTheme.accentGold,
+                      onRefresh: _refresh,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: LayoutHelper.horizontalPaddingValue(context),
+                            right: LayoutHelper.horizontalPaddingValue(context),
+                            top: 12,
+                            bottom: 24,
+                          ),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  LayoutHelper.gridCrossAxisCount(context),
+                              childAspectRatio:
+                                  LayoutHelper.listCellAspectRatio(context),
+                              crossAxisSpacing:
+                                  LayoutHelper.gridSpacing(context),
+                              mainAxisSpacing:
+                                  LayoutHelper.gridSpacing(context),
+                            ),
+                            itemCount: rooms.length,
+                            itemBuilder: (context, index) {
+                              final room = rooms[index];
+                              return SeminarRoomCard(
+                                room: room,
+                                onTap: () {
+                                  HapticHelper.lightImpact();
+                                  context.navigateTo(
+                                    SeminarRoomDetailScreen(room: room),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                      itemCount: rooms.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final room = rooms[index];
-                        return _RoomTile(
-                          room: room,
-                          onTap: () {
-                            HapticHelper.lightImpact();
-                            context.navigateTo(
-                              SeminarRoomDetailScreen(room: room),
-                            );
-                          },
-                        );
-                      },
                     );
                   },
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoomTile extends StatelessWidget {
-  final SeminarRoom room;
-  final VoidCallback onTap;
-
-  const _RoomTile({required this.room, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppTheme.primaryDark.withValues(alpha: 0.35),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.accentGold.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.meeting_room_outlined,
-                  color: AppTheme.accentGold,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      room.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      room.capacity != null
-                          ? 'Capacité: ${room.capacity}'
-                          : 'Capacité: —',
-                      style: const TextStyle(color: AppTheme.textGray),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Icon(Icons.chevron_right, color: AppTheme.textGray),
             ],
           ),
         ),

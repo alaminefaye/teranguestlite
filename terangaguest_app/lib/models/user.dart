@@ -188,16 +188,18 @@ class Gallery {
   final List<GalleryAlbum> albums;
 
   Gallery({this.establishmentPhotoUrl, List<GalleryAlbum>? albums})
-      : albums = albums ?? const [];
+    : albums = albums ?? const [];
 
   static Gallery? fromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     final albumsList = json['albums'] as List<dynamic>?;
     return Gallery(
       establishmentPhotoUrl: json['establishment_photo_url'] as String?,
-      albums: albumsList
-          ?.map((e) => GalleryAlbum.fromJson(e as Map<String, dynamic>))
-          .toList() ?? const [],
+      albums:
+          albumsList
+              ?.map((e) => GalleryAlbum.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }
@@ -218,12 +220,16 @@ class GalleryAlbum {
   static GalleryAlbum fromJson(Map<String, dynamic> json) {
     final photosList = json['photos'] as List<dynamic>?;
     return GalleryAlbum(
-      id: (json['id'] is int) ? json['id'] as int : int.tryParse(json['id'].toString()) ?? 0,
+      id: (json['id'] is int)
+          ? json['id'] as int
+          : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
-      photos: photosList
-          ?.map((e) => GalleryPhoto.fromJson(e as Map<String, dynamic>))
-          .toList() ?? const [],
+      photos:
+          photosList
+              ?.map((e) => GalleryPhoto.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }
@@ -243,7 +249,9 @@ class GalleryPhoto {
 
   static GalleryPhoto fromJson(Map<String, dynamic> json) {
     return GalleryPhoto(
-      id: (json['id'] is int) ? json['id'] as int : int.tryParse(json['id'].toString()) ?? 0,
+      id: (json['id'] is int)
+          ? json['id'] as int
+          : int.tryParse(json['id'].toString()) ?? 0,
       url: json['url'] as String? ?? '',
       title: json['title'] as String?,
       description: json['description'] as String?,
@@ -372,7 +380,8 @@ class Enterprise {
           ? json['sport_settings']['document_url'] as String?
           : null),
       excursionsDisplayMode: (json['excursions_settings'] is Map
-          ? (json['excursions_settings']['display_mode'] as String? ?? 'catalog')
+          ? (json['excursions_settings']['display_mode'] as String? ??
+                'catalog')
           : 'catalog'),
       excursionsDocumentUrl: (json['excursions_settings'] is Map
           ? json['excursions_settings']['document_url'] as String?
