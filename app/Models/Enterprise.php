@@ -9,6 +9,14 @@ class Enterprise extends Model
 {
     use HasFactory;
 
+    /** @param  mixed  $raw */
+    private static function normalizeCatalogDocumentMode(mixed $raw): string
+    {
+        $mode = is_string($raw) ? strtolower(trim($raw)) : strtolower(trim((string) $raw));
+
+        return in_array($mode, ['catalog', 'document'], true) ? $mode : 'catalog';
+    }
+
     protected $fillable = [
         'name',
         'address',
@@ -250,7 +258,7 @@ class Enterprise extends Model
             $documentUrl = asset('storage/' . $s['document_path']);
         }
         return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'display_mode'  => self::normalizeCatalogDocumentMode($s['display_mode'] ?? 'catalog'),
             'document_url'  => $documentUrl,
             'document_path' => $s['document_path'] ?? null,
         ];
@@ -268,7 +276,7 @@ class Enterprise extends Model
             $documentUrl = asset('storage/' . $s['document_path']);
         }
         return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'display_mode'  => self::normalizeCatalogDocumentMode($s['display_mode'] ?? 'catalog'),
             'document_url'  => $documentUrl,
             'document_path' => $s['document_path'] ?? null,
         ];
@@ -286,7 +294,7 @@ class Enterprise extends Model
             $documentUrl = asset('storage/' . $s['document_path']);
         }
         return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'display_mode'  => self::normalizeCatalogDocumentMode($s['display_mode'] ?? 'catalog'),
             'document_url'  => $documentUrl,
             'document_path' => $s['document_path'] ?? null,
         ];
@@ -304,7 +312,7 @@ class Enterprise extends Model
             $documentUrl = asset('storage/' . $s['document_path']);
         }
         return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'display_mode'  => self::normalizeCatalogDocumentMode($s['display_mode'] ?? 'catalog'),
             'document_url'  => $documentUrl,
             'document_path' => $s['document_path'] ?? null,
         ];
@@ -322,7 +330,7 @@ class Enterprise extends Model
             $documentUrl = asset('storage/' . $s['document_path']);
         }
         return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
+            'display_mode'  => self::normalizeCatalogDocumentMode($s['display_mode'] ?? 'catalog'),
             'document_url'  => $documentUrl,
             'document_path' => $s['document_path'] ?? null,
         ];

@@ -319,6 +319,19 @@ class Enterprise {
   final String? phone;
   final String? email;
 
+  /// Normalise `catalog` / `document` (API peut renvoyer des espaces ou une casse inhabituelle).
+  static String catalogDocumentMode(dynamic raw) {
+    final s = raw?.toString().trim().toLowerCase() ?? '';
+    if (s == 'document') return 'document';
+    return 'catalog';
+  }
+
+  static String? optionalDocumentUrl(dynamic raw) {
+    if (raw == null) return null;
+    final s = raw.toString().trim();
+    return s.isEmpty ? null : s;
+  }
+
   Enterprise({
     required this.id,
     required this.name,
@@ -367,37 +380,56 @@ class Enterprise {
       chatbotUrl: json['chatbot_url'] as String?,
       animationsProgramUrl: animations?['program_url'] as String?,
       animationsJournalUrl: animations?['journal_url'] as String?,
-      spaDisplayMode: (json['spa_settings'] is Map
-          ? (json['spa_settings']['display_mode'] as String? ?? 'catalog')
-          : 'catalog'),
-      spaDocumentUrl: (json['spa_settings'] is Map
-          ? json['spa_settings']['document_url'] as String?
-          : null),
-      sportDisplayMode: (json['sport_settings'] is Map
-          ? (json['sport_settings']['display_mode'] as String? ?? 'catalog')
-          : 'catalog'),
-      sportDocumentUrl: (json['sport_settings'] is Map
-          ? json['sport_settings']['document_url'] as String?
-          : null),
-      excursionsDisplayMode: (json['excursions_settings'] is Map
-          ? (json['excursions_settings']['display_mode'] as String? ??
-                'catalog')
-          : 'catalog'),
-      excursionsDocumentUrl: (json['excursions_settings'] is Map
-          ? json['excursions_settings']['document_url'] as String?
-          : null),
-      hotelBoxDisplayMode: (json['hotel_box_settings'] is Map
-          ? (json['hotel_box_settings']['display_mode'] as String? ?? 'catalog')
-          : 'catalog'),
-      hotelBoxDocumentUrl: (json['hotel_box_settings'] is Map
-          ? json['hotel_box_settings']['document_url'] as String?
-          : null),
-      roomBoxDisplayMode: (json['room_box_settings'] is Map
-          ? (json['room_box_settings']['display_mode'] as String? ?? 'catalog')
-          : 'catalog'),
-      roomBoxDocumentUrl: (json['room_box_settings'] is Map
-          ? json['room_box_settings']['document_url'] as String?
-          : null),
+      spaDisplayMode: json['spa_settings'] is Map
+          ? catalogDocumentMode(
+              (json['spa_settings'] as Map)['display_mode'],
+            )
+          : 'catalog',
+      spaDocumentUrl: json['spa_settings'] is Map
+          ? optionalDocumentUrl(
+              (json['spa_settings'] as Map)['document_url'],
+            )
+          : null,
+      sportDisplayMode: json['sport_settings'] is Map
+          ? catalogDocumentMode(
+              (json['sport_settings'] as Map)['display_mode'],
+            )
+          : 'catalog',
+      sportDocumentUrl: json['sport_settings'] is Map
+          ? optionalDocumentUrl(
+              (json['sport_settings'] as Map)['document_url'],
+            )
+          : null,
+      excursionsDisplayMode: json['excursions_settings'] is Map
+          ? catalogDocumentMode(
+              (json['excursions_settings'] as Map)['display_mode'],
+            )
+          : 'catalog',
+      excursionsDocumentUrl: json['excursions_settings'] is Map
+          ? optionalDocumentUrl(
+              (json['excursions_settings'] as Map)['document_url'],
+            )
+          : null,
+      hotelBoxDisplayMode: json['hotel_box_settings'] is Map
+          ? catalogDocumentMode(
+              (json['hotel_box_settings'] as Map)['display_mode'],
+            )
+          : 'catalog',
+      hotelBoxDocumentUrl: json['hotel_box_settings'] is Map
+          ? optionalDocumentUrl(
+              (json['hotel_box_settings'] as Map)['document_url'],
+            )
+          : null,
+      roomBoxDisplayMode: json['room_box_settings'] is Map
+          ? catalogDocumentMode(
+              (json['room_box_settings'] as Map)['display_mode'],
+            )
+          : 'catalog',
+      roomBoxDocumentUrl: json['room_box_settings'] is Map
+          ? optionalDocumentUrl(
+              (json['room_box_settings'] as Map)['document_url'],
+            )
+          : null,
       address: json['address'] as String?,
       phone: json['phone'] as String?,
       email: json['email'] as String?,

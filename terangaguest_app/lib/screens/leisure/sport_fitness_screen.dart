@@ -39,29 +39,60 @@ class _SportFitnessScreenState extends State<SportFitnessScreen> {
 
   Future<void> _checkSportDisplayMode() async {
     try {
-      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
-      final data = response.data;
-      if (data is Map && data['success'] == true && data['data'] is Map) {
-        final enterprise = Enterprise.fromJson(
-          Map<String, dynamic>.from(data['data'] as Map),
-        );
-        if (enterprise.sportDisplayMode == 'document' &&
-            enterprise.sportDocumentUrl != null &&
-            enterprise.sportDocumentUrl!.isNotEmpty) {
-          if (!mounted) return;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => InAppDocumentScreen(
-                title: 'Sport & Fitness',
-                url: enterprise.sportDocumentUrl!,
-              ),
+      final enterprise = await _loadEnterpriseConfigForSport();
+      if (!mounted) return;
+
+      final docUrl = enterprise?.sportDocumentUrl?.trim();
+      final isDocument = enterprise != null &&
+          Enterprise.catalogDocumentMode(enterprise.sportDisplayMode) ==
+              'document' &&
+          docUrl != null &&
+          docUrl.isNotEmpty;
+
+      if (isDocument) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => InAppDocumentScreen(
+              title: 'Sport & Fitness',
+              url: docUrl,
             ),
-          );
-          return;
-        }
+          ),
+        );
+        return;
       }
     } catch (_) {}
     if (mounted) setState(() => _checkingMode = false);
+  }
+
+  /// Tablette connectée : `/user` (entreprise du JWT). Sinon vitrine (QR).
+  Future<Enterprise?> _loadEnterpriseConfigForSport() async {
+    if (!ApiConfig.vitrineMode) {
+      try {
+        final response = await ApiService().get(ApiConfig.user);
+        final data = response.data;
+        if (data is Map &&
+            data['success'] == true &&
+            data['data'] is Map<String, dynamic>) {
+          final entRaw =
+              (data['data'] as Map<String, dynamic>)['enterprise'];
+          if (entRaw is Map) {
+            return Enterprise.fromJson(Map<String, dynamic>.from(entRaw));
+          }
+        }
+      } catch (_) {}
+    }
+
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineEnterprise);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        return Enterprise.fromJson(
+          Map<String, dynamic>.from(data['data'] as Map),
+        );
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   PalaceService? _getConciergeService(List<PalaceService> services) {
