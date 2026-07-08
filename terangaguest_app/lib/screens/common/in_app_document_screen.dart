@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../config/theme.dart';
 import '../../utils/haptic_helper.dart';
+import 'web_document_view_stub.dart'
+    if (dart.library.html) 'web_document_view_web.dart';
 
 class InAppDocumentScreen extends StatefulWidget {
   final String title;
@@ -18,39 +22,60 @@ class InAppDocumentScreen extends StatefulWidget {
 }
 
 class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   bool _isLoading = true;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    final loadUrl = _buildViewerUrl(widget.url);
+    if (kIsWeb) {
+      _isLoading = false;
+      return;
+    }
+
+    final loadUrl = _buildMobileViewerUrl(widget.url);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
-            if (mounted) setState(() { _isLoading = true; _hasError = false; });
+            if (mounted) {
+              setState(() {
+                _isLoading = true;
+                _hasError = false;
+              });
+            }
           },
           onPageFinished: (_) {
             if (mounted) setState(() => _isLoading = false);
           },
           onWebResourceError: (_) {
-            if (mounted) setState(() { _isLoading = false; _hasError = true; });
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+                _hasError = true;
+              });
+            }
           },
         ),
       )
       ..loadRequest(Uri.parse(loadUrl));
   }
 
-  /// Si l'URL est un PDF, on passe par Google Docs Viewer pour l'afficher in-app.
-  String _buildViewerUrl(String url) {
+  /// Sur mobile, on passe par Google Docs Viewer pour certains PDF.
+  String _buildMobileViewerUrl(String url) {
     final lower = url.toLowerCase();
     if (lower.endsWith('.pdf') || lower.contains('.pdf?')) {
       return 'https://docs.google.com/viewer?embedded=true&url=${Uri.encodeComponent(url)}';
     }
     return url;
+  }
+
+  Future<void> _openExternally() async {
+    final uri = Uri.tryParse(widget.url);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.platformDefault);
   }
 
   @override
@@ -62,11 +87,17 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.accentGold,
+                      ),
                       onPressed: () {
                         HapticHelper.lightImpact();
                         Navigator.of(context).pop();
@@ -85,6 +116,13 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.open_in_new,
+                        color: AppTheme.accentGold,
+                      ),
+                      onPressed: _openExternally,
+                    ),
                     if (_isLoading)
                       const Padding(
                         padding: EdgeInsets.only(right: 12),
@@ -93,7 +131,9 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentGold),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppTheme.accentGold,
+                            ),
                           ),
                         ),
                       ),
@@ -101,12 +141,20 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
                 ),
               ),
               Expanded(
-                child: _hasError
-                    ? _ErrorView(onRetry: () {
-                        setState(() { _isLoading = true; _hasError = false; });
-                        _controller.reload();
-                      })
-                    : WebViewWidget(controller: _controller),
+                child: kIsWeb
+                    ? WebDocumentView(url: widget.url)
+                    : _hasError
+                    ? _ErrorView(
+                        onRetry: () {
+                          setState(() {
+                            _isLoading = true;
+                            _hasError = false;
+                          });
+                          _controller?.reload();
+                        },
+                        onOpenExternally: _openExternally,
+                      )
+                    : WebViewWidget(controller: _controller!),
               ),
             ],
           ),
@@ -118,7 +166,9 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
 
 class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
-  const _ErrorView({required this.onRetry});
+  final VoidCallback onOpenExternally;
+
+  const _ErrorView({required this.onRetry, required this.onOpenExternally});
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +178,11 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: AppTheme.accentGold, size: 56),
+            const Icon(
+              Icons.error_outline,
+              color: AppTheme.accentGold,
+              size: 56,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Impossible de charger le document',
@@ -151,9 +205,19 @@ class _ErrorView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentGold,
                 foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('Réessayer'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onOpenExternally,
+              child: const Text(
+                'Ouvrir le document',
+                style: TextStyle(color: AppTheme.accentGold),
+              ),
             ),
           ],
         ),
