@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../../config/theme.dart';
 import '../../models/excursion.dart';
 import '../../models/favorite_item.dart';
@@ -179,6 +180,7 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
             borderRadius: BorderRadius.circular(16),
             child: _excursion!.image != null
                 ? CachedNetworkImage(
+                    imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                     imageUrl: _excursion!.image!,
                     height: 300,
                     width: double.infinity,

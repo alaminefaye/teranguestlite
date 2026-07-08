@@ -1194,7 +1194,10 @@ class _AdminChatConversationScreenState
     final day = DateTime(d.year, d.month, d.day);
     if (day == today) return 'Aujourd\'hui';
     if (day == yesterday) return 'Hier';
-    return DateFormat('d MMMM yyyy', Localizations.localeOf(context).languageCode).format(d);
+    return DateFormat(
+      'd MMMM yyyy',
+      Localizations.localeOf(context).languageCode,
+    ).format(d);
   }
 
   Widget _buildDateSeparator(DateTime date) {
@@ -1435,6 +1438,7 @@ class _AdminChatConversationScreenState
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
+              webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
               url,
               fit: BoxFit.cover,
               width: 220,

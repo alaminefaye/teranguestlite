@@ -36,7 +36,9 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapHotelScreen());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _bootstrapHotelScreen(),
+    );
   }
 
   Future<void> _bootstrapHotelScreen() async {
@@ -53,8 +55,7 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
           final title = AppLocalizations.of(context).hotelInfos;
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (_) =>
-                  InAppDocumentScreen(title: title, url: docUrl),
+              builder: (_) => InAppDocumentScreen(title: title, url: docUrl),
             ),
           );
           return;
@@ -287,6 +288,7 @@ class _HotelInfosScreenState extends State<HotelInfosScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
+                    webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                     infos.mapUrl!,
                     fit: BoxFit.contain,
                     width: double.infinity,

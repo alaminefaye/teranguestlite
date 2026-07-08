@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../config/theme.dart';
@@ -584,6 +585,7 @@ class _AnnouncementSequencePlayerState
     // Affiche
     if (ann.hasPoster) {
       return CachedNetworkImage(
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
         key: ValueKey('poster-${ann.id}'),
         imageUrl: ann.posterUrl!,
         fit: BoxFit.cover,

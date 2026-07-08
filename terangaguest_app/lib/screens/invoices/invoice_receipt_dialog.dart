@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
@@ -213,6 +214,7 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: CachedNetworkImage(
+                imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                 imageUrl: logoUrl,
                 height: 56,
                 fit: BoxFit.contain,
@@ -324,7 +326,10 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
   }
 
   Widget _buildOrderInfo() {
-    final dateFormat = DateFormat('dd/MM/yyyy • HH:mm', Localizations.localeOf(context).languageCode);
+    final dateFormat = DateFormat(
+      'dd/MM/yyyy • HH:mm',
+      Localizations.localeOf(context).languageCode,
+    );
     final formattedDate = dateFormat.format(_order!.createdAt);
 
     // Utiliser delivered_at réel si disponible, sinon l'heure actuelle (cas popup notification)
@@ -333,7 +338,9 @@ class _InvoiceReceiptDialogState extends State<InvoiceReceiptDialog>
 
     // Nom de l'hôtel depuis le profil de l'utilisateur connecté
     final authProvider = context.read<AuthProvider>();
-    final hotelName = authProvider.user?.enterprise?.name ?? AppLocalizations.of(context).hotelFallback;
+    final hotelName =
+        authProvider.user?.enterprise?.name ??
+        AppLocalizations.of(context).hotelFallback;
 
     return Column(
       children: [

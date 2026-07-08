@@ -76,6 +76,8 @@ class ServiceCard extends StatelessWidget {
                       hasImage
                           ? (imagePath!.startsWith('http')
                                 ? Image.network(
+                                    webHtmlElementStrategy:
+                                        WebHtmlElementStrategy.prefer,
                                     imagePath!,
                                     fit: BoxFit.cover,
                                     width: double.infinity,

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -205,6 +206,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // 1) Image en plein fond : couverture (photo) ou logo en repli
           if (backgroundImageUrl != null && backgroundImageUrl.isNotEmpty)
             CachedNetworkImage(
+              imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
               imageUrl: backgroundImageUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
@@ -277,6 +279,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         child: ClipOval(
                           child: CachedNetworkImage(
+                            imageRenderMethodForWeb:
+                                ImageRenderMethodForWeb.HtmlImage,
                             imageUrl: logoUrl,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Center(

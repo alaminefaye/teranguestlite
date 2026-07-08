@@ -401,13 +401,33 @@ Route::get('/landing-assets/{file}', function (string $file) {
     ]);
 })->name('landing.asset');
 
-// App Web Client (Flutter) — index.html pour /client et /client/*
-Route::get('/client', function () {
-    return file_get_contents(public_path('client/index.html'));
-});
-Route::get('/client/{any}', function () {
-    return file_get_contents(public_path('client/index.html'));
-})->where('any', '.*');
+// App Web Client (Flutter) — sert les vrais assets du build, avec fallback SPA.
+Route::get('/client/{path?}', function (?string $path = null) {
+    $clientRoot = realpath(public_path('client'));
+    abort_unless($clientRoot !== false, 404);
+
+    $relativePath = ltrim($path ?? '', '/');
+    $requestedPath = $relativePath === ''
+        ? $clientRoot . DIRECTORY_SEPARATOR . 'index.html'
+        : $clientRoot . DIRECTORY_SEPARATOR . $relativePath;
+
+    $resolvedPath = realpath($requestedPath);
+
+    if ($resolvedPath !== false &&
+        str_starts_with($resolvedPath, $clientRoot) &&
+        is_file($resolvedPath)) {
+        return response()->file($resolvedPath, [
+            'Cache-Control' => $relativePath === 'index.html'
+                ? 'no-store, no-cache, must-revalidate, max-age=0'
+                : 'public, max-age=604800',
+        ]);
+    }
+
+    return response()->file($clientRoot . DIRECTORY_SEPARATOR . 'index.html', [
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma' => 'no-cache',
+    ]);
+})->where('path', '.*');
 
 // Pages TailAdmin (Form, Tables, Charts, UI, Blank, Error)
 Route::get('/form-elements', function () {

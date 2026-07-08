@@ -115,6 +115,7 @@ class GuideItemsScreen extends StatelessWidget {
           children: [
             if (item.image != null)
               Image.network(
+                webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                 ApiConfig.storageUrl(item.image!),
                 height: 160,
                 fit: BoxFit.cover,

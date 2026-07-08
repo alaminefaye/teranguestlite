@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../generated/l10n/app_localizations.dart';
@@ -81,6 +82,8 @@ class MenuItemCard extends StatelessWidget {
                           ),
                           child: item.image != null
                               ? CachedNetworkImage(
+                                  imageRenderMethodForWeb:
+                                      ImageRenderMethodForWeb.HtmlImage,
                                   imageUrl: item.image!,
                                   width: double.infinity,
                                   height: double.infinity,
@@ -190,7 +193,10 @@ class MenuItemCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          if (TranslatableTextHelper.resolveDisplayTextSync(item.description, locale).trim().isNotEmpty)
+                          if (TranslatableTextHelper.resolveDisplayTextSync(
+                            item.description,
+                            locale,
+                          ).trim().isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 2.0),
                               child: TranslatableText(
@@ -211,7 +217,9 @@ class MenuItemCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                context.watch<CurrencyProvider>().formatPrice(item.price),
+                                context.watch<CurrencyProvider>().formatPrice(
+                                  item.price,
+                                ),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w900,

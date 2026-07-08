@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:provider/provider.dart';
 import '../models/announcement.dart';
 import '../providers/announcements_provider.dart';
@@ -126,6 +127,7 @@ class _AnnouncementThumbnail extends StatelessWidget {
             // Image de fond (affiche ou placeholder)
             if (ann.hasPoster)
               CachedNetworkImage(
+                imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                 imageUrl: ann.posterUrl!,
                 fit: BoxFit.cover,
                 placeholder: (_, _) => Container(color: Colors.grey[850]),

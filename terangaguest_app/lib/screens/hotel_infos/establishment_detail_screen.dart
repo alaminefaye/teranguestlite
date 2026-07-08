@@ -166,6 +166,7 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
+                webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                 d.coverPhoto!,
                 height: 200,
                 fit: BoxFit.cover,
@@ -336,6 +337,8 @@ class _EstablishmentDetailScreenState extends State<EstablishmentDetailScreen> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.network(
+                                  webHtmlElementStrategy:
+                                      WebHtmlElementStrategy.prefer,
                                   url,
                                   fit: BoxFit.cover,
                                   width: cellSize,
@@ -410,6 +413,7 @@ class _PhotoPreviewPage extends StatelessWidget {
               minScale: 0.5,
               maxScale: 4.0,
               child: Image.network(
+                webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                 imageUrl,
                 fit: BoxFit.contain,
                 loadingBuilder: (context, child, progress) => progress == null

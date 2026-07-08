@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../models/announcement.dart';
@@ -211,6 +212,7 @@ class _AnnouncementPopupState extends State<AnnouncementPopup> {
     // 3. Affiche seule (ou fallback si vidéo en erreur)
     if (ann.hasPoster) {
       return CachedNetworkImage(
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
         imageUrl: ann.posterUrl!,
         fit: BoxFit.contain,
         placeholder: (_, _) => Container(
@@ -245,6 +247,7 @@ class _AnnouncementPopupState extends State<AnnouncementPopup> {
   Widget _buildPosterBackground({required Widget child}) {
     if (ann.hasPoster) {
       return CachedNetworkImage(
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
         imageUrl: ann.posterUrl!,
         fit: BoxFit.cover,
         imageBuilder: (_, provider) => Container(

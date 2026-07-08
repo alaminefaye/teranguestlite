@@ -191,6 +191,7 @@ class _EstablishmentsListScreenState extends State<EstablishmentsListScreen> {
                     children: [
                       if (e.coverPhoto != null && e.coverPhoto!.isNotEmpty)
                         Image.network(
+                          webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                           e.coverPhoto!,
                           height: 160,
                           fit: BoxFit.cover,

@@ -200,6 +200,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.network(
+            webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
             gallery.establishmentPhotoUrl!,
             fit: BoxFit.cover,
             width: double.infinity,
@@ -274,6 +275,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.network(
+                            webHtmlElementStrategy:
+                                WebHtmlElementStrategy.prefer,
                             firstPhotoUrl,
                             width: 72,
                             height: 72,

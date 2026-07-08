@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../../config/theme.dart';
 import '../../models/menu_item.dart';
 import '../../models/favorite_item.dart';
@@ -162,6 +163,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             ? Container(
                 color: AppTheme.primaryDark,
                 child: CachedNetworkImage(
+                  imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                   imageUrl: widget.item.image!,
                   fit: BoxFit.contain,
                   placeholder: (context, url) => _buildImagePlaceholder(),

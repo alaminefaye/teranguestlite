@@ -269,6 +269,7 @@ class _PalaceListScreenState extends State<PalaceListScreen> {
     }
 
     return Image.network(
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       imageUrl,
       fit: BoxFit.cover,
       width: double.infinity,

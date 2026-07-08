@@ -62,6 +62,7 @@ dependencies:
 
   # Cache images (performance, offline)
   cached_network_image: ^3.4.1
+  cached_network_image_platform_interface: ^4.1.1
 
   # Firebase (notifications push)
   firebase_core: ^3.8.1

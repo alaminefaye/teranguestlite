@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../../config/theme.dart';
 import '../../models/spa.dart';
 import '../../models/favorite_item.dart';
@@ -197,6 +198,7 @@ class _SpaServiceDetailScreenState extends State<SpaServiceDetailScreen> {
       borderRadius: BorderRadius.circular(16),
       child: _service!.image != null
           ? CachedNetworkImage(
+              imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
               imageUrl: _service!.image!,
               height: 300,
               width: double.infinity,

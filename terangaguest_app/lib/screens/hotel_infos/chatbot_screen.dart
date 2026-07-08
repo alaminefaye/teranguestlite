@@ -684,7 +684,10 @@ class _ChatbotScreenState extends State<ChatbotScreen>
     final day = DateTime(d.year, d.month, d.day);
     if (day == today) return l10n.periodToday;
     if (day == yesterday) return l10n.yesterday;
-    return DateFormat('d MMMM yyyy', Localizations.localeOf(context).languageCode).format(d);
+    return DateFormat(
+      'd MMMM yyyy',
+      Localizations.localeOf(context).languageCode,
+    ).format(d);
   }
 
   Widget _buildDateSeparator(BuildContext context, DateTime date) {
@@ -925,6 +928,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
+              webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
               url,
               fit: BoxFit.cover,
               width: 220,

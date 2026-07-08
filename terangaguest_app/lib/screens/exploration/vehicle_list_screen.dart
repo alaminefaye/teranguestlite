@@ -372,6 +372,7 @@ class _VehicleCard extends StatelessWidget {
                 ),
                 child: vehicle.image != null && vehicle.image!.isNotEmpty
                     ? Image.network(
+                        webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                         vehicle.image!,
                         fit: BoxFit.cover,
                         width: double.infinity,

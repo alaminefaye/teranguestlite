@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../config/theme.dart';
 import '../models/spa.dart';
@@ -19,7 +20,10 @@ class SpaServiceCard extends StatelessWidget {
     final locale = context.read<LocaleProvider>().languageCode;
     return Semantics(
       button: true,
-      label: TranslatableTextHelper.resolveDisplayTextSync(service.name, locale),
+      label: TranslatableTextHelper.resolveDisplayTextSync(
+        service.name,
+        locale,
+      ),
       enabled: service.isAvailable,
       child: GestureDetector(
         onTap: service.isAvailable ? onTap : null,
@@ -68,6 +72,8 @@ class SpaServiceCard extends StatelessWidget {
                         ),
                         child: service.image != null
                             ? CachedNetworkImage(
+                                imageRenderMethodForWeb:
+                                    ImageRenderMethodForWeb.HtmlImage,
                                 imageUrl: service.image!,
                                 width: double.infinity,
                                 height: double.infinity,

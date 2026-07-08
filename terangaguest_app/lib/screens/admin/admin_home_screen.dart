@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../generated/l10n/app_localizations.dart';
@@ -1142,6 +1143,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         children: [
           if (backgroundImageUrl != null && backgroundImageUrl.isNotEmpty)
             CachedNetworkImage(
+              imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
               imageUrl: backgroundImageUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
@@ -1193,6 +1195,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 children: [
                   if (logoUrl != null && logoUrl.isNotEmpty)
                     CachedNetworkImage(
+                      imageRenderMethodForWeb:
+                          ImageRenderMethodForWeb.HtmlImage,
                       imageUrl: logoUrl,
                       height: logoSize,
                       fit: BoxFit.contain,
@@ -1244,7 +1248,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 right: pad + 8,
               ),
               child: Text(
-                displayName.isNotEmpty ? l10n.welcomeToEnterprise(displayName) : l10n.welcomeTitle,
+                displayName.isNotEmpty
+                    ? l10n.welcomeToEnterprise(displayName)
+                    : l10n.welcomeTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: nameOnBannerSize,
@@ -1451,9 +1457,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              l10n.adminSectionInPreparation(tile.label),
-            ),
+            content: Text(l10n.adminSectionInPreparation(tile.label)),
             backgroundColor: AppTheme.accentGold,
             duration: const Duration(seconds: 2),
           ),
@@ -1587,6 +1591,7 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: CachedNetworkImage(
+                  imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                   imageUrl: order.items!.first.image!,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
@@ -1727,7 +1732,10 @@ class _NewOrdersCarouselDialogState extends State<_NewOrdersCarouselDialog> {
           },
           child: Text(
             l10n.openOrder,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -2020,7 +2028,10 @@ class _NewLaundryCarouselDialogState extends State<_NewLaundryCarouselDialog> {
           },
           child: Text(
             l10n.openRequest,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -2302,7 +2313,10 @@ class _NewPalaceCarouselDialogState extends State<_NewPalaceCarouselDialog> {
           },
           child: Text(
             l10n.openRequest,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -2568,7 +2582,10 @@ class _NewRestaurantCarouselDialogState
           },
           child: Text(
             l10n.openAction,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -2838,7 +2855,10 @@ class _NewExcursionCarouselDialogState
           },
           child: Text(
             l10n.openAction,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -3094,7 +3114,10 @@ class _NewSpaCarouselDialogState extends State<_NewSpaCarouselDialog> {
           },
           child: Text(
             l10n.openAction,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -3366,7 +3389,10 @@ class _CancelledSpaCarouselDialogState
           },
           child: Text(
             l10n.viewDetails,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],
@@ -3628,7 +3654,10 @@ class _RescheduledSpaCarouselDialogState
           },
           child: Text(
             l10n.viewDetails,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],

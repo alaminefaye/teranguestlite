@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../config/theme.dart';
 import '../models/excursion.dart';
@@ -66,6 +67,8 @@ class ExcursionCard extends StatelessWidget {
                         ),
                         child: excursion.image != null
                             ? CachedNetworkImage(
+                                imageRenderMethodForWeb:
+                                    ImageRenderMethodForWeb.HtmlImage,
                                 imageUrl: excursion.image!,
                                 width: double.infinity,
                                 height: double.infinity,

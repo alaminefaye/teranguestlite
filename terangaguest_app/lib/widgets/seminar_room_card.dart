@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/seminar_room.dart';
@@ -8,11 +9,7 @@ class SeminarRoomCard extends StatelessWidget {
   final SeminarRoom room;
   final VoidCallback onTap;
 
-  const SeminarRoomCard({
-    super.key,
-    required this.room,
-    required this.onTap,
-  });
+  const SeminarRoomCard({super.key, required this.room, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +63,8 @@ class SeminarRoomCard extends StatelessWidget {
                         ),
                         child: room.image != null && room.image!.isNotEmpty
                             ? CachedNetworkImage(
+                                imageRenderMethodForWeb:
+                                    ImageRenderMethodForWeb.HtmlImage,
                                 imageUrl: room.image!,
                                 width: double.infinity,
                                 height: double.infinity,
