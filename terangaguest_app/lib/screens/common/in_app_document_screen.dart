@@ -90,7 +90,9 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   }
 
   Future<void> _openExternally() async {
-    final targetUrl = kIsWeb ? buildWebPdfLaunchUrl(widget.url) : widget.url;
+    final targetUrl = kIsWeb
+        ? buildWebPdfLaunchUrl(widget.url, title: widget.title)
+        : widget.url;
     final uri = Uri.tryParse(targetUrl);
     if (uri == null) return;
     await launchUrl(
