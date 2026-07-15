@@ -25,12 +25,19 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   WebViewController? _controller;
   bool _isLoading = true;
   bool _hasError = false;
+  bool _openDirectlyOnWeb = false;
 
   @override
   void initState() {
     super.initState();
     if (kIsWeb) {
+      _openDirectlyOnWeb = _shouldOpenDirectlyOnWeb(widget.url);
       _isLoading = false;
+      if (_openDirectlyOnWeb) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openExternally();
+        });
+      }
       return;
     }
 
@@ -72,10 +79,22 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
     return url;
   }
 
+  bool _shouldOpenDirectlyOnWeb(String url) {
+    final lower = url.trim().toLowerCase();
+    return lower.endsWith('.pdf') ||
+        lower.contains('.pdf?') ||
+        lower.contains('docs.google.com/viewer') ||
+        lower.contains('docs.google.com/gview');
+  }
+
   Future<void> _openExternally() async {
     final uri = Uri.tryParse(widget.url);
     if (uri == null) return;
-    await launchUrl(uri, mode: LaunchMode.platformDefault);
+    await launchUrl(
+      uri,
+      mode: LaunchMode.platformDefault,
+      webOnlyWindowName: kIsWeb ? '_self' : null,
+    );
   }
 
   @override
@@ -142,7 +161,12 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
               ),
               Expanded(
                 child: kIsWeb
-                    ? WebDocumentView(url: widget.url)
+                    ? _openDirectlyOnWeb
+                        ? _WebOpenFallback(
+                            title: widget.title,
+                            onOpenExternally: _openExternally,
+                          )
+                        : WebDocumentView(url: widget.url)
                     : _hasError
                     ? _ErrorView(
                         onRetry: () {
@@ -158,6 +182,67 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WebOpenFallback extends StatelessWidget {
+  final String title;
+  final VoidCallback onOpenExternally;
+
+  const _WebOpenFallback({
+    required this.title,
+    required this.onOpenExternally,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.picture_as_pdf_outlined,
+              color: AppTheme.accentGold,
+              size: 56,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Le document PDF est ouvert directement dans le navigateur pour garder un scroll normal sur le web mobile.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppTheme.textGray,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: onOpenExternally,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentGold,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Ouvrir le document'),
+            ),
+          ],
         ),
       ),
     );
