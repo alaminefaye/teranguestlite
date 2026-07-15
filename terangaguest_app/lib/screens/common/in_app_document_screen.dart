@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../config/theme.dart';
 import '../../utils/haptic_helper.dart';
+import 'web_browser_helper_stub.dart'
+    if (dart.library.html) 'web_browser_helper_web.dart';
 import 'web_document_view_stub.dart'
     if (dart.library.html) 'web_document_view_web.dart';
 
@@ -88,7 +90,8 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   }
 
   Future<void> _openExternally() async {
-    final uri = Uri.tryParse(widget.url);
+    final targetUrl = kIsWeb ? buildWebPdfLaunchUrl(widget.url) : widget.url;
+    final uri = Uri.tryParse(targetUrl);
     if (uri == null) return;
     await launchUrl(
       uri,
@@ -222,7 +225,7 @@ class _WebOpenFallback extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Le document PDF est ouvert directement dans le navigateur pour garder un scroll normal sur le web mobile.',
+              'Le document PDF est ouvert avec le mode le plus compatible pour garder un scroll normal sur le web mobile.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppTheme.textGray,
