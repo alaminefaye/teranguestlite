@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+  <title>PDF Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #041b33;
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      font-family: Arial, sans-serif;
+    }
+
+    #app {
+      min-height: 100%;
+      padding: 12px 8px 24px;
+      box-sizing: border-box;
+    }
+
+    #status {
+      color: #d4af37;
+      text-align: center;
+      padding: 24px 12px;
+      font-size: 14px;
+    }
+
+    #pages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .page {
+      width: min(100%, 900px);
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .page canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="status">Chargement du document...</div>
+    <div id="pages"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.mjs" type="module"></script>
+  <script type="module">
+    import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.mjs';
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
+
+    const params = new URLSearchParams(window.location.search);
+    const file = params.get('file');
+    const statusEl = document.getElementById('status');
+    const pagesEl = document.getElementById('pages');
+
+    if (!file) {
+      statusEl.textContent = 'Aucun document a afficher.';
+    } else {
+      try {
+        const pdf = await pdfjsLib.getDocument(file).promise;
+        statusEl.remove();
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+          const page = await pdf.getPage(pageNumber);
+          const viewport = page.getViewport({ scale: 1 });
+          const availableWidth = Math.min(window.innerWidth - 16, 900);
+          const scale = availableWidth / viewport.width;
+          const scaledViewport = page.getViewport({ scale });
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'page';
+
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          const outputScale = window.devicePixelRatio || 1;
+
+          canvas.width = Math.floor(scaledViewport.width * outputScale);
+          canvas.height = Math.floor(scaledViewport.height * outputScale);
+          canvas.style.width = `${scaledViewport.width}px`;
+          canvas.style.height = `${scaledViewport.height}px`;
+          context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+
+          wrapper.appendChild(canvas);
+          pagesEl.appendChild(wrapper);
+
+          await page.render({
+            canvasContext: context,
+            viewport: scaledViewport,
+          }).promise;
+        }
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Impossible de charger le document.';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -51,9 +51,7 @@ class _WebDocumentViewState extends State<WebDocumentView> {
     final trimmed = url.trim();
     final lower = trimmed.toLowerCase();
     if (lower.endsWith('.pdf') || lower.contains('.pdf?')) {
-      final uri = Uri.parse(trimmed);
-      if (uri.fragment.isNotEmpty) return trimmed;
-      return '$trimmed#toolbar=1&navpanes=0&scrollbar=1&view=FitH';
+      return 'pdf_viewer.html?file=${Uri.encodeComponent(trimmed)}';
     }
     return trimmed;
   }
