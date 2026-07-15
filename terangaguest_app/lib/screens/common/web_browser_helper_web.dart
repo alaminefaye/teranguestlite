@@ -24,10 +24,7 @@ String buildWebPdfLaunchUrl(String url) {
       lower.contains('docs.google.com/gview');
 
   if (!isPdf) return trimmed;
-  if (isSafariWebBrowser()) return _extractOriginalPdfUrl(trimmed);
-
-  final originalUrl = _extractOriginalPdfUrl(trimmed);
-  return 'https://docs.google.com/viewer?embedded=true&url=${Uri.encodeComponent(originalUrl)}';
+  return _extractOriginalPdfUrl(trimmed);
 }
 
 String _extractOriginalPdfUrl(String url) {
