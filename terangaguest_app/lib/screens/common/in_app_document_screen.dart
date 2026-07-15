@@ -27,19 +27,14 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   WebViewController? _controller;
   bool _isLoading = true;
   bool _hasError = false;
-  bool _openDirectlyOnWeb = false;
+  bool _showWebPdfFallback = false;
 
   @override
   void initState() {
     super.initState();
     if (kIsWeb) {
-      _openDirectlyOnWeb = _shouldOpenDirectlyOnWeb(widget.url);
+      _showWebPdfFallback = _shouldOpenDirectlyOnWeb(widget.url);
       _isLoading = false;
-      if (_openDirectlyOnWeb) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _openExternally();
-        });
-      }
       return;
     }
 
@@ -90,15 +85,13 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   }
 
   Future<void> _openExternally() async {
-    final targetUrl = kIsWeb
-        ? buildWebPdfLaunchUrl(widget.url, title: widget.title)
-        : widget.url;
+    final targetUrl = kIsWeb ? buildWebPdfLaunchUrl(widget.url) : widget.url;
     final uri = Uri.tryParse(targetUrl);
     if (uri == null) return;
     await launchUrl(
       uri,
       mode: LaunchMode.platformDefault,
-      webOnlyWindowName: kIsWeb ? '_self' : null,
+      webOnlyWindowName: kIsWeb ? '_blank' : null,
     );
   }
 
@@ -166,7 +159,7 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
               ),
               Expanded(
                 child: kIsWeb
-                    ? _openDirectlyOnWeb
+                    ? _showWebPdfFallback
                         ? _WebOpenFallback(
                             title: widget.title,
                             onOpenExternally: _openExternally,
@@ -227,7 +220,7 @@ class _WebOpenFallback extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Le document PDF est ouvert avec le mode le plus compatible pour garder un scroll normal sur le web mobile.',
+              'Le document s ouvre dans un nouvel onglet pour garder le retour vers l application.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppTheme.textGray,

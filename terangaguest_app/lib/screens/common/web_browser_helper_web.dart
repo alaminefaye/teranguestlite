@@ -14,7 +14,7 @@ bool isSafariWebBrowser() {
   return hasSafari && !hasOtherBrowserToken;
 }
 
-String buildWebPdfLaunchUrl(String url, {String? title}) {
+String buildWebPdfLaunchUrl(String url) {
   final trimmed = url.trim();
   final lower = trimmed.toLowerCase();
   final isPdf =
@@ -24,23 +24,7 @@ String buildWebPdfLaunchUrl(String url, {String? title}) {
       lower.contains('docs.google.com/gview');
 
   if (!isPdf) return trimmed;
-  final originalUrl = _extractOriginalPdfUrl(trimmed);
-  final uri = Uri.parse(html.window.location.href);
-  final basePath = uri.path.endsWith('/')
-      ? uri.path
-      : uri.path.substring(0, uri.path.lastIndexOf('/') + 1);
-  final pdfPageUri = Uri(
-    scheme: uri.scheme,
-    host: uri.host,
-    port: uri.hasPort ? uri.port : null,
-    path: '${basePath}pdf.html',
-    queryParameters: {
-      'file': originalUrl,
-      'title': title?.trim().isNotEmpty == true ? title!.trim() : 'Document',
-      'return': '/client/',
-    },
-  );
-  return pdfPageUri.toString();
+  return _extractOriginalPdfUrl(trimmed);
 }
 
 String _extractOriginalPdfUrl(String url) {
