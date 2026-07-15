@@ -23,13 +23,27 @@ class _WebDocumentViewState extends State<WebDocumentView> {
     final iframeUrl = _buildIframeUrl(widget.url);
 
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
-      return html.IFrameElement()
+      final iframe = html.IFrameElement()
         ..src = iframeUrl
         ..style.border = '0'
+        ..style.display = 'block'
         ..style.width = '100%'
         ..style.height = '100%'
+        ..style.overflow = 'auto'
+        ..style.touchAction = 'auto'
         ..style.backgroundColor = 'transparent'
+        ..setAttribute('scrolling', 'yes')
         ..allowFullscreen = true;
+
+      final container = html.DivElement()
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.overflow = 'auto'
+        ..style.touchAction = 'auto'
+        ..style.setProperty('-webkit-overflow-scrolling', 'touch');
+
+      container.children.add(iframe);
+      return container;
     });
   }
 
@@ -37,9 +51,8 @@ class _WebDocumentViewState extends State<WebDocumentView> {
     final trimmed = url.trim();
     final lower = trimmed.toLowerCase();
     if (lower.endsWith('.pdf') || lower.contains('.pdf?')) {
-      final uri = Uri.parse(trimmed);
-      if (uri.fragment.isNotEmpty) return trimmed;
-      return '$trimmed#toolbar=1&navpanes=0&scrollbar=1&view=FitH';
+      if (lower.contains('docs.google.com')) return trimmed;
+      return 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(trimmed)}';
     }
     return trimmed;
   }
