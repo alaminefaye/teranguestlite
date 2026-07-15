@@ -27,13 +27,11 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
   WebViewController? _controller;
   bool _isLoading = true;
   bool _hasError = false;
-  bool _showWebPdfFallback = false;
 
   @override
   void initState() {
     super.initState();
     if (kIsWeb) {
-      _showWebPdfFallback = _shouldOpenDirectlyOnWeb(widget.url);
       _isLoading = false;
       return;
     }
@@ -74,14 +72,6 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
       return 'https://docs.google.com/viewer?embedded=true&url=${Uri.encodeComponent(url)}';
     }
     return url;
-  }
-
-  bool _shouldOpenDirectlyOnWeb(String url) {
-    final lower = url.trim().toLowerCase();
-    return lower.endsWith('.pdf') ||
-        lower.contains('.pdf?') ||
-        lower.contains('docs.google.com/viewer') ||
-        lower.contains('docs.google.com/gview');
   }
 
   Future<void> _openExternally() async {
@@ -159,12 +149,7 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
               ),
               Expanded(
                 child: kIsWeb
-                    ? _showWebPdfFallback
-                        ? _WebOpenFallback(
-                            title: widget.title,
-                            onOpenExternally: _openExternally,
-                          )
-                        : WebDocumentView(url: widget.url)
+                    ? WebDocumentView(url: buildWebPdfLaunchUrl(widget.url))
                     : _hasError
                     ? _ErrorView(
                         onRetry: () {
@@ -180,67 +165,6 @@ class _InAppDocumentScreenState extends State<InAppDocumentScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WebOpenFallback extends StatelessWidget {
-  final String title;
-  final VoidCallback onOpenExternally;
-
-  const _WebOpenFallback({
-    required this.title,
-    required this.onOpenExternally,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.picture_as_pdf_outlined,
-              color: AppTheme.accentGold,
-              size: 56,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Le document s ouvre dans un nouvel onglet pour garder le retour vers l application.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppTheme.textGray,
-                fontSize: 14,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: onOpenExternally,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentGold,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Ouvrir le document'),
-            ),
-          ],
         ),
       ),
     );

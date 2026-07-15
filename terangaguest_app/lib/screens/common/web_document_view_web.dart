@@ -51,8 +51,9 @@ class _WebDocumentViewState extends State<WebDocumentView> {
     final trimmed = url.trim();
     final lower = trimmed.toLowerCase();
     if (lower.endsWith('.pdf') || lower.contains('.pdf?')) {
-      if (lower.contains('docs.google.com')) return trimmed;
-      return 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(trimmed)}';
+      final uri = Uri.parse(trimmed);
+      if (uri.fragment.isNotEmpty) return trimmed;
+      return '$trimmed#toolbar=1&navpanes=0&scrollbar=1&view=FitH';
     }
     return trimmed;
   }
