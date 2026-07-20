@@ -215,6 +215,20 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 30),
           ],
 
+          // Horaires des repas
+          if (_restaurant!.mealHours != null &&
+              _restaurant!.mealHours!.isNotEmpty) ...[
+            _buildMealHours(),
+            const SizedBox(height: 30),
+          ],
+
+          // Tarifs
+          if (_restaurant!.pricing != null &&
+              _restaurant!.pricing!.isNotEmpty) ...[
+            _buildPricing(),
+            const SizedBox(height: 30),
+          ],
+
           // Commodités
           if (_restaurant!.amenities != null &&
               _restaurant!.amenities!.isNotEmpty) ...[
@@ -451,6 +465,166 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildMealHours() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Horaires des repas',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ..._restaurant!.mealHours!.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    entry.key,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                  Text(
+                    entry.value?.toString() ?? '',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPricing() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.accentGold, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tarifs',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentGold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ..._buildPricingItems(),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildPricingItems() {
+    final items = <Widget>[];
+    for (final entry in _restaurant!.pricing!.entries) {
+      if (entry.value is Map<String, dynamic>) {
+        final subMap = entry.value as Map<String, dynamic>;
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.key,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...subMap.entries.map(
+                  (subEntry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0, left: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          subEntry.key,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        Text(
+                          subEntry.value?.toString() ?? '',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  entry.key,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textGray,
+                  ),
+                ),
+                Text(
+                  entry.value?.toString() ?? '',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    return items;
   }
 
   Widget _buildAmenities() {

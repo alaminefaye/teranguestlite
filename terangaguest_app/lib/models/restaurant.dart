@@ -12,6 +12,8 @@ class Restaurant {
   final Map<String, String>? openingHours;
   final bool isOpen;
   final List<String>? amenities;
+  final Map<String, dynamic>? mealHours;
+  final Map<String, dynamic>? pricing;
 
   Restaurant({
     required this.id,
@@ -25,6 +27,8 @@ class Restaurant {
     this.openingHours,
     required this.isOpen,
     this.amenities,
+    this.mealHours,
+    this.pricing,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -40,7 +44,18 @@ class Restaurant {
       openingHours: _parseOpeningHours(json['opening_hours']),
       isOpen: json['is_open_now'] as bool? ?? json['is_open'] as bool? ?? false,
       amenities: _parseAmenities(json['amenities']),
+      mealHours: _parseJsonMap(json['meal_hours']),
+      pricing: _parseJsonMap(json['pricing']),
     );
+  }
+
+  static Map<String, dynamic>? _parseJsonMap(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) {
+      return Map<String, dynamic>.from(raw);
+    }
+    return null;
   }
 
   static Map<String, String>? _parseOpeningHours(dynamic raw) {
@@ -88,6 +103,8 @@ class Restaurant {
       'image': image,
       'menu_file': menuFile,
       'opening_hours': openingHours,
+      'meal_hours': mealHours,
+      'pricing': pricing,
       'is_open': isOpen,
       'amenities': amenities,
     };

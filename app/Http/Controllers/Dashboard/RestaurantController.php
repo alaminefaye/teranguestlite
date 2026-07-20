@@ -73,6 +73,8 @@ class RestaurantController extends Controller
             'capacity' => 'nullable|integer|min:1',
             'status' => 'required|in:open,closed,coming_soon',
             'opening_hours' => 'nullable|array',
+            'meal_hours' => 'nullable|array',
+            'pricing' => 'nullable|array',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'has_terrace' => 'nullable|boolean',
@@ -108,6 +110,29 @@ class RestaurantController extends Controller
             }
             
             $validated['opening_hours'] = $openingHours;
+        }
+
+        // Traiter les horaires de repas
+        if ($request->has('meal_hours')) {
+            $mealHours = [];
+            $meals = ['breakfast', 'lunch', 'dinner'];
+            foreach ($meals as $meal) {
+                if ($request->input("meal_hours.{$meal}.enabled")) {
+                    $mealHours[$meal] = [
+                        'open' => $request->input("meal_hours.{$meal}.open"),
+                        'close' => $request->input("meal_hours.{$meal}.close"),
+                    ];
+                }
+            }
+            $validated['meal_hours'] = $mealHours;
+        }
+
+        // Traiter les tarifs (JSON)
+        if ($request->has('pricing') && !empty(trim($request->input('pricing')))) {
+            $pricingJson = json_decode($request->input('pricing'), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $validated['pricing'] = $pricingJson;
+            }
         }
 
         // Convertir les checkboxes
@@ -150,6 +175,8 @@ class RestaurantController extends Controller
             'capacity' => 'nullable|integer|min:1',
             'status' => 'required|in:open,closed,coming_soon',
             'opening_hours' => 'nullable|array',
+            'meal_hours' => 'nullable|array',
+            'pricing' => 'nullable|array',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'has_terrace' => 'nullable|boolean',
@@ -190,6 +217,29 @@ class RestaurantController extends Controller
             }
             
             $validated['opening_hours'] = $openingHours;
+        }
+
+        // Traiter les horaires de repas
+        if ($request->has('meal_hours')) {
+            $mealHours = [];
+            $meals = ['breakfast', 'lunch', 'dinner'];
+            foreach ($meals as $meal) {
+                if ($request->input("meal_hours.{$meal}.enabled")) {
+                    $mealHours[$meal] = [
+                        'open' => $request->input("meal_hours.{$meal}.open"),
+                        'close' => $request->input("meal_hours.{$meal}.close"),
+                    ];
+                }
+            }
+            $validated['meal_hours'] = $mealHours;
+        }
+
+        // Traiter les tarifs (JSON)
+        if ($request->has('pricing') && !empty(trim($request->input('pricing')))) {
+            $pricingJson = json_decode($request->input('pricing'), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $validated['pricing'] = $pricingJson;
+            }
         }
 
         // Convertir les checkboxes

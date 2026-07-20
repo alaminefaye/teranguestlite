@@ -26,6 +26,8 @@ class Restaurant extends Model
         'capacity',
         'status',
         'opening_hours',
+        'meal_hours',
+        'pricing',
         'phone',
         'email',
         'has_terrace',
@@ -38,6 +40,8 @@ class Restaurant extends Model
 
     protected $casts = [
         'opening_hours' => 'array',
+        'meal_hours' => 'array',
+        'pricing' => 'array',
         'has_terrace' => 'boolean',
         'has_wifi' => 'boolean',
         'has_live_music' => 'boolean',

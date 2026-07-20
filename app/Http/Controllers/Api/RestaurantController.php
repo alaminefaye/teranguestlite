@@ -41,6 +41,8 @@ class RestaurantController extends Controller
                     'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
                     'capacity' => $restaurant->capacity,
                     'opening_hours' => $restaurant->opening_hours,
+                    'meal_hours' => $restaurant->meal_hours,
+                    'pricing' => $restaurant->pricing,
                     'is_open_now' => $restaurant->is_open_now,
                     'today_hours' => $restaurant->today_hours,
                 ];
@@ -68,6 +70,8 @@ class RestaurantController extends Controller
                 'image' => $restaurant->image ? asset('storage/' . $restaurant->image) : null,
                 'capacity' => $restaurant->capacity,
                 'opening_hours' => $restaurant->opening_hours,
+                'meal_hours' => $restaurant->meal_hours,
+                'pricing' => $restaurant->pricing,
                 'is_open_now' => $restaurant->is_open_now,
                 'today_hours' => $restaurant->today_hours,
             ],
