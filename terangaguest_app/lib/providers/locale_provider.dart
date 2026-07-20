@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 
 const String _keyLocale = 'app_locale';
 
-/// Supported: fr, en, ar, es. Default: fr.
+/// Supported: fr, en. Default: fr.
 class LocaleProvider with ChangeNotifier {
   Locale _locale = const Locale('fr');
   bool _loaded = false;
@@ -31,7 +31,7 @@ class LocaleProvider with ChangeNotifier {
   }
 
   static String _supported(String code) {
-    if (code == 'en' || code == 'ar' || code == 'es') return code;
+    if (code == 'en') return code;
     return 'fr';
   }
 

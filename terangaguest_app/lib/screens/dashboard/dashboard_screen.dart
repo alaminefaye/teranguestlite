@@ -458,8 +458,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const languages = [
       ('fr', 'Français'),
       ('en', 'English'),
-      ('ar', 'العربية'),
-      ('es', 'Español'),
     ];
     showDialog(
       context: context,
