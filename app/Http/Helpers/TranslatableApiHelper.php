@@ -25,7 +25,26 @@ final class TranslatableApiHelper
         try {
             $raw = $model->getTranslations($attribute);
         } catch (\Throwable) {
-            $fallback = $model->{$attribute} ?? '';
+            $fallback = '';
+
+            if (method_exists($model, 'getAttributes')) {
+                $attributes = $model->getAttributes();
+                $rawValue = $attributes[$attribute] ?? '';
+
+                if (is_string($rawValue)) {
+                    $decoded = json_decode($rawValue, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        foreach (self::LOCALES as $locale) {
+                            if (isset($decoded[$locale]) && is_string($decoded[$locale]) && $decoded[$locale] !== '') {
+                                $fallback = $decoded[$locale];
+                                break;
+                            }
+                        }
+                    } else {
+                        $fallback = $rawValue;
+                    }
+                }
+            }
 
             if (! is_string($fallback)) {
                 $fallback = '';

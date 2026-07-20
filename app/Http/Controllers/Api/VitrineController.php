@@ -788,45 +788,68 @@ class VitrineController extends Controller
 
     public function rooms(): JsonResponse
     {
-        $enterpriseId = $this->resolveEnterpriseId();
-        $rooms = Room::query()
-            ->where('enterprise_id', $enterpriseId)
-            ->orderBy('type')
-            ->orderBy('room_number')
-            ->get();
+        try {
+            $enterpriseId = $this->resolveEnterpriseId();
+            $rooms = Room::query()
+                ->where('enterprise_id', $enterpriseId)
+                ->orderBy('type')
+                ->orderBy('room_number')
+                ->get();
 
-        // Group rooms by type
-        $groupedRooms = [];
-        foreach ($rooms as $room) {
-            $type = $room->type ?? 'other';
-            if (!isset($groupedRooms[$type])) {
-                $groupedRooms[$type] = [
-                    'type' => $type,
-                    'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
-                    'type_label' => $room->type_name,
-                    'rooms' => [],
-                ];
+            // Group rooms by type
+            $groupedRooms = [];
+            foreach ($rooms as $room) {
+                try {
+                    $type = $room->type ?? 'other';
+                    if (!isset($groupedRooms[$type])) {
+                        $groupedRooms[$type] = [
+                            'type' => $type,
+                            'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
+                            'type_label' => $room->type_name,
+                            'rooms' => [],
+                        ];
+                    }
+                    $groupedRooms[$type]['rooms'][] = [
+                        'id' => $room->id,
+                        'room_number' => $room->room_number,
+                        'floor' => $room->floor,
+                        'type' => $room->type,
+                        'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
+                        'description' => TranslatableApiHelper::translationsFor($room, 'description'),
+                        'price_per_night' => $room->price_per_night,
+                        'formatted_price_per_night' => $room->price_per_night ? number_format($room->price_per_night, 0, '', ' ') . ' FCFA' : null,
+                        'capacity' => $room->capacity,
+                        'amenities' => $room->amenities ?? [],
+                        'image' => $room->image ? asset('storage/' . $room->image) : null,
+                        'status' => $room->status,
+                        'status_label' => $room->status_name,
+                    ];
+                } catch (\Throwable $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'rooms_debug_room_failure',
+                        'debug' => [
+                            'room_id' => $room->id ?? null,
+                            'room_number' => $room->room_number ?? null,
+                            'type' => $room->type ?? null,
+                            'error' => $e->getMessage(),
+                        ],
+                    ], 500);
+                }
             }
-            $groupedRooms[$type]['rooms'][] = [
-                'id' => $room->id,
-                'room_number' => $room->room_number,
-                'floor' => $room->floor,
-                'type' => $room->type,
-                'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
-                'description' => TranslatableApiHelper::translationsFor($room, 'description'),
-                'price_per_night' => $room->price_per_night,
-                'formatted_price_per_night' => $room->price_per_night ? number_format($room->price_per_night, 0, '', ' ') . ' FCFA' : null,
-                'capacity' => $room->capacity,
-                'amenities' => $room->amenities ?? [],
-                'image' => $room->image ? asset('storage/' . $room->image) : null,
-                'status' => $room->status,
-                'status_label' => $room->status_name,
-            ];
-        }
 
-        return response()->json([
-            'success' => true,
-            'data' => array_values($groupedRooms),
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'data' => array_values($groupedRooms),
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'rooms_debug_endpoint_failure',
+                'debug' => [
+                    'error' => $e->getMessage(),
+                ],
+            ], 500);
+        }
     }
 }
