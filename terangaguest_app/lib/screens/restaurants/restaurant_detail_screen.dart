@@ -468,6 +468,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   }
 
   Widget _buildMealHours() {
+    final mealLabels = {
+      'breakfast': 'PETIT DÉJEUNER',
+      'lunch': 'DÉJEUNER',
+      'dinner': 'DÎNER',
+    };
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -490,20 +495,23 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
           const SizedBox(height: 16),
           ..._restaurant!.mealHours!.entries.map((entry) {
+            final mealTime = entry.value is Map<String, dynamic>
+                ? (entry.value as Map<String, dynamic>)['time']?.toString()
+                : entry.value?.toString();
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    entry.key,
+                    mealLabels[entry.key] ?? entry.key,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppTheme.textGray,
                     ),
                   ),
                   Text(
-                    entry.value?.toString() ?? '',
+                    mealTime ?? '',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white,

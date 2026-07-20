@@ -282,11 +282,8 @@
                                         </div>
                                     </label>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <input type="time" name="meal_hours[{{ $key }}][open]" value="{{ $openTime }}"
-                                        class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
-                                    <span>-</span>
-                                    <input type="time" name="meal_hours[{{ $key }}][close]" value="{{ $closeTime }}"
+                                <div>
+                                    <input type="text" name="meal_hours[{{ $key }}][time]" value="{{ old("meal_hours.{$key}.time", $currentMealHours[$key]['time'] ?? '') }}" placeholder="06h30 - 10h"
                                         class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                                 </div>
                             </div>

@@ -119,8 +119,7 @@ class RestaurantController extends Controller
             foreach ($meals as $meal) {
                 if ($request->input("meal_hours.{$meal}.enabled")) {
                     $mealHours[$meal] = [
-                        'open' => $request->input("meal_hours.{$meal}.open"),
-                        'close' => $request->input("meal_hours.{$meal}.close"),
+                        'time' => $request->input("meal_hours.{$meal}.time"),
                     ];
                 }
             }
@@ -226,8 +225,7 @@ class RestaurantController extends Controller
             foreach ($meals as $meal) {
                 if ($request->input("meal_hours.{$meal}.enabled")) {
                     $mealHours[$meal] = [
-                        'open' => $request->input("meal_hours.{$meal}.open"),
-                        'close' => $request->input("meal_hours.{$meal}.close"),
+                        'time' => $request->input("meal_hours.{$meal}.time"),
                     ];
                 }
             }
