@@ -115,6 +115,7 @@ class VitrineController extends Controller
 
         return response()->json([
             'success' => true,
+            'debug_server_version' => 'v2_meal_pricing_fixed',
             'data' => $restaurants->map(function ($restaurant) {
                 return [
                     'id' => $restaurant->id,
@@ -129,6 +130,8 @@ class VitrineController extends Controller
                     'opening_hours' => $restaurant->opening_hours,
                     'is_open_now' => $restaurant->is_open_now,
                     'today_hours' => $restaurant->today_hours,
+                    'meal_hours' => $restaurant->meal_hours,
+                    'pricing' => $restaurant->pricing,
                 ];
             }),
         ], 200);
@@ -151,6 +154,7 @@ class VitrineController extends Controller
 
         return response()->json([
             'success' => true,
+            'debug_server_version' => 'v2_meal_pricing_fixed',
             'data' => [
                 'id' => $restaurant->id,
                 'name' => TranslatableApiHelper::translationsFor($restaurant, 'name'),
@@ -164,6 +168,8 @@ class VitrineController extends Controller
                 'opening_hours' => $restaurant->opening_hours,
                 'is_open_now' => $restaurant->is_open_now,
                 'today_hours' => $restaurant->today_hours,
+                'meal_hours' => $restaurant->meal_hours,
+                'pricing' => $restaurant->pricing,
             ],
         ], 200);
     }
