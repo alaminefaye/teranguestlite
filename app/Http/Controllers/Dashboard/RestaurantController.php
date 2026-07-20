@@ -119,7 +119,7 @@ class RestaurantController extends Controller
             foreach ($meals as $meal) {
                 if ($request->input("meal_hours.{$meal}.enabled")) {
                     $mealHours[$meal] = [
-                        'time' => $request->input("meal_hours.{$meal}.time"),
+                        'time' => preg_replace('/[\x00-\x1F\x7F]/u', '', $request->input("meal_hours.{$meal}.time")),
                     ];
                 }
             }
@@ -128,7 +128,9 @@ class RestaurantController extends Controller
 
         // Traiter les tarifs (JSON)
         if ($request->has('pricing') && !empty(trim($request->input('pricing')))) {
-            $pricingJson = json_decode($request->input('pricing'), true);
+            // Nettoyer le JSON des caractères de contrôle invisibles
+            $cleanPricing = preg_replace('/[\x00-\x1F\x7F]/u', '', $request->input('pricing'));
+            $pricingJson = json_decode($cleanPricing, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $validated['pricing'] = $pricingJson;
             }
@@ -225,7 +227,7 @@ class RestaurantController extends Controller
             foreach ($meals as $meal) {
                 if ($request->input("meal_hours.{$meal}.enabled")) {
                     $mealHours[$meal] = [
-                        'time' => $request->input("meal_hours.{$meal}.time"),
+                        'time' => preg_replace('/[\x00-\x1F\x7F]/u', '', $request->input("meal_hours.{$meal}.time")),
                     ];
                 }
             }
@@ -234,7 +236,9 @@ class RestaurantController extends Controller
 
         // Traiter les tarifs (JSON)
         if ($request->has('pricing') && !empty(trim($request->input('pricing')))) {
-            $pricingJson = json_decode($request->input('pricing'), true);
+            // Nettoyer le JSON des caractères de contrôle invisibles
+            $cleanPricing = preg_replace('/[\x00-\x1F\x7F]/u', '', $request->input('pricing'));
+            $pricingJson = json_decode($cleanPricing, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $validated['pricing'] = $pricingJson;
             }

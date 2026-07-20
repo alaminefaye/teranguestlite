@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 class Restaurant {
   final int id;
@@ -34,6 +35,11 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
+    debugPrint('Restaurant.fromJson: $json');
+    final mealHours = _parseJsonMap(json['meal_hours']);
+    final pricing = _parseJsonMap(json['pricing']);
+    debugPrint('mealHours parsed: $mealHours');
+    debugPrint('pricing parsed: $pricing');
     return Restaurant(
       id: json['id'] as int,
       name: json['name'],
@@ -46,8 +52,8 @@ class Restaurant {
       openingHours: _parseOpeningHours(json['opening_hours']),
       isOpen: json['is_open_now'] as bool? ?? json['is_open'] as bool? ?? false,
       amenities: _parseAmenities(json['amenities']),
-      mealHours: _parseJsonMap(json['meal_hours']),
-      pricing: _parseJsonMap(json['pricing']),
+      mealHours: mealHours,
+      pricing: pricing,
     );
   }
 

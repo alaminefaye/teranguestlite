@@ -186,6 +186,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       );
     }
 
+    debugPrint('Restaurant object: ${_restaurant!.toJson()}');
+    debugPrint('mealHours: ${_restaurant!.mealHours}');
+    debugPrint('mealHours isEmpty: ${_restaurant!.mealHours?.isEmpty}');
+    debugPrint('pricing: ${_restaurant!.pricing}');
+    debugPrint('pricing isEmpty: ${_restaurant!.pricing?.isEmpty}');
+
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 60,
@@ -495,9 +501,19 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
           const SizedBox(height: 16),
           ..._restaurant!.mealHours!.entries.map((entry) {
-            final mealTime = entry.value is Map<String, dynamic>
-                ? (entry.value as Map<String, dynamic>)['time']?.toString()
-                : entry.value?.toString();
+            String? mealTime;
+            final value = entry.value;
+            if (value is String) {
+              mealTime = value;
+            } else if (value is Map<String, dynamic>) {
+              mealTime =
+                  value['time']?.toString() ??
+                  value['open']?.toString() ??
+                  value['close']?.toString();
+              if (value['open'] != null && value['close'] != null) {
+                mealTime = '${value['open']} - ${value['close']}';
+              }
+            }
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
