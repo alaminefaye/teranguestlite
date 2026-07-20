@@ -14,6 +14,7 @@ import '../common/in_app_document_screen.dart';
 import '../hotel_infos/guide_items_screen.dart';
 import '../hotel_infos/guides_screen.dart';
 import '../hotel_infos/hotel_infos_screen.dart';
+import 'room_prices_screen.dart';
 
 class RoomModuleScreen extends StatefulWidget {
   const RoomModuleScreen({super.key});
@@ -116,7 +117,9 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     if (_checkingRoomBox) {
       return Scaffold(
         body: Container(
-          decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+          decoration: const BoxDecoration(
+            gradient: AppTheme.backgroundGradient,
+          ),
           child: const SafeArea(
             child: Center(
               child: CircularProgressIndicator(
@@ -167,6 +170,12 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
         Icons.info_outline_rounded,
         'assets/images/info_pratique.png',
         () => context.navigateTo(const HotelInfosScreen()),
+      ),
+      (
+        l10n.tarifs,
+        Icons.attach_money_outlined,
+        'assets/images/info_hotel.png',
+        () => context.navigateTo(const RoomPricesScreen()),
       ),
     ];
 
