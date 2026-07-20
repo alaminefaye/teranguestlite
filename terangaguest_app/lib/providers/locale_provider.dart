@@ -7,11 +7,27 @@ const String _keyLocale = 'app_locale';
 
 /// Supported: fr, en. Default: fr.
 class LocaleProvider with ChangeNotifier {
-  Locale _locale = const Locale('fr');
-  bool _loaded = false;
+  LocaleProvider({
+    Locale initialLocale = const Locale('fr'),
+    bool loaded = false,
+  }) : _locale = Locale(_supported(initialLocale.languageCode)),
+       _loaded = loaded;
+
+  Locale _locale;
+  bool _loaded;
 
   Locale get locale => _locale;
   bool get isLoaded => _loaded;
+
+  static Future<String> loadInitialLanguageCode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final code = prefs.getString(_keyLocale) ?? 'fr';
+      return _supported(code);
+    } catch (_) {
+      return 'fr';
+    }
+  }
 
   Future<void> load() async {
     if (_loaded) return;
@@ -36,9 +52,9 @@ class LocaleProvider with ChangeNotifier {
   }
 
   Future<void> setLocale(Locale value) async {
-    if (_locale == value) return;
-    _locale = value;
     final validCode = _supported(value.languageCode);
+    if (_locale.languageCode == validCode) return;
+    _locale = Locale(validCode);
     ApiService().setLanguage(validCode);
     try {
       final prefs = await SharedPreferences.getInstance();

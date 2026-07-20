@@ -37,6 +37,7 @@ import 'providers/tablet_session_provider.dart';
 import 'providers/chat_unread_provider.dart';
 import 'providers/announcements_provider.dart';
 import 'providers/currency_provider.dart';
+import 'services/api_service.dart';
 import 'services/fcm_service.dart';
 import 'services/notifications_api.dart';
 import 'services/reviews_api.dart';
@@ -111,7 +112,11 @@ void main() {
         DeviceOrientation.portraitUp,
       ]);
 
-      runApp(const MyApp());
+      final initialLanguageCode =
+          await LocaleProvider.loadInitialLanguageCode();
+      ApiService().setLanguage(initialLanguageCode);
+
+      runApp(MyApp(initialLanguageCode: initialLanguageCode));
     },
     (error, stackTrace) {
       debugPrint('*** UNCAUGHT ASYNC ERROR ***');
@@ -122,7 +127,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.initialLanguageCode});
+
+  final String initialLanguageCode;
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +144,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LaundryProvider()),
         ChangeNotifierProvider(create: (_) => PalaceProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(
+          create: (_) => LocaleProvider(
+            initialLocale: Locale(initialLanguageCode),
+            loaded: true,
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => TabletSessionProvider()),
         ChangeNotifierProvider(create: (_) => ChatUnreadProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementsProvider()),
