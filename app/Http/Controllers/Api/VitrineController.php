@@ -22,6 +22,7 @@ use App\Models\SpaService;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VitrineController extends Controller
 {
@@ -59,6 +60,39 @@ class VitrineController extends Controller
             return [$trimmed];
         }
         return [];
+    }
+
+    private function decodeTranslatableField(mixed $value): array
+    {
+        if (is_array($value)) {
+            return [
+                'fr' => isset($value['fr']) ? (string) $value['fr'] : null,
+                'en' => isset($value['en']) ? (string) $value['en'] : null,
+                'es' => isset($value['es']) ? (string) $value['es'] : null,
+                'ar' => isset($value['ar']) ? (string) $value['ar'] : null,
+            ];
+        }
+
+        if ($value === null) {
+            return ['fr' => null, 'en' => null, 'es' => null, 'ar' => null];
+        }
+
+        $stringValue = trim((string) $value);
+        if ($stringValue === '') {
+            return ['fr' => null, 'en' => null, 'es' => null, 'ar' => null];
+        }
+
+        $decoded = json_decode($stringValue, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return [
+                'fr' => isset($decoded['fr']) ? (string) $decoded['fr'] : null,
+                'en' => isset($decoded['en']) ? (string) $decoded['en'] : null,
+                'es' => isset($decoded['es']) ? (string) $decoded['es'] : null,
+                'ar' => isset($decoded['ar']) ? (string) $decoded['ar'] : null,
+            ];
+        }
+
+        return ['fr' => $stringValue, 'en' => $stringValue, 'es' => null, 'ar' => null];
     }
 
     public function enterprise(): JsonResponse
@@ -790,22 +824,39 @@ class VitrineController extends Controller
     {
         try {
             $enterpriseId = $this->resolveEnterpriseId();
-            $rooms = Room::query()
+            $rooms = DB::table('rooms')
                 ->where('enterprise_id', $enterpriseId)
                 ->orderBy('type')
                 ->orderBy('room_number')
                 ->get();
 
-            // Group rooms by type
+            $typeLabels = Room::roomTypeLabels();
+            $statusLabels = [
+                'available' => 'Disponible',
+                'occupied' => 'Occupée',
+                'maintenance' => 'Maintenance',
+                'reserved' => 'Réservée',
+            ];
+
             $groupedRooms = [];
             foreach ($rooms as $room) {
                 try {
                     $type = $room->type ?? 'other';
+                    $typeName = $this->decodeTranslatableField($room->type_name ?? null);
+                    $description = $this->decodeTranslatableField($room->description ?? null);
+                    $amenities = $this->decodeJsonList($room->amenities ?? null);
+                    $image = is_string($room->image ?? null) && trim((string) $room->image) !== ''
+                        ? asset('storage/' . ltrim(trim((string) $room->image), '/'))
+                        : null;
+                    $price = is_numeric($room->price_per_night ?? null)
+                        ? (float) $room->price_per_night
+                        : null;
+
                     if (!isset($groupedRooms[$type])) {
                         $groupedRooms[$type] = [
                             'type' => $type,
-                            'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
-                            'type_label' => $room->type_name,
+                            'type_name' => $typeName,
+                            'type_label' => $typeLabels[$type] ?? ucfirst((string) $type),
                             'rooms' => [],
                         ];
                     }
@@ -814,15 +865,15 @@ class VitrineController extends Controller
                         'room_number' => $room->room_number,
                         'floor' => $room->floor,
                         'type' => $room->type,
-                        'type_name' => TranslatableApiHelper::translationsFor($room, 'type_name'),
-                        'description' => TranslatableApiHelper::translationsFor($room, 'description'),
-                        'price_per_night' => $room->price_per_night,
-                        'formatted_price_per_night' => $room->price_per_night ? number_format($room->price_per_night, 0, '', ' ') . ' FCFA' : null,
+                        'type_name' => $typeName,
+                        'description' => $description,
+                        'price_per_night' => $price,
+                        'formatted_price_per_night' => $price !== null ? number_format($price, 0, '', ' ') . ' FCFA' : null,
                         'capacity' => $room->capacity,
-                        'amenities' => $room->amenities ?? [],
-                        'image' => $room->image ? asset('storage/' . $room->image) : null,
+                        'amenities' => $amenities,
+                        'image' => $image,
                         'status' => $room->status,
-                        'status_label' => $room->status_name,
+                        'status_label' => $statusLabels[$room->status ?? ''] ?? ucfirst((string) ($room->status ?? '')),
                     ];
                 } catch (\Throwable $e) {
                     return response()->json([
