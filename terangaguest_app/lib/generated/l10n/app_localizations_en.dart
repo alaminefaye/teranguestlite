@@ -131,6 +131,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roomService => 'Room Service';
 
   @override
+  String get tarifs => 'Prices';
+
+  @override
+  String get roomPrices => 'Room Prices';
+
+  @override
+  String get noRoomsAvailable => 'No rooms available';
+
+  @override
+  String get checkBackLater => 'Please check back later';
+
+  @override
+  String get errorHint => 'Check your connection and try again.';
+
+  @override
   String get restaurantsBars => 'Restaurants & Bars';
 
   @override
@@ -436,9 +451,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error => 'Error';
-
-  @override
-  String get errorHint => 'Check your connection and try again.';
 
   @override
   String get close => 'Close';

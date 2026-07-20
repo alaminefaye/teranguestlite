@@ -342,6 +342,36 @@ abstract class AppLocalizations {
   /// **'Service en chambre'**
   String get roomService;
 
+  /// No description provided for @tarifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tarifs'**
+  String get tarifs;
+
+  /// No description provided for @roomPrices.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tarifs des chambres'**
+  String get roomPrices;
+
+  /// No description provided for @noRoomsAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune chambre disponible'**
+  String get noRoomsAvailable;
+
+  /// No description provided for @checkBackLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez revenir plus tard'**
+  String get checkBackLater;
+
+  /// No description provided for @errorHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez votre connexion et réessayez.'**
+  String get errorHint;
+
   /// No description provided for @restaurantsBars.
   ///
   /// In fr, this message translates to:
@@ -917,12 +947,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur'**
   String get error;
-
-  /// No description provided for @errorHint.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vérifiez votre connexion et réessayez.'**
-  String get errorHint;
 
   /// No description provided for @close.
   ///

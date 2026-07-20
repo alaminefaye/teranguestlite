@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Room;
 use App\Models\Enterprise;
+use App\Models\Room;
+use Illuminate\Database\Seeder;
 
 class RoomSeeder extends Seeder
 {
@@ -12,35 +12,134 @@ class RoomSeeder extends Seeder
     {
         $enterprises = Enterprise::all();
 
-        $roomTypes = [
-            ['type' => 'single', 'capacity' => 1, 'price' => 65000],
-            ['type' => 'single', 'capacity' => 2, 'price' => 75000],
-            ['type' => 'double', 'capacity' => 2, 'price' => 85000],
-            ['type' => 'double', 'capacity' => 3, 'price' => 95000],
-            ['type' => 'deluxe', 'capacity' => 2, 'price' => 120000],
-            ['type' => 'deluxe', 'capacity' => 3, 'price' => 135000],
-            ['type' => 'suite', 'capacity' => 2, 'price' => 200000],
-            ['type' => 'suite', 'capacity' => 4, 'price' => 250000],
-            ['type' => 'presidential', 'capacity' => 4, 'price' => 500000],
+        $pricingRows = [
+            [
+                'formula_type' => 'single',
+                'formula_name' => [
+                    'fr' => 'Chambre et petit déjeuner',
+                    'en' => 'Room and breakfast',
+                ],
+                'items' => [
+                    [
+                        'label' => ['fr' => 'Chambre individuelle', 'en' => 'Single room'],
+                        'capacity' => 1,
+                        'price' => 71000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Chambre 2 personnes', 'en' => 'Double room'],
+                        'capacity' => 2,
+                        'price' => 92000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Enfants', 'en' => 'Children'],
+                        'capacity' => 1,
+                        'price' => 25000,
+                    ],
+                ],
+            ],
+            [
+                'formula_type' => 'double',
+                'formula_name' => [
+                    'fr' => 'Demi-pension',
+                    'en' => 'Half board',
+                ],
+                'items' => [
+                    [
+                        'label' => ['fr' => 'Chambre individuelle', 'en' => 'Single room'],
+                        'capacity' => 1,
+                        'price' => 81000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Chambre 2 personnes', 'en' => 'Double room'],
+                        'capacity' => 2,
+                        'price' => 122000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Enfants', 'en' => 'Children'],
+                        'capacity' => 1,
+                        'price' => 30000,
+                    ],
+                ],
+            ],
+            [
+                'formula_type' => 'suite',
+                'formula_name' => [
+                    'fr' => 'Pension complète',
+                    'en' => 'Full board',
+                ],
+                'items' => [
+                    [
+                        'label' => ['fr' => 'Chambre individuelle', 'en' => 'Single room'],
+                        'capacity' => 1,
+                        'price' => 91000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Chambre 2 personnes', 'en' => 'Double room'],
+                        'capacity' => 2,
+                        'price' => 132000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Enfants', 'en' => 'Children'],
+                        'capacity' => 1,
+                        'price' => 35000,
+                    ],
+                ],
+            ],
+            [
+                'formula_type' => 'deluxe',
+                'formula_name' => [
+                    'fr' => 'Tout compris',
+                    'en' => 'All inclusive',
+                ],
+                'items' => [
+                    [
+                        'label' => ['fr' => 'Chambre individuelle', 'en' => 'Single room'],
+                        'capacity' => 1,
+                        'price' => 99000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Chambre 2 personnes', 'en' => 'Double room'],
+                        'capacity' => 2,
+                        'price' => 148000,
+                    ],
+                    [
+                        'label' => ['fr' => 'Enfants', 'en' => 'Children'],
+                        'capacity' => 1,
+                        'price' => 38000,
+                    ],
+                ],
+            ],
         ];
 
         foreach ($enterprises as $enterprise) {
-            foreach ($roomTypes as $index => $roomData) {
-                $roomNumber = ($enterprise->id * 100) + $index + 1;
-                
-                Room::create([
+            Room::where('enterprise_id', $enterprise->id)->delete();
+
+            $index = 1;
+            foreach ($pricingRows as $formula) {
+                foreach ($formula['items'] as $item) {
+                    Room::create([
                     'enterprise_id' => $enterprise->id,
-                    'room_number' => (string)$roomNumber,
-                    'type' => $roomData['type'],
-                    'capacity' => $roomData['capacity'],
-                    'price_per_night' => $roomData['price'],
-                    'floor' => (int)($index / 3) + 1,
-                    'status' => $index < 5 ? 'available' : ($index < 7 ? 'occupied' : 'maintenance'),
-                    'description' => "Chambre {$roomData['type']} pour {$roomData['capacity']} personne(s), vue panoramique",
-                    'amenities' => ['WiFi', 'TV', 'Climatisation', 'Mini-bar', 'Coffre-fort'],
+                    'room_number' => sprintf(
+                        'T-%d-%02d',
+                        $enterprise->id,
+                        $index++
+                    ),
+                    'floor' => null,
+                    'type' => $formula['formula_type'],
+                    'type_name' => $formula['formula_name'],
+                    'capacity' => $item['capacity'],
+                    'price_per_night' => $item['price'],
+                    'status' => 'available',
+                    'description' => $item['label'],
+                    'amenities' => [
+                        'Tarif journalier',
+                        'Prestations incluses selon formule',
+                    ],
                 ]);
+                }
             }
-            echo "✅ Chambres créées pour : {$enterprise->name}\n";
+
+            echo "✅ Tarifs chambres créés pour : {$enterprise->name}\n";
         }
     }
 }

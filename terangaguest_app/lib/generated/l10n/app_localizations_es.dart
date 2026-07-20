@@ -132,6 +132,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get roomService => 'Servicio a la habitación';
 
   @override
+  String get tarifs => 'Tarifs';
+
+  @override
+  String get roomPrices => 'Tarifs des chambres';
+
+  @override
+  String get noRoomsAvailable => 'Aucune chambre disponible';
+
+  @override
+  String get checkBackLater => 'Veuillez revenir plus tard';
+
+  @override
+  String get errorHint => 'Compruebe su conexión e intente de nuevo.';
+
+  @override
   String get restaurantsBars => 'Restaurantes y Bares';
 
   @override
@@ -442,9 +457,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get error => 'Error';
-
-  @override
-  String get errorHint => 'Compruebe su conexión e intente de nuevo.';
 
   @override
   String get close => 'Cerrar';

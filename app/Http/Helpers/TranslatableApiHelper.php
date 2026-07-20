@@ -22,7 +22,18 @@ final class TranslatableApiHelper
             return array_fill_keys(self::LOCALES, is_string($value) ? $value : '');
         }
 
-        $raw = $model->getTranslations($attribute);
+        try {
+            $raw = $model->getTranslations($attribute);
+        } catch (\Throwable) {
+            $fallback = $model->{$attribute} ?? '';
+
+            if (! is_string($fallback)) {
+                $fallback = '';
+            }
+
+            return array_fill_keys(self::LOCALES, $fallback);
+        }
+
         $out = [];
         foreach (self::LOCALES as $locale) {
             $out[$locale] = isset($raw[$locale]) && $raw[$locale] !== '' && $raw[$locale] !== null

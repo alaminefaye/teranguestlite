@@ -167,7 +167,9 @@ class _RoomPricesScreenState extends State<RoomPricesScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          roomType.typeLabel.isNotEmpty ? roomType.typeLabel : roomType.typeName,
+          roomType.typeLabel.isNotEmpty
+              ? roomType.typeLabel
+              : roomType.typeName,
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -183,6 +185,9 @@ class _RoomPricesScreenState extends State<RoomPricesScreen> {
 
   Widget _buildRoomCard(Room room) {
     final hasImage = room.image != null && room.image!.isNotEmpty;
+    final cardTitle = (room.description != null && room.description!.isNotEmpty)
+        ? room.description!
+        : room.typeName;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -252,9 +257,7 @@ class _RoomPricesScreenState extends State<RoomPricesScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        room.roomNumber != null && room.roomNumber!.isNotEmpty
-                            ? 'Chambre ${room.roomNumber}'
-                            : room.typeName,
+                        cardTitle,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -326,7 +329,8 @@ class _RoomPricesScreenState extends State<RoomPricesScreen> {
                   ),
                 ],
                 if (room.description != null &&
-                    room.description!.isNotEmpty) ...[
+                    room.description!.isNotEmpty &&
+                    room.description != cardTitle) ...[
                   const SizedBox(height: 16),
                   const Divider(color: AppTheme.textGray, height: 1),
                   const SizedBox(height: 16),
@@ -355,7 +359,9 @@ class _RoomPricesScreenState extends State<RoomPricesScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        backgroundColor: AppTheme.accentGold.withValues(alpha: 0.1),
+                        backgroundColor: AppTheme.accentGold.withValues(
+                          alpha: 0.1,
+                        ),
                         side: const BorderSide(color: AppTheme.accentGold),
                       );
                     }).toList(),
