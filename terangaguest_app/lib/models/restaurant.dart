@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Restaurant {
   final int id;
 
@@ -54,6 +56,16 @@ class Restaurant {
     if (raw is Map<String, dynamic>) return raw;
     if (raw is Map) {
       return Map<String, dynamic>.from(raw);
+    }
+    if (raw is String) {
+      try {
+        // Try to decode if it's a JSON string
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) return decoded;
+        if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      } catch (e) {
+        // Ignore parsing errors
+      }
     }
     return null;
   }
