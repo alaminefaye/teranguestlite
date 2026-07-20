@@ -60,6 +60,7 @@ class RestaurantController extends Controller
 
         return response()->json([
             'success' => true,
+            'debug_server_version' => 'v2_meal_pricing_fixed', // <-- TEST pour vérifier le code serveur
             'data' => [
                 'id' => $restaurant->id,
                 'name' => TranslatableApiHelper::translationsFor($restaurant, 'name'),
