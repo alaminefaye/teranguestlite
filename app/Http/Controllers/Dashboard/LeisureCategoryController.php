@@ -116,7 +116,7 @@ class LeisureCategoryController extends Controller
         $enterprise = Enterprise::find(auth()->user()->enterprise_id);
         return view('pages.dashboard.leisure-categories.sport-settings', [
             'title'        => 'Paramètres Sport & Fitness',
-            'sportSettings' => $enterprise ? $enterprise->sport_settings : ['display_mode' => 'catalog', 'document_url' => null],
+            'sportSettings' => $enterprise ? $enterprise->sport_settings : ['display_mode' => 'catalog', 'document_url' => null, 'document_url_fr' => null, 'document_url_en' => null],
         ]);
     }
 
@@ -125,6 +125,8 @@ class LeisureCategoryController extends Controller
         $request->validate([
             'display_mode' => 'required|in:catalog,document',
             'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_fr'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_en'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
         ]);
 
         $enterprise = Enterprise::find(auth()->user()->enterprise_id);
@@ -142,6 +144,22 @@ class LeisureCategoryController extends Controller
             }
             $sport['document_path'] = $request->file('document')->store('sport-documents', 'public');
             unset($sport['document_url']);
+        }
+
+        if ($request->hasFile('document_fr')) {
+            if (!empty($sport['document_path_fr'])) {
+                Storage::disk('public')->delete($sport['document_path_fr']);
+            }
+            $sport['document_path_fr'] = $request->file('document_fr')->store('sport-documents', 'public');
+            unset($sport['document_url_fr']);
+        }
+
+        if ($request->hasFile('document_en')) {
+            if (!empty($sport['document_path_en'])) {
+                Storage::disk('public')->delete($sport['document_path_en']);
+            }
+            $sport['document_path_en'] = $request->file('document_en')->store('sport-documents', 'public');
+            unset($sport['document_url_en']);
         }
 
         $settings['sport'] = $sport;

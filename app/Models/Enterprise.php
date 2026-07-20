@@ -9,6 +9,76 @@ class Enterprise extends Model
 {
     use HasFactory;
 
+    private function buildStoredFileUrl(?string $path, ?string $url = null): ?string
+    {
+        if (is_string($url) && trim($url) !== '') {
+            return trim($url);
+        }
+
+        if (is_string($path) && trim($path) !== '') {
+            return asset('storage/' . ltrim(trim($path), '/'));
+        }
+
+        return null;
+    }
+
+    private function normalizedDocumentLocale(): string
+    {
+        $locale = strtolower((string) app()->getLocale());
+        return $locale === 'en' ? 'en' : 'fr';
+    }
+
+    private function localizedDocumentSettings(string $settingsKey): array
+    {
+        $s = is_array($this->settings) ? ($this->settings[$settingsKey] ?? []) : [];
+        $requestedLocale = $this->normalizedDocumentLocale();
+        $fallbackLocale = $requestedLocale === 'en' ? 'fr' : 'en';
+
+        $documents = [
+            'fr' => [
+                'path' => $s['document_path_fr'] ?? null,
+                'url' => $s['document_url_fr'] ?? null,
+            ],
+            'en' => [
+                'path' => $s['document_path_en'] ?? null,
+                'url' => $s['document_url_en'] ?? null,
+            ],
+        ];
+
+        $selectedLocale = null;
+        $documentPath = null;
+        $documentUrl = null;
+
+        foreach ([$requestedLocale, $fallbackLocale] as $locale) {
+            $candidate = $documents[$locale];
+            $candidateUrl = $this->buildStoredFileUrl($candidate['path'], $candidate['url']);
+            if ($candidateUrl) {
+                $selectedLocale = $locale;
+                $documentPath = $candidate['path'];
+                $documentUrl = $candidateUrl;
+                break;
+            }
+        }
+
+        if (!$documentUrl) {
+            $documentPath = $s['document_path'] ?? null;
+            $documentUrl = $this->buildStoredFileUrl($documentPath, $s['document_url'] ?? null);
+        }
+
+        return [
+            'display_mode' => $s['display_mode'] ?? 'catalog',
+            'document_url' => $documentUrl,
+            'document_path' => $documentPath,
+            'document_locale' => $selectedLocale,
+            'document_url_fr' => $this->buildStoredFileUrl($documents['fr']['path'], $documents['fr']['url']),
+            'document_path_fr' => $documents['fr']['path'],
+            'document_url_en' => $this->buildStoredFileUrl($documents['en']['path'], $documents['en']['url']),
+            'document_path_en' => $documents['en']['path'],
+            'legacy_document_url' => $this->buildStoredFileUrl($s['document_path'] ?? null, $s['document_url'] ?? null),
+            'legacy_document_path' => $s['document_path'] ?? null,
+        ];
+    }
+
     protected $fillable = [
         'name',
         'address',
@@ -244,16 +314,7 @@ class Enterprise extends Model
      */
     public function getSportSettingsAttribute(): array
     {
-        $s = is_array($this->settings) ? ($this->settings['sport'] ?? []) : [];
-        $documentUrl = $s['document_url'] ?? null;
-        if (!$documentUrl && !empty($s['document_path'])) {
-            $documentUrl = asset('storage/' . $s['document_path']);
-        }
-        return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
-            'document_url'  => $documentUrl,
-            'document_path' => $s['document_path'] ?? null,
-        ];
+        return $this->localizedDocumentSettings('sport');
     }
 
     /**
@@ -262,16 +323,7 @@ class Enterprise extends Model
      */
     public function getExcursionsSettingsAttribute(): array
     {
-        $s = is_array($this->settings) ? ($this->settings['excursions'] ?? []) : [];
-        $documentUrl = $s['document_url'] ?? null;
-        if (!$documentUrl && !empty($s['document_path'])) {
-            $documentUrl = asset('storage/' . $s['document_path']);
-        }
-        return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
-            'document_url'  => $documentUrl,
-            'document_path' => $s['document_path'] ?? null,
-        ];
+        return $this->localizedDocumentSettings('excursions');
     }
 
     /**
@@ -280,16 +332,7 @@ class Enterprise extends Model
      */
     public function getSpaSettingsAttribute(): array
     {
-        $s = is_array($this->settings) ? ($this->settings['spa'] ?? []) : [];
-        $documentUrl = $s['document_url'] ?? null;
-        if (!$documentUrl && !empty($s['document_path'])) {
-            $documentUrl = asset('storage/' . $s['document_path']);
-        }
-        return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
-            'document_url'  => $documentUrl,
-            'document_path' => $s['document_path'] ?? null,
-        ];
+        return $this->localizedDocumentSettings('spa');
     }
 
     /**
@@ -298,16 +341,7 @@ class Enterprise extends Model
      */
     public function getHotelBoxSettingsAttribute(): array
     {
-        $s = is_array($this->settings) ? ($this->settings['hotel_box'] ?? []) : [];
-        $documentUrl = $s['document_url'] ?? null;
-        if (!$documentUrl && !empty($s['document_path'])) {
-            $documentUrl = asset('storage/' . $s['document_path']);
-        }
-        return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
-            'document_url'  => $documentUrl,
-            'document_path' => $s['document_path'] ?? null,
-        ];
+        return $this->localizedDocumentSettings('hotel_box');
     }
 
     /**
@@ -316,16 +350,7 @@ class Enterprise extends Model
      */
     public function getRoomBoxSettingsAttribute(): array
     {
-        $s = is_array($this->settings) ? ($this->settings['room_box'] ?? []) : [];
-        $documentUrl = $s['document_url'] ?? null;
-        if (!$documentUrl && !empty($s['document_path'])) {
-            $documentUrl = asset('storage/' . $s['document_path']);
-        }
-        return [
-            'display_mode'  => $s['display_mode'] ?? 'catalog',
-            'document_url'  => $documentUrl,
-            'document_path' => $s['document_path'] ?? null,
-        ];
+        return $this->localizedDocumentSettings('room_box');
     }
 
     /**

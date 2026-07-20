@@ -148,7 +148,7 @@ class SpaServiceController extends Controller
         $enterprise = Enterprise::find(auth()->user()->enterprise_id);
         return view('pages.dashboard.spa-services.settings', [
             'title'       => 'Paramètres Spa & Bien-être',
-            'spaSettings' => $enterprise ? $enterprise->spa_settings : ['display_mode' => 'catalog', 'document_url' => null],
+            'spaSettings' => $enterprise ? $enterprise->spa_settings : ['display_mode' => 'catalog', 'document_url' => null, 'document_url_fr' => null, 'document_url_en' => null],
         ]);
     }
 
@@ -158,6 +158,8 @@ class SpaServiceController extends Controller
         $request->validate([
             'display_mode' => 'required|in:catalog,document',
             'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_fr'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_en'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
         ]);
 
         $enterprise = Enterprise::find(auth()->user()->enterprise_id);
@@ -176,6 +178,22 @@ class SpaServiceController extends Controller
             }
             $spa['document_path'] = $request->file('document')->store('spa-documents', 'public');
             unset($spa['document_url']);
+        }
+
+        if ($request->hasFile('document_fr')) {
+            if (!empty($spa['document_path_fr'])) {
+                Storage::disk('public')->delete($spa['document_path_fr']);
+            }
+            $spa['document_path_fr'] = $request->file('document_fr')->store('spa-documents', 'public');
+            unset($spa['document_url_fr']);
+        }
+
+        if ($request->hasFile('document_en')) {
+            if (!empty($spa['document_path_en'])) {
+                Storage::disk('public')->delete($spa['document_path_en']);
+            }
+            $spa['document_path_en'] = $request->file('document_en')->store('spa-documents', 'public');
+            unset($spa['document_url_en']);
         }
 
         $settings['spa'] = $spa;

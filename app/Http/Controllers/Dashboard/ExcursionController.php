@@ -172,6 +172,8 @@ class ExcursionController extends Controller
         $request->validate([
             'display_mode' => 'required|in:catalog,document',
             'document'     => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_fr'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_en'  => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
         ]);
 
         $enterprise = Enterprise::find(auth()->user()->enterprise_id);
@@ -189,6 +191,22 @@ class ExcursionController extends Controller
             }
             $exc['document_path'] = $request->file('document')->store('excursions-documents', 'public');
             unset($exc['document_url']);
+        }
+
+        if ($request->hasFile('document_fr')) {
+            if (!empty($exc['document_path_fr'])) {
+                Storage::disk('public')->delete($exc['document_path_fr']);
+            }
+            $exc['document_path_fr'] = $request->file('document_fr')->store('excursions-documents', 'public');
+            unset($exc['document_url_fr']);
+        }
+
+        if ($request->hasFile('document_en')) {
+            if (!empty($exc['document_path_en'])) {
+                Storage::disk('public')->delete($exc['document_path_en']);
+            }
+            $exc['document_path_en'] = $request->file('document_en')->store('excursions-documents', 'public');
+            unset($exc['document_url_en']);
         }
 
         $settings['excursions'] = $exc;

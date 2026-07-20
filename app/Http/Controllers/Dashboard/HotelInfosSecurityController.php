@@ -92,6 +92,8 @@ class HotelInfosSecurityController extends Controller
         $request->validate([
             'display_mode' => 'required|in:catalog,document',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_fr' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
+            'document_en' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:20480',
         ]);
 
         $settings = is_array($enterprise->settings) ? $enterprise->settings : [];
@@ -104,6 +106,22 @@ class HotelInfosSecurityController extends Controller
             }
             $box['document_path'] = $request->file('document')->store('hotel-box-documents', 'public');
             unset($box['document_url']);
+        }
+
+        if ($request->hasFile('document_fr')) {
+            if (!empty($box['document_path_fr'])) {
+                Storage::disk('public')->delete($box['document_path_fr']);
+            }
+            $box['document_path_fr'] = $request->file('document_fr')->store('hotel-box-documents', 'public');
+            unset($box['document_url_fr']);
+        }
+
+        if ($request->hasFile('document_en')) {
+            if (!empty($box['document_path_en'])) {
+                Storage::disk('public')->delete($box['document_path_en']);
+            }
+            $box['document_path_en'] = $request->file('document_en')->store('hotel-box-documents', 'public');
+            unset($box['document_url_en']);
         }
 
         $settings['hotel_box'] = $box;
