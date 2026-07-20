@@ -188,6 +188,16 @@
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image actuelle</label>
                 <img src="{{ asset('storage/' . $room->image) }}" alt="Chambre {{ $room->room_number }}" class="h-32 w-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input type="checkbox" name="remove_image" value="1"
+                        {{ old('remove_image') ? 'checked' : '' }}
+                        class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                    <span>Supprimer l'image actuelle</span>
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Si vous cochez cette option sans importer une nouvelle image, la photo actuelle sera supprimée.</p>
+                @error('remove_image')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
             </div>
             @endif
 

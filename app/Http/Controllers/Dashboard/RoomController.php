@@ -198,6 +198,7 @@ class RoomController extends Controller
             'description_en' => 'nullable|string|max:255',
             'amenities_text' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'remove_image' => 'nullable|boolean',
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
         ]);
@@ -352,6 +353,9 @@ class RoomController extends Controller
                 Storage::disk('public')->delete($room->image);
             }
             $validated['image'] = $request->file('image')->store('rooms', 'public');
+        } elseif ($request->boolean('remove_image') && $room->image) {
+            Storage::disk('public')->delete($room->image);
+            $validated['image'] = null;
         }
 
         $room->update($validated);
