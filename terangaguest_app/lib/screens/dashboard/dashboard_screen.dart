@@ -35,6 +35,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Enterprise? _enterprise;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -55,11 +56,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _enterprise = Enterprise.fromJson(
               Map<String, dynamic>.from(payload),
             );
+            _isLoading = false;
           });
         }
+      } else {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
       }
     } catch (_) {
-      // ignore
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -335,31 +345,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 bottom: 8,
                 right: pad + 8,
               ),
-              child: Text(
-                enterpriseName.isNotEmpty
-                    ? l10n.welcomeToEnterprise(enterpriseName)
-                    : l10n.welcomeTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: nameOnBannerSize,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.9),
-                      offset: const Offset(0, 1),
-                      blurRadius: 6,
+              child: _isLoading
+                  ? SizedBox(
+                      height: nameOnBannerSize + 8,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppTheme.accentGold,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      enterpriseName.isNotEmpty
+                          ? l10n.welcomeToEnterprise(enterpriseName)
+                          : '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: nameOnBannerSize,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.9),
+                            offset: const Offset(0, 1),
+                            blurRadius: 6,
+                          ),
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            offset: const Offset(0, 2),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
             ),
           ),
           // 4b) Logo TerangaGuest en haut à gauche
@@ -455,10 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showLanguageDialog(BuildContext context) {
     final localeProvider = context.read<LocaleProvider>();
     final currentCode = localeProvider.languageCode;
-    const languages = [
-      ('fr', 'Français'),
-      ('en', 'English'),
-    ];
+    const languages = [('fr', 'Français'), ('en', 'English')];
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

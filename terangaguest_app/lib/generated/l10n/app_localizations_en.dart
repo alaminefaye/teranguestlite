@@ -117,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get english => 'English';
 
   @override
-  String get welcomeTitle => 'Welcome to King Fahd Palace Hotel';
+  String get welcomeTitle => 'Welcome';
 
   @override
   String welcomeToEnterprise(String enterpriseName) {

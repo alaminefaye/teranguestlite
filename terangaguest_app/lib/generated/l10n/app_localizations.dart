@@ -321,7 +321,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Bienvenue au King Fahd Palace Hotel'**
+  /// **'Bienvenue'**
   String get welcomeTitle;
 
   /// No description provided for @welcomeToEnterprise.

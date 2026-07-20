@@ -36,7 +36,7 @@
   "language": "Langue",
   "french": "Français",
   "english": "English",
-  "welcomeTitle": "Bienvenue au King Fahd Palace Hotel",
+  "welcomeTitle": "Bienvenue",
   "welcomeToEnterprise": "Bienvenue au {enterpriseName}",
   "@welcomeToEnterprise": {
     "placeholders": {
