@@ -3,14 +3,14 @@
 @section('content')
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Chambres</h1>
-        <p class="text-gray-600 dark:text-gray-400">Gérer les chambres de l'hôtel</p>
+        <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">{{ $title ?? 'Chambres & Tarifs' }}</h1>
+        <p class="text-gray-600 dark:text-gray-400">{{ $pageDescription ?? 'Gérer les chambres de l\'hôtel et les tarifs visibles dans l\'application mobile.' }}</p>
     </div>
     <a href="{{ route('dashboard.rooms.create') }}" class="inline-flex items-center px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Nouvelle chambre
+        {{ $createLabel ?? 'Nouvelle chambre / tarif' }}
     </a>
 </div>
 

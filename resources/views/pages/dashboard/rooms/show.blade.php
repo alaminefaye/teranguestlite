@@ -56,6 +56,18 @@
                     <p class="text-gray-800 dark:text-white/90">{{ $roomTypeLabel ?? $room->type ?? '—' }}</p>
                 </div>
 
+                @if(!empty($roomTypeTranslations['fr']) || !empty($roomTypeTranslations['en']))
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Formule affichée</label>
+                    <p class="text-gray-800 dark:text-white/90">
+                        {{ $roomTypeTranslations['fr'] ?: '—' }}
+                        @if(!empty($roomTypeTranslations['en']))
+                            <span class="text-gray-500 dark:text-gray-400">/ {{ $roomTypeTranslations['en'] }}</span>
+                        @endif
+                    </p>
+                </div>
+                @endif
+
                 <div>
                     <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Statut</label>
                     @php
@@ -81,10 +93,15 @@
                     <p class="text-gray-800 dark:text-white/90">{{ $room->capacity }} personnes</p>
                 </div>
 
-                @if($room->description)
+                @if(!empty($roomDescriptionTranslations['fr']) || !empty($roomDescriptionTranslations['en']))
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
-                    <p class="text-gray-800 dark:text-white/90">{{ $room->description }}</p>
+                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Libellé affiché</label>
+                    <p class="text-gray-800 dark:text-white/90">
+                        {{ $roomDescriptionTranslations['fr'] ?: '—' }}
+                        @if(!empty($roomDescriptionTranslations['en']))
+                            <span class="text-gray-500 dark:text-gray-400">/ {{ $roomDescriptionTranslations['en'] }}</span>
+                        @endif
+                    </p>
                 </div>
                 @endif
 

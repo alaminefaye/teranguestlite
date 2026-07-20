@@ -9,7 +9,8 @@
         <span>/</span>
         <span>Modifier</span>
     </div>
-    <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Modifier chambre {{ $room->room_number }}</h1>
+    <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Modifier chambre / tarif {{ $room->room_number }}</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Les champs ci-dessous alimentent aussi le bloc Tarifs dans l'application mobile.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
@@ -123,48 +124,63 @@
                 @enderror
             </div>
 
-            <!-- Description -->
-            <div class="md:col-span-2">
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Description
+            <!-- Formule affichée -->
+            <div>
+                <label for="type_name_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Formule affichée (FR)
                 </label>
-                <textarea name="description" id="description" rows="3"
-                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">{{ old('description', $room->description) }}</textarea>
-                @error('description')
+                <input type="text" name="type_name_fr" id="type_name_fr" value="{{ old('type_name_fr', $roomForm['type_name_fr'] ?? '') }}"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('type_name_fr')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <!-- Équipements -->
+            <div>
+                <label for="type_name_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Formule affichée (EN)
+                </label>
+                <input type="text" name="type_name_en" id="type_name_en" value="{{ old('type_name_en', $roomForm['type_name_en'] ?? '') }}"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('type_name_en')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Libellé affiché -->
+            <div>
+                <label for="description_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Libellé affiché (FR)
+                </label>
+                <input type="text" name="description_fr" id="description_fr" value="{{ old('description_fr', $roomForm['description_fr'] ?? '') }}"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('description_fr')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="description_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Libellé affiché (EN)
+                </label>
+                <input type="text" name="description_en" id="description_en" value="{{ old('description_en', $roomForm['description_en'] ?? '') }}"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                @error('description_en')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Équipements / prestations -->
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Équipements</label>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    @php
-                        $amenitiesList = [
-                            'wifi' => 'Wi-Fi',
-                            'tv' => 'Télévision',
-                            'minibar' => 'Minibar',
-                            'ac' => 'Climatisation',
-                            'safe' => 'Coffre-fort',
-                            'balcony' => 'Balcon',
-                            'bathtub' => 'Baignoire',
-                            'shower' => 'Douche',
-                            'hairdryer' => 'Sèche-cheveux',
-                            'phone' => 'Téléphone',
-                            'ironing' => 'Fer à repasser',
-                            'desk' => 'Bureau',
-                        ];
-                        $selectedAmenities = old('amenities', $room->amenities ?? []);
-                    @endphp
-                    @foreach($amenitiesList as $key => $label)
-                        <div class="flex items-center">
-                            <input type="checkbox" name="amenities[]" id="amenity_{{ $key }}" value="{{ $key }}"
-                                {{ in_array($key, $selectedAmenities) ? 'checked' : '' }}
-                                class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
-                            <label for="amenity_{{ $key }}" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $label }}</label>
-                        </div>
-                    @endforeach
-                </div>
+                <label for="amenities_text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Équipements / prestations
+                </label>
+                <textarea name="amenities_text" id="amenities_text" rows="4"
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">{{ old('amenities_text', $roomForm['amenities_text'] ?? '') }}</textarea>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Un élément par ligne. Exemple: Tarif journalier, prestations incluses, avantages.</p>
+                @error('amenities_text')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Image actuelle -->

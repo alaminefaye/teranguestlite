@@ -7,6 +7,10 @@
             <p class="text-gray-600 dark:text-gray-400">Gérer les catégories affichées dans le module Chambre.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('dashboard.rooms.index') }}"
+                class="inline-flex items-center px-4 py-2 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 rounded-md hover:bg-brand-100 dark:hover:bg-brand-500/20 text-sm font-medium border border-brand-200 dark:border-brand-500/30">
+                🏨 Tarifs chambres
+            </a>
             <a href="{{ route('dashboard.room-box-settings') }}"
                 class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-medium border border-gray-200 dark:border-gray-700">
                 ⚙️ Boîte Chambre (app)
@@ -41,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-                    @foreach($categories as $category)
+                    @forelse($categories as $category)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900 dark:text-white">{{ $category->name }}</div>
@@ -75,10 +79,15 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                Aucun guide chambre trouvé. Lancez le seeder ou créez une catégorie manuellement.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 @endsection
-

@@ -11,15 +11,92 @@ use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
-    /** Libellés des types de chambre (évite d'accéder au JSON type_name Spatie sur la liste = 500 / lenteur). */
+    /** Libellés des types techniques de chambre. */
     private static function roomTypeLabels(): array
     {
+        return Room::roomTypeLabels();
+    }
+
+    private function roomPageMeta(): array
+    {
         return [
-            'single' => 'Chambre Simple',
-            'double' => 'Chambre Double',
-            'suite' => 'Suite',
-            'deluxe' => 'Deluxe',
-            'presidential' => 'Suite Présidentielle',
+            'title' => 'Chambres & Tarifs',
+            'description' => 'Cette page pilote aussi le bloc Tarifs affiché dans l\'application mobile.',
+            'create_label' => 'Nouvelle chambre / tarif',
+        ];
+    }
+
+    private function extractTranslations(?Room $room, string $field): array
+    {
+        if (!$room) {
+            return ['fr' => '', 'en' => ''];
+        }
+
+        try {
+            $translations = $room->getTranslations($field);
+        } catch (\Throwable $e) {
+            $translations = [];
+        }
+
+        return [
+            'fr' => is_string($translations['fr'] ?? null) ? $translations['fr'] : '',
+            'en' => is_string($translations['en'] ?? null) ? $translations['en'] : '',
+        ];
+    }
+
+    private function buildTranslatedField(Request $request, string $frKey, string $enKey, ?string $fallback = null): string|array|null
+    {
+        $fr = trim((string) $request->input($frKey, ''));
+        $en = trim((string) $request->input($enKey, ''));
+
+        $translations = array_filter([
+            'fr' => $fr,
+            'en' => $en,
+        ], fn ($value) => $value !== '');
+
+        if (!empty($translations)) {
+            return $translations;
+        }
+
+        $fallback = trim((string) ($fallback ?? ''));
+
+        return $fallback !== '' ? $fallback : null;
+    }
+
+    private function parseAmenities(Request $request): array
+    {
+        $raw = trim((string) $request->input('amenities_text', ''));
+        if ($raw === '') {
+            return [];
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+
+        return array_values(array_filter(array_map(
+            fn ($line) => trim((string) $line),
+            $lines
+        )));
+    }
+
+    private function roomFormDefaults(?Room $room = null): array
+    {
+        $typeName = $this->extractTranslations($room, 'type_name');
+        $description = $this->extractTranslations($room, 'description');
+
+        $amenities = [];
+        if ($room && is_array($room->amenities)) {
+            $amenities = array_values(array_filter(array_map(
+                fn ($item) => trim((string) $item),
+                $room->amenities
+            )));
+        }
+
+        return [
+            'type_name_fr' => $typeName['fr'],
+            'type_name_en' => $typeName['en'],
+            'description_fr' => $description['fr'],
+            'description_en' => $description['en'],
+            'amenities_text' => implode("\n", $amenities),
         ];
     }
 
@@ -62,7 +139,9 @@ class RoomController extends Controller
             ];
 
             return view('pages.dashboard.rooms.index', [
-                'title' => 'Chambres',
+                'title' => $this->roomPageMeta()['title'],
+                'pageDescription' => $this->roomPageMeta()['description'],
+                'createLabel' => $this->roomPageMeta()['create_label'],
                 'rooms' => $rooms,
                 'stats' => $stats,
                 'typeLabels' => self::roomTypeLabels(),
@@ -85,7 +164,8 @@ class RoomController extends Controller
     {
         try {
             return view('pages.dashboard.rooms.create', [
-                'title' => 'Créer une chambre',
+                'title' => 'Créer une chambre / un tarif',
+                'roomForm' => $this->roomFormDefaults(),
             ]);
         } catch (\Throwable $e) {
             Log::error('RoomController::create error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
@@ -112,8 +192,11 @@ class RoomController extends Controller
             'status' => 'required|in:available,occupied,maintenance,reserved',
             'price_per_night' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1|max:10',
-            'description' => 'nullable|string',
-            'amenities' => 'nullable|array',
+            'type_name_fr' => 'nullable|string|max:255',
+            'type_name_en' => 'nullable|string|max:255',
+            'description_fr' => 'nullable|string|max:255',
+            'description_en' => 'nullable|string|max:255',
+            'amenities_text' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
@@ -122,9 +205,27 @@ class RoomController extends Controller
         // Ajouter enterprise_id automatiquement
         $validated['enterprise_id'] = $enterpriseId;
 
-        // Libellé FR du type (plus de traduction auto Google = plus de 500)
+        // Libellés affichés dans l'app mobile.
         $typeLabels = self::roomTypeLabels();
-        $validated['type_name'] = ['fr' => $typeLabels[$validated['type']] ?? ucfirst($validated['type'])];
+        $validated['type_name'] = $this->buildTranslatedField(
+            $request,
+            'type_name_fr',
+            'type_name_en',
+            $typeLabels[$validated['type']] ?? ucfirst($validated['type'])
+        );
+        $validated['description'] = $this->buildTranslatedField(
+            $request,
+            'description_fr',
+            'description_en'
+        );
+        $validated['amenities'] = $this->parseAmenities($request);
+        unset(
+            $validated['type_name_fr'],
+            $validated['type_name_en'],
+            $validated['description_fr'],
+            $validated['description_en'],
+            $validated['amenities_text']
+        );
 
         // Upload image
         if ($request->hasFile('image')) {
@@ -172,6 +273,8 @@ class RoomController extends Controller
                 'room' => $room,
                 'stats' => $stats,
                 'roomTypeLabel' => $typeLabel,
+                'roomTypeTranslations' => $this->extractTranslations($room, 'type_name'),
+                'roomDescriptionTranslations' => $this->extractTranslations($room, 'description'),
             ]);
         } catch (\Throwable $e) {
             Log::error('RoomController::show error: ' . $e->getMessage(), ['room_id' => $room->id, 'trace' => $e->getTraceAsString()]);
@@ -188,6 +291,7 @@ class RoomController extends Controller
         return view('pages.dashboard.rooms.edit', [
             'title' => 'Modifier chambre ' . $room->room_number,
             'room' => $room,
+            'roomForm' => $this->roomFormDefaults($room),
         ]);
     }
 
@@ -209,16 +313,37 @@ class RoomController extends Controller
             'status' => 'required|in:available,occupied,maintenance,reserved',
             'price_per_night' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1|max:10',
-            'description' => 'nullable|string',
-            'amenities' => 'nullable|array',
+            'type_name_fr' => 'nullable|string|max:255',
+            'type_name_en' => 'nullable|string|max:255',
+            'description_fr' => 'nullable|string|max:255',
+            'description_en' => 'nullable|string|max:255',
+            'amenities_text' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
         ]);
 
-        // Libellé FR du type (Room n'utilise plus TranslatesAutomatically)
+        // Libellés affichés dans l'app mobile.
         $typeLabels = self::roomTypeLabels();
-        $validated['type_name'] = ['fr' => $typeLabels[$validated['type']] ?? ucfirst($validated['type'])];
+        $validated['type_name'] = $this->buildTranslatedField(
+            $request,
+            'type_name_fr',
+            'type_name_en',
+            $typeLabels[$validated['type']] ?? ucfirst($validated['type'])
+        );
+        $validated['description'] = $this->buildTranslatedField(
+            $request,
+            'description_fr',
+            'description_en'
+        );
+        $validated['amenities'] = $this->parseAmenities($request);
+        unset(
+            $validated['type_name_fr'],
+            $validated['type_name_en'],
+            $validated['description_fr'],
+            $validated['description_en'],
+            $validated['amenities_text']
+        );
 
         // Upload nouvelle image
         if ($request->hasFile('image')) {

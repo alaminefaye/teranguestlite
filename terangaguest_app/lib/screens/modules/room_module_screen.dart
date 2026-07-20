@@ -174,7 +174,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
       (
         l10n.tarifs,
         Icons.attach_money_outlined,
-        'assets/images/info_hotel.png',
+        'assets/images/info_tarifs.png',
         () => context.navigateTo(const RoomPricesScreen()),
       ),
     ];

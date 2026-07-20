@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Enterprise;
+use App\Models\GuideCategory;
+use App\Models\GuideItem;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -92,23 +95,32 @@ class GuideInfoSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $catData) {
-            $category = \App\Models\GuideCategory::firstOrCreate([
-                'name' => $catData['name'],
-            ], [
-                'order' => $catData['order'],
-                'is_active' => true,
-            ]);
+        foreach (Enterprise::all() as $enterprise) {
+            GuideItem::where('enterprise_id', $enterprise->id)->delete();
+            GuideCategory::where('enterprise_id', $enterprise->id)->delete();
 
-            $order = 1;
-            foreach ($catData['items'] as $itemData) {
-                \App\Models\GuideItem::firstOrCreate([
-                    'guide_category_id' => $category->id,
-                    'title' => $itemData['title'],
-                ], array_merge($itemData, [
-                        'order' => $order++,
-                        'is_active' => true,
-                    ]));
+            foreach ($data as $catData) {
+                $category = GuideCategory::create([
+                    'enterprise_id' => $enterprise->id,
+                    'name' => ['fr' => $catData['name'], 'en' => $catData['name']],
+                    'category_type' => $catData['category_type'] ?? 'other',
+                    'order' => $catData['order'],
+                    'is_active' => true,
+                ]);
+
+                $order = 1;
+                foreach ($catData['items'] as $itemData) {
+                    GuideItem::create(array_merge($itemData, [
+                            'enterprise_id' => $enterprise->id,
+                            'guide_category_id' => $category->id,
+                            'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
+                            'description' => isset($itemData['description'])
+                                ? ['fr' => $itemData['description'], 'en' => $itemData['description']]
+                                : null,
+                            'order' => $order++,
+                            'is_active' => true,
+                        ]));
+                }
             }
         }
     }

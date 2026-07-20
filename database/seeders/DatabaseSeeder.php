@@ -53,6 +53,11 @@ class DatabaseSeeder extends Seeder
         $this->call(LaundrySeeder::class);
         echo "\n";
 
+        // 8b. Créer les guides & infos chambre par hôtel
+        echo "🛏️ Création des guides chambre...\n";
+        $this->call(GuideInfoSeeder::class);
+        echo "\n";
+
         // 9. Créer les services palace
         echo "👑 Création des services palace...\n";
         $this->call(PalaceSeeder::class);

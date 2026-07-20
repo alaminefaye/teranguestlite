@@ -245,6 +245,7 @@ class MenuHelper
                             ['name' => 'Horaires salle de sport', 'path' => '/dashboard/gym-hours'],
                             ['name' => 'Excursions', 'path' => '/dashboard/excursions'],
                             ['name' => 'Séminaires (salles)', 'path' => '/dashboard/seminar-rooms'],
+                            ['name' => 'Tarifs chambres', 'path' => '/dashboard/rooms'],
                             ['name' => 'Chambre - Guides (catégories)', 'path' => '/dashboard/guide-categories'],
                             ['name' => 'Boîte Chambre (app)', 'path' => '/dashboard/room-box-settings'],
                             ['name' => 'Chambre - Guides (éléments)', 'path' => '/dashboard/guide-items'],

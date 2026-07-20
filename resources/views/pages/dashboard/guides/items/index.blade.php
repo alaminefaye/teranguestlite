@@ -19,6 +19,10 @@
             <p class="text-gray-600 dark:text-gray-400">Gérez les numéros, adresses et contenus.</p>
         </div>
         <div class="flex items-center gap-4">
+            <a href="{{ route('dashboard.rooms.index') }}"
+                class="inline-flex items-center px-4 py-2 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 rounded-md hover:bg-brand-100 dark:hover:bg-brand-500/20 text-sm font-medium border border-brand-200 dark:border-brand-500/30">
+                🏨 Tarifs chambres
+            </a>
             <form method="GET" action="{{ route('dashboard.guide-items.index') }}" class="flex items-center gap-2">
                 <select name="category" onchange="this.form.submit()"
                     class="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-800 dark:text-white/90">
@@ -102,7 +106,7 @@
                         <tr>
                             <td colspan="{{ $category ? 5 : 6 }}"
                                 class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                Aucun élément trouvé.
+                                Aucun élément trouvé. Les données ici viennent des guides chambre, pas des tarifs des chambres.
                             </td>
                         </tr>
                     @endforelse
@@ -116,4 +120,3 @@
         @endif
     </div>
 @endsection
-
