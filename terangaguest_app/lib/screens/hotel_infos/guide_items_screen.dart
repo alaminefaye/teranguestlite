@@ -127,13 +127,45 @@ class GuideItemsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      color: AppTheme.accentGold,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: const TextStyle(
+                            color: AppTheme.accentGold,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      if (item.phone != null) ...[
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentGold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppTheme.accentGold.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Text(
+                            item.phone!,
+                            style: const TextStyle(
+                              color: AppTheme.accentGold,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   if (item.description != null) ...[
                     const SizedBox(height: 12),
@@ -177,7 +209,10 @@ class GuideItemsScreen extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () => _makePhoneCall(item.phone!),
                             icon: const Icon(Icons.phone, size: 20),
-                            label: Text(AppLocalizations.of(context).call),
+                            label: Text(
+                              '${AppLocalizations.of(context).call} (${item.phone})',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green.withValues(
                                 alpha: 0.2,
