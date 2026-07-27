@@ -103,14 +103,12 @@ class Excursion {
   factory Excursion.fromJson(Map<String, dynamic> json) {
     final adultEur = _parseDoubleNullable(json['price_adult_eur']);
     final childEur = _parseDoubleNullable(json['price_child_eur']);
-    final fmtAdult = json['formatted_price_adult'] as String?;
-    final fmtChild = json['formatted_price_child'] as String?;
+    final fmtAdult = _parseStringNullable(json['formatted_price_adult']);
+    final fmtChild = _parseStringNullable(json['formatted_price_child']);
     return Excursion(
       id: _parseIntSafe(json['id']),
       name: _parseTranslatableString(json['name']),
-      description: _parseTranslatableString(json['description']).trim().isEmpty
-          ? null
-          : _parseTranslatableString(json['description']),
+      description: _parseStringNullable(_parseTranslatableString(json['description'])),
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
       priceAdultEur: adultEur,
@@ -119,27 +117,37 @@ class Excursion {
       formattedPriceChildBackend: fmtChild,
       duration:
           _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
-      image: json['image'] as String?,
-      isAvailable: json['is_available'] as bool? ?? true,
-      destination: _parseTranslatableString(json['destination']).trim().isEmpty
-          ? null
-          : _parseTranslatableString(json['destination']),
+      image: _parseStringNullable(json['image']),
+      isAvailable: _parseBoolSafe(json['is_available']),
+      destination: _parseStringNullable(_parseTranslatableString(json['destination'])),
       inclusions:
           _parseStringList(json['inclusions']) ??
           _parseStringList(json['included']),
       scheduleDescription:
-          _parseTranslatableString(json['schedule_description']).trim().isEmpty
-          ? null
-          : _parseTranslatableString(json['schedule_description']),
+          _parseStringNullable(_parseTranslatableString(json['schedule_description'])),
       childrenAgeRange:
-          _parseTranslatableString(json['children_age_range']).trim().isEmpty
-          ? null
-          : _parseTranslatableString(json['children_age_range']),
+          _parseStringNullable(_parseTranslatableString(json['children_age_range'])),
       departureTime:
-          _parseTranslatableString(json['departure_time']).trim().isEmpty
-          ? null
-          : _parseTranslatableString(json['departure_time']),
+          _parseStringNullable(_parseTranslatableString(json['departure_time'])),
     );
+  }
+
+  static bool _parseBoolSafe(dynamic v, {bool defaultValue = true}) {
+    if (v == null) return defaultValue;
+    if (v is bool) return v;
+    if (v is num) return v != 0;
+    if (v is String) {
+      final s = v.trim().toLowerCase();
+      if (s == 'true' || s == '1') return true;
+      if (s == 'false' || s == '0') return false;
+    }
+    return defaultValue;
+  }
+
+  static String? _parseStringNullable(dynamic v) {
+    if (v == null) return null;
+    final str = v is String ? v : v.toString();
+    return str.trim().isEmpty ? null : str;
   }
 
   static double _parseDouble(dynamic value) {
