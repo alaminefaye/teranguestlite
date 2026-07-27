@@ -21,6 +21,8 @@ class Excursion {
 
   final double? priceAdultEur;
   final double? priceChildEur;
+  final String? formattedPriceAdultBackend;
+  final String? formattedPriceChildBackend;
 
   Excursion({
     required this.id,
@@ -30,6 +32,8 @@ class Excursion {
     required this.priceChild,
     this.priceAdultEur,
     this.priceChildEur,
+    this.formattedPriceAdultBackend,
+    this.formattedPriceChildBackend,
     required this.duration,
     this.image,
     required this.isAvailable,
@@ -99,6 +103,8 @@ class Excursion {
   factory Excursion.fromJson(Map<String, dynamic> json) {
     final adultEur = _parseDoubleNullable(json['price_adult_eur']);
     final childEur = _parseDoubleNullable(json['price_child_eur']);
+    final fmtAdult = json['formatted_price_adult'] as String?;
+    final fmtChild = json['formatted_price_child'] as String?;
     return Excursion(
       id: _parseIntSafe(json['id']),
       name: _parseTranslatableString(json['name']),
@@ -109,6 +115,8 @@ class Excursion {
       priceChild: _parseDouble(json['price_child']),
       priceAdultEur: adultEur,
       priceChildEur: childEur,
+      formattedPriceAdultBackend: fmtAdult,
+      formattedPriceChildBackend: fmtChild,
       duration:
           _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
@@ -156,11 +164,20 @@ class Excursion {
   }
 
   String get formattedPriceAdult {
+    if (formattedPriceAdultBackend != null && formattedPriceAdultBackend!.contains('€')) {
+      return formattedPriceAdultBackend!;
+    }
     final fcfa = '${priceAdult.toStringAsFixed(0)} FCFA';
     if (priceAdultEur != null && priceAdultEur! > 0) {
       final eurStr = priceAdultEur! == priceAdultEur!.toInt()
           ? priceAdultEur!.toInt().toString()
           : priceAdultEur!.toStringAsFixed(2);
+      return '$fcfa ($eurStr €)';
+    } else if (priceAdult > 0) {
+      final calcEur = priceAdult / 655.957;
+      final eurStr = (calcEur == calcEur.toInt())
+          ? calcEur.toInt().toString()
+          : calcEur.toStringAsFixed(2);
       return '$fcfa ($eurStr €)';
     }
     return fcfa;
@@ -168,11 +185,20 @@ class Excursion {
 
   String get formattedPriceChild {
     if (priceChild <= 0) return '';
+    if (formattedPriceChildBackend != null && formattedPriceChildBackend!.contains('€')) {
+      return formattedPriceChildBackend!;
+    }
     final fcfa = '${priceChild.toStringAsFixed(0)} FCFA';
     if (priceChildEur != null && priceChildEur! > 0) {
       final eurStr = priceChildEur! == priceChildEur!.toInt()
           ? priceChildEur!.toInt().toString()
           : priceChildEur!.toStringAsFixed(2);
+      return '$fcfa ($eurStr €)';
+    } else if (priceChild > 0) {
+      final calcEur = priceChild / 655.957;
+      final eurStr = (calcEur == calcEur.toInt())
+          ? calcEur.toInt().toString()
+          : calcEur.toStringAsFixed(2);
       return '$fcfa ($eurStr €)';
     }
     return fcfa;
