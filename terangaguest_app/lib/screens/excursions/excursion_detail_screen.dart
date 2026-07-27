@@ -234,60 +234,69 @@ class _ExcursionDetailScreenState extends State<ExcursionDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
                       children: [
                         const Icon(
                           Icons.access_time,
-                          size: 20,
+                          size: 18,
                           color: AppTheme.accentGold,
                         ),
-                        const SizedBox(width: 8),
                         Text(
                           _excursion!.formattedDuration,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
                         if (_excursion!.departureTime != null &&
-                            _excursion!.departureTime!.isNotEmpty) ...[
-                          const SizedBox(width: 12),
+                            _excursion!.departureTime!.isNotEmpty)
                           Text(
                             '• ${_excursion!.departureTime!}',
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: AppTheme.textGray,
                             ),
                           ),
-                        ],
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          ).adultPrice(_excursion!.formattedPriceAdult),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.accentGold,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).adultPrice(_excursion!.formattedPriceAdult),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
+                            textAlign: TextAlign.end,
                           ),
-                        ),
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          ).childPrice(_excursion!.formattedPriceChild),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textGray,
-                          ),
-                        ),
-                      ],
+                          if (_excursion!.formattedPriceChild.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).childPrice(_excursion!.formattedPriceChild),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textGray,
+                              ),
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

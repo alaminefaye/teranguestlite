@@ -168,30 +168,37 @@ class ExcursionCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).adultPrice(excursion.formattedPriceAdult),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.accentGold,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).adultPrice(excursion.formattedPriceAdult),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.accentGold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).childPrice(excursion.formattedPriceChild),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppTheme.textGray,
-                                    ),
-                                  ),
-                                ],
+                                    if (excursion.formattedPriceChild.isNotEmpty)
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        ).childPrice(excursion.formattedPriceChild),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppTheme.textGray,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
                               ),
                               const Icon(
                                 Icons.arrow_forward_ios,
