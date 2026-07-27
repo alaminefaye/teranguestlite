@@ -65,20 +65,7 @@ class ExcursionCard extends StatelessWidget {
                           topLeft: Radius.circular(14),
                           topRight: Radius.circular(14),
                         ),
-                        child: excursion.image != null
-                            ? CachedNetworkImage(
-                                imageRenderMethodForWeb:
-                                    ImageRenderMethodForWeb.HtmlImage,
-                                imageUrl: excursion.image!,
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    _buildPlaceholder(),
-                                errorWidget: (context, url, error) =>
-                                    _buildPlaceholder(),
-                              )
-                            : _buildPlaceholder(),
+                        child: _buildImage(),
                       ),
                       if (!excursion.isAvailable)
                         Positioned(
@@ -98,17 +85,17 @@ class ExcursionCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.cancel,
-                                  size: 12,
+                                  Icons.block,
+                                  size: 14,
                                   color: Colors.white,
                                 ),
                                 SizedBox(width: 4),
                                 Text(
                                   'Indisponible',
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.white,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ],
@@ -223,6 +210,51 @@ class ExcursionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImage() {
+    final img = excursion.image;
+    if (img != null && img.trim().isNotEmpty) {
+      if (img.startsWith('http')) {
+        return CachedNetworkImage(
+          imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
+          imageUrl: img,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => _buildPlaceholder(),
+          errorWidget: (context, url, error) => _buildPlaceholderAsset(),
+        );
+      } else {
+        return Image.asset(
+          img,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildPlaceholderAsset(),
+        );
+      }
+    }
+    return _buildPlaceholderAsset();
+  }
+
+  Widget _buildPlaceholderAsset() {
+    final nameLower = excursion.name.toLowerCase();
+    String assetPath = 'assets/images/box_exploration.png';
+    if (nameLower.contains('gorée') || nameLower.contains('goree') || nameLower.contains('dakar') || nameLower.contains('saint-louis') || nameLower.contains('st louis')) {
+      assetPath = 'assets/images/explor_visites_guidees.png';
+    } else if (nameLower.contains('bandia') || nameLower.contains('lion') || nameLower.contains('brousse')) {
+      assetPath = 'assets/images/explor_decouverte.png';
+    } else if (nameLower.contains('lac rose') || nameLower.contains('somone') || nameLower.contains('saloum') || nameLower.contains('oiseau')) {
+      assetPath = 'assets/images/info_decouvrir.png';
+    }
+    return Image.asset(
+      assetPath,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
     );
   }
 
