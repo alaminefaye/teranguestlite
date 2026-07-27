@@ -19,12 +19,17 @@ class Excursion {
   final String? childrenAgeRange;
   final String? departureTime;
 
+  final double? priceAdultEur;
+  final double? priceChildEur;
+
   Excursion({
     required this.id,
     required this.name,
     this.description,
     required this.priceAdult,
     required this.priceChild,
+    this.priceAdultEur,
+    this.priceChildEur,
     required this.duration,
     this.image,
     required this.isAvailable,
@@ -92,6 +97,8 @@ class Excursion {
   }
 
   factory Excursion.fromJson(Map<String, dynamic> json) {
+    final adultEur = _parseDoubleNullable(json['price_adult_eur']);
+    final childEur = _parseDoubleNullable(json['price_child_eur']);
     return Excursion(
       id: _parseIntSafe(json['id']),
       name: _parseTranslatableString(json['name']),
@@ -100,6 +107,8 @@ class Excursion {
           : _parseTranslatableString(json['description']),
       priceAdult: _parseDouble(json['price_adult']),
       priceChild: _parseDouble(json['price_child']),
+      priceAdultEur: adultEur,
+      priceChildEur: childEur,
       duration:
           _parseInt(json['duration_hours']) ?? _parseInt(json['duration']) ?? 0,
       image: json['image'] as String?,
@@ -132,6 +141,13 @@ class Excursion {
     return 0.0;
   }
 
+  static double? _parseDoubleNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
   static int? _parseInt(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
@@ -139,8 +155,28 @@ class Excursion {
     return null;
   }
 
-  String get formattedPriceAdult => '${priceAdult.toStringAsFixed(0)} FCFA';
-  String get formattedPriceChild => '${priceChild.toStringAsFixed(0)} FCFA';
+  String get formattedPriceAdult {
+    final fcfa = '${priceAdult.toStringAsFixed(0)} FCFA';
+    if (priceAdultEur != null && priceAdultEur! > 0) {
+      final eurStr = priceAdultEur! == priceAdultEur!.toInt()
+          ? priceAdultEur!.toInt().toString()
+          : priceAdultEur!.toStringAsFixed(2);
+      return '$fcfa ($eurStr €)';
+    }
+    return fcfa;
+  }
+
+  String get formattedPriceChild {
+    if (priceChild <= 0) return '';
+    final fcfa = '${priceChild.toStringAsFixed(0)} FCFA';
+    if (priceChildEur != null && priceChildEur! > 0) {
+      final eurStr = priceChildEur! == priceChildEur!.toInt()
+          ? priceChildEur!.toInt().toString()
+          : priceChildEur!.toStringAsFixed(2);
+      return '$fcfa ($eurStr €)';
+    }
+    return fcfa;
+  }
   String get formattedDuration => '${duration}h';
 
   Map<String, dynamic> toJson() {

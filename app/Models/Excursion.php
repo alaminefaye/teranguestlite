@@ -13,9 +13,9 @@ class Excursion extends Model
 
     public array $translatable = ['name', 'description'];
 
-    protected $fillable = ['enterprise_id', 'name', 'type', 'description', 'image', 'price_adult', 'price_child', 'children_age_range', 'duration_hours', 'departure_time', 'schedule_description', 'included', 'not_included', 'min_participants', 'max_participants', 'status', 'is_featured', 'display_order', 'is_active'];
+    protected $fillable = ['enterprise_id', 'name', 'type', 'description', 'image', 'price_adult', 'price_child', 'price_adult_eur', 'price_child_eur', 'children_age_range', 'duration_hours', 'departure_time', 'schedule_description', 'included', 'not_included', 'min_participants', 'max_participants', 'status', 'is_featured', 'display_order', 'is_active'];
 
-    protected $casts = ['price_adult' => 'decimal:2', 'price_child' => 'decimal:2', 'duration_hours' => 'integer', 'min_participants' => 'integer', 'max_participants' => 'integer', 'is_featured' => 'boolean', 'display_order' => 'integer', 'is_active' => 'boolean', 'included' => 'array', 'not_included' => 'array'];
+    protected $casts = ['price_adult' => 'decimal:2', 'price_child' => 'decimal:2', 'price_adult_eur' => 'decimal:2', 'price_child_eur' => 'decimal:2', 'duration_hours' => 'integer', 'min_participants' => 'integer', 'max_participants' => 'integer', 'is_featured' => 'boolean', 'display_order' => 'integer', 'is_active' => 'boolean', 'included' => 'array', 'not_included' => 'array'];
 
     public function scopeActive($query)
     {
@@ -40,11 +40,20 @@ class Excursion extends Model
     }
     public function getFormattedPriceAdultAttribute()
     {
-        return number_format($this->price_adult, 0, ',', ' ') . ' FCFA';
+        $fcfa = number_format($this->price_adult, 0, ',', ' ') . ' FCFA';
+        if ($this->price_adult_eur) {
+            $fcfa .= ' (' . number_format($this->price_adult_eur, 2, ',', ' ') . ' €)';
+        }
+        return $fcfa;
     }
     public function getFormattedPriceChildAttribute()
     {
-        return $this->price_child ? number_format($this->price_child, 0, ',', ' ') . ' FCFA' : '';
+        if (!$this->price_child) return '';
+        $fcfa = number_format($this->price_child, 0, ',', ' ') . ' FCFA';
+        if ($this->price_child_eur) {
+            $fcfa .= ' (' . number_format($this->price_child_eur, 2, ',', ' ') . ' €)';
+        }
+        return $fcfa;
     }
     public function getTypeLabelAttribute()
     {
