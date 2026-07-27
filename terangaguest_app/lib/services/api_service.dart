@@ -59,6 +59,12 @@ class ApiService {
   // Getter pour accéder à Dio
   Dio get dio => _dio;
 
+  // Indique si un token d'authentification est actuellement configuré
+  bool get hasAuthToken =>
+      _dio.options.headers.containsKey('Authorization') &&
+      _dio.options.headers['Authorization'] != null &&
+      (_dio.options.headers['Authorization'] as String).trim().isNotEmpty;
+
   // Définir le token d'authentification
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';

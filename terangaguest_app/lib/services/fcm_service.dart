@@ -11,6 +11,10 @@ class FcmService {
   /// Récupère le token FCM et l'envoie au backend (à appeler après connexion).
   /// La tablette doit être connectée avec le compte "Client Chambre XXX" pour recevoir les notifications de la chambre.
   Future<void> registerTokenIfNeeded() async {
+    if (ApiConfig.vitrineMode || !_api.hasAuthToken) {
+      debugPrint('FCM: non connecté ou mode vitrine — enregistrement du token ignoré.');
+      return;
+    }
     try {
       final granted = await requestPermission();
       if (!granted) {
@@ -41,6 +45,9 @@ class FcmService {
 
   /// Supprime le token côté backend (à appeler à la déconnexion).
   Future<void> unregisterToken() async {
+    if (ApiConfig.vitrineMode || !_api.hasAuthToken) {
+      return;
+    }
     try {
       await _api.delete(ApiConfig.fcmToken);
       debugPrint('FCM: token supprimé côté serveur.');
