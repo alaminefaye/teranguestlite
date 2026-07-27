@@ -317,19 +317,19 @@ class ExcursionSeeder extends Seeder
             ],
         ];
 
-        $enterpriseIds = Enterprise::all()->pluck('id')->push(null);
+        $enterprises = Enterprise::all();
 
-        foreach ($enterpriseIds as $enterpriseId) {
-            if ($enterpriseId === null) {
-                Excursion::whereNull('enterprise_id')->delete();
-            } else {
-                Excursion::where('enterprise_id', $enterpriseId)->delete();
-            }
+        if ($enterprises->isEmpty()) {
+            return;
+        }
+
+        foreach ($enterprises as $enterprise) {
+            Excursion::where('enterprise_id', $enterprise->id)->delete();
 
             $order = 1;
             foreach ($excursions as $data) {
                 Excursion::create([
-                    'enterprise_id' => $enterpriseId,
+                    'enterprise_id' => $enterprise->id,
                     'name' => ['fr' => $data['name'], 'en' => $data['name']],
                     'type' => $data['type'],
                     'description' => ['fr' => $data['description'], 'en' => $data['description']],
