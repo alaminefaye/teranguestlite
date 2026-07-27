@@ -27,7 +27,7 @@ class SpaServicesListScreen extends StatefulWidget {
 class _SpaServicesListScreenState extends State<SpaServicesListScreen> {
   String? _selectedCategory;
   bool _checkingMode = true;
-  bool _documentMode = false;
+  final bool _documentMode = false;
 
   List<Map<String, String>> _getCategoryFilters(BuildContext context) {
     final l10n = AppLocalizations.of(context);

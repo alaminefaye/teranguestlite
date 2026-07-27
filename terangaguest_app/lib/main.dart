@@ -127,7 +127,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.initialLanguageCode});
+  const MyApp({super.key, this.initialLanguageCode = 'fr'});
 
   final String initialLanguageCode;
 
