@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\AmenityCategory;
 use App\Models\AmenityItem;
 use App\Models\Enterprise;
+use App\Models\GuideCategory;
+use App\Models\GuideItem;
 use App\Models\LaundryService;
 use App\Models\LeisureCategory;
 use App\Models\PalaceService;
@@ -23,6 +25,7 @@ class DefaultDataForEnterpriseService
         $instance->seedLaundry($enterprise);
         $instance->seedPalace($enterprise);
         $instance->seedAmenities($enterprise);
+        $instance->seedGuides($enterprise);
     }
 
     protected function seedLeisure(Enterprise $enterprise): void
@@ -190,6 +193,51 @@ class DefaultDataForEnterpriseService
                     'display_order' => $order,
                 ]);
             }
+        }
+    }
+
+    protected function seedGuides(Enterprise $enterprise): void
+    {
+        $category = GuideCategory::withoutGlobalScope('enterprise')->firstOrCreate(
+            [
+                'enterprise_id' => $enterprise->id,
+                'category_type' => 'useful_numbers',
+            ],
+            [
+                'name' => ['fr' => 'Numéros utiles', 'en' => 'Useful numbers'],
+                'order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        $items = [
+            ['title' => 'BAR PISCINE', 'phone' => '2010'],
+            ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
+            ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
+            ['title' => 'BOUTIQUE', 'phone' => '2013'],
+            ['title' => 'INFIRMERIE', 'phone' => '2016'],
+            ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
+            ['title' => 'SDT EXCURSION', 'phone' => '2008'],
+            ['title' => 'RECEPTION', 'phone' => '2500'],
+            ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
+            ['title' => 'ROOM SERVICE', 'phone' => '2408'],
+            ['title' => 'SPA', 'phone' => '2012'],
+        ];
+
+        $order = 1;
+        foreach ($items as $itemData) {
+            GuideItem::withoutGlobalScope('enterprise')->firstOrCreate(
+                [
+                    'enterprise_id' => $enterprise->id,
+                    'guide_category_id' => $category->id,
+                    'phone' => $itemData['phone'],
+                ],
+                [
+                    'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
+                    'order' => $order++,
+                    'is_active' => true,
+                ]
+            );
         }
     }
 }

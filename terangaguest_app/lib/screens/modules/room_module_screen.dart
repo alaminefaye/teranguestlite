@@ -166,7 +166,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     final numbersCategory = _findCategory(
       categories: categories,
       types: const ['useful_numbers', 'numbers', 'contacts'],
-      keywords: const ['num', 'urgence', 'contact', 'appel'],
+      keywords: const ['useful', 'utiles'],
     );
 
     final items = [

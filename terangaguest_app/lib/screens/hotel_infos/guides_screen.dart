@@ -61,6 +61,34 @@ class _GuidesScreenState extends State<GuidesScreen> {
     );
   }
 
+  String _getCategoryImage(GuideCategory category) {
+    if (category.image != null && category.image!.trim().isNotEmpty) {
+      return ApiConfig.storageUrl(category.image!);
+    }
+    final nameLower = category.name.toLowerCase();
+    final typeLower = (category.categoryType ?? '').toLowerCase();
+
+    if (typeLower == 'useful_numbers' || (nameLower.contains('num') && nameLower.contains('util'))) {
+      return 'assets/images/info_urgence.png';
+    }
+    if (nameLower.contains('urgence')) {
+      return 'assets/images/info_urgence.png';
+    }
+    if (nameLower.contains('santé') || nameLower.contains('sante') || nameLower.contains('hopit') || nameLower.contains('médic')) {
+      return 'assets/images/info_sante.png';
+    }
+    if (nameLower.contains('transport') || nameLower.contains('vol') || nameLower.contains('taxi')) {
+      return 'assets/images/info_transport.png';
+    }
+    if (nameLower.contains('pratique') || nameLower.contains('internet') || nameLower.contains('culture')) {
+      return 'assets/images/info_pratique.png';
+    }
+    if (nameLower.contains('découvr') || nameLower.contains('decouvr') || nameLower.contains('sénégal') || nameLower.contains('senegal')) {
+      return 'assets/images/info_decouvrir.png';
+    }
+    return 'assets/images/info_hotel.png';
+  }
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
@@ -119,15 +147,12 @@ class _GuidesScreenState extends State<GuidesScreen> {
       itemCount: _categories!.length,
       itemBuilder: (context, index) {
         final category = _categories![index];
-        final imagePath = category.image != null
-            ? ApiConfig.storageUrl(category.image!)
-            : null;
+        final imagePath = _getCategoryImage(category);
 
         return ServiceCard(
           title: category.name,
           icon: Icons.info_outline,
-          imagePath:
-              imagePath, // Note: ServiceCard would need to be able to handle network images instead of just assets to fully work here, but we will use the fallback for now if no image is given.
+          imagePath: imagePath,
           onTap: () {
             HapticHelper.lightImpact();
             context.navigateTo(GuideItemsScreen(category: category));
