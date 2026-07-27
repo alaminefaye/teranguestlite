@@ -77,6 +77,27 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     }
   }
 
+  static final _defaultUsefulNumbersCategory = GuideCategory(
+    id: -1,
+    name: 'Numéros utiles',
+    categoryType: 'useful_numbers',
+    order: 1,
+    isActive: true,
+    items: [
+      GuideItem(id: 1, categoryId: -1, title: 'BAR PISCINE', phone: '2010', order: 1, isActive: true),
+      GuideItem(id: 2, categoryId: -1, title: 'BAR SAINT-LOUIS', phone: '2009', order: 2, isActive: true),
+      GuideItem(id: 3, categoryId: -1, title: 'BASE NAUTIQ', phone: '2702', order: 3, isActive: true),
+      GuideItem(id: 4, categoryId: -1, title: 'BOUTIQUE', phone: '2013', order: 4, isActive: true),
+      GuideItem(id: 5, categoryId: -1, title: 'INFIRMERIE', phone: '2016', order: 5, isActive: true),
+      GuideItem(id: 6, categoryId: -1, title: 'SALLE DE SPORT', phone: '2015', order: 6, isActive: true),
+      GuideItem(id: 7, categoryId: -1, title: 'SDT EXCURSION', phone: '2008', order: 7, isActive: true),
+      GuideItem(id: 8, categoryId: -1, title: 'RECEPTION', phone: '2500', order: 8, isActive: true),
+      GuideItem(id: 9, categoryId: -1, title: 'RELATION CLIENTELE FRAM', phone: '2017', order: 9, isActive: true),
+      GuideItem(id: 10, categoryId: -1, title: 'ROOM SERVICE', phone: '2408', order: 10, isActive: true),
+      GuideItem(id: 11, categoryId: -1, title: 'SPA', phone: '2012', order: 11, isActive: true),
+    ],
+  );
+
   GuideCategory? _findCategory({
     required List<GuideCategory> categories,
     required List<String> types,
@@ -161,9 +182,12 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
         'Numéros utiles',
         Icons.phone_in_talk_outlined,
         'assets/images/info_urgence.png',
-        () => numbersCategory != null
-            ? context.navigateTo(GuideItemsScreen(category: numbersCategory))
-            : context.navigateTo(const GuidesScreen()),
+        () {
+          final cat = (numbersCategory != null && (numbersCategory.items?.isNotEmpty ?? false))
+              ? numbersCategory
+              : _defaultUsefulNumbersCategory;
+          context.navigateTo(GuideItemsScreen(category: cat));
+        },
       ),
       (
         l10n.practicalInfo,

@@ -17,8 +17,26 @@ class GuideInfoSeeder extends Seeder
     {
         $data = [
             [
-                'name' => 'Numéros d’urgence',
+                'name' => 'Numéros utiles',
+                'category_type' => 'useful_numbers',
                 'order' => 1,
+                'items' => [
+                    ['title' => 'BAR PISCINE', 'phone' => '2010'],
+                    ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
+                    ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
+                    ['title' => 'BOUTIQUE', 'phone' => '2013'],
+                    ['title' => 'INFIRMERIE', 'phone' => '2016'],
+                    ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
+                    ['title' => 'SDT EXCURSION', 'phone' => '2008'],
+                    ['title' => 'RECEPTION', 'phone' => '2500'],
+                    ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
+                    ['title' => 'ROOM SERVICE', 'phone' => '2408'],
+                    ['title' => 'SPA', 'phone' => '2012'],
+                ]
+            ],
+            [
+                'name' => 'Numéros d’urgence',
+                'order' => 2,
                 'items' => [
                     ['title' => 'Pompiers', 'phone' => '18'],
                     ['title' => 'Pompiers de Malick Sy', 'phone' => '+221 33 823 03 59'],
@@ -33,7 +51,7 @@ class GuideInfoSeeder extends Seeder
             ],
             [
                 'name' => 'Santé & Hôpitaux',
-                'order' => 2,
+                'order' => 3,
                 'items' => [
                     ['title' => 'SOS Médecin', 'phone' => '+221 33 889 15 15'],
                     ['title' => 'Clinique de la Madeleine', 'address' => '18 Av des Jambaars, Dakar', 'phone' => '+221 33 889 94 70'],
@@ -48,7 +66,7 @@ class GuideInfoSeeder extends Seeder
             ],
             [
                 'name' => 'Transport',
-                'order' => 3,
+                'order' => 4,
                 'items' => [
                     ['title' => 'Aéroport Blaise Diagne', 'phone' => '+221 33 939 59 00', 'description' => 'Départ ou arrivée des vols en temps réel : sur le site internet de l’aéroport'],
                     ['title' => 'Taxi urbain', 'description' => 'Très présent dans les grandes villes'],
@@ -59,7 +77,7 @@ class GuideInfoSeeder extends Seeder
             ],
             [
                 'name' => 'Pratique & Internet',
-                'order' => 4,
+                'order' => 5,
                 'items' => [
                     ['title' => 'Culture & respect', 'description' => "Le Sénégal est un pays reconnu pour la Teranga (hospitalité).\n\nQuelques conseils :\n- Respecter les lieux religieux\n- Adopter une tenue correcte dans les lieux publics et religieux\n- Demander l’autorisation avant de photographier certaines personnes"],
                     ['title' => 'Santé Pratique', 'description' => "Hôpitaux et cliniques modernes disponibles à Dakar et dans les grandes villes.\nPharmacies accessibles dans les zones urbaines.\nIl est conseillé de boire de l’eau en bouteille."],
@@ -68,7 +86,7 @@ class GuideInfoSeeder extends Seeder
             ],
             [
                 'name' => 'Découvrir le Sénégal',
-                'order' => 5,
+                'order' => 6,
                 'items' => [
                     ['title' => 'Ville de Dakar', 'latitude' => 14.7110139, 'longitude' => -17.5360373, 'description' => 'La capitale sénégalaise séduit d’abord par son patrimoine architectural, vestiges de la colonisation française. Dakar est une ville cosmopolite aux trésors multiples. De la pointe des Almadies au Cap Manuel, elle vibre au rythme des vagues, dévoilant ses lieux festifs, ses espaces culturels et ses marchés colorés.'],
                     ['title' => 'Gorée', 'latitude' => 14.6672883, 'longitude' => -17.4030526, 'description' => 'Trait d’union entre le passé et le présent, Gorée exerce une fascination extraordinaire sur ses visiteurs, célèbres et anonymes, qui, en déambulant dans les ruelles de l’île, marchent sur les empreintes laissées par les fantômes du passé. Un lieu unique chargé d’émotion où les maisons en vieux rose laissent deviner, à travers leurs fenêtres, l’histoire de tout un peuple.'],
@@ -81,7 +99,7 @@ class GuideInfoSeeder extends Seeder
                     ['title' => 'Sites Mégalitiques de Kaolack', 'latitude' => 13.6911115, 'longitude' => -15.5246957, 'description' => 'Kaolack, chef lieu de la région du Saloum et capitale de l’arachide et du sel, est une région carrefour dont le marché est l’un des plus grands du pays. La région abrite un nombre considérable de sites mégalithiques ou « menhirs bretons ». A Nioro du Rip, sont érigés plus de 1 000 cercles concentriques avec plus 30 000 pierres. Il s’agit des vestiges funéraires d’une civilisation qui eut cours de l’an 200 avant J.C. jusqu’au XVIe siècle.'],
                     ['title' => 'Parc de Niokolo-Koba', 'latitude' => 13.0020502, 'longitude' => -13.5813666, 'description' => 'Classé Patrimoine mondial et Réserve de la biosphère internationale, le parc du Niokolo-Koba s’étend sur une superficie de plus de 950 000 hectares et offre un paysage riche et très varié, où se concentrent presque toutes les espèces végétales et animales des savanes de l’Ouest africain. Il renferme également de petites collines dont l’Assirik (311 m), qui surplombent les cours d’eau où les animaux viennent s’abreuver.'],
                     ['title' => 'Pays Bassari et Bédik', 'latitude' => 12.5509486, 'longitude' => -12.8448607, 'description' => 'Aux pieds du Fouta Djallon, un territoire sauvage et montagneux abrite les peuples Bassari et Bédick. Des communautés atypiques dont la découverte des cultures est un véritable voyage au cœur des rites africains originels. L’osmose avec la nature se traduit dans les rites, les cérémonies d’initiation, l’architecture des habitations, les récits des mythes et légendes. Une richesse classée depuis 2012 au Patrimoine mondial de l’Unesco.'],
-                    ['title' => 'Chutes de Dindefelo', 'latitude' => 12.3772271, 'longitude' => -12.3354685, 'description' => 'Un bruissement d’eau et puis la découverte d’une cascade majestueuse : c’est la magie des Chutes de Dindefello. Du sommet de la montagne, l’eau s’écrase sur les différents paliers jusqu’à atterrir sur le bassin, dans une chorégraphie fabuleuse. Une invitation à une baignade rafraichissante dans une source aux vertus thérapeutiques et mystérieuses. Aussi, les populations locales jouent le rôle de guides pour aller à la découverte des autres merveilles qui composent le catalogue touristique de Dindefelo.'],
+                    ['title' => 'Chutes de Dindefelo', 'latitude' => 12.3772271, 'longitude' => -12.3354685, 'description' => 'Un bruissement d’eau et puis la découverte d’une cascade majestueuse : c’est la magie des Chutes de Dindefello. Du sommet de la montagne, l’eau s’écrase sur les différents paliers jusqu’à atterrir sur le bassin, dans une chorégraphie fabuleuse. Une invitation à une baignade rafraichissante dans une source aux vertus thérapeutique et mystérieuses. Aussi, les populations locales jouent le rôle de guides pour aller à la découverte des autres merveilles qui composent le catalogue touristique de Dindefelo.'],
                     ['title' => 'Kafountine', 'latitude' => 12.9330338, 'longitude' => -16.7523952, 'description' => 'Dans un décor de bolongs et de lagunes, Kafountine est un magnifique spot pour les ornithologues et les passionnés de pêche grâce à ses magnifiques plages. Non loin de là, Abéné attire beaucoup de monde de par ses activités culturelles telles que ses festivals et cérémonies traditionnelles organisées au mois de décembre de chaque année.'],
                     ['title' => 'L’ile de Karabane', 'latitude' => 12.5377992, 'longitude' => -16.7183526, 'description' => 'Ancien comptoir colonial, l’île située à l’embouchure du fleuve, conserve les traces de son passé de ville administrative de premier plan. Accessible par pirogue, le village est un refuge paradisiaque recouvert d’une végétation luxuriante : palmiers, cocotiers, baobabs, fromagers, manguiers, flamboyants, bougainvillées. L’île est au centre d’un immense domaine halieutique avec d’innombrables espèces de poissons tropicaux ; un lieu de rêve pour pêcher et nager avec les dauphins.'],
                     ['title' => 'Oussouye', 'latitude' => 12.4902554, 'longitude' => -16.5529418, 'description' => 'Carrefour géographique de la Basse Casamance, Oussouye est le centre d’une région imprégnée par l’animisme et organisée en minuscules royaumes. Il est également le berceau de culture de la basse Casamance où sont célébrées chaque année la récolte du vin de palme et les cérémonies de lutte traditionnelle. On peut y découvrir les cases à impluvium d’Enampore et de Séléki qui se transforment souvent en campements pour accueillir les visiteurs.'],
@@ -95,13 +113,20 @@ class GuideInfoSeeder extends Seeder
             ],
         ];
 
-        foreach (Enterprise::all() as $enterprise) {
-            GuideItem::where('enterprise_id', $enterprise->id)->delete();
-            GuideCategory::where('enterprise_id', $enterprise->id)->delete();
+        $enterpriseIds = Enterprise::all()->pluck('id')->push(null);
+
+        foreach ($enterpriseIds as $enterpriseId) {
+            if ($enterpriseId === null) {
+                GuideItem::whereNull('enterprise_id')->delete();
+                GuideCategory::whereNull('enterprise_id')->delete();
+            } else {
+                GuideItem::where('enterprise_id', $enterpriseId)->delete();
+                GuideCategory::where('enterprise_id', $enterpriseId)->delete();
+            }
 
             foreach ($data as $catData) {
                 $category = GuideCategory::create([
-                    'enterprise_id' => $enterprise->id,
+                    'enterprise_id' => $enterpriseId,
                     'name' => ['fr' => $catData['name'], 'en' => $catData['name']],
                     'category_type' => $catData['category_type'] ?? 'other',
                     'order' => $catData['order'],
@@ -111,15 +136,15 @@ class GuideInfoSeeder extends Seeder
                 $order = 1;
                 foreach ($catData['items'] as $itemData) {
                     GuideItem::create(array_merge($itemData, [
-                            'enterprise_id' => $enterprise->id,
-                            'guide_category_id' => $category->id,
-                            'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
-                            'description' => isset($itemData['description'])
-                                ? ['fr' => $itemData['description'], 'en' => $itemData['description']]
-                                : null,
-                            'order' => $order++,
-                            'is_active' => true,
-                        ]));
+                        'enterprise_id' => $enterpriseId,
+                        'guide_category_id' => $category->id,
+                        'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
+                        'description' => isset($itemData['description'])
+                            ? ['fr' => $itemData['description'], 'en' => $itemData['description']]
+                            : null,
+                        'order' => $order++,
+                        'is_active' => true,
+                    ]));
                 }
             }
         }
