@@ -143,6 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               // Bloc hero : isolé en RepaintBoundary pour éviter les repaints lors du scroll de la grille
               RepaintBoundary(child: _buildEnterpriseHero(context)),
+              _buildQuickInfoBanner(context),
               // Grille des services
               Expanded(child: _buildServicesGrid(context)),
               RepaintBoundary(child: _buildFooter(context)),
@@ -508,6 +509,155 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             );
           }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickInfoBanner(BuildContext context) {
+    final infos = _enterprise?.hotelInfos;
+    final wifiNet = (infos?.wifiNetwork != null && infos!.wifiNetwork.trim().isNotEmpty)
+        ? infos.wifiNetwork.trim()
+        : 'WIFI PALMBEACH';
+
+    final wifiPass = (infos?.wifiPassword != null && infos!.wifiPassword.trim().isNotEmpty)
+        ? infos.wifiPassword.trim()
+        : 'palm2023';
+
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobileWidth = w < 600;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: LayoutHelper.horizontalPaddingValue(context),
+        right: LayoutHelper.horizontalPaddingValue(context),
+        top: 8,
+        bottom: 4,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryDark.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.accentGold.withValues(alpha: 0.35),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Wrap(
+          alignment: WrapAlignment.spaceAround,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            // Check-In / Check-Out
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.access_time_filled_rounded,
+                  size: 16,
+                  color: AppTheme.accentGold,
+                ),
+                const SizedBox(width: 6),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: isMobileWidth ? 11.5 : 13,
+                      color: Colors.white,
+                    ),
+                    children: const [
+                      TextSpan(
+                        text: 'CHECK-IN ',
+                        style: TextStyle(
+                          color: AppTheme.accentGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '15H00  •  ',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(
+                        text: 'CHECK-OUT ',
+                        style: TextStyle(
+                          color: AppTheme.accentGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '12H00',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            if (!isMobileWidth)
+              Container(
+                height: 14,
+                width: 1,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+
+            // Wi-Fi Info
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.wifi_rounded,
+                  size: 16,
+                  color: AppTheme.accentGold,
+                ),
+                const SizedBox(width: 6),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: isMobileWidth ? 11.5 : 13,
+                      color: Colors.white,
+                    ),
+                    children: [
+                      const TextSpan(
+                        text: 'Wi-Fi : ',
+                        style: TextStyle(
+                          color: AppTheme.accentGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '$wifiNet  ',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const TextSpan(
+                        text: 'Pass : ',
+                        style: TextStyle(
+                          color: AppTheme.accentGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                      TextSpan(
+                        text: wifiPass,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
