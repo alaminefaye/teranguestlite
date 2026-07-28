@@ -556,97 +556,103 @@ class _DashboardScreenState extends State<DashboardScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Row 1: Check-In / Check-Out
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.access_time_filled_rounded,
-                  size: 16,
-                  color: AppTheme.accentGold,
-                ),
-                const SizedBox(width: 8),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: isMobileWidth ? 12.5 : 14,
-                      color: Colors.white,
-                    ),
-                    children: const [
-                      TextSpan(
-                        text: 'CHECK-IN ',
-                        style: TextStyle(
-                          color: AppTheme.accentGold,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '15H00  •  ',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      TextSpan(
-                        text: 'CHECK-OUT ',
-                        style: TextStyle(
-                          color: AppTheme.accentGold,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '12H00',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.access_time_filled_rounded,
+                    size: 16,
+                    color: AppTheme.accentGold,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: isMobileWidth ? 12 : 13.5,
+                        color: Colors.white,
+                      ),
+                      children: const [
+                        TextSpan(
+                          text: 'CHECK-IN ',
+                          style: TextStyle(
+                            color: AppTheme.accentGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '15H00  •  ',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        TextSpan(
+                          text: 'CHECK-OUT ',
+                          style: TextStyle(
+                            color: AppTheme.accentGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '12H00',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 6),
             // Row 2: Wi-Fi Info
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.wifi_rounded,
-                  size: 16,
-                  color: AppTheme.accentGold,
-                ),
-                const SizedBox(width: 8),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: isMobileWidth ? 12.5 : 14,
-                      color: Colors.white,
-                    ),
-                    children: [
-                      const TextSpan(
-                        text: 'Wi-Fi : ',
-                        style: TextStyle(
-                          color: AppTheme.accentGold,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '$wifiNet  •  ',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const TextSpan(
-                        text: 'Pass : ',
-                        style: TextStyle(
-                          color: AppTheme.accentGold,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      TextSpan(
-                        text: wifiPass,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.wifi_rounded,
+                    size: 16,
+                    color: AppTheme.accentGold,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: isMobileWidth ? 12 : 13.5,
+                        color: Colors.white,
+                      ),
+                      children: [
+                        const TextSpan(
+                          text: 'Network ID : ',
+                          style: TextStyle(
+                            color: AppTheme.accentGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '$wifiNet  •  ',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const TextSpan(
+                          text: 'Password : ',
+                          style: TextStyle(
+                            color: AppTheme.accentGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                        TextSpan(
+                          text: wifiPass,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
