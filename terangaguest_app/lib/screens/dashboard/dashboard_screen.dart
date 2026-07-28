@@ -535,42 +535,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
         bottom: 4,
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: AppTheme.primaryDark.withValues(alpha: 0.75),
+          color: AppTheme.primaryDark.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.accentGold.withValues(alpha: 0.35),
-            width: 1,
+            color: AppTheme.accentGold.withValues(alpha: 0.4),
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: 0.35),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Wrap(
-          alignment: WrapAlignment.spaceAround,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 12,
-          runSpacing: 6,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Check-In / Check-Out
+            // Row 1: Check-In / Check-Out
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.access_time_filled_rounded,
                   size: 16,
                   color: AppTheme.accentGold,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
-                      fontSize: isMobileWidth ? 11.5 : 13,
+                      fontSize: isMobileWidth ? 12.5 : 14,
                       color: Colors.white,
                     ),
                     children: const [
@@ -579,7 +577,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color: AppTheme.accentGold,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10.5,
+                          fontSize: 11,
                         ),
                       ),
                       TextSpan(
@@ -591,7 +589,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color: AppTheme.accentGold,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10.5,
+                          fontSize: 11,
                         ),
                       ),
                       TextSpan(
@@ -603,28 +601,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-
-            if (!isMobileWidth)
-              Container(
-                height: 14,
-                width: 1,
-                color: Colors.white.withValues(alpha: 0.2),
-              ),
-
-            // Wi-Fi Info
+            const SizedBox(height: 6),
+            // Row 2: Wi-Fi Info
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.wifi_rounded,
                   size: 16,
                   color: AppTheme.accentGold,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
-                      fontSize: isMobileWidth ? 11.5 : 13,
+                      fontSize: isMobileWidth ? 12.5 : 14,
                       color: Colors.white,
                     ),
                     children: [
@@ -633,11 +624,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color: AppTheme.accentGold,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10.5,
+                          fontSize: 11,
                         ),
                       ),
                       TextSpan(
-                        text: '$wifiNet  ',
+                        text: '$wifiNet  •  ',
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const TextSpan(
@@ -645,7 +636,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color: AppTheme.accentGold,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10.5,
+                          fontSize: 11,
                         ),
                       ),
                       TextSpan(
