@@ -13,6 +13,10 @@ class SeminarRoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final coverImage = room.image?.trim().isNotEmpty == true
+        ? room.image!.trim()
+        : (room.galleryImages.isNotEmpty ? room.galleryImages.first : null);
+
     return Semantics(
       button: true,
       label: room.name,
@@ -61,11 +65,11 @@ class SeminarRoomCard extends StatelessWidget {
                           topLeft: Radius.circular(14),
                           topRight: Radius.circular(14),
                         ),
-                        child: room.image != null && room.image!.isNotEmpty
+                        child: coverImage != null && coverImage.isNotEmpty
                             ? CachedNetworkImage(
                                 imageRenderMethodForWeb:
                                     ImageRenderMethodForWeb.HtmlImage,
-                                imageUrl: room.image!,
+                                imageUrl: coverImage,
                                 width: double.infinity,
                                 height: double.infinity,
                                 fit: BoxFit.cover,
@@ -76,6 +80,47 @@ class SeminarRoomCard extends StatelessWidget {
                               )
                             : _buildPlaceholder(),
                       ),
+                      if (room.galleryImages.length > 1)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryDark.withValues(
+                                alpha: 0.88,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.accentGold.withValues(
+                                  alpha: 0.65,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.photo_library_outlined,
+                                  size: 12,
+                                  color: AppTheme.accentGold,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${room.galleryImages.length}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       if (room.equipments.isNotEmpty)
                         Positioned(
                           top: 8,

@@ -11,6 +11,33 @@ use Illuminate\View\View;
 
 class SeminarRoomController extends Controller
 {
+    private function normalizeGalleryPaths(array $paths): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            fn ($path) => trim((string) $path),
+            $paths
+        ))));
+    }
+
+    private function storeGalleryUploads(Request $request): array
+    {
+        $stored = [];
+        foreach ($request->file('gallery_images', []) as $file) {
+            if ($file) {
+                $stored[] = $file->store('seminar-rooms/gallery', 'public');
+            }
+        }
+
+        return $this->normalizeGalleryPaths($stored);
+    }
+
+    private function removeGalleryFiles(array $paths): void
+    {
+        foreach ($this->normalizeGalleryPaths($paths) as $path) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
     public function index(Request $request): View
     {
         $query = SeminarRoom::query();
@@ -55,6 +82,8 @@ class SeminarRoomController extends Controller
             'capacity' => 'nullable|integer|min:0',
             'equipments' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'nullable|image|max:30720',
             'contact_phone' => 'nullable|string|max:50',
             'contact_email' => 'nullable|email|max:255',
             'display_order' => 'nullable|integer|min:0',
@@ -67,6 +96,7 @@ class SeminarRoomController extends Controller
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('seminar-rooms', 'public');
         }
+        $validated['gallery_images'] = $this->storeGalleryUploads($request);
 
         SeminarRoom::create($validated);
 
@@ -98,6 +128,10 @@ class SeminarRoomController extends Controller
             'capacity' => 'nullable|integer|min:0',
             'equipments' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'nullable|image|max:30720',
+            'remove_gallery_images' => 'nullable|array',
+            'remove_gallery_images.*' => 'nullable|string',
             'contact_phone' => 'nullable|string|max:50',
             'contact_email' => 'nullable|email|max:255',
             'display_order' => 'nullable|integer|min:0',
@@ -113,6 +147,22 @@ class SeminarRoomController extends Controller
             $validated['image'] = $request->file('image')->store('seminar-rooms', 'public');
         }
 
+        $existingGallery = is_array($seminar_room->gallery_images) ? $seminar_room->gallery_images : [];
+        $galleryToRemove = $this->normalizeGalleryPaths(
+            $request->input('remove_gallery_images', [])
+        );
+        if (!empty($galleryToRemove)) {
+            $this->removeGalleryFiles($galleryToRemove);
+        }
+        $remainingGallery = array_values(array_filter(
+            $existingGallery,
+            fn ($path) => !in_array($path, $galleryToRemove, true)
+        ));
+        $validated['gallery_images'] = $this->normalizeGalleryPaths([
+            ...$remainingGallery,
+            ...$this->storeGalleryUploads($request),
+        ]);
+
         $seminar_room->update($validated);
 
         return redirect()->route('dashboard.seminar-rooms.index')
@@ -123,6 +173,9 @@ class SeminarRoomController extends Controller
     {
         if ($seminar_room->image) {
             Storage::disk('public')->delete($seminar_room->image);
+        }
+        if (is_array($seminar_room->gallery_images)) {
+            $this->removeGalleryFiles($seminar_room->gallery_images);
         }
 
         $seminar_room->delete();
@@ -147,4 +200,3 @@ class SeminarRoomController extends Controller
         return array_values(array_filter(array_map('trim', explode("\n", $value))));
     }
 }
-

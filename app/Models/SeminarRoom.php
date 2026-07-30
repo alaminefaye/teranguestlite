@@ -21,6 +21,7 @@ class SeminarRoom extends Model
         'capacity',
         'equipments',
         'image',
+        'gallery_images',
         'contact_phone',
         'contact_email',
         'display_order',
@@ -30,6 +31,7 @@ class SeminarRoom extends Model
     protected $casts = [
         'capacity' => 'integer',
         'equipments' => 'array',
+        'gallery_images' => 'array',
         'display_order' => 'integer',
         'is_active' => 'boolean',
     ];
@@ -49,4 +51,3 @@ class SeminarRoom extends Model
         return $query->orderBy('display_order')->orderBy('id', 'desc');
     }
 }
-

@@ -7,6 +7,7 @@ class SeminarRoom {
   final int? capacity;
   final List<String> equipments;
   final String? image;
+  final List<String> galleryImages;
   final String? contactPhone;
   final String? contactEmail;
 
@@ -17,6 +18,7 @@ class SeminarRoom {
     this.capacity,
     required this.equipments,
     this.image,
+    this.galleryImages = const [],
     this.contactPhone,
     this.contactEmail,
   });
@@ -54,7 +56,10 @@ class SeminarRoom {
   static List<String> _parseStringList(dynamic v) {
     if (v == null) return const [];
     if (v is List) {
-      return v.map((e) => e?.toString() ?? '').where((e) => e.isNotEmpty).toList();
+      return v
+          .map((e) => e?.toString() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
     }
     if (v is String) {
       final s = v.trim();
@@ -79,12 +84,14 @@ class SeminarRoom {
       id: _parseIntSafe(json['id']),
       name: _parseTranslatableString(json['name']),
       description: desc.isEmpty ? null : desc,
-      capacity: json['capacity'] == null ? null : _parseIntSafe(json['capacity']),
+      capacity: json['capacity'] == null
+          ? null
+          : _parseIntSafe(json['capacity']),
       equipments: _parseStringList(json['equipments']),
       image: json['image'] as String?,
+      galleryImages: _parseStringList(json['gallery_images']),
       contactPhone: json['contact_phone'] as String?,
       contactEmail: json['contact_email'] as String?,
     );
   }
 }
-

@@ -54,13 +54,28 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo principale</label>
                 <input type="file" name="image" accept="image/*" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
                 @if($room->image)
                     <div class="mt-3">
                         <img src="{{ asset('storage/' . $room->image) }}" class="h-24 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-700" alt="Image">
                     </div>
                 @endif
+                @error('image')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ajouter des images à la galerie</label>
+                <input type="file" name="gallery_images[]" accept="image/*" multiple class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vous pouvez sélectionner plusieurs images.</p>
+                @error('gallery_images')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
+                @error('gallery_images.*')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
@@ -74,6 +89,31 @@
                     Afficher dans l'application
                 </label>
             </div>
+
+            @if(is_array($room->gallery_images) && count($room->gallery_images) > 0)
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Galerie actuelle</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach($room->gallery_images as $galleryImage)
+                            <label class="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800 cursor-pointer">
+                                <img src="{{ asset('storage/' . $galleryImage) }}" alt="Galerie salle" class="h-28 w-full object-cover rounded-md mb-3">
+                                <span class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <input type="checkbox" name="remove_gallery_images[]" value="{{ $galleryImage }}"
+                                        {{ in_array($galleryImage, old('remove_gallery_images', []), true) ? 'checked' : '' }}
+                                        class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                                    <span>Supprimer</span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('remove_gallery_images')
+                        <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                    @enderror
+                    @error('remove_gallery_images.*')
+                        <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
         </div>
     </div>
 
@@ -83,4 +123,3 @@
     </div>
 </form>
 @endsection
-

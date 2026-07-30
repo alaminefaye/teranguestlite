@@ -53,8 +53,23 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo principale</label>
                 <input type="file" name="image" accept="image/*" class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                @error('image')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Galerie d'images</label>
+                <input type="file" name="gallery_images[]" accept="image/*" multiple class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vous pouvez sélectionner plusieurs images pour la galerie.</p>
+                @error('gallery_images')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
+                @error('gallery_images.*')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
@@ -77,4 +92,3 @@
     </div>
 </form>
 @endsection
-

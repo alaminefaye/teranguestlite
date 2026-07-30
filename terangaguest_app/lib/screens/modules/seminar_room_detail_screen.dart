@@ -1,22 +1,54 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../config/theme.dart';
 import '../../models/seminar_room.dart';
 import '../../utils/haptic_helper.dart';
 
-class SeminarRoomDetailScreen extends StatelessWidget {
+class SeminarRoomDetailScreen extends StatefulWidget {
   final SeminarRoom room;
 
   const SeminarRoomDetailScreen({super.key, required this.room});
 
   @override
+  State<SeminarRoomDetailScreen> createState() =>
+      _SeminarRoomDetailScreenState();
+}
+
+class _SeminarRoomDetailScreenState extends State<SeminarRoomDetailScreen> {
+  late final PageController _pageController;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.sizeOf(context).width;
-    final isMobile = w < 600;
-    final pad = isMobile ? 16.0 : 60.0;
+    final room = widget.room;
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 600;
+    final horizontalPadding = isMobile ? 16.0 : 60.0;
     final phone = room.contactPhone?.trim() ?? '';
     final email = room.contactEmail?.trim() ?? '';
+    final gallery = room.galleryImages.isNotEmpty
+        ? room.galleryImages
+        : (room.image != null && room.image!.trim().isNotEmpty
+              ? [room.image!.trim()]
+              : const <String>[]);
+    final hasImage = gallery.isNotEmpty;
+    final heroHeight = isMobile ? 205.0 : 255.0;
+    final thumbHeight = isMobile ? 68.0 : 82.0;
 
     return Scaffold(
       body: Container(
@@ -47,7 +79,7 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: AppTheme.accentGold,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -56,34 +88,121 @@ class SeminarRoomDetailScreen extends StatelessWidget {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: pad, vertical: 10),
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    6,
+                    horizontalPadding,
+                    24,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (room.image != null && room.image!.trim().isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: CachedNetworkImage(
-                            imageUrl: room.image!,
-                            height: 240,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              height: 240,
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.25),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              height: 240,
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.25),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.image_not_supported_outlined,
-                                  color: AppTheme.textGray,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: hasImage
+                            ? SizedBox(
+                                height: heroHeight,
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: gallery.length,
+                                  onPageChanged: (index) {
+                                    setState(() => _currentImageIndex = index);
+                                  },
+                                  itemBuilder: (context, index) {
+                                    return CachedNetworkImage(
+                                      imageRenderMethodForWeb:
+                                          ImageRenderMethodForWeb.HtmlImage,
+                                      imageUrl: gallery[index],
+                                      width: double.infinity,
+                                      height: heroHeight,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          _buildPlaceholder(height: heroHeight),
+                                      errorWidget: (context, url, error) =>
+                                          _buildPlaceholder(height: heroHeight),
+                                    );
+                                  },
+                                ),
+                              )
+                            : _buildPlaceholder(height: heroHeight),
+                      ),
+                      if (gallery.length > 1) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(gallery.length, (index) {
+                            final isActive = index == _currentImageIndex;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              width: isActive ? 16 : 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppTheme.accentGold
+                                    : Colors.white24,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: thumbHeight,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: gallery.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (context, index) => GestureDetector(
+                              onTap: () {
+                                _pageController.animateToPage(
+                                  index,
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              child: Container(
+                                width: isMobile ? 92 : 108,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: index == _currentImageIndex
+                                        ? AppTheme.accentGold
+                                        : Colors.white24,
+                                    width: 1.3,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: CachedNetworkImage(
+                                    imageRenderMethodForWeb:
+                                        ImageRenderMethodForWeb.HtmlImage,
+                                    imageUrl: gallery[index],
+                                    width: isMobile ? 92 : 108,
+                                    height: thumbHeight,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      width: isMobile ? 92 : 108,
+                                      height: thumbHeight,
+                                      color: AppTheme.primaryBlue.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          width: isMobile ? 92 : 108,
+                                          height: thumbHeight,
+                                          color: AppTheme.primaryBlue
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
+                      ],
                       const SizedBox(height: 16),
                       _InfoRow(
                         icon: Icons.people_outline,
@@ -93,9 +212,9 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       if ((room.description ?? '').trim().isNotEmpty) ...[
                         const Divider(color: AppTheme.textGray, height: 24),
-                        Text(
+                        const Text(
                           'Description',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
                           ),
@@ -110,9 +229,9 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                         ),
                       ],
                       const Divider(color: AppTheme.textGray, height: 24),
-                      Text(
+                      const Text(
                         'Équipements',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                         ),
@@ -125,7 +244,7 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                         )
                       else
                         ...room.equipments.map(
-                          (e) => Padding(
+                          (equipment) => Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +257,7 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    e,
+                                    equipment,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       height: 1.3,
@@ -151,9 +270,9 @@ class SeminarRoomDetailScreen extends StatelessWidget {
                         ),
                       if (phone.isNotEmpty || email.isNotEmpty) ...[
                         const Divider(color: AppTheme.textGray, height: 24),
-                        Text(
+                        const Text(
                           'Contact',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
                           ),
@@ -195,6 +314,20 @@ class SeminarRoomDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildPlaceholder({required double height}) {
+    return Container(
+      width: double.infinity,
+      height: height,
+      color: AppTheme.primaryBlue.withValues(alpha: 0.25),
+      child: const Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: AppTheme.textGray,
+        ),
+      ),
+    );
+  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -202,7 +335,11 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +374,11 @@ class _ActionRow extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _ActionRow({required this.icon, required this.label, required this.onTap});
+  const _ActionRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -270,4 +411,3 @@ class _ActionRow extends StatelessWidget {
     );
   }
 }
-

@@ -586,16 +586,29 @@ class VitrineController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $rooms->map(fn ($r) => [
-                'id' => $r->id,
-                'name' => TranslatableApiHelper::translationsFor($r, 'name'),
-                'description' => TranslatableApiHelper::translationsFor($r, 'description'),
-                'capacity' => $r->capacity,
-                'equipments' => $r->equipments ?? [],
-                'image' => $r->image ? asset('storage/' . $r->image) : null,
-                'contact_phone' => $r->contact_phone,
-                'contact_email' => $r->contact_email,
-            ]),
+            'data' => $rooms->map(function ($r) {
+                $galleryImages = array_values(array_filter(array_map(
+                    fn ($path) => is_string($path) && trim($path) !== ''
+                        ? asset('storage/' . ltrim(trim($path), '/'))
+                        : null,
+                    $this->decodeJsonList($r->gallery_images ?? null)
+                )));
+                $image = $r->image
+                    ? asset('storage/' . $r->image)
+                    : ($galleryImages[0] ?? null);
+
+                return [
+                    'id' => $r->id,
+                    'name' => TranslatableApiHelper::translationsFor($r, 'name'),
+                    'description' => TranslatableApiHelper::translationsFor($r, 'description'),
+                    'capacity' => $r->capacity,
+                    'equipments' => $r->equipments ?? [],
+                    'image' => $image,
+                    'gallery_images' => $galleryImages,
+                    'contact_phone' => $r->contact_phone,
+                    'contact_email' => $r->contact_email,
+                ];
+            }),
         ], 200);
     }
 

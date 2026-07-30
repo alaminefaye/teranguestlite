@@ -18,6 +18,17 @@
             <img src="{{ asset('storage/' . $room->image) }}" alt="{{ $room->name }}" class="h-56 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-700 mb-5">
         @endif
 
+        @if(is_array($room->gallery_images) && count($room->gallery_images) > 0)
+            <div class="mb-5">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Galerie</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    @foreach($room->gallery_images as $galleryImage)
+                        <img src="{{ asset('storage/' . $galleryImage) }}" alt="Galerie salle" class="h-40 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div class="space-y-4">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
@@ -64,4 +75,3 @@
     </div>
 </div>
 @endsection
-
