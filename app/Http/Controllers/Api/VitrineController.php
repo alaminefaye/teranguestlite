@@ -849,9 +849,15 @@ class VitrineController extends Controller
                     $typeName = $this->decodeTranslatableField($room->type_name ?? null);
                     $description = $this->decodeTranslatableField($room->description ?? null);
                     $amenities = $this->decodeJsonList($room->amenities ?? null);
+                    $galleryImages = array_values(array_filter(array_map(
+                        fn ($path) => is_string($path) && trim($path) !== ''
+                            ? asset('storage/' . ltrim(trim($path), '/'))
+                            : null,
+                        $this->decodeJsonList($room->gallery_images ?? null)
+                    )));
                     $image = is_string($room->image ?? null) && trim((string) $room->image) !== ''
                         ? asset('storage/' . ltrim(trim((string) $room->image), '/'))
-                        : null;
+                        : ($galleryImages[0] ?? null);
                     $price = is_numeric($room->price_per_night ?? null)
                         ? (float) $room->price_per_night
                         : null;
@@ -876,6 +882,7 @@ class VitrineController extends Controller
                         'capacity' => $room->capacity,
                         'amenities' => $amenities,
                         'image' => $image,
+                        'gallery_images' => $galleryImages,
                         'status' => $room->status,
                         'status_label' => $statusLabels[$room->status ?? ''] ?? ucfirst((string) ($room->status ?? '')),
                     ];

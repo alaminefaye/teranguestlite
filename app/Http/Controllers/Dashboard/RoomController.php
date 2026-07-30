@@ -78,6 +78,33 @@ class RoomController extends Controller
         )));
     }
 
+    private function normalizeGalleryPaths(array $paths): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            fn ($path) => trim((string) $path),
+            $paths
+        ))));
+    }
+
+    private function storeGalleryUploads(Request $request): array
+    {
+        $stored = [];
+        foreach ($request->file('gallery_images', []) as $file) {
+            if ($file) {
+                $stored[] = $file->store('rooms/gallery', 'public');
+            }
+        }
+
+        return $this->normalizeGalleryPaths($stored);
+    }
+
+    private function removeGalleryFiles(array $paths): void
+    {
+        foreach ($this->normalizeGalleryPaths($paths) as $path) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
     private function roomFormDefaults(?Room $room = null): array
     {
         $typeName = $this->extractTranslations($room, 'type_name');
@@ -194,10 +221,12 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1|max:10',
             'type_name_fr' => 'nullable|string|max:255',
             'type_name_en' => 'nullable|string|max:255',
-            'description_fr' => 'nullable|string|max:255',
-            'description_en' => 'nullable|string|max:255',
+            'description_fr' => 'nullable|string|max:5000',
+            'description_en' => 'nullable|string|max:5000',
             'amenities_text' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'nullable|image|max:30720',
             'remove_image' => 'nullable|boolean',
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
@@ -232,6 +261,7 @@ class RoomController extends Controller
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('rooms', 'public');
         }
+        $validated['gallery_images'] = $this->storeGalleryUploads($request);
 
         try {
             Room::create($validated);
@@ -316,10 +346,14 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1|max:10',
             'type_name_fr' => 'nullable|string|max:255',
             'type_name_en' => 'nullable|string|max:255',
-            'description_fr' => 'nullable|string|max:255',
-            'description_en' => 'nullable|string|max:255',
+            'description_fr' => 'nullable|string|max:5000',
+            'description_en' => 'nullable|string|max:5000',
             'amenities_text' => 'nullable|string',
             'image' => 'nullable|image|max:30720',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'nullable|image|max:30720',
+            'remove_gallery_images' => 'nullable|array',
+            'remove_gallery_images.*' => 'nullable|string',
             'wifi_network' => 'nullable|string|max:255',
             'wifi_password' => 'nullable|string|max:255',
         ]);
@@ -358,6 +392,22 @@ class RoomController extends Controller
             $validated['image'] = null;
         }
 
+        $existingGallery = is_array($room->gallery_images) ? $room->gallery_images : [];
+        $galleryToRemove = $this->normalizeGalleryPaths(
+            $request->input('remove_gallery_images', [])
+        );
+        if (!empty($galleryToRemove)) {
+            $this->removeGalleryFiles($galleryToRemove);
+        }
+        $remainingGallery = array_values(array_filter(
+            $existingGallery,
+            fn ($path) => !in_array($path, $galleryToRemove, true)
+        ));
+        $validated['gallery_images'] = $this->normalizeGalleryPaths([
+            ...$remainingGallery,
+            ...$this->storeGalleryUploads($request),
+        ]);
+
         $room->update($validated);
 
         return redirect()->route('dashboard.rooms.index')
@@ -383,6 +433,9 @@ class RoomController extends Controller
         // Supprimer l'image
         if ($room->image) {
             Storage::disk('public')->delete($room->image);
+        }
+        if (is_array($room->gallery_images)) {
+            $this->removeGalleryFiles($room->gallery_images);
         }
 
         $room->delete();

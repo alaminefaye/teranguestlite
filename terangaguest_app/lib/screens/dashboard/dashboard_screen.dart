@@ -516,11 +516,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildQuickInfoBanner(BuildContext context) {
     final infos = _enterprise?.hotelInfos;
-    final wifiNet = (infos?.wifiNetwork != null && infos!.wifiNetwork.trim().isNotEmpty)
+    final wifiNet =
+        (infos?.wifiNetwork != null && infos!.wifiNetwork.trim().isNotEmpty)
         ? infos.wifiNetwork.trim()
         : 'WIFI PALMBEACH';
 
-    final wifiPass = (infos?.wifiPassword != null && infos!.wifiPassword.trim().isNotEmpty)
+    final wifiPass =
+        (infos?.wifiPassword != null && infos!.wifiPassword.trim().isNotEmpty)
         ? infos.wifiPassword.trim()
         : 'palm2023';
 
@@ -669,6 +671,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'image': 'assets/images/box_hotel_infos.png',
       },
       {
+        'title': 'Chambres et Suites',
+        'icon': Icons.bed_outlined,
+        'route': '/module-room',
+        'image': 'assets/images/info_hotel.png',
+      },
+      {
         'title': 'Restaurants',
         'icon': Icons.restaurant_outlined,
         'route': '/module-restaurants',
@@ -697,12 +705,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         'icon': Icons.meeting_room_outlined,
         'route': '/module-seminars',
         'image': 'assets/images/info_etablissements.png',
-      },
-      {
-        'title': 'Chambre',
-        'icon': Icons.bed_outlined,
-        'route': '/module-room',
-        'image': 'assets/images/info_hotel.png',
       },
       {
         'title': 'Contact',

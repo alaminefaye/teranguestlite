@@ -62,6 +62,7 @@ class Room {
   final int? capacity;
   final List<String>? amenities;
   final String? image;
+  final List<String> galleryImages;
   final String? status;
   final String? statusLabel;
 
@@ -77,6 +78,7 @@ class Room {
     this.capacity,
     this.amenities,
     this.image,
+    this.galleryImages = const [],
     this.status,
     this.statusLabel,
   });
@@ -160,6 +162,7 @@ class Room {
       capacity: json['capacity'] as int?,
       amenities: _parseStringList(json['amenities']),
       image: json['image'] as String?,
+      galleryImages: _parseStringList(json['gallery_images']) ?? const [],
       status: json['status'] as String?,
       statusLabel: json['status_label'] as String?,
     );

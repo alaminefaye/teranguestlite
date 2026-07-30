@@ -19,10 +19,16 @@ class RoomPriceDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = room.image != null && room.image!.isNotEmpty;
-    final title = (room.description != null && room.description!.isNotEmpty)
-        ? room.description!
-        : room.typeName;
+    final gallery = room.galleryImages.isNotEmpty
+        ? room.galleryImages
+        : (room.image != null && room.image!.isNotEmpty
+              ? [room.image!]
+              : const <String>[]);
+    final hasImage = gallery.isNotEmpty;
+    final title = room.typeName.trim().isNotEmpty
+        ? room.typeName
+        : sectionTitle;
+    final description = room.description?.trim();
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -79,7 +85,7 @@ class RoomPriceDetailScreen extends StatelessWidget {
                             ? CachedNetworkImage(
                                 imageRenderMethodForWeb:
                                     ImageRenderMethodForWeb.HtmlImage,
-                                imageUrl: room.image!,
+                                imageUrl: gallery.first,
                                 width: double.infinity,
                                 height: 240,
                                 fit: BoxFit.cover,
@@ -90,6 +96,43 @@ class RoomPriceDetailScreen extends StatelessWidget {
                               )
                             : _buildPlaceholder(),
                       ),
+                      if (gallery.length > 1) ...[
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          height: 84,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: gallery.length,
+                            separatorBuilder: (_, index) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (context, index) => ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                imageRenderMethodForWeb:
+                                    ImageRenderMethodForWeb.HtmlImage,
+                                imageUrl: gallery[index],
+                                width: 110,
+                                height: 84,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  width: 110,
+                                  height: 84,
+                                  color: AppTheme.primaryBlue.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 110,
+                                  height: 84,
+                                  color: AppTheme.primaryBlue.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       Container(
                         width: double.infinity,
@@ -154,6 +197,18 @@ class RoomPriceDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            if (description != null &&
+                                description.isNotEmpty) ...[
+                              const SizedBox(height: 18),
+                              Text(
+                                description,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  height: 1.5,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 16),
                             if (room.capacity != null)
                               Row(

@@ -25,12 +25,14 @@ class Room extends Model
         'description',
         'amenities',
         'image',
+        'gallery_images',
         'wifi_network',
         'wifi_password',
     ];
 
     protected $casts = [
         'amenities' => 'array',
+        'gallery_images' => 'array',
         'price_per_night' => 'decimal:2',
     ];
 

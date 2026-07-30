@@ -58,7 +58,7 @@
 
                 @if(!empty($roomTypeTranslations['fr']) || !empty($roomTypeTranslations['en']))
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Formule affichée</label>
+                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Nom affiché</label>
                     <p class="text-gray-800 dark:text-white/90">
                         {{ $roomTypeTranslations['fr'] ?: '—' }}
                         @if(!empty($roomTypeTranslations['en']))
@@ -95,8 +95,8 @@
 
                 @if(!empty($roomDescriptionTranslations['fr']) || !empty($roomDescriptionTranslations['en']))
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Libellé affiché</label>
-                    <p class="text-gray-800 dark:text-white/90">
+                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
+                    <p class="text-gray-800 dark:text-white/90 whitespace-pre-line">
                         {{ $roomDescriptionTranslations['fr'] ?: '—' }}
                         @if(!empty($roomDescriptionTranslations['en']))
                             <span class="text-gray-500 dark:text-gray-400">/ {{ $roomDescriptionTranslations['en'] }}</span>
@@ -183,6 +183,19 @@
                     </svg>
                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Aucune image</p>
                 </div>
+            @endif
+        </div>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Galerie</h3>
+            @if(is_array($room->gallery_images) && count($room->gallery_images) > 0)
+                <div class="grid grid-cols-2 gap-3">
+                    @foreach($room->gallery_images as $galleryImage)
+                        <img src="{{ asset('storage/' . $galleryImage) }}" alt="Galerie chambre {{ $room->room_number }}" class="w-full h-28 object-cover rounded-lg">
+                    @endforeach
+                </div>
+            @else
+                <p class="text-sm text-gray-500 dark:text-gray-400">Aucune photo de galerie enregistrée.</p>
             @endif
         </div>
 

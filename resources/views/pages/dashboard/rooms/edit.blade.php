@@ -124,10 +124,10 @@
                 @enderror
             </div>
 
-            <!-- Formule affichée -->
+            <!-- Nom affiché -->
             <div>
                 <label for="type_name_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Formule affichée (FR)
+                    Nom affiché (FR)
                 </label>
                 <input type="text" name="type_name_fr" id="type_name_fr" value="{{ old('type_name_fr', $roomForm['type_name_fr'] ?? '') }}"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
@@ -138,7 +138,7 @@
 
             <div>
                 <label for="type_name_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Formule affichée (EN)
+                    Nom affiché (EN)
                 </label>
                 <input type="text" name="type_name_en" id="type_name_en" value="{{ old('type_name_en', $roomForm['type_name_en'] ?? '') }}"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
@@ -147,24 +147,26 @@
                 @enderror
             </div>
 
-            <!-- Libellé affiché -->
-            <div>
+            <!-- Description -->
+            <div class="md:col-span-2">
                 <label for="description_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Libellé affiché (FR)
+                    Description (FR)
                 </label>
-                <input type="text" name="description_fr" id="description_fr" value="{{ old('description_fr', $roomForm['description_fr'] ?? '') }}"
+                <textarea name="description_fr" id="description_fr" rows="4"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    {{ old('description_fr', $roomForm['description_fr'] ?? '') }}</textarea>
                 @error('description_fr')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div>
+            <div class="md:col-span-2">
                 <label for="description_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Libellé affiché (EN)
+                    Description (EN)
                 </label>
-                <input type="text" name="description_en" id="description_en" value="{{ old('description_en', $roomForm['description_en'] ?? '') }}"
+                <textarea name="description_en" id="description_en" rows="4"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    {{ old('description_en', $roomForm['description_en'] ?? '') }}</textarea>
                 @error('description_en')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
@@ -201,14 +203,55 @@
             </div>
             @endif
 
+            <!-- Galerie actuelle -->
+            @if(is_array($room->gallery_images) && count($room->gallery_images) > 0)
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Galerie actuelle</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($room->gallery_images as $galleryImage)
+                        <label class="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800 cursor-pointer">
+                            <img src="{{ asset('storage/' . $galleryImage) }}" alt="Galerie chambre" class="h-28 w-full object-cover rounded-md mb-3">
+                            <span class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" name="remove_gallery_images[]" value="{{ $galleryImage }}"
+                                    {{ in_array($galleryImage, old('remove_gallery_images', []), true) ? 'checked' : '' }}
+                                    class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                                <span>Supprimer</span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('remove_gallery_images')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+                @error('remove_gallery_images.*')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+            @endif
+
             <!-- Nouvelle image -->
             <div class="md:col-span-2">
                 <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $room->image ? 'Changer l\'image' : 'Image de la chambre' }}
+                    {{ $room->image ? 'Changer la photo principale' : 'Photo principale' }}
                 </label>
                 <input type="file" name="image" id="image" accept="image/*"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('image')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="gallery_images" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Ajouter des photos à la galerie
+                </label>
+                <input type="file" name="gallery_images[]" id="gallery_images" accept="image/*" multiple
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Les nouvelles images seront ajoutées à la galerie existante.</p>
+                @error('gallery_images')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+                @error('gallery_images.*')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>

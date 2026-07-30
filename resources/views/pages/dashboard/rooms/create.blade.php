@@ -122,12 +122,12 @@
                 @enderror
             </div>
 
-            <!-- Formule affichée -->
+            <!-- Nom affiché -->
             <div>
                 <label for="type_name_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Formule affichée (FR)
+                    Nom affiché (FR)
                 </label>
-                <input type="text" name="type_name_fr" id="type_name_fr" value="{{ old('type_name_fr', $roomForm['type_name_fr'] ?? '') }}" placeholder="Ex. Demi-pension"
+                <input type="text" name="type_name_fr" id="type_name_fr" value="{{ old('type_name_fr', $roomForm['type_name_fr'] ?? '') }}" placeholder="Ex. Chambre Deluxe Vue Mer"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('type_name_fr')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
@@ -136,33 +136,35 @@
 
             <div>
                 <label for="type_name_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Formule affichée (EN)
+                    Nom affiché (EN)
                 </label>
-                <input type="text" name="type_name_en" id="type_name_en" value="{{ old('type_name_en', $roomForm['type_name_en'] ?? '') }}" placeholder="Ex. Half board"
+                <input type="text" name="type_name_en" id="type_name_en" value="{{ old('type_name_en', $roomForm['type_name_en'] ?? '') }}" placeholder="Ex. Deluxe Sea View Room"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('type_name_en')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <!-- Libellé affiché -->
-            <div>
+            <!-- Description -->
+            <div class="md:col-span-2">
                 <label for="description_fr" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Libellé affiché (FR)
+                    Description (FR)
                 </label>
-                <input type="text" name="description_fr" id="description_fr" value="{{ old('description_fr', $roomForm['description_fr'] ?? '') }}" placeholder="Ex. Chambre individuelle"
+                <textarea name="description_fr" id="description_fr" rows="4" placeholder="Décrivez la chambre ou la suite, ses atouts, sa vue, son ambiance..."
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    {{ old('description_fr', $roomForm['description_fr'] ?? '') }}</textarea>
                 @error('description_fr')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div>
+            <div class="md:col-span-2">
                 <label for="description_en" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Libellé affiché (EN)
+                    Description (EN)
                 </label>
-                <input type="text" name="description_en" id="description_en" value="{{ old('description_en', $roomForm['description_en'] ?? '') }}" placeholder="Ex. Single room"
+                <textarea name="description_en" id="description_en" rows="4" placeholder="Describe the room or suite, its view, comfort and atmosphere..."
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                    {{ old('description_en', $roomForm['description_en'] ?? '') }}</textarea>
                 @error('description_en')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
@@ -181,14 +183,30 @@
                 @enderror
             </div>
 
-            <!-- Image -->
+            <!-- Image principale -->
             <div class="md:col-span-2">
                 <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Image de la chambre
+                    Photo principale
                 </label>
                 <input type="file" name="image" id="image" accept="image/*"
                     class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
                 @error('image')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Galerie -->
+            <div class="md:col-span-2">
+                <label for="gallery_images" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Galerie photos
+                </label>
+                <input type="file" name="gallery_images[]" id="gallery_images" accept="image/*" multiple
+                    class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-800 dark:text-white/90 focus:border-brand-500 focus:ring-brand-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vous pouvez sélectionner plusieurs images. Elles seront affichées dans la galerie mobile.</p>
+                @error('gallery_images')
+                    <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
+                @enderror
+                @error('gallery_images.*')
                     <p class="mt-1 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                 @enderror
             </div>

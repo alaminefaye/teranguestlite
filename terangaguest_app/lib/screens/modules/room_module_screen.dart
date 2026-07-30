@@ -3,6 +3,7 @@ import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../generated/l10n/app_localizations.dart';
 import '../../models/guide.dart';
+import '../../models/room.dart';
 import '../../models/user.dart';
 import '../../services/api_service.dart';
 import '../../services/guides_api.dart';
@@ -14,6 +15,7 @@ import '../common/in_app_document_screen.dart';
 import '../hotel_infos/guide_items_screen.dart';
 import '../hotel_infos/guides_screen.dart';
 import '../hotel_infos/hotel_infos_screen.dart';
+import 'room_category_detail_screen.dart';
 import 'room_prices_screen.dart';
 
 class RoomModuleScreen extends StatefulWidget {
@@ -25,7 +27,9 @@ class RoomModuleScreen extends StatefulWidget {
 
 class _RoomModuleScreenState extends State<RoomModuleScreen> {
   List<GuideCategory>? _categories;
+  List<RoomType>? _roomTypes;
   bool _loading = false;
+  bool _roomsLoading = false;
   bool _checkingRoomBox = true;
 
   @override
@@ -48,7 +52,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) =>
-                  InAppDocumentScreen(title: 'Chambre', url: docUrl),
+                  InAppDocumentScreen(title: 'Chambres et Suites', url: docUrl),
             ),
           );
           return;
@@ -60,6 +64,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     if (!mounted) return;
     setState(() => _checkingRoomBox = false);
     _loadGuides();
+    _loadRooms();
   }
 
   Future<void> _loadGuides() async {
@@ -77,6 +82,121 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     }
   }
 
+  Future<void> _loadRooms() async {
+    if (_roomsLoading) return;
+    setState(() => _roomsLoading = true);
+    try {
+      final response = await ApiService().get(ApiConfig.vitrineRooms);
+      final data = response.data;
+      if (data is Map && data['success'] == true && data['data'] is List) {
+        final roomTypes = (data['data'] as List)
+            .map((e) => RoomType.fromJson(e as Map<String, dynamic>))
+            .toList();
+        if (!mounted) return;
+        setState(() => _roomTypes = roomTypes);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _roomTypes = const []);
+    } finally {
+      if (mounted) setState(() => _roomsLoading = false);
+    }
+  }
+
+  bool _isSuiteType(RoomType roomType) {
+    final haystack =
+        '${roomType.type} ${roomType.typeName} ${roomType.typeLabel}'
+            .toLowerCase();
+    return haystack.contains('suite') || haystack.contains('presidential');
+  }
+
+  String _buildCategoryDescription({
+    required String title,
+    required List<RoomType> roomTypes,
+    required List<Room> rooms,
+  }) {
+    final uniqueDescriptions = rooms
+        .map((room) => room.description?.trim() ?? '')
+        .where((text) => text.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (uniqueDescriptions.isNotEmpty) {
+      return uniqueDescriptions.take(2).join('\n\n');
+    }
+
+    final labels = roomTypes
+        .map(
+          (type) => type.typeLabel.isNotEmpty ? type.typeLabel : type.typeName,
+        )
+        .where((text) => text.trim().isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (labels.isNotEmpty) {
+      return '$title disponibles: ${labels.join(', ')}.';
+    }
+
+    return 'Découvrez nos $title disponibles dans l’application.';
+  }
+
+  List<RoomCategoryViewData> _buildRoomCategories() {
+    final allTypes = _roomTypes ?? const <RoomType>[];
+    final suiteTypes = allTypes.where(_isSuiteType).toList();
+    final roomTypes = allTypes.where((type) => !_isSuiteType(type)).toList();
+
+    RoomCategoryViewData buildCategory({
+      required String title,
+      required IconData icon,
+      required List<RoomType> sourceTypes,
+      required String fallbackImage,
+    }) {
+      final rooms = sourceTypes.expand((type) => type.rooms).toList();
+      final gallery = rooms
+          .expand((room) sync* {
+            if (room.image?.trim().isNotEmpty ?? false) {
+              yield room.image!.trim();
+            }
+            for (final image in room.galleryImages) {
+              if (image.trim().isNotEmpty) {
+                yield image.trim();
+              }
+            }
+          })
+          .where((image) => image.isNotEmpty)
+          .toSet()
+          .toList();
+
+      return RoomCategoryViewData(
+        title: title,
+        icon: icon,
+        imagePath: gallery.isNotEmpty ? gallery.first : fallbackImage,
+        description: _buildCategoryDescription(
+          title: title,
+          roomTypes: sourceTypes,
+          rooms: rooms,
+        ),
+        gallery: gallery,
+        rooms: rooms,
+      );
+    }
+
+    return [
+      buildCategory(
+        title: 'Chambres',
+        icon: Icons.bed_outlined,
+        sourceTypes: roomTypes,
+        fallbackImage: 'assets/images/info_hotel.png',
+      ),
+      buildCategory(
+        title: 'Suites',
+        icon: Icons.king_bed_outlined,
+        sourceTypes: suiteTypes,
+        fallbackImage: 'assets/images/box_hotel_infos.png',
+      ),
+    ];
+  }
+
   static final _defaultUsefulNumbersCategory = GuideCategory(
     id: -1,
     name: 'Numéros utiles',
@@ -84,17 +204,94 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     order: 1,
     isActive: true,
     items: [
-      GuideItem(id: 1, categoryId: -1, title: 'BAR PISCINE', phone: '2010', order: 1, isActive: true),
-      GuideItem(id: 2, categoryId: -1, title: 'BAR SAINT-LOUIS', phone: '2009', order: 2, isActive: true),
-      GuideItem(id: 3, categoryId: -1, title: 'BASE NAUTIQ', phone: '2702', order: 3, isActive: true),
-      GuideItem(id: 4, categoryId: -1, title: 'BOUTIQUE', phone: '2013', order: 4, isActive: true),
-      GuideItem(id: 5, categoryId: -1, title: 'INFIRMERIE', phone: '2016', order: 5, isActive: true),
-      GuideItem(id: 6, categoryId: -1, title: 'SALLE DE SPORT', phone: '2015', order: 6, isActive: true),
-      GuideItem(id: 7, categoryId: -1, title: 'SDT EXCURSION', phone: '2008', order: 7, isActive: true),
-      GuideItem(id: 8, categoryId: -1, title: 'RECEPTION', phone: '2500', order: 8, isActive: true),
-      GuideItem(id: 9, categoryId: -1, title: 'RELATION CLIENTELE FRAM', phone: '2017', order: 9, isActive: true),
-      GuideItem(id: 10, categoryId: -1, title: 'ROOM SERVICE', phone: '2408', order: 10, isActive: true),
-      GuideItem(id: 11, categoryId: -1, title: 'SPA', phone: '2012', order: 11, isActive: true),
+      GuideItem(
+        id: 1,
+        categoryId: -1,
+        title: 'BAR PISCINE',
+        phone: '2010',
+        order: 1,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 2,
+        categoryId: -1,
+        title: 'BAR SAINT-LOUIS',
+        phone: '2009',
+        order: 2,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 3,
+        categoryId: -1,
+        title: 'BASE NAUTIQ',
+        phone: '2702',
+        order: 3,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 4,
+        categoryId: -1,
+        title: 'BOUTIQUE',
+        phone: '2013',
+        order: 4,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 5,
+        categoryId: -1,
+        title: 'INFIRMERIE',
+        phone: '2016',
+        order: 5,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 6,
+        categoryId: -1,
+        title: 'SALLE DE SPORT',
+        phone: '2015',
+        order: 6,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 7,
+        categoryId: -1,
+        title: 'SDT EXCURSION',
+        phone: '2008',
+        order: 7,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 8,
+        categoryId: -1,
+        title: 'RECEPTION',
+        phone: '2500',
+        order: 8,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 9,
+        categoryId: -1,
+        title: 'RELATION CLIENTELE FRAM',
+        phone: '2017',
+        order: 9,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 10,
+        categoryId: -1,
+        title: 'ROOM SERVICE',
+        phone: '2408',
+        order: 10,
+        isActive: true,
+      ),
+      GuideItem(
+        id: 11,
+        categoryId: -1,
+        title: 'SPA',
+        phone: '2012',
+        order: 11,
+        isActive: true,
+      ),
     ],
   );
 
@@ -156,6 +353,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     final crossAxisCount = LayoutHelper.gridCrossAxisCount(context);
     final aspectRatio = LayoutHelper.dashboardCellAspectRatio(context);
     final spacing = LayoutHelper.gridSpacing(context);
+    final roomCategories = _buildRoomCategories();
 
     final categories = _categories ?? <GuideCategory>[];
     final equipmentCategory = _findCategory(
@@ -183,7 +381,9 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
         Icons.phone_in_talk_outlined,
         'assets/images/info_urgence.png',
         () {
-          final cat = (numbersCategory != null && (numbersCategory.items?.isNotEmpty ?? false))
+          final cat =
+              (numbersCategory != null &&
+                  (numbersCategory.items?.isNotEmpty ?? false))
               ? numbersCategory
               : _defaultUsefulNumbersCategory;
           context.navigateTo(GuideItemsScreen(category: cat));
@@ -230,7 +430,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Chambre',
+                            'Chambres et Suites',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -239,7 +439,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Guide, numéros & infos pratiques',
+                            'Chambres, suites, galerie et infos pratiques',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppTheme.textGray,
@@ -254,27 +454,88 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
               Expanded(
                 child: Padding(
                   padding: LayoutHelper.horizontalPadding(context),
-                  child: GridView.builder(
+                  child: SingleChildScrollView(
                     padding: EdgeInsets.symmetric(vertical: spacing),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: spacing,
-                      mainAxisSpacing: spacing,
-                      childAspectRatio: aspectRatio,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            'Hébergements',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
+                          itemCount: roomCategories.length,
+                          itemBuilder: (context, index) {
+                            final category = roomCategories[index];
+                            return ServiceCard(
+                              title: category.title,
+                              icon: category.icon,
+                              imagePath: category.imagePath,
+                              isLoading: _roomsLoading,
+                              onTap: () {
+                                if (_roomsLoading) return;
+                                HapticHelper.lightImpact();
+                                context.navigateTo(
+                                  RoomCategoryDetailScreen(category: category),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            'Services utiles',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGold,
+                            ),
+                          ),
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: spacing,
+                                mainAxisSpacing: spacing,
+                                childAspectRatio: aspectRatio,
+                              ),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final (title, icon, image, onTap) = items[index];
+                            return ServiceCard(
+                              title: title,
+                              icon: icon,
+                              imagePath: image,
+                              onTap: () {
+                                HapticHelper.lightImpact();
+                                onTap();
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final (title, icon, image, onTap) = items[index];
-                      return ServiceCard(
-                        title: title,
-                        icon: icon,
-                        imagePath: image,
-                        onTap: () {
-                          HapticHelper.lightImpact();
-                          onTap();
-                        },
-                      );
-                    },
                   ),
                 ),
               ),
