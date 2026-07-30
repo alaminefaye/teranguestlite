@@ -60,8 +60,18 @@
                     <div class="mt-3">
                         <img src="{{ asset('storage/' . $room->image) }}" class="h-24 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-700" alt="Image">
                     </div>
+                    <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" name="remove_image" value="1"
+                            {{ old('remove_image') ? 'checked' : '' }}
+                            class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 dark:border-gray-700">
+                        <span>Supprimer la photo principale actuelle</span>
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Si vous cochez cette option sans importer une nouvelle image, la photo principale sera supprimée.</p>
                 @endif
                 @error('image')
+                    <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
+                @enderror
+                @error('remove_image')
                     <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p>
                 @enderror
             </div>

@@ -41,11 +41,14 @@ class _SeminarRoomDetailScreenState extends State<SeminarRoomDetailScreen> {
     final horizontalPadding = isMobile ? 16.0 : 60.0;
     final phone = room.contactPhone?.trim() ?? '';
     final email = room.contactEmail?.trim() ?? '';
-    final gallery = room.galleryImages.isNotEmpty
-        ? room.galleryImages
-        : (room.image != null && room.image!.trim().isNotEmpty
-              ? [room.image!.trim()]
-              : const <String>[]);
+    final gallery = <String>[
+      if (room.image != null && room.image!.trim().isNotEmpty)
+        room.image!.trim(),
+      ...room.galleryImages.where((image) {
+        final trimmed = image.trim();
+        return trimmed.isNotEmpty && trimmed != (room.image?.trim() ?? '');
+      }),
+    ];
     final hasImage = gallery.isNotEmpty;
     final heroHeight = isMobile ? 205.0 : 255.0;
     final thumbHeight = isMobile ? 68.0 : 82.0;

@@ -130,6 +130,7 @@ class SeminarRoomController extends Controller
             'image' => 'nullable|image|max:30720',
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'nullable|image|max:30720',
+            'remove_image' => 'nullable|boolean',
             'remove_gallery_images' => 'nullable|array',
             'remove_gallery_images.*' => 'nullable|string',
             'contact_phone' => 'nullable|string|max:50',
@@ -145,6 +146,9 @@ class SeminarRoomController extends Controller
                 Storage::disk('public')->delete($seminar_room->image);
             }
             $validated['image'] = $request->file('image')->store('seminar-rooms', 'public');
+        } elseif ($request->boolean('remove_image') && $seminar_room->image) {
+            Storage::disk('public')->delete($seminar_room->image);
+            $validated['image'] = null;
         }
 
         $existingGallery = is_array($seminar_room->gallery_images) ? $seminar_room->gallery_images : [];
