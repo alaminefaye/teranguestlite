@@ -19,6 +19,34 @@ use App\Models\PalaceService;
  */
 class DefaultDataForEnterpriseService
 {
+    protected function usefulNumbersItems(): array
+    {
+        return [
+            ['title' => 'BAR PISCINE', 'phone' => '2010'],
+            ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
+            ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
+            ['title' => 'BOUTIQUE', 'phone' => '2013'],
+            ['title' => 'INFIRMERIE', 'phone' => '2016'],
+            ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
+            ['title' => 'SDT EXCURSION', 'phone' => '2008'],
+            ['title' => 'RECEPTION', 'phone' => '2500'],
+            ['title' => 'SECURITE', 'phone' => '2501'],
+            ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
+            ['title' => 'ROOM SERVICE', 'phone' => '2408'],
+            ['title' => 'SPA', 'phone' => '2012'],
+        ];
+    }
+
+    protected function emergencyNumbersItems(): array
+    {
+        $allowedTitles = ['RECEPTION', 'INFIRMERIE', 'SECURITE'];
+
+        return array_values(array_filter(
+            $this->usefulNumbersItems(),
+            fn (array $item) => in_array($item['title'], $allowedTitles, true)
+        ));
+    }
+
     public static function seedForEnterprise(Enterprise $enterprise): void
     {
         $instance = new self();
@@ -200,7 +228,7 @@ class DefaultDataForEnterpriseService
 
     protected function seedGuides(Enterprise $enterprise): void
     {
-        $category = GuideCategory::withoutGlobalScope('enterprise')->firstOrCreate(
+        $usefulNumbersCategory = GuideCategory::withoutGlobalScope('enterprise')->firstOrCreate(
             [
                 'enterprise_id' => $enterprise->id,
                 'category_type' => 'useful_numbers',
@@ -212,34 +240,57 @@ class DefaultDataForEnterpriseService
             ]
         );
 
-        $items = [
-            ['title' => 'BAR PISCINE', 'phone' => '2010'],
-            ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
-            ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
-            ['title' => 'BOUTIQUE', 'phone' => '2013'],
-            ['title' => 'INFIRMERIE', 'phone' => '2016'],
-            ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
-            ['title' => 'SDT EXCURSION', 'phone' => '2008'],
-            ['title' => 'RECEPTION', 'phone' => '2500'],
-            ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
-            ['title' => 'ROOM SERVICE', 'phone' => '2408'],
-            ['title' => 'SPA', 'phone' => '2012'],
-        ];
+        $emergencyCategory = GuideCategory::withoutGlobalScope('enterprise')->firstOrCreate(
+            [
+                'enterprise_id' => $enterprise->id,
+                'order' => 2,
+                'category_type' => 'other',
+            ],
+            [
+                'name' => ['fr' => 'Numéros d’urgence', 'en' => 'Emergency numbers'],
+                'is_active' => true,
+            ]
+        );
+
+        $emergencyCategory->update([
+            'name' => ['fr' => 'Numéros d’urgence', 'en' => 'Emergency numbers'],
+            'order' => 2,
+            'category_type' => 'other',
+            'is_active' => true,
+        ]);
+
+        GuideItem::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $enterprise->id)
+            ->where('guide_category_id', $usefulNumbersCategory->id)
+            ->delete();
 
         $order = 1;
-        foreach ($items as $itemData) {
-            GuideItem::withoutGlobalScope('enterprise')->firstOrCreate(
-                [
-                    'enterprise_id' => $enterprise->id,
-                    'guide_category_id' => $category->id,
-                    'phone' => $itemData['phone'],
-                ],
-                [
-                    'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
-                    'order' => $order++,
-                    'is_active' => true,
-                ]
-            );
+        foreach ($this->usefulNumbersItems() as $itemData) {
+            GuideItem::withoutGlobalScope('enterprise')->create([
+                'enterprise_id' => $enterprise->id,
+                'guide_category_id' => $usefulNumbersCategory->id,
+                'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
+                'phone' => $itemData['phone'],
+                'order' => $order++,
+                'is_active' => true,
+            ]);
+        }
+
+        GuideItem::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $enterprise->id)
+            ->where('guide_category_id', $emergencyCategory->id)
+            ->delete();
+
+        $order = 1;
+        foreach ($this->emergencyNumbersItems() as $itemData) {
+            GuideItem::withoutGlobalScope('enterprise')->create([
+                'enterprise_id' => $enterprise->id,
+                'guide_category_id' => $emergencyCategory->id,
+                'title' => ['fr' => $itemData['title'], 'en' => $itemData['title']],
+                'phone' => $itemData['phone'],
+                'order' => $order++,
+                'is_active' => true,
+            ]);
         }
     }
 

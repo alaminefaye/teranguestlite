@@ -36,6 +36,10 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final gallery = widget.category.gallery;
+    final hasGallery = gallery.isNotEmpty;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final roomsCrossAxisCount = screenWidth < 900 ? 2 : 3;
+    final roomsAspectRatio = screenWidth < 600 ? 0.78 : 0.88;
 
     return Scaffold(
       body: Container(
@@ -80,17 +84,19 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
                       _buildGallery(gallery),
                       const SizedBox(height: 20),
                       _buildIntroCard(),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Galerie',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentGold,
+                      if (hasGallery) ...[
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Galerie',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildThumbnails(gallery),
+                        const SizedBox(height: 12),
+                        _buildThumbnails(gallery),
+                      ],
                       const SizedBox(height: 24),
                       const Text(
                         'Hébergements disponibles',
@@ -104,7 +110,20 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
                       if (widget.category.rooms.isEmpty)
                         _buildEmptyState()
                       else
-                        ...widget.category.rooms.map(_buildRoomCard),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: widget.category.rooms.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: roomsCrossAxisCount,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: roomsAspectRatio,
+                              ),
+                          itemBuilder: (context, index) =>
+                              _buildRoomCard(widget.category.rooms[index]),
+                        ),
                     ],
                   ),
                 ),
@@ -118,7 +137,10 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
 
   Widget _buildGallery(List<String> gallery) {
     if (gallery.isEmpty) {
-      return _buildPlaceholder(height: 230);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: _buildCategoryCoverImage(height: 230),
+      );
     }
 
     return Column(
@@ -166,6 +188,34 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildCategoryCoverImage({double height = 230}) {
+    final imagePath = widget.category.imagePath.trim();
+    if (imagePath.isEmpty) {
+      return _buildPlaceholder(height: height);
+    }
+
+    if (imagePath.startsWith('http')) {
+      return CachedNetworkImage(
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
+        imageUrl: imagePath,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => _buildPlaceholder(height: height),
+        errorWidget: (context, url, error) => _buildPlaceholder(height: height),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      width: double.infinity,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          _buildPlaceholder(height: height),
     );
   }
 
@@ -256,6 +306,8 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
   }
 
   Widget _buildRoomCard(Room room) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth < 600;
     final title = (room.typeName.trim().isNotEmpty)
         ? room.typeName
         : widget.category.title;
@@ -264,7 +316,15 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
         : 'Description bientôt disponible.';
     final coverImage = room.image?.trim().isNotEmpty == true
         ? room.image
-        : (room.galleryImages.isNotEmpty ? room.galleryImages.first : null);
+        : (room.galleryImages.isNotEmpty
+              ? room.galleryImages.first
+              : (widget.category.gallery.isNotEmpty
+                    ? widget.category.gallery.first
+                    : null));
+    final imageHeight = isMobile ? 92.0 : 118.0;
+    final titleSize = isMobile ? 15.0 : 17.0;
+    final bodySize = isMobile ? 11.5 : 13.0;
+    final metaSize = isMobile ? 11.0 : 12.0;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -280,7 +340,6 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [AppTheme.primaryBlue, AppTheme.primaryDark],
@@ -300,41 +359,49 @@ class _RoomCategoryDetailScreenState extends State<RoomCategoryDetailScreen> {
                   imageRenderMethodForWeb: ImageRenderMethodForWeb.HtmlImage,
                   imageUrl: coverImage,
                   width: double.infinity,
-                  height: 160,
+                  height: imageHeight,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => _buildPlaceholder(height: 160),
+                  placeholder: (context, url) =>
+                      _buildPlaceholder(height: imageHeight),
                   errorWidget: (context, url, error) =>
-                      _buildPlaceholder(height: 160),
+                      _buildPlaceholder(height: imageHeight),
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isMobile ? 10 : 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: titleSize,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.accentGold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: isMobile ? 6 : 8),
                   Text(
                     description,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    maxLines: isMobile ? 2 : 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: bodySize,
                       height: 1.4,
                       color: Colors.white,
                     ),
                   ),
                   if (room.capacity != null) ...[
-                    const SizedBox(height: 10),
+                    SizedBox(height: isMobile ? 6 : 10),
                     Text(
-                      'Capacité : ${room.capacity} personnes',
-                      style: const TextStyle(
-                        fontSize: 13,
+                      '${room.capacity} personne${room.capacity! > 1 ? 's' : ''}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: metaSize,
                         color: AppTheme.textGray,
                       ),
                     ),

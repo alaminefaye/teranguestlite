@@ -7,7 +7,7 @@ import '../../generated/l10n/app_localizations.dart';
 import '../../models/room.dart';
 import '../../utils/haptic_helper.dart';
 
-class RoomPriceDetailScreen extends StatelessWidget {
+class RoomPriceDetailScreen extends StatefulWidget {
   const RoomPriceDetailScreen({
     super.key,
     required this.room,
@@ -18,7 +18,29 @@ class RoomPriceDetailScreen extends StatelessWidget {
   final String sectionTitle;
 
   @override
+  State<RoomPriceDetailScreen> createState() => _RoomPriceDetailScreenState();
+}
+
+class _RoomPriceDetailScreenState extends State<RoomPriceDetailScreen> {
+  late final PageController _pageController;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final room = widget.room;
+    final sectionTitle = widget.sectionTitle;
     final gallery = room.galleryImages.isNotEmpty
         ? room.galleryImages
         : (room.image != null && room.image!.isNotEmpty
@@ -30,6 +52,18 @@ class RoomPriceDetailScreen extends StatelessWidget {
         : sectionTitle;
     final description = room.description?.trim();
     final l10n = AppLocalizations.of(context);
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 600;
+    final heroHeight = isMobile ? 205.0 : 255.0;
+    final thumbHeight = isMobile ? 68.0 : 82.0;
+    final headerTitleSize = isMobile ? 18.0 : 22.0;
+    final sectionLabelSize = isMobile ? 12.0 : 14.0;
+    final titleSize = isMobile ? 19.0 : 23.0;
+    final priceSize = isMobile ? 16.0 : 19.0;
+    final bodySize = isMobile ? 13.0 : 15.0;
+    final metaSize = isMobile ? 13.0 : 15.0;
+    final amenitiesTitleSize = isMobile ? 14.0 : 16.0;
+    final chipTextSize = isMobile ? 11.0 : 12.0;
 
     return Scaffold(
       body: Container(
@@ -44,7 +78,7 @@ class RoomPriceDetailScreen extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile ? 14 : 16),
                 child: Row(
                   children: [
                     IconButton(
@@ -57,12 +91,12 @@ class RoomPriceDetailScreen extends StatelessWidget {
                         Navigator.of(context).pop();
                       },
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(
-                          fontSize: 22,
+                        style: TextStyle(
+                          fontSize: headerTitleSize,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.accentGold,
                         ),
@@ -75,57 +109,109 @@ class RoomPriceDetailScreen extends StatelessWidget {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  padding: EdgeInsets.fromLTRB(16, isMobile ? 4 : 8, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(18),
                         child: hasImage
-                            ? CachedNetworkImage(
-                                imageRenderMethodForWeb:
-                                    ImageRenderMethodForWeb.HtmlImage,
-                                imageUrl: gallery.first,
-                                width: double.infinity,
-                                height: 240,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    _buildPlaceholder(),
-                                errorWidget: (context, url, error) =>
-                                    _buildPlaceholder(),
+                            ? SizedBox(
+                                height: heroHeight,
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: gallery.length,
+                                  onPageChanged: (index) {
+                                    setState(() => _currentImageIndex = index);
+                                  },
+                                  itemBuilder: (context, index) {
+                                    return CachedNetworkImage(
+                                      imageRenderMethodForWeb:
+                                          ImageRenderMethodForWeb.HtmlImage,
+                                      imageUrl: gallery[index],
+                                      width: double.infinity,
+                                      height: heroHeight,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          _buildPlaceholder(height: heroHeight),
+                                      errorWidget: (context, url, error) =>
+                                          _buildPlaceholder(height: heroHeight),
+                                    );
+                                  },
+                                ),
                               )
-                            : _buildPlaceholder(),
+                            : _buildPlaceholder(height: heroHeight),
                       ),
                       if (gallery.length > 1) ...[
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(gallery.length, (index) {
+                            final isActive = index == _currentImageIndex;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              width: isActive ? 16 : 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppTheme.accentGold
+                                    : Colors.white24,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 10),
                         SizedBox(
-                          height: 84,
+                          height: thumbHeight,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: gallery.length,
                             separatorBuilder: (_, index) =>
                                 const SizedBox(width: 10),
-                            itemBuilder: (context, index) => ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: CachedNetworkImage(
-                                imageRenderMethodForWeb:
-                                    ImageRenderMethodForWeb.HtmlImage,
-                                imageUrl: gallery[index],
-                                width: 110,
-                                height: 84,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  width: 110,
-                                  height: 84,
-                                  color: AppTheme.primaryBlue.withValues(
-                                    alpha: 0.3,
+                            itemBuilder: (context, index) => GestureDetector(
+                              onTap: () {
+                                _pageController.animateToPage(
+                                  index,
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              child: Container(
+                                width: isMobile ? 92 : 108,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: index == _currentImageIndex
+                                        ? AppTheme.accentGold
+                                        : Colors.white24,
+                                    width: 1.3,
                                   ),
                                 ),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 110,
-                                  height: 84,
-                                  color: AppTheme.primaryBlue.withValues(
-                                    alpha: 0.3,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: CachedNetworkImage(
+                                    imageRenderMethodForWeb:
+                                        ImageRenderMethodForWeb.HtmlImage,
+                                    imageUrl: gallery[index],
+                                    width: isMobile ? 92 : 108,
+                                    height: thumbHeight,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      width: isMobile ? 92 : 108,
+                                      height: thumbHeight,
+                                      color: AppTheme.primaryBlue.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          width: isMobile ? 92 : 108,
+                                          height: thumbHeight,
+                                          color: AppTheme.primaryBlue
+                                              .withValues(alpha: 0.3),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -133,10 +219,10 @@ class RoomPriceDetailScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 20),
+                      SizedBox(height: isMobile ? 14 : 20),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(18),
+                        padding: EdgeInsets.all(isMobile ? 14 : 18),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
@@ -147,7 +233,7 @@ class RoomPriceDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: AppTheme.accentGold,
-                            width: 1.5,
+                            width: 1.4,
                           ),
                         ),
                         child: Column(
@@ -155,27 +241,27 @@ class RoomPriceDetailScreen extends StatelessWidget {
                           children: [
                             Text(
                               sectionTitle,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: sectionLabelSize,
                                 fontWeight: FontWeight.w600,
                                 color: AppTheme.textGray,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
                               title,
-                              style: const TextStyle(
-                                fontSize: 24,
+                              style: TextStyle(
+                                fontSize: titleSize,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
                             if (room.pricePerNight != null)
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isMobile ? 12 : 14,
+                                  vertical: isMobile ? 8 : 10,
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppTheme.accentGold.withValues(
@@ -190,8 +276,8 @@ class RoomPriceDetailScreen extends StatelessWidget {
                                   room.formattedPricePerNight != null
                                       ? '${room.formattedPricePerNight} / nuit'
                                       : '${room.pricePerNight!.toStringAsFixed(0)} FCFA / nuit',
-                                  style: const TextStyle(
-                                    fontSize: 20,
+                                  style: TextStyle(
+                                    fontSize: priceSize,
                                     fontWeight: FontWeight.bold,
                                     color: AppTheme.accentGold,
                                   ),
@@ -199,30 +285,31 @@ class RoomPriceDetailScreen extends StatelessWidget {
                               ),
                             if (description != null &&
                                 description.isNotEmpty) ...[
-                              const SizedBox(height: 18),
+                              SizedBox(height: isMobile ? 12 : 16),
                               Text(
                                 description,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  height: 1.5,
+                                style: TextStyle(
+                                  fontSize: bodySize,
+                                  height: 1.45,
                                   color: Colors.white,
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 16),
+                            SizedBox(height: isMobile ? 12 : 14),
                             if (room.capacity != null)
                               Row(
                                 children: [
                                   const Icon(
                                     Icons.people_outline,
                                     color: AppTheme.textGray,
+                                    size: 18,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       l10n.capacityPeople(room.capacity!),
-                                      style: const TextStyle(
-                                        fontSize: 15,
+                                      style: TextStyle(
+                                        fontSize: metaSize,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -231,19 +318,20 @@ class RoomPriceDetailScreen extends StatelessWidget {
                               ),
                             if (room.floor != null &&
                                 room.floor!.isNotEmpty) ...[
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                               Row(
                                 children: [
                                   const Icon(
                                     Icons.layers_outlined,
                                     color: AppTheme.textGray,
+                                    size: 18,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'Étage ${room.floor}',
-                                      style: const TextStyle(
-                                        fontSize: 15,
+                                      style: TextStyle(
+                                        fontSize: metaSize,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -253,26 +341,29 @@ class RoomPriceDetailScreen extends StatelessWidget {
                             ],
                             if (room.amenities != null &&
                                 room.amenities!.isNotEmpty) ...[
-                              const SizedBox(height: 18),
+                              SizedBox(height: isMobile ? 12 : 16),
                               Text(
                                 l10n.amenities,
-                                style: const TextStyle(
-                                  fontSize: 16,
+                                style: TextStyle(
+                                  fontSize: amenitiesTitleSize,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.accentGold,
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                               Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                                spacing: 6,
+                                runSpacing: 6,
                                 children: room.amenities!.map((amenity) {
                                   return Chip(
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                     label: Text(
                                       amenity,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 12,
+                                        fontSize: chipTextSize,
                                       ),
                                     ),
                                     backgroundColor: AppTheme.accentGold
@@ -298,15 +389,15 @@ class RoomPriceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder({double height = 240}) {
     return Container(
       width: double.infinity,
-      height: 240,
+      height: height,
       decoration: BoxDecoration(
         color: AppTheme.primaryBlue.withValues(alpha: 0.3),
       ),
       child: const Center(
-        child: Icon(Icons.hotel, size: 72, color: AppTheme.accentGold),
+        child: Icon(Icons.hotel, size: 56, color: AppTheme.accentGold),
       ),
     );
   }

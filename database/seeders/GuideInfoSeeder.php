@@ -5,11 +5,38 @@ namespace Database\Seeders;
 use App\Models\Enterprise;
 use App\Models\GuideCategory;
 use App\Models\GuideItem;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class GuideInfoSeeder extends Seeder
 {
+    private function usefulNumbersItems(): array
+    {
+        return [
+            ['title' => 'BAR PISCINE', 'phone' => '2010'],
+            ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
+            ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
+            ['title' => 'BOUTIQUE', 'phone' => '2013'],
+            ['title' => 'INFIRMERIE', 'phone' => '2016'],
+            ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
+            ['title' => 'SDT EXCURSION', 'phone' => '2008'],
+            ['title' => 'RECEPTION', 'phone' => '2500'],
+            ['title' => 'SECURITE', 'phone' => '2501'],
+            ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
+            ['title' => 'ROOM SERVICE', 'phone' => '2408'],
+            ['title' => 'SPA', 'phone' => '2012'],
+        ];
+    }
+
+    private function emergencyNumbersItems(): array
+    {
+        $allowedTitles = ['RECEPTION', 'INFIRMERIE', 'SECURITE'];
+
+        return array_values(array_filter(
+            $this->usefulNumbersItems(),
+            fn (array $item) => in_array($item['title'], $allowedTitles, true)
+        ));
+    }
+
     /**
      * Run the database seeds.
      */
@@ -20,34 +47,13 @@ class GuideInfoSeeder extends Seeder
                 'name' => 'Numéros utiles',
                 'category_type' => 'useful_numbers',
                 'order' => 1,
-                'items' => [
-                    ['title' => 'BAR PISCINE', 'phone' => '2010'],
-                    ['title' => 'BAR SAINT-LOUIS', 'phone' => '2009'],
-                    ['title' => 'BASE NAUTIQ', 'phone' => '2702'],
-                    ['title' => 'BOUTIQUE', 'phone' => '2013'],
-                    ['title' => 'INFIRMERIE', 'phone' => '2016'],
-                    ['title' => 'SALLE DE SPORT', 'phone' => '2015'],
-                    ['title' => 'SDT EXCURSION', 'phone' => '2008'],
-                    ['title' => 'RECEPTION', 'phone' => '2500'],
-                    ['title' => 'RELATION CLIENTELE FRAM', 'phone' => '2017'],
-                    ['title' => 'ROOM SERVICE', 'phone' => '2408'],
-                    ['title' => 'SPA', 'phone' => '2012'],
-                ]
+                'items' => $this->usefulNumbersItems(),
             ],
             [
                 'name' => 'Numéros d’urgence',
+                'category_type' => 'other',
                 'order' => 2,
-                'items' => [
-                    ['title' => 'Pompiers', 'phone' => '18'],
-                    ['title' => 'Pompiers de Malick Sy', 'phone' => '+221 33 823 03 59'],
-                    ['title' => 'Police et gendarmerie', 'phone' => '17'],
-                    ['title' => 'Gendarmerie nationale', 'phone' => '+221 800 00 20 20'],
-                    ['title' => 'Groupe Intervention Rapide', 'phone' => '+221 77 529 01 52'],
-                    ['title' => 'Chef Brigade accidents', 'phone' => '+221 77 529 01 03'],
-                    ['title' => 'Signalement contre les tentatives de racket', 'phone' => '+221 33 821 24 31'],
-                    ['title' => 'Commissariat central de Dakar', 'phone' => '+221 33 842 33 41'],
-                    ['title' => 'Gendarmerie nationale de Saly', 'phone' => '+221 33 957 19 61'],
-                ]
+                'items' => $this->emergencyNumbersItems(),
             ],
             [
                 'name' => 'Santé & Hôpitaux',
