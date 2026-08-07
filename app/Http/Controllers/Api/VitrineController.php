@@ -17,6 +17,7 @@ use App\Models\MenuItem;
 use App\Models\PalaceService;
 use App\Models\Restaurant;
 use App\Models\Room;
+use App\Models\RoomGalleryPhoto;
 use App\Models\SeminarRoom;
 use App\Models\SpaService;
 use App\Models\Vehicle;
@@ -924,6 +925,53 @@ class VitrineController extends Controller
                 'debug' => [
                     'error' => $e->getMessage(),
                 ],
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /vitrine/rooms/gallery
+     * Retourne les photos de la galerie hébergements groupées par type (chambre / suite).
+     */
+    public function roomGallery(): JsonResponse
+    {
+        try {
+            $enterpriseId = $this->resolveEnterpriseId();
+
+            $photos = RoomGalleryPhoto::query()
+                ->where('enterprise_id', $enterpriseId)
+                ->active()
+                ->ordered()
+                ->get();
+
+            // Grouper par type
+            $grouped = [];
+            foreach (RoomGalleryPhoto::TYPES as $typeKey => $typeLabel) {
+                $typePhotos = $photos->filter(fn($p) => $p->type === $typeKey)->values();
+                $grouped[] = [
+                    'type'        => $typeKey,
+                    'type_label'  => $typeLabel,
+                    'total'       => $typePhotos->count(),
+                    'photos'      => $typePhotos->map(fn($p) => [
+                        'id'                 => $p->id,
+                        'title'              => $p->title,
+                        'description'        => $p->description,
+                        'url'                => $p->url,
+                        'original_extension' => $p->original_extension,
+                        'display_order'      => $p->display_order,
+                    ])->values()->all(),
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data'    => $grouped,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'room_gallery_endpoint_failure',
+                'debug'   => ['error' => $e->getMessage()],
             ], 500);
         }
     }

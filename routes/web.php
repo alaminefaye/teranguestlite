@@ -140,6 +140,13 @@ Route::middleware(['auth', 'enterprise'])->group(function () {
         Route::put('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'update'])->name('gallery-albums.photos.update');
         Route::delete('gallery-albums/{gallery_album}/photos/{photo}', [\App\Http\Controllers\Dashboard\GalleryPhotoController::class, 'destroy'])->name('gallery-albums.photos.destroy');
 
+        // Galerie Hébergements (Chambres & Suites) — classement par type
+        Route::get('room-gallery', [\App\Http\Controllers\Dashboard\RoomGalleryController::class, 'index'])->name('room-gallery.index');
+        Route::post('room-gallery', [\App\Http\Controllers\Dashboard\RoomGalleryController::class, 'store'])->name('room-gallery.store');
+        Route::put('room-gallery/{roomGalleryPhoto}', [\App\Http\Controllers\Dashboard\RoomGalleryController::class, 'update'])->name('room-gallery.update');
+        Route::delete('room-gallery/{roomGalleryPhoto}', [\App\Http\Controllers\Dashboard\RoomGalleryController::class, 'destroy'])->name('room-gallery.destroy');
+        Route::post('room-gallery/reorder', [\App\Http\Controllers\Dashboard\RoomGalleryController::class, 'reorder'])->name('room-gallery.reorder');
+
         // Nos établissements (autres sites du groupe)
         Route::resource('establishments', \App\Http\Controllers\Dashboard\EstablishmentController::class);
         Route::get('establishments/{establishment}/photos', [\App\Http\Controllers\Dashboard\EstablishmentPhotoController::class, 'index'])->name('establishments.photos.index');

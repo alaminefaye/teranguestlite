@@ -59,6 +59,7 @@ Route::prefix('vitrine')->group(function () {
     Route::get('/guides', [VitrineController::class, 'guides']);
     
     Route::get('/rooms', [VitrineController::class, 'rooms']);
+    Route::get('/rooms/gallery', [VitrineController::class, 'roomGallery']);
 });
 
 // ==========================================

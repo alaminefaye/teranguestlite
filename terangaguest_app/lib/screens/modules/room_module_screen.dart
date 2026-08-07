@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/api_config.dart';
 import '../../config/theme.dart';
 import '../../models/room.dart';
+import '../../models/room_gallery.dart';
 import '../../models/user.dart';
 import '../../services/api_service.dart';
 import '../../utils/haptic_helper.dart';
@@ -10,6 +11,7 @@ import '../../utils/navigation_helper.dart';
 import '../../widgets/service_card.dart';
 import '../common/in_app_document_screen.dart';
 import 'room_category_detail_screen.dart';
+import 'room_gallery_screen.dart';
 
 class RoomModuleScreen extends StatefulWidget {
   const RoomModuleScreen({super.key});
@@ -52,6 +54,35 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
     } catch (_) {
       // catalogue par défaut
     }
+
+    // Tenter de charger la galerie hébergements (nouvelle fonctionnalité)
+    try {
+      final galleryResponse =
+          await ApiService().get(ApiConfig.vitrineRoomGallery);
+      final galleryData = galleryResponse.data;
+      if (galleryData is Map &&
+          galleryData['success'] == true &&
+          galleryData['data'] is List) {
+        final categories = (galleryData['data'] as List)
+            .map((e) =>
+                RoomGalleryCategory.fromJson(e as Map<String, dynamic>))
+            .where((cat) => cat.hasPhotos)
+            .toList();
+
+        if (categories.isNotEmpty && mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) =>
+                  RoomGalleryScreen(categories: categories),
+            ),
+          );
+          return;
+        }
+      }
+    } catch (_) {
+      // fallback catalogue tarifs
+    }
+
     if (!mounted) return;
     setState(() => _checkingRoomBox = false);
     _loadRooms();
