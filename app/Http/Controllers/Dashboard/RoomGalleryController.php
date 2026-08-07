@@ -19,7 +19,7 @@ use Illuminate\View\View;
  */
 class RoomGalleryController extends Controller
 {
-    private const MAX_IMAGE_KB  = 30720; // 30 Mo
+    private const MAX_IMAGE_KB  = 61440; // 60 Mo
     private const STORAGE_DISK  = 'public';
     private const STORAGE_PATH  = 'room-gallery';
     private const ALLOWED_MIMES = 'jpg,jpeg,png,webp,gif,tif,tiff';

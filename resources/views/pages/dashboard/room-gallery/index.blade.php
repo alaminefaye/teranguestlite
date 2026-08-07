@@ -9,7 +9,7 @@
     </div>
     <h1 class="text-title-md2 font-semibold text-gray-900 dark:text-white/90">Galerie Chambres & Suites</h1>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Ajoutez des photos classées par type (Chambre / Suite). Formats acceptés : JPG, PNG, WEBP, GIF, <strong>TIF/TIFF</strong>. Max&nbsp;30&nbsp;Mo par photo.
+        Ajoutez des photos classées par type (Chambre / Suite). Formats acceptés : JPG, PNG, WEBP, GIF, <strong>TIF/TIFF</strong>. Max&nbsp;60&nbsp;Mo par photo.
     </p>
 </div>
 
@@ -86,7 +86,7 @@
                                class="sr-only"
                                onchange="previewFiles(this, '{{ $typeKey }}')">
                     </label>
-                    <p class="mt-2 text-xs text-gray-400">JPG, PNG, WEBP, GIF, <span class="font-semibold text-amber-600 dark:text-amber-400">TIF/TIFF</span> — max 30 Mo par fichier</p>
+                    <p class="mt-2 text-xs text-gray-400">JPG, PNG, WEBP, GIF, <span class="font-semibold text-amber-600 dark:text-amber-400">TIF/TIFF</span> — max 60 Mo par fichier</p>
                 </div>
 
                 {{-- Prévisualisation --}}
