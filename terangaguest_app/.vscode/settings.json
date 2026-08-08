@@ -1,0 +1,14 @@
+{
+    "dart.sdkPath": "/Users/Zhuanz/Documents/flutter/bin/cache/dart-sdk",
+    "dart.flutterSdkPath": "/Users/Zhuanz/Documents/flutter",
+    "dart.flutterSdkPaths": [
+        "/Users/Zhuanz/Documents/flutter"
+    ],
+    "dart.sdkPaths": [
+        "/Users/Zhuanz/Documents/flutter/bin/cache/dart-sdk"
+    ],
+    "dart.checkForSdkUpdates": false,
+    "dart.runPubGetOnNestedProjects": "both",
+    "dart.allowAnalytics": false,
+    "dart.warnWhenEditingFilesOutsideWorkspace": false
+}

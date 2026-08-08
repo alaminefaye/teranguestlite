@@ -22,6 +22,7 @@ class RoomModuleScreen extends StatefulWidget {
 
 class _RoomModuleScreenState extends State<RoomModuleScreen> {
   List<RoomType>? _roomTypes;
+  List<RoomGalleryCategory>? _galleryCategories;
   bool _roomsLoading = false;
   bool _checkingRoomBox = true;
 
@@ -55,7 +56,7 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
       // catalogue par défaut
     }
 
-    // Tenter de charger la galerie hébergements (nouvelle fonctionnalité)
+    // Charger les photos de la galerie hébergements (Chambres & Suites)
     try {
       final galleryResponse =
           await ApiService().get(ApiConfig.vitrineRoomGallery);
@@ -70,17 +71,11 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
             .toList();
 
         if (categories.isNotEmpty && mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) =>
-                  RoomGalleryScreen(categories: categories),
-            ),
-          );
-          return;
+          setState(() => _galleryCategories = categories);
         }
       }
     } catch (_) {
-      // fallback catalogue tarifs
+      // ignore
     }
 
     if (!mounted) return;
@@ -157,26 +152,43 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
       required List<RoomType> sourceTypes,
       required String fallbackImage,
     }) {
+      final isChambre = title.toLowerCase().contains('chambre');
+      final targetType = isChambre ? 'chambre' : 'suite';
+
+      final roomGalleryCat = _galleryCategories?.firstWhere(
+        (c) => c.type == targetType && c.hasPhotos,
+        orElse: () => RoomGalleryCategory(
+            type: '', typeLabel: '', total: 0, photos: []),
+      );
+
+      final galleryPhotoUrls =
+          roomGalleryCat?.photos.map((p) => p.url).toList() ?? [];
+
       final rooms = sourceTypes.expand((type) => type.rooms).toList();
-      final gallery = rooms
-          .expand((room) sync* {
-            if (room.image?.trim().isNotEmpty ?? false) {
-              yield room.image!.trim();
-            }
-            for (final image in room.galleryImages) {
-              if (image.trim().isNotEmpty) {
-                yield image.trim();
+      final gallery = [
+        ...galleryPhotoUrls,
+        ...rooms
+            .expand((room) sync* {
+              if (room.image?.trim().isNotEmpty ?? false) {
+                yield room.image!.trim();
               }
-            }
-          })
-          .where((image) => image.isNotEmpty)
-          .toSet()
-          .toList();
+              for (final image in room.galleryImages) {
+                if (image.trim().isNotEmpty) {
+                  yield image.trim();
+                }
+              }
+            })
+            .where((image) => image.isNotEmpty),
+      ].toSet().toList();
+
+      final String coverImage = galleryPhotoUrls.isNotEmpty
+          ? galleryPhotoUrls.first
+          : (gallery.isNotEmpty ? gallery.first : fallbackImage);
 
       return RoomCategoryViewData(
         title: title,
         icon: icon,
-        imagePath: gallery.isNotEmpty ? gallery.first : fallbackImage,
+        imagePath: coverImage,
         description: _buildCategoryDescription(
           title: title,
           roomTypes: sourceTypes,
@@ -304,9 +316,42 @@ class _RoomModuleScreenState extends State<RoomModuleScreen> {
                               onTap: () {
                                 if (_roomsLoading) return;
                                 HapticHelper.lightImpact();
-                                context.navigateTo(
-                                  RoomCategoryDetailScreen(category: category),
+
+                                final isChambre = category.title
+                                    .toLowerCase()
+                                    .contains('chambre');
+                                final targetType =
+                                    isChambre ? 'chambre' : 'suite';
+
+                                final galleryCat =
+                                    _galleryCategories?.firstWhere(
+                                  (c) => c.type == targetType && c.hasPhotos,
+                                  orElse: () => RoomGalleryCategory(
+                                      type: '',
+                                      typeLabel: '',
+                                      total: 0,
+                                      photos: []),
                                 );
+
+                                if (galleryCat != null &&
+                                    galleryCat.hasPhotos &&
+                                    _galleryCategories != null &&
+                                    _galleryCategories!.isNotEmpty) {
+                                  final galleryIndex =
+                                      _galleryCategories!.indexOf(galleryCat);
+                                  context.navigateTo(
+                                    RoomGalleryScreen(
+                                      categories: _galleryCategories!,
+                                      initialTabIndex:
+                                          galleryIndex >= 0 ? galleryIndex : 0,
+                                    ),
+                                  );
+                                } else {
+                                  context.navigateTo(
+                                    RoomCategoryDetailScreen(
+                                        category: category),
+                                  );
+                                }
                               },
                             );
                           },
