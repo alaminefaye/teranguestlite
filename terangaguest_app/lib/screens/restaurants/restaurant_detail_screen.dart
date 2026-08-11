@@ -228,12 +228,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 30),
           ],
 
-          // Tarifs
-          if (_restaurant!.pricing != null &&
-              _restaurant!.pricing!.isNotEmpty) ...[
-            _buildPricing(),
-            const SizedBox(height: 30),
-          ],
 
           // Commodités
           if (_restaurant!.amenities != null &&
